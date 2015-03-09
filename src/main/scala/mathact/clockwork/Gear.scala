@@ -1,5 +1,6 @@
 package mathact.clockwork
 
+
 /**
  * Base trait for gear classes
  * Created by CAB on 08.03.2015.

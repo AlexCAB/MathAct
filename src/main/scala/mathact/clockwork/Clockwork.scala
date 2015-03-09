@@ -1,10 +1,6 @@
 package mathact.clockwork
-
-import java.awt.{Rectangle, Toolkit}
-
-
+import mathact.clockwork.ui.Layout
 import scala.collection.mutable.{ListBuffer => MutList}
-import scala.swing.{Dimension, Point}
 
 
 /**

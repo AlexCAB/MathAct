@@ -1,5 +1,5 @@
-package mathact.clockwork
-import java.awt.{Rectangle, Toolkit}
+package mathact.clockwork.ui
+import java.awt.{Toolkit,Canvas,Rectangle,Font}
 import scala.collection.mutable.{ListBuffer => MutList}
 import scala.swing.{Dimension, Point}
 
@@ -16,11 +16,13 @@ class Layout(x:Int, y:Int, width:Int, height:Int) {
     new Dimension(
       if(width == Int.MaxValue){monitorSize.width - x}else{width},
       if(height == Int.MaxValue){monitorSize.height - y}else{height})}
+  //Helpers
+  private val canvas = new Canvas()
   //Variables
   private val layouts = MutList[MutList[Rectangle]](MutList[Rectangle]())
   //Functions
   private def findFreeLayout(size:Dimension):(Int,Point) = {  //Return: layer number, Point
-  val lastLayer = layouts(layouts.size - 1)
+    val lastLayer = layouts(layouts.size - 1)
     //If first component it the layer then return, else find free space
     if(lastLayer.isEmpty){
       (layouts.size - 1, new Point(x, y))}
@@ -54,4 +56,11 @@ class Layout(x:Int, y:Int, width:Int, height:Int) {
       if(defX == Int.MaxValue){point.x}else{defX},
       if(defY == Int.MaxValue){point.y}else{defY})
     addLayout(layer, pos, size)
-    pos}}
+    pos}
+  def calcStringColumnWidth(strings:List[String], font:Font):Int = {
+    val metrics = canvas.getFontMetrics(font)
+    strings.map(s ⇒ metrics.stringWidth(s)) match{
+      case Nil ⇒ 100
+      case l ⇒ l.max}}
+  def calcDoubleColumnWidth(values:List[Double], font:Font):Int =
+    calcStringColumnWidth(values.map(_.toString),font)}
