@@ -4,7 +4,7 @@ import java.lang.reflect.Field
 
 
 /**
- * DSL helper class for VariableBoard like components,
+ * DSL helper class for VariableBoard like gridRow,
  * Created by CAB on 09.03.2015.
  */
 
@@ -37,6 +37,7 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
   def getId(value:T):Int
   def checkField(f:Field):Boolean
   def fillDefValue(min:Double, max:Double, size:Option[Int]):T
+  def checkParameters(min:Double, max:Double, value:T):(Boolean,String)
   //Methods
   def addVarParameter(min:Option[Double], max:Option[Double], value:Option[T], size:Option[Int], operator:Operator)
   :T = {
@@ -101,6 +102,13 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
       val min = params.min.getOrElse(defMin)
       val max = params.max.getOrElse(defMax)
       val value = params.value.getOrElse(fillDefValue(max, min, params.size))
+      checkParameters(min,max,value) match{
+        case (false, msg) ⇒ {throw new SyntaxException(s"""
+          |Incorrect initialization parameters in ${component.getClass.getCanonicalName}, definition number ${params.id}.
+          |Message: $msg
+          |""".stripMargin)}
+        case _ ⇒}
+      //Check parameters
       //Set field value
       field.set(component, value)
       //Construct Variable

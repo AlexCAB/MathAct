@@ -1,13 +1,8 @@
 package mathact.pots
-import java.awt.Font
 import mathact.clockwork._
-import javax.swing.JSlider
-import javax.swing.SwingConstants._
-import javax.swing.event.{ChangeEvent, ChangeListener}
-import mathact.clockwork.dsl.{VariableBoard, SyntaxException, Variable}
-import mathact.clockwork.ui.OneColumnFrame
-import scala.swing._
-import Alignment._
+import mathact.clockwork.dsl.{VariableBoard, SyntaxException}
+import mathact.clockwork.ui.components._
+import scala.swing.Point
 import java.lang.reflect.Modifier
 import java.lang.reflect.Field
 
@@ -17,85 +12,14 @@ import java.lang.reflect.Field
  * Created by CAB on 08.03.2015.
  */
 
-abstract class PotBoard
-(x:Int = Int.MaxValue, y:Int = Int.MaxValue, defMin:Double = -1, defMax:Double = 1)
-(implicit clockwork:Clockwork) {
+abstract class PotBoard(implicit clockwork:Clockwork) {
   //Parameters
-  private val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
-  private val minMaxFont = new Font(Font.SERIF, Font.BOLD, 14)
-  private val valueFont = new Font(Font.SERIF, Font.BOLD, 14)
-  //Classes
-  private class Pot(
-    varName:String, min:Double, max:Double, value:Double,
-    nameWidth:Int, minMaxWidth:Int, valWidth:Int,
-    valueChanged:(Double)⇒Unit)
-  extends FlowPanel{
-    //Construction
-    contents += new Label {
-      font = nameFont
-      horizontalAlignment = Right
-      text = varName
-      preferredSize = new Dimension(nameWidth, 20)}
-    contents += new Label {
-      font = minMaxFont
-      text = "[" + min + "," + max + "]"
-      preferredSize = new Dimension(minMaxWidth + 25, 20)}
-
-
-
-
-//
-//        val l = new Label {
-//          text = p.value.toString
-//          preferredSize = new Dimension(50, 20)}
-//        contents += l
-//
-//
-//        val s = new JSlider(HORIZONTAL, (p.min * sliderScale).toInt, (p.max * sliderScale).toInt, (p.value * sliderScale).toInt)
-//        s.addChangeListener(new ChangeListener {
-//          def stateChanged(e: ChangeEvent) = {
-//            p.value = s.getValue.toDouble / sliderScale
-//            l.text = p.value.toString
-//            p.up(p.value)}})
-//        contents += Component.wrap(s)
-
-
-//        //Methods
-//        def update(v:Double) = {
-//          s.setValue((v * sliderScale).toInt)}}
-//      (p.name,pp)})
-
-
-
-
-
-
-
-  }
-  //Helpers
-  private val thisPotBoard = this
-  private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, defMin, defMax){
-    def createIdValue(id:Int):Double = id.toDouble
-    def getId(value:Double):Int = value.toInt
-    def checkField(f:Field):Boolean = {f.getType.getName == "double"}
-    def fillDefValue(min:Double, max:Double, size:Option[Int]):Double = {(max + max) / 2}}
-  private val arrayVarBoard = new VariableBoard[Array[Double]](thisPotBoard, defMin, defMax){
-    def createIdValue(id:Int):Array[Double] = Array[Double](id)
-    def getId(value:Array[Double]):Int = value(0).toInt
-    def checkField(f:Field):Boolean = {
-      f.getType.getName match{
-        case "[D" ⇒ Modifier.isFinal(f.getModifiers) match{
-          case false ⇒ throw new SyntaxException(
-            s"Array definition should be 'val' in ${thisPotBoard.getClass.getCanonicalName}")
-          case _ ⇒ true}
-        case _ ⇒ false}}
-    def fillDefValue(min:Double, max:Double, size:Option[Int]):Array[Double] = {Array.fill(size.get)((max + max) / 2)}}
-  //UI
-  private val frame = new OneColumnFrame(clockwork){
-    title = thisPotBoard.getClass.getCanonicalName match{
-      case null ⇒ "PotBoard"
-      case n ⇒ n.split("[.]").last.replace("$","")}
-    override def closeOperation() {if(gear.work){clockwork.delGear(gear)}}}
+  def screenX:Int = frame.peer.getLocation.x
+  def screenX_=(x:Int) = frame.peer.setLocation(new Point(x, frame.peer.getLocation.y))
+  def screenY:Int = frame.peer.getLocation.y
+  def screenY_=(y:Int) = frame.peer.setLocation(new Point(frame.peer.getLocation.x, y))
+  def defaultMin_=(x:Double) = _defaultMin = x
+  def defaultMax_=(x:Double) = _defaultMax = x
   //DSL Methods
   def in(min: ⇒Double, max: ⇒Double):Double =
     doubleVarBoard.addVarParameter(Some(min), Some(max), None, None, doubleVarBoard.MinMax)
@@ -128,52 +52,62 @@ abstract class PotBoard
       arrayVarBoard.addNextVarParameter(Some(min), None, None, None, arrayVarBoard.Minimum)
     def maximum(max: ⇒Double):Array[Double] =
       arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, arrayVarBoard.Maximum)}
+  //Variables
+  private var _defaultMin:Double = -1
+  private var _defaultMax:Double = 1
+  private var pots:List[Potentiometer] = List()
+  //Helpers
+  private val thisPotBoard = this
+  private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, _defaultMin, _defaultMax){
+    def createIdValue(id:Int):Double = id.toDouble
+    def getId(value:Double):Int = value.toInt
+    def checkField(f:Field):Boolean = {f.getType.getName == "double"}
+    def fillDefValue(min:Double, max:Double, size:Option[Int]):Double = {(max + max) / 2}
+    def checkParameters(min:Double, max:Double, value:Double):(Boolean,String) = (min, max, value) match{
+      case _ if value >= min && value <= max ⇒ (true,"")
+      case _ ⇒ (false, s"(minimum($min) <= value($value) <= maximum($max)) is false")}}
+  private val arrayVarBoard = new VariableBoard[Array[Double]](thisPotBoard, _defaultMin, _defaultMax){
+    def createIdValue(id:Int):Array[Double] = Array[Double](id)
+    def getId(value:Array[Double]):Int = value(0).toInt
+    def checkField(f:Field):Boolean = {
+      f.getType.getName match{
+        case "[D" ⇒ Modifier.isFinal(f.getModifiers) match{
+          case false ⇒ throw new SyntaxException(
+            s"Array definition should be 'val' in ${thisPotBoard.getClass.getCanonicalName}")
+          case _ ⇒ true}
+        case _ ⇒ false}}
+    def fillDefValue(min:Double, max:Double, size:Option[Int]):Array[Double] = {Array.fill(size.get)((max + max) / 2)}
+    def checkParameters(min:Double, max:Double, value:Array[Double]):(Boolean,String) = {
+      value.toList.zipWithIndex.map{
+        case (v,_) if v >= min && v <= max ⇒ (true,"")
+        case (v,i) ⇒ (false, s"  For i = $i (minimum($min) <= value($v) <= maximum($max)) is false")}
+      .filter{case (f,_) ⇒ !f} match{
+        case Nil ⇒ (true,"")
+        case le ⇒ (false, "\n" + le.map{case (_,msg) ⇒ msg}.mkString("\n"))}}}
+  //UI
+  private val frame = new GridFrame(clockwork, clockwork.skin.titleFor(thisPotBoard, "PotBoard")){
+     def closing() {if(gear.work){clockwork.delGear(gear)}}}
   //Gear
   private val gear:Gear = new Gear{
     def start() = {
       //Get vars
       val doubleVars = doubleVarBoard.getVars
       val arrayVars = arrayVarBoard.getVars
-      //Calculation of UI metrics
-      val nameColWidth = List(
-        clockwork.layout.calcStringColumnWidth(doubleVars.map(_.name), nameFont),
-        clockwork.layout.calcStringColumnWidth(arrayVars.map(_.name), nameFont) + 20 ).max // + index
-      val minColWidth = clockwork.layout.calcDoubleColumnWidth(
-        doubleVars.map(_.min) ++ arrayVars.map(_.min),
-        minMaxFont)
-      val maxColWidth = clockwork.layout.calcDoubleColumnWidth(
-        doubleVars.map(_.max) ++ arrayVars.map(_.max),
-        minMaxFont)
-      val valueColWidth = clockwork.layout.calcDoubleColumnWidth(
-        doubleVars.map(_.value) ++ arrayVars.map(_.value.toList).fold(List[Double]())((a,b)⇒ a ++ b),
-        valueFont)
       //Construct UI
-      println(nameColWidth,minColWidth,maxColWidth,valueColWidth)
       val doublePots = doubleVars.map(variable ⇒ {
-        new Pot(
-          variable.name, variable.min, variable.max, variable.value,
-          nameColWidth, minColWidth + maxColWidth, valueColWidth,
-          valueChanged = (v)⇒{
+        new Potentiometer(clockwork,variable.name, variable.min, variable.max, variable.value){
+          def potValueChanged(v:Double) = {}
+        }
 
-
-
-          })
-
-      })
+})
 
 
 
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
-          new Pot(
-            variable.name + s"_$index", variable.min, variable.max, value,
-            nameColWidth, minColWidth + maxColWidth, valueColWidth,
-            valueChanged = (v)⇒{
-
-
-
-            })
-
+          new Potentiometer(clockwork,variable.name + s"_$index", variable.min, variable.max, value){
+            def potValueChanged(v:Double) = {}
+          }
 
 
         }}
@@ -191,12 +125,14 @@ abstract class PotBoard
 
       frame.add(doublePots)
       frame.add(arrayPots)
+      pots = doublePots ++ arrayPots
       //Show
-      frame.show(x,y)}
+      frame.show()}
     def tick() = {
 
 
-
+     println("tick")
+//      pots.head.setCurrentValue(1.9)
 
     }
     def stop() = {frame.hide()}}

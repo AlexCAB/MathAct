@@ -57,10 +57,5 @@ class Layout(x:Int, y:Int, width:Int, height:Int) {
       if(defY == Int.MaxValue){point.y}else{defY})
     addLayout(layer, pos, size)
     pos}
-  def calcStringColumnWidth(strings:List[String], font:Font):Int = {
-    val metrics = canvas.getFontMetrics(font)
-    strings.map(s ⇒ metrics.stringWidth(s)) match{
-      case Nil ⇒ 100
-      case l ⇒ l.max}}
-  def calcDoubleColumnWidth(values:List[Double], font:Font):Int =
-    calcStringColumnWidth(values.map(_.toString),font)}
+  def calcStringWidth(string:String, font:Font):Int = canvas.getFontMetrics(font).stringWidth(string)
+  def calcDoubleWidth(value:Double, font:Font):Int = calcStringWidth(value.toString,font)}
