@@ -1,7 +1,8 @@
-package mathact.pots
-import mathact.clockwork._
-import mathact.clockwork.dsl.{VariableBoard, SyntaxException}
-import mathact.clockwork.ui.components._
+package mathact.toys.pots
+import mathact.utils.Environment
+import mathact.utils.clockwork.Gear
+import mathact.utils.dsl.{VariableBoard, SyntaxException}
+import mathact.utils.ui.components.{GridFrame, Potentiometer}
 import scala.swing.Point
 import java.lang.reflect.Modifier
 import java.lang.reflect.Field
@@ -12,14 +13,9 @@ import java.lang.reflect.Field
  * Created by CAB on 08.03.2015.
  */
 
-abstract class PotBoard(implicit clockwork:Clockwork) {
-  //Parameters
-  def screenX:Int = frame.peer.getLocation.x
-  def screenX_=(x:Int) = frame.peer.setLocation(new Point(x, frame.peer.getLocation.y))
-  def screenY:Int = frame.peer.getLocation.y
-  def screenY_=(y:Int) = frame.peer.setLocation(new Point(frame.peer.getLocation.x, y))
-  def defaultMin_=(x:Double) = _defaultMin = x
-  def defaultMax_=(x:Double) = _defaultMax = x
+abstract class PotBoard
+(name:String = "", screenX:Int = Int.MaxValue, screenY:Int = Int.MaxValue, defaultMin:Double = -1, defaultMax:Double = 1)
+(implicit environment:Environment){
   //DSL Methods
   def in(min: ⇒Double, max: ⇒Double):Double =
     doubleVarBoard.addVarParameter(Some(min), Some(max), None, None, doubleVarBoard.MinMax)
@@ -53,12 +49,10 @@ abstract class PotBoard(implicit clockwork:Clockwork) {
     def maximum(max: ⇒Double):Array[Double] =
       arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, arrayVarBoard.Maximum)}
   //Variables
-  private var _defaultMin:Double = -1
-  private var _defaultMax:Double = 1
   private var pots:List[Potentiometer] = List()
   //Helpers
   private val thisPotBoard = this
-  private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, _defaultMin, _defaultMax){
+  private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, defaultMin, defaultMax){
     def createIdValue(id:Int):Double = id.toDouble
     def getId(value:Double):Int = value.toInt
     def checkField(f:Field):Boolean = {f.getType.getName == "double"}
@@ -66,7 +60,7 @@ abstract class PotBoard(implicit clockwork:Clockwork) {
     def checkParameters(min:Double, max:Double, value:Double):(Boolean,String) = (min, max, value) match{
       case _ if value >= min && value <= max ⇒ (true,"")
       case _ ⇒ (false, s"(minimum($min) <= value($value) <= maximum($max)) is false")}}
-  private val arrayVarBoard = new VariableBoard[Array[Double]](thisPotBoard, _defaultMin, _defaultMax){
+  private val arrayVarBoard = new VariableBoard[Array[Double]](thisPotBoard, defaultMin, defaultMax){
     def createIdValue(id:Int):Array[Double] = Array[Double](id)
     def getId(value:Array[Double]):Int = value(0).toInt
     def checkField(f:Field):Boolean = {
@@ -85,55 +79,37 @@ abstract class PotBoard(implicit clockwork:Clockwork) {
         case Nil ⇒ (true,"")
         case le ⇒ (false, "\n" + le.map{case (_,msg) ⇒ msg}.mkString("\n"))}}}
   //UI
-  private val frame = new GridFrame(clockwork, clockwork.skin.titleFor(thisPotBoard, "PotBoard")){
-     def closing() {if(gear.work){clockwork.delGear(gear)}}}
+  private val frame = new GridFrame(environment, environment.skin.titleFor(name, thisPotBoard, "PotBoard")){
+     def closing() = {if(gear.work){environment.clockwork.delGear(gear)}}}
   //Gear
-  private val gear:Gear = new Gear{
+  private val gear:Gear = new Gear(environment.clockwork){
     def start() = {
       //Get vars
       val doubleVars = doubleVarBoard.getVars
       val arrayVars = arrayVarBoard.getVars
       //Construct UI
       val doublePots = doubleVars.map(variable ⇒ {
-        new Potentiometer(clockwork,variable.name, variable.min, variable.max, variable.value){
-          def potValueChanged(v:Double) = {}
-        }
-
-})
-
-
-
+        new Potentiometer(environment, variable.name, variable.min, variable.max, variable.value){
+          def potValueChanged(v:Double) = {
+            variable.field.setDouble(thisPotBoard,v)
+            changed()}
+          def getCurrentValue:Double = {
+            variable.field.getDouble(thisPotBoard)}}})
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
-          new Potentiometer(clockwork,variable.name + s"_$index", variable.min, variable.max, value){
-            def potValueChanged(v:Double) = {}
-          }
-
-
-        }}
-
-
-
-
-
-
-      })
-
-
-
-
-
+          new Potentiometer(environment, variable.name + s"_$index", variable.min, variable.max, value){
+            def potValueChanged(v:Double) = {
+              variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index) = v
+              changed()}
+            def getCurrentValue:Double = {
+              variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index)}}}}})
+      //Add to frame
       frame.add(doublePots)
       frame.add(arrayPots)
       pots = doublePots ++ arrayPots
       //Show
-      frame.show()}
-    def tick() = {
-
-
-     println("tick")
-//      pots.head.setCurrentValue(1.9)
-
-    }
+      frame.show(screenX, screenY)}
+    def update() = {
+      pots.foreach(_.update())}
     def stop() = {frame.hide()}}
-  clockwork.addGear(gear)}
+  environment.clockwork.addGear(gear)}

@@ -1,7 +1,7 @@
-package mathact.clockwork.ui.components
+package mathact.utils.ui.components
 import java.awt.Dimension
-import mathact.clockwork.Clockwork
-import mathact.clockwork.ui.Alignment
+import mathact.utils.Environment
+import mathact.utils.ui.Alignment
 import scala.swing.Alignment._
 import scala.swing.Label
 
@@ -11,11 +11,11 @@ import scala.swing.Label
  * Created by CAB on 10.03.2015.
  */
 
-class NameLabel(clockwork:Clockwork, labText:String) extends Label with Alignment{
+class NameLabel(environment:Environment, labText:String) extends Label with Alignment{
   //Construction
-  val initWidth = clockwork.layout.calcStringWidth(labText, clockwork.skin.nameFont)
-  val initHeight = clockwork.skin.nameHeight
-  font = clockwork.skin.nameFont
+  val initWidth = environment.layout.calcStringWidth(labText, environment.skin.nameFont)
+  val initHeight = environment.skin.nameHeight
+  font = environment.skin.nameFont
   horizontalAlignment = Right
   text = labText
   preferredSize = new Dimension(initWidth, initHeight)

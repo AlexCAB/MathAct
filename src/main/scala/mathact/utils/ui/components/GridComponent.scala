@@ -1,7 +1,5 @@
-package mathact.clockwork.ui.components
-
-import mathact.clockwork.ui.Alignment
-
+package mathact.utils.ui.components
+import mathact.utils.ui.Alignment
 import scala.swing.Component
 
 
@@ -11,4 +9,4 @@ import scala.swing.Component
  */
 
 trait GridComponent {
-  val gridRow:List[(Component, Alignment)]}
+  val gridRow:List[Component with Alignment]}

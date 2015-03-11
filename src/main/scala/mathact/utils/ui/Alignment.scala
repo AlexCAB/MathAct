@@ -1,4 +1,4 @@
-package mathact.clockwork.ui
+package mathact.utils.ui
 
 /**
  * Trait provide alignment properties fro UI gridRow

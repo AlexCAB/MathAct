@@ -1,5 +1,4 @@
-package mathact.clockwork
-import mathact.clockwork.ui.{Skin, Layout}
+package mathact.utils.clockwork
 import scala.collection.mutable.{ListBuffer => MutList}
 
 
@@ -8,7 +7,7 @@ import scala.collection.mutable.{ListBuffer => MutList}
  * Created by CAB on 08.03.2015.
  */
 
-class Clockwork(val layout:Layout, val skin:Skin) {
+class Clockwork{
   //Variables
   private val gears = MutList[Gear]()
   //Functions
@@ -27,9 +26,9 @@ class Clockwork(val layout:Layout, val skin:Skin) {
 
     }}
 
-
-    Thread.sleep(2000)
-    gears.toList.foreach(g ⇒ {g.tick()})
+//
+//    Thread.sleep(2000)
+//    gears.toList.foreach(g ⇒ {g.tick()})
 
   }
 
@@ -44,6 +43,7 @@ class Clockwork(val layout:Layout, val skin:Skin) {
 
 
   def addGear(gear:Gear):Unit = {gears += gear}
+  def gearChanged(gear:Gear):Unit = {gears.foreach(_.doUpdate())}
   def delGear(gear:Gear):Unit = {stop()}
 
 }

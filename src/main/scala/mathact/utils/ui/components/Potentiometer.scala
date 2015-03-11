@@ -1,0 +1,38 @@
+package mathact.utils.ui.components
+import mathact.utils.Environment
+import mathact.utils.clockwork.ExecutionException
+import scala.swing.Component
+
+
+/**
+ * Potentiometer UI
+ * Created by CAB on 10.03.2015.
+ */
+
+abstract class Potentiometer(environment:Environment, varName:String, min:Double, max:Double, value:Double)
+extends GridComponent {
+  //Components
+  val nameView = new NameLabel(environment, varName)
+  val diapasonView = new DiapasonLabel(environment, min, max)
+  val sliderBar:HorizontalSlider = new HorizontalSlider(environment, min, max, value, environment.skin.potSliderWidth){
+    def valueChanged(v:Double) = {
+      editBar.setCurrentValue(v)
+      potValueChanged(v)}}
+  val editBar:NumberSpinner = new NumberSpinner(environment, min, max, value){
+    def valueChanged(v:Double) = {
+      sliderBar.setCurrentValue(v)
+      potValueChanged(v)}}
+  val gridRow = List(nameView, diapasonView, sliderBar, editBar)
+  //Abstract methods
+  def potValueChanged(v:Double)
+  def getCurrentValue:Double
+  //Methods
+  def setCurrentValue(v:Double) = {
+    //Check bounds
+    if(v > max || v < min){
+      throw new ExecutionException(s"(minimum($min) <= value($v) <= maximum($max)) is false, on var $varName.")}
+    //Set new value
+    sliderBar.setCurrentValue(v)
+    editBar.setCurrentValue(v)}
+  def update() = {
+    setCurrentValue(getCurrentValue)}}

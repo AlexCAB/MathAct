@@ -1,9 +1,10 @@
-package mathact.clockwork.ui.components
+package mathact.utils.ui.components
 import java.awt.Dimension
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.{JSpinner, SpinnerNumberModel}
-import mathact.clockwork.Clockwork
-import mathact.clockwork.ui.Alignment
+import mathact.utils.Environment
+import mathact.utils.ui.Alignment
+import scala.swing.{Component, BorderPanel}
 
 
 /**
@@ -11,19 +12,21 @@ import mathact.clockwork.ui.Alignment
  * Created by CAB on 10.03.2015.
  */
 
-abstract class NumberSpinner(clockwork:Clockwork, min:Double, max:Double, init:Double, step:Double = .1)
-extends JSpinner with Alignment{
+abstract class NumberSpinner(environment:Environment, min:Double, max:Double, init:Double, step:Double = .1)
+extends BorderPanel with Alignment{
   //Variables
   private var callChanged = true
   //Construction
+  val spinner = new JSpinner
   val initWidth:Int = {
-    val w = clockwork.layout.calcDoubleWidth(init, clockwork.skin.valueFont)
+    val w = environment.layout.calcDoubleWidth(init, environment.skin.valueFont)
     if(w < 30) 30 else w}
-  val initHeight = clockwork.skin.valueHeight
+  val initHeight = environment.skin.valueHeight
   val model = new SpinnerNumberModel(init, min, max, step)
-  setModel(model)
-  setPreferredSize(new Dimension(initWidth, initHeight))
-  setFont(clockwork.skin.valueFont)
+  spinner.setModel(model)
+  spinner.setPreferredSize(new Dimension(initWidth, initHeight))
+  spinner.setFont(environment.skin.valueFont)
+  layout(Component.wrap(spinner)) = BorderPanel.Position.Center
   //Listeners
   model.addChangeListener(new ChangeListener{def stateChanged(e:ChangeEvent) = {
     if(callChanged){valueChanged(model.getValue.asInstanceOf[Double])}}})
@@ -35,7 +38,7 @@ extends JSpinner with Alignment{
     callChanged = false
     model.setValue(v)
     callChanged = true}
-  def setNewSize(w:Int,h:Int):Unit = {setPreferredSize(new Dimension(w, h))}}
+  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
 
 
 

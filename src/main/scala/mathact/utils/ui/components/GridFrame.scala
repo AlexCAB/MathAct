@@ -1,5 +1,5 @@
-package mathact.clockwork.ui.components
-import mathact.clockwork.Clockwork
+package mathact.utils.ui.components
+import mathact.utils.Environment
 import scala.collection.mutable.{ListBuffer => MutList}
 import scala.swing._
 
@@ -9,7 +9,7 @@ import scala.swing._
  * Created by CAB on 09.03.2015.
  */
 
-abstract class GridFrame(clockwork:Clockwork, windowTitle:String) extends Frame {
+abstract class GridFrame(environment:Environment, windowTitle:String) extends Frame {
   //Variables
   val componentsList = MutList[GridComponent]()
   //Construction
@@ -23,19 +23,19 @@ abstract class GridFrame(clockwork:Clockwork, windowTitle:String) extends Frame 
   //Methods
   def add(components:List[GridComponent]) = {
     componentsList ++= components}
-  def show() = {
+  def show(defX:Int, defY:Int) = {
     //Placing of gridRow
     componentsList.size match{
       case s if s != 0 ⇒ {
         //Calc Size
-        val widths = componentsList.toList.map(_.gridRow.map(_._2.initWidth))
+        val widths = componentsList.toList.map(_.gridRow.map(_.initWidth))
         val nCol = widths.map(_.size).max
         val colWidths = widths.map(l ⇒ l ++ (l.size until nCol).map(_ ⇒ 0)).transpose.map(_.max)
-        val rowHeights = componentsList.toList.map(_.gridRow.map(_._2.initHeight)).map(_.max)
+        val rowHeights = componentsList.toList.map(_.gridRow.map(_.initHeight)).map(_.max)
         //Layout
         panel.contents ++= rowHeights.zip(componentsList).map{case(rowHeight, comList) ⇒ {
-          val components = colWidths.zip(comList.gridRow).map{case(colWidth, (component, alignment)) ⇒ {
-            alignment.setNewSize(colWidth,rowHeight)
+          val components = colWidths.zip(comList.gridRow).map{case(colWidth, component) ⇒ {
+            component.setNewSize(colWidth,rowHeight)
             component}}
           new BorderPanel{
             import BorderPanel.Position._
@@ -47,6 +47,6 @@ abstract class GridFrame(clockwork:Clockwork, windowTitle:String) extends Frame 
     pack()
     visible = true
     //Locate
-    location = clockwork.layout.occupyLocation(size, location.x, location.y)}
+    location = environment.layout.occupyLocation(size, defX, defY)}
   def hide() = {
     visible = false}}

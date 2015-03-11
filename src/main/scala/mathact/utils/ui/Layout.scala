@@ -1,4 +1,4 @@
-package mathact.clockwork.ui
+package mathact.utils.ui
 import java.awt.{Toolkit,Canvas,Rectangle,Font}
 import scala.collection.mutable.{ListBuffer => MutList}
 import scala.swing.{Dimension, Point}
