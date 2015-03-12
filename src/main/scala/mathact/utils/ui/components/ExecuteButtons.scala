@@ -1,6 +1,6 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
-import mathact.utils.ui.Alignment
+import mathact.utils.ui.{UIParams, ToyComponent}
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
@@ -10,23 +10,23 @@ import scala.swing.event.ButtonClicked
  * Created by CAB on 11.03.2015.
  */
 
-abstract class ExecuteButtons(environment:Environment) extends GridPanel(1,3) with Alignment{
+abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3) with ToyComponent{
   //Constructions
-  val initHeight = environment.skin.executorButtonsSize
+  val initHeight = uiParams.executorButtonsSize
   val initWidth = initHeight * 3
   preferredSize = new Dimension(initWidth, initHeight)
   //Buttons
   val startBtn:Button = new Button{
-    icon = environment.skin.startEnabledIcon
-    disabledIcon = environment.skin.startDisableIcon
+    icon = uiParams.startEnabledIcon
+    disabledIcon = uiParams.startDisableIcon
     reactions += {case ButtonClicked(_) ⇒{
       enabled = false
       stopBtn.enabled = true
       stepBtn.enabled = false
       start()}}}
   val stopBtn:Button = new Button{
-    icon = environment.skin.stopEnabledIcon
-    disabledIcon = environment.skin.stopDisableIcon
+    icon = uiParams.stopEnabledIcon
+    disabledIcon = uiParams.stopDisableIcon
     enabled = false
     reactions += {case ButtonClicked(_) ⇒{
       enabled = false
@@ -34,8 +34,8 @@ abstract class ExecuteButtons(environment:Environment) extends GridPanel(1,3) wi
       stepBtn.enabled = true
       stop()}}}
   val stepBtn:Button = new Button{
-    icon = environment.skin.stepEnabledIcon
-    disabledIcon = environment.skin.stepDisableIcon
+    icon = uiParams.stepEnabledIcon
+    disabledIcon = uiParams.stepDisableIcon
     reactions += {case ButtonClicked(_) ⇒{
       step()}}}
   contents ++= List(startBtn, stopBtn, stepBtn)

@@ -1,6 +1,7 @@
 package examples
 import mathact.toys.ActBox
 import mathact.toys.doers.Doer
+import mathact.toys.plots.XTracer
 import mathact.toys.pots.PotBoard
 
 
@@ -67,31 +68,38 @@ object PotBoardExample extends ActBox{
 //
 //  MyPotBoard.a
 
+//
+//
+//
+//   new Doer{
+//     make{
+//
+//
+//       println("ssssss")
+//       MyPotBoard.a += .002
+//
+//   }}
 
 
 
-  new Doer({
-
-   println("ssssss")
 
 
 
-  })
+  new XTracer{
+
+    black{x ⇒
 
 
-
-//  val adminName = u.newTermName("admin")
-//  val admin = t.member(adminName)
+      println("trace")
 
 
+    x
 
-//  println(this.getClass.getDeclaredClasses.mkString("\n"))
-////  println(this.getClass.getDeclaredConstructors.mkString("\n"))
-////  println(this.getClass.getDeclaredFields.mkString("\n"))
-////  println(this.getClass.getDeclaredMethods.mkString("\n"))
-////  println(this.getClass.getClasses.mkString("\n"))
-////  println(this.getClass.getFields.mkString("\n"))
-//  println(this.getClass.getFields.mkString("\n"))
+
+    }
+
+
+  }
 
 
 

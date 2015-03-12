@@ -1,5 +1,5 @@
 package mathact.utils.ui.components
-import mathact.utils.ui.Alignment
+import mathact.utils.ui.ToyComponent
 import scala.swing.Component
 
 
@@ -9,4 +9,4 @@ import scala.swing.Component
  */
 
 trait GridComponent {
-  val gridRow:List[Component with Alignment]}
+  val gridRow:List[Component with ToyComponent]}

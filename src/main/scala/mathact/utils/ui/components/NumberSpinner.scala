@@ -2,8 +2,7 @@ package mathact.utils.ui.components
 import java.awt.Dimension
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.{JSpinner, SpinnerNumberModel}
-import mathact.utils.Environment
-import mathact.utils.ui.Alignment
+import mathact.utils.ui.{ToyComponent,UIParams}
 import scala.swing.{Component, BorderPanel}
 
 
@@ -12,20 +11,20 @@ import scala.swing.{Component, BorderPanel}
  * Created by CAB on 10.03.2015.
  */
 
-abstract class NumberSpinner(environment:Environment, min:Double, max:Double, init:Double, step:Double = .1)
-extends BorderPanel with Alignment{
+abstract class NumberSpinner(uiParams:UIParams.NumberSpinner, min:Double, max:Double, init:Double, step:Double = .1)
+extends BorderPanel with ToyComponent{
   //Variables
   private var callChanged = true
   //Construction
   val spinner = new JSpinner
   val initWidth:Int = {
-    val w = environment.layout.calcDoubleWidth(init, environment.skin.valueFont)
+    val w = calcDoubleWidth(init, uiParams.valueFont)
     if(w < 30) 30 else w}
-  val initHeight = environment.skin.valueHeight
+  val initHeight = uiParams.valueHeight
   val model = new SpinnerNumberModel(init, min, max, step)
   spinner.setModel(model)
   spinner.setPreferredSize(new Dimension(initWidth, initHeight))
-  spinner.setFont(environment.skin.valueFont)
+  spinner.setFont(uiParams.valueFont)
   layout(Component.wrap(spinner)) = BorderPanel.Position.Center
   //Listeners
   model.addChangeListener(new ChangeListener{def stateChanged(e:ChangeEvent) = {

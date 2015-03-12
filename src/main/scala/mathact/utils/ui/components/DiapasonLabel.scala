@@ -1,7 +1,6 @@
 package mathact.utils.ui.components
 import java.awt.Dimension
-import mathact.utils.Environment
-import mathact.utils.ui.Alignment
+import mathact.utils.ui.{UIParams, ToyComponent}
 import scala.swing.Alignment._
 import scala.swing.Label
 
@@ -11,11 +10,11 @@ import scala.swing.Label
  * Created by CAB on 10.03.2015.
  */
 
-class DiapasonLabel (environment:Environment, min:Double, max:Double) extends Label with Alignment{
+class DiapasonLabel (uiParams:UIParams.DiapasonLabel, min:Double, max:Double) extends Label with ToyComponent{
   //Construction
-  val initWidth = List(min,max).map(x ⇒ environment.layout.calcDoubleWidth(x, environment.skin.nameFont)).sum + 20
-  val initHeight = environment.skin.diapasonHeight
-  font = environment.skin.diapasonFont
+  val initWidth = List(min,max).map(x ⇒ calcDoubleWidth(x, uiParams.valueFont)).sum + 20
+  val initHeight = uiParams.valueHeight
+  font = uiParams.valueFont
   horizontalAlignment = Center
   text = "[" + min + "," + max + "]"
   preferredSize = new Dimension(initWidth, initHeight)

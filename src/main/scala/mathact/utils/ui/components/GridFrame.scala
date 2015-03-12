@@ -1,6 +1,5 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
-import scala.collection.mutable.{ListBuffer => MutList}
 import scala.swing._
 
 
@@ -11,7 +10,7 @@ import scala.swing._
 
 abstract class GridFrame(environment:Environment, windowTitle:String) extends Frame {
   //Variables
-  val componentsList = MutList[GridComponent]()
+  var componentsList = List[GridComponent]()
   //Construction
   title = windowTitle
   private val panel = new GridPanel(0,1)

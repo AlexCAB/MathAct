@@ -1,7 +1,7 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
 import mathact.utils.clockwork.ExecutionException
-import scala.swing.Component
+import mathact.utils.ui.UIParams
 
 
 /**
@@ -9,16 +9,23 @@ import scala.swing.Component
  * Created by CAB on 10.03.2015.
  */
 
-abstract class Potentiometer(environment:Environment, varName:String, min:Double, max:Double, value:Double)
+abstract class Potentiometer(
+  environment:Environment,
+  varName:String,
+  min:Double,
+  max:Double,
+  value:Double,
+  uiParams:UIParams.Potentiometer)
 extends GridComponent {
   //Components
-  val nameView = new NameLabel(environment, varName)
-  val diapasonView = new DiapasonLabel(environment, min, max)
-  val sliderBar:HorizontalSlider = new HorizontalSlider(environment, min, max, value, environment.skin.potSliderWidth){
+  val nameView = new NameLabel(uiParams, varName)
+  val diapasonView = new DiapasonLabel(uiParams, min, max)
+  val sliderBar:HorizontalSlider = new HorizontalSlider(
+      environment, min, max, value, uiParams.sliderWidth, uiParams.sliderHeight){
     def valueChanged(v:Double) = {
       editBar.setCurrentValue(v)
       potValueChanged(v)}}
-  val editBar:NumberSpinner = new NumberSpinner(environment, min, max, value){
+  val editBar:NumberSpinner = new NumberSpinner(uiParams, min, max, value){
     def valueChanged(v:Double) = {
       sliderBar.setCurrentValue(v)
       potValueChanged(v)}}

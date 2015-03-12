@@ -3,7 +3,7 @@ import java.awt.Dimension
 import javax.swing.{JSlider, SwingConstants}
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import mathact.utils.Environment
-import mathact.utils.ui.Alignment
+import mathact.utils.ui.ToyComponent
 import scala.swing.{Component, BorderPanel}
 
 
@@ -12,15 +12,21 @@ import scala.swing.{Component, BorderPanel}
  * Created by CAB on 10.03.2015.
  */
 
-abstract class HorizontalSlider
-(environment:Environment, min:Double, max:Double, init:Double, sliderWidth:Int, sliderScale:Double = 1000)
-extends BorderPanel with Alignment{
+abstract class HorizontalSlider(
+  environment:Environment,
+  min:Double,
+  max:Double,
+  init:Double,
+  sliderWidth:Int,
+  sliderHeight:Int,
+  sliderScale:Double = 1000)
+extends BorderPanel with ToyComponent{
   //Variables
   private var callChanged = true
   //Construction
   val slider = new JSlider
   val initWidth = sliderWidth
-  val initHeight = environment.skin.horizontalSliderHeight
+  val initHeight = sliderHeight
   slider.setOrientation(SwingConstants.HORIZONTAL)
   slider.setMinimum((min * sliderScale).toInt)
   slider.setMaximum((max * sliderScale).toInt)

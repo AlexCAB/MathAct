@@ -13,8 +13,4 @@ abstract class ActBox(x:Int = 10, y:Int = 10, width:Int = Int.MaxValue, height:I
   //Fields
   implicit val environment = Environment(new Clockwork,new Layout(x, y, width, height), new Skin)
   //Methods
-  def main(arg:Array[String]):Unit = environment.clockwork.start()
-
-
-
-}
+  def main(arg:Array[String]):Unit = environment.clockwork.start()}

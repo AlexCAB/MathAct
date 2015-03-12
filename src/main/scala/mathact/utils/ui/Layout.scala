@@ -1,5 +1,5 @@
 package mathact.utils.ui
-import java.awt.{Toolkit,Canvas,Rectangle,Font}
+import java.awt.{Toolkit,Rectangle}
 import scala.collection.mutable.{ListBuffer => MutList}
 import scala.swing.{Dimension, Point}
 
@@ -16,8 +16,6 @@ class Layout(x:Int, y:Int, width:Int, height:Int) {
     new Dimension(
       if(width == Int.MaxValue){monitorSize.width - x}else{width},
       if(height == Int.MaxValue){monitorSize.height - y}else{height})}
-  //Helpers
-  private val canvas = new Canvas()
   //Variables
   private val layouts = MutList[MutList[Rectangle]](MutList[Rectangle]())
   //Functions
@@ -56,6 +54,5 @@ class Layout(x:Int, y:Int, width:Int, height:Int) {
       if(defX == Int.MaxValue){point.x}else{defX},
       if(defY == Int.MaxValue){point.y}else{defY})
     addLayout(layer, pos, size)
-    pos}
-  def calcStringWidth(string:String, font:Font):Int = canvas.getFontMetrics(font).stringWidth(string)
-  def calcDoubleWidth(value:Double, font:Font):Int = calcStringWidth(value.toString,font)}
+    pos}}
+

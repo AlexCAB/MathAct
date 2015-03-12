@@ -13,8 +13,12 @@ import java.lang.reflect.Field
  * Created by CAB on 08.03.2015.
  */
 
-abstract class PotBoard
-(name:String = "", screenX:Int = Int.MaxValue, screenY:Int = Int.MaxValue, defaultMin:Double = -1, defaultMax:Double = 1)
+abstract class PotBoard(
+  name:String = "",
+  defaultMin:Double = -1,
+  defaultMax:Double = 1,
+  screenX:Int = Int.MaxValue,
+  screenY:Int = Int.MaxValue)
 (implicit environment:Environment){
   //DSL Methods
   def in(min: ⇒Double, max: ⇒Double):Double =
@@ -52,6 +56,7 @@ abstract class PotBoard
   private var pots:List[Potentiometer] = List()
   //Helpers
   private val thisPotBoard = this
+  private val potBoardName = environment.skin.titleFor(name, thisPotBoard, "PotBoard")
   private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, defaultMin, defaultMax){
     def createIdValue(id:Int):Double = id.toDouble
     def getId(value:Double):Int = value.toInt
@@ -78,9 +83,14 @@ abstract class PotBoard
       .filter{case (f,_) ⇒ !f} match{
         case Nil ⇒ (true,"")
         case le ⇒ (false, "\n" + le.map{case (_,msg) ⇒ msg}.mkString("\n"))}}}
+  //Check parameters
+  if(defaultMin >= defaultMax ){throw new SyntaxException(s"""
+    |Incorrect parameters for PotBoard with name $potBoardName:
+    | defaultMin($defaultMin) < defaultMax($defaultMax) is false
+    |""".stripMargin)}
   //UI
-  private val frame = new GridFrame(environment, environment.skin.titleFor(name, thisPotBoard, "PotBoard")){
-     def closing() = {if(gear.work){environment.clockwork.delGear(gear)}}}
+  private val frame = new GridFrame(environment, potBoardName){
+     def closing() = gear.endWork()}
   //Gear
   private val gear:Gear = new Gear(environment.clockwork){
     def start() = {
@@ -89,7 +99,8 @@ abstract class PotBoard
       val arrayVars = arrayVarBoard.getVars
       //Construct UI
       val doublePots = doubleVars.map(variable ⇒ {
-        new Potentiometer(environment, variable.name, variable.min, variable.max, variable.value){
+        new Potentiometer(
+            environment, variable.name, variable.min, variable.max, variable.value, environment.skin.PotBoard){
           def potValueChanged(v:Double) = {
             variable.field.setDouble(thisPotBoard,v)
             changed()}
@@ -97,7 +108,8 @@ abstract class PotBoard
             variable.field.getDouble(thisPotBoard)}}})
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
-          new Potentiometer(environment, variable.name + s"_$index", variable.min, variable.max, value){
+          new Potentiometer(
+            environment, variable.name + s"_$index", variable.min, variable.max, value, environment.skin.PotBoard){
             def potValueChanged(v:Double) = {
               variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index) = v
               changed()}
@@ -111,5 +123,4 @@ abstract class PotBoard
       frame.show(screenX, screenY)}
     def update() = {
       pots.foreach(_.update())}
-    def stop() = {frame.hide()}}
-  environment.clockwork.addGear(gear)}
+    def stop() = {frame.hide()}}}
