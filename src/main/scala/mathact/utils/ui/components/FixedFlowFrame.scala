@@ -1,6 +1,6 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
-import mathact.utils.ui.ToyComponent
+import mathact.utils.ui.components.ToyComponent
 import scala.swing._
 
 
@@ -23,8 +23,12 @@ abstract class FixedFlowFrame(environment:Environment, windowTitle:String, compo
   //Methods
   def show(defX:Int, defY:Int) = {
     //ToyComponent
-    val height = components.map(_.initHeight).max
-    components.map(c ⇒ c.setNewSize(c.initWidth, height))
+//    val height = components.map(_.initHeight).max
+//    components.map(c ⇒ c.setNewSize(c.initWidth, height))
+
+    val height = components.map(_.preferredSize.getHeight).max
+    components.map(c ⇒ c.preferredSize = new Dimension(c.preferredSize.getWidth.toInt, height.toInt))
+
     //Add components
     panel.contents ++= components
     //Show

@@ -2,7 +2,7 @@ package mathact.utils.ui.components
 import java.awt.Dimension
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import javax.swing.{JSpinner, SpinnerNumberModel}
-import mathact.utils.ui.{ToyComponent,UIParams}
+import mathact.utils.ui.UIParams
 import scala.swing.{Component, BorderPanel}
 
 

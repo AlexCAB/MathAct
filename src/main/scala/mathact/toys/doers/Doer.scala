@@ -35,7 +35,7 @@ abstract class Doer(
     |""".stripMargin)}
   //UI
   private val slider = new HorizontalSlider(
-      environment, speedMin, speedMax, speedInit,
+      speedMin, speedMax, speedInit,
       environment.skin.Doer.sliderWidth, environment.skin.Doer.sliderHeight, 10){
     def valueChanged(v:Double) = {
       frame.setTitleAdd(s" - $v/second")

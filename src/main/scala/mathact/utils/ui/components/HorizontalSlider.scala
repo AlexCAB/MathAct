@@ -3,7 +3,7 @@ import java.awt.Dimension
 import javax.swing.{JSlider, SwingConstants}
 import javax.swing.event.{ChangeEvent, ChangeListener}
 import mathact.utils.Environment
-import mathact.utils.ui.ToyComponent
+import mathact.utils.ui.components.ToyComponent
 import scala.swing.{Component, BorderPanel}
 
 
@@ -13,7 +13,6 @@ import scala.swing.{Component, BorderPanel}
  */
 
 abstract class HorizontalSlider(
-  environment:Environment,
   min:Double,
   max:Double,
   init:Double,
@@ -25,13 +24,14 @@ extends BorderPanel with ToyComponent{
   private var callChanged = true
   //Construction
   val slider = new JSlider
-  val initWidth = sliderWidth
-  val initHeight = sliderHeight
+//  val initWidth = sliderWidth
+//  val initHeight = sliderHeight
+  preferredSize = new Dimension(sliderWidth, sliderHeight)
   slider.setOrientation(SwingConstants.HORIZONTAL)
   slider.setMinimum((min * sliderScale).toInt)
   slider.setMaximum((max * sliderScale).toInt)
   slider.setValue((init * sliderScale).toInt)
-  slider.setPreferredSize(new Dimension(sliderWidth, initHeight))
+//  slider.setPreferredSize(new Dimension(sliderWidth, initHeight))
   layout(Component.wrap(slider)) = BorderPanel.Position.Center
   //Listeners
   slider.addChangeListener(new ChangeListener {def stateChanged(e: ChangeEvent) = {

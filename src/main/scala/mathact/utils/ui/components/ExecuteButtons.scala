@@ -1,6 +1,6 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
-import mathact.utils.ui.{UIParams, ToyComponent}
+import mathact.utils.ui.UIParams
 import scala.swing._
 import scala.swing.event.ButtonClicked
 
@@ -12,9 +12,12 @@ import scala.swing.event.ButtonClicked
 
 abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3) with ToyComponent{
   //Constructions
-  val initHeight = uiParams.executorButtonsSize
-  val initWidth = initHeight * 3
-  preferredSize = new Dimension(initWidth, initHeight)
+//  val initHeight = uiParams.executorButtonsSize
+//  val initWidth = initHeight * 3
+//  preferredSize = new Dimension(initWidth, initHeight)
+  preferredSize = new Dimension(
+    uiParams.executorButtonsSize,
+    uiParams.executorButtonsSize * 3)
   //Buttons
   val startBtn:Button = new Button{
     icon = uiParams.startEnabledIcon

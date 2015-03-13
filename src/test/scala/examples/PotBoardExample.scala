@@ -97,7 +97,16 @@ object PotBoardExample extends ActBox{
 
 
     }
+    "test" white {x ⇒
 
+
+      println("trace")
+
+
+      x
+
+
+    }
 
   }
 

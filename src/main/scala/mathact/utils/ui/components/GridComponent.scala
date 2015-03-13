@@ -1,5 +1,7 @@
 package mathact.utils.ui.components
-import mathact.utils.ui.ToyComponent
+
+import mathact.utils.ui.components.ToyComponent
+
 import scala.swing.Component
 
 

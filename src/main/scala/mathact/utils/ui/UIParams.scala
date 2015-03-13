@@ -1,5 +1,5 @@
 package mathact.utils.ui
-import java.awt.Font
+import java.awt.{Color, Font}
 import javax.swing.ImageIcon
 
 /**
@@ -17,6 +17,10 @@ object UIParams {
   trait NameLabel{
     val nameFont:Font
     val nameHeight:Int}
+  trait NumberLabel{
+    val numberFormat:String
+    val numberFont:Font
+    val numberHeight:Int}
   trait NumberSpinner{
     val valueFont:Font
     val valueHeight:Int}
@@ -32,4 +36,17 @@ object UIParams {
     val stopDisableIcon:ImageIcon
     val stepEnabledIcon:ImageIcon
     val stepDisableIcon:ImageIcon
-    val executorButtonsSize:Int}}
+    val executorButtonsSize:Int}
+  trait MinMaxAvgPane extends NameLabel with NumberLabel{
+    val separatorFont:Font
+    val separatorHeight:Int}
+  trait XYsPlot{
+    val backgroundPaint:Color
+    val rangeGridlinePaint:Color
+    val domainGridlinePaint:Color
+
+  }
+
+
+
+}

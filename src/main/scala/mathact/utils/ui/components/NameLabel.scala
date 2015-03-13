@@ -1,6 +1,6 @@
 package mathact.utils.ui.components
 import java.awt.Dimension
-import mathact.utils.ui.{UIParams, ToyComponent}
+import mathact.utils.ui.UIParams
 import scala.swing.Alignment._
 import scala.swing.Label
 

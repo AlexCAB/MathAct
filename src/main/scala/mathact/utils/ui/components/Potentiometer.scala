@@ -20,8 +20,7 @@ extends GridComponent {
   //Components
   val nameView = new NameLabel(uiParams, varName)
   val diapasonView = new DiapasonLabel(uiParams, min, max)
-  val sliderBar:HorizontalSlider = new HorizontalSlider(
-      environment, min, max, value, uiParams.sliderWidth, uiParams.sliderHeight){
+  val sliderBar:HorizontalSlider = new HorizontalSlider(min, max, value, uiParams.sliderWidth, uiParams.sliderHeight){
     def valueChanged(v:Double) = {
       editBar.setCurrentValue(v)
       potValueChanged(v)}}

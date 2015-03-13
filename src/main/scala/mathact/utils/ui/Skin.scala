@@ -39,11 +39,14 @@ class Skin {
     val sliderHeight = 16
     val sliderWidth = 180}
   //XTracer
-  object XTracer{
-
-
-
-
+  object XTracer extends MinMaxAvgPane with XYsPlot{
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val nameHeight = 16
+    val numberFormat = "#0.000000000"
+    val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val numberHeight = 16
+    val separatorFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val separatorHeight = 16
 
 
   }

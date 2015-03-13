@@ -1,5 +1,6 @@
-package mathact.utils.ui
-import java.awt.{Font, Canvas}
+package mathact.utils.ui.components
+
+import java.awt.{Canvas, Font}
 
 
 /**
@@ -9,9 +10,9 @@ import java.awt.{Font, Canvas}
 
 trait ToyComponent {
   //Abstract
-  val initWidth:Int
-  val initHeight:Int
-  def setNewSize(w:Int,h:Int):Unit
+//  val initWidth:Int
+//  val initHeight:Int
+//  def setNewSize(w:Int,h:Int):Unit
   //Helpers Methods
   private lazy val canvas = new Canvas()
   def calcStringWidth(string:String, font:Font):Int = canvas.getFontMetrics(font).stringWidth(string)
