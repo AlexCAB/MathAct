@@ -10,13 +10,11 @@ import scala.swing.Label
  * Created by CAB on 10.03.2015.
  */
 
-class NameLabel(uiParams:UIParams.NameLabel, labText:String) extends Label with ToyComponent{
+class NameLabel(uiParams:UIParams.NameLabel, labText:String) extends Label with UIComponent{
   //Construction
-  val initWidth = calcStringWidth(labText, uiParams.nameFont)
-  val initHeight = uiParams.nameHeight
+  preferredSize = new Dimension(
+    calcStringWidth(labText, uiParams.nameFont),
+    uiParams.nameHeight)
   font = uiParams.nameFont
   horizontalAlignment = Right
-  text = labText
-  preferredSize = new Dimension(initWidth, initHeight)
-  //Methods
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+  text = labText}

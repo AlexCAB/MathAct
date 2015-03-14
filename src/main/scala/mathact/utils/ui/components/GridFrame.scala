@@ -27,16 +27,13 @@ abstract class GridFrame(environment:Environment, windowTitle:String) extends Fr
     componentsList.size match{
       case s if s != 0 ⇒ {
         //Calc Size
-//        val widths = componentsList.toList.map(_.gridRow.map(_.initWidth))
         val widths = componentsList.toList.map(_.gridRow.map(_.preferredSize.getWidth.toInt))
         val nCol = widths.map(_.size).max
         val colWidths = widths.map(l ⇒ l ++ (l.size until nCol).map(_ ⇒ 0)).transpose.map(_.max)
-//        val rowHeights = componentsList.toList.map(_.gridRow.map(_.initHeight)).map(_.max)
         val rowHeights = componentsList.toList.map(_.gridRow.map(_.preferredSize.getHeight.toInt)).map(_.max)
         //Layout
         panel.contents ++= rowHeights.zip(componentsList).map{case(rowHeight, comList) ⇒ {
           val components = colWidths.zip(comList.gridRow).map{case(colWidth, component) ⇒ {
-//            component.setNewSize(colWidth,rowHeight)
             component.preferredSize = new Dimension(colWidth,rowHeight)
             component}}
           new BorderPanel{

@@ -1,4 +1,4 @@
-package mathact.toys.plots
+package mathact.tools.plots
 
 
 /**

@@ -1,10 +1,10 @@
-package mathact.toys.doers
+package mathact.tools.doers
 import java.awt.event.{ActionListener,ActionEvent}
 import javax.swing.Timer
 import mathact.utils.Environment
 import mathact.utils.clockwork.Gear
 import mathact.utils.dsl.SyntaxException
-import mathact.utils.ui.components.{ExecuteButtons, HorizontalSlider, FixedFlowFrame}
+import mathact.utils.ui.components.{ExecuteButtons, HorizontalSlider, FlowFrame}
 
 
 /**
@@ -26,7 +26,7 @@ abstract class Doer(
   def make(proc: ⇒Unit) = {procs +:= (()⇒proc)}
   //Helpers
   private val thisDoer = this
-  private val doerName = environment.skin.titleFor(name, thisDoer, "Doer")
+  private val doerName = environment.params.titleFor(name, thisDoer, "Doer")
   //Check parameters
   if(speedMax > 1000 || speedMin <= 0 || speedInit > speedMax || speedInit < speedMin){throw new SyntaxException(s"""
     |Incorrect parameters for Doer with name $doerName:
@@ -36,12 +36,12 @@ abstract class Doer(
   //UI
   private val slider = new HorizontalSlider(
       speedMin, speedMax, speedInit,
-      environment.skin.Doer.sliderWidth, environment.skin.Doer.sliderHeight, 10){
+      environment.params.Doer.sliderWidth, environment.params.Doer.sliderHeight, 10){
     def valueChanged(v:Double) = {
       frame.setTitleAdd(s" - $v/second")
       timer.setDelay((1000 / v).toInt)
       timer.restart()}}
-  private val execBtn = new ExecuteButtons(environment.skin.Doer){
+  private val execBtn = new ExecuteButtons(environment.params.Doer){
     def start() = {
       timer.start()}
     def stop() = {
@@ -49,7 +49,7 @@ abstract class Doer(
     def step() = {
       procs.foreach(p ⇒ p())
       gear.changed()}}
-  private val frame:FixedFlowFrame = new FixedFlowFrame(environment, doerName, List(slider, execBtn)){
+  private val frame:FlowFrame = new FlowFrame(environment, doerName, List(slider, execBtn)){
     def closing() = gear.endWork()}
   frame.setTitleAdd(s" - $speedInit/second")
   //Timer
@@ -58,7 +58,7 @@ abstract class Doer(
       procs.foreach(p ⇒ p())
       gear.changed()}})
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork){
+  private val gear:Gear = new Gear(environment.clockwork, environment.params.Doer.updatePriority){
     def start() = {
       //Show
       frame.show(screenX, screenY)}

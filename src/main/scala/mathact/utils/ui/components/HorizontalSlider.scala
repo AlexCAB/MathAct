@@ -2,8 +2,6 @@ package mathact.utils.ui.components
 import java.awt.Dimension
 import javax.swing.{JSlider, SwingConstants}
 import javax.swing.event.{ChangeEvent, ChangeListener}
-import mathact.utils.Environment
-import mathact.utils.ui.components.ToyComponent
 import scala.swing.{Component, BorderPanel}
 
 
@@ -19,7 +17,7 @@ abstract class HorizontalSlider(
   sliderWidth:Int,
   sliderHeight:Int,
   sliderScale:Double = 1000)
-extends BorderPanel with ToyComponent{
+extends BorderPanel with UIComponent{
   //Variables
   private var callChanged = true
   //Construction
@@ -43,5 +41,4 @@ extends BorderPanel with ToyComponent{
   def setCurrentValue(v:Double) = {
     callChanged = false
     slider.setValue((v * sliderScale).toInt)
-    callChanged = true}
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+    callChanged = true}}

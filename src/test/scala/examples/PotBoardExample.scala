@@ -1,8 +1,8 @@
 package examples
-import mathact.toys.ActBox
-import mathact.toys.doers.Doer
-import mathact.toys.plots.XTracer
-import mathact.toys.pots.PotBoard
+import mathact.tools.ActBox
+import mathact.tools.doers.Doer
+import mathact.tools.plots.XTracer
+import mathact.tools.pots.PotBoard
 
 
 /**
@@ -19,7 +19,7 @@ object PotBoardExample extends ActBox{
 //
 //    var a = init(.1)
 //    var aaaaaaaaaaaa = init(.11111111111111111111111111111111111111111111111)
-//    val b = in(.2,.3)
+//    val b = in(-1,1)
 ////    val b = in(.211111111111111111111111111111111111111111111,.31111111111111111111111111111111111111111111111111111111111111111)
 //    var c = init(.4) in(.4,.6)
 //    var e = zero
@@ -67,7 +67,7 @@ object PotBoardExample extends ActBox{
 //
 //
 //  MyPotBoard.a
-
+//
 //
 //
 //
@@ -79,36 +79,36 @@ object PotBoardExample extends ActBox{
 //       MyPotBoard.a += .002
 //
 //   }}
-
-
-
-
-
-
-  new XTracer{
-
-    black{x ⇒
-
-
-      println("trace")
-
-
-    x
-
-
-    }
-    "test" white {x ⇒
-
-
-      println("trace")
-
-
-      x
-
-
-    }
-
-  }
+//
+//
+//
+//
+//
+//
+//  new XTracer{
+//
+//    black{x ⇒
+//
+//
+////      println("trace")
+//
+//
+//    x * x + MyPotBoard.b
+//
+//
+//    }
+//    "test" red {x ⇒
+//
+//
+////      println("trace")
+//
+//
+//      -x
+//
+//
+//    }
+//
+//  }
 
 
 

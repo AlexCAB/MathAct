@@ -1,8 +1,8 @@
-package mathact.toys.plots
+package mathact.tools.plots
 import java.awt.Color
 import mathact.utils.Environment
 import mathact.utils.clockwork.Gear
-import mathact.utils.ui.components.{MinMaxAvgPane, BorderFrame}
+import mathact.utils.ui.components.{XYsPlot, MinMaxAvgPane, BorderFrame}
 import scala.math.random
 
 
@@ -12,9 +12,13 @@ import scala.math.random
  */
 
 abstract class XTracer(
+  name:String = "",
   val a:Double = -1,
   val b:Double = 1,
-  name:String = "",
+  val step:Double = 0.05,
+  minRange:Double = -1,
+  maxRange:Double = 1,
+  drawPoints:Boolean = false,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
   screenW:Int = 600,
@@ -66,27 +70,31 @@ abstract class XTracer(
       proc}}
   //Helpers
   private val thisXTracer = this
-  private val xTracerName = environment.skin.titleFor(name, thisXTracer, "XTracer")
+  private val xTracerName = environment.params.titleFor(name, thisXTracer, "XTracer")
   //UI
-//  private val plot =
-
-
-
-
-  private val minMaxAvg = new MinMaxAvgPane(environment.skin.XTracer)
-  private val frame = new BorderFrame(environment, xTracerName, south = Some(minMaxAvg)){
+  private val plot = new XYsPlot(environment.params.XTracer, screenW, screenH, drawPoints)
+  private val minMaxAvg = new MinMaxAvgPane(environment.params.XTracer)
+  private val frame = new BorderFrame(environment, xTracerName, south = Some(minMaxAvg), center = Some(plot)){
     def closing() = {gear.endWork()}}
+  //Functions
+  private def trace() = {
+    val xs = (a to b by step).toList
+    val yss = procs.map{case ((_,proc,_)) ⇒ {xs.map(x ⇒ proc(x))}}
 
-
-
-
-
+    plot.update(xs, yss)
+    minMaxAvg.update(yss.flatMap(e ⇒ e))}
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork){
+  private val gear:Gear = new Gear(environment.clockwork, environment.params.XTracer.updatePriority){
     def start() = {
+      //Prepare plot
+      val lines = procs.zipWithIndex.map{
+        case ((c, _, Some(n)), _) ⇒ (n, c)
+        case ((c, _, None), i) ⇒ ("L" + i, c)}
+      plot.setLines(lines, minRange, maxRange)
       //Show
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
-    def update() = {}
+    def update() = {
+      trace()}
     def stop() = {
       frame.hide()}}
 

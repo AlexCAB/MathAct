@@ -12,18 +12,17 @@ import scala.swing.{Component, BorderPanel}
  */
 
 abstract class NumberSpinner(uiParams:UIParams.NumberSpinner, min:Double, max:Double, init:Double, step:Double = .1)
-extends BorderPanel with ToyComponent{
+extends BorderPanel with UIComponent{
   //Variables
   private var callChanged = true
   //Construction
   val spinner = new JSpinner
-  val initWidth:Int = {
-    val w = calcDoubleWidth(init, uiParams.valueFont)
-    if(w < 30) 30 else w}
-  val initHeight = uiParams.valueHeight
+  preferredSize = new Dimension({
+      val w = calcDoubleWidth(init, uiParams.valueFont)
+      if(w < 30) 30 else w},
+    uiParams.valueHeight)
   val model = new SpinnerNumberModel(init, min, max, step)
   spinner.setModel(model)
-  spinner.setPreferredSize(new Dimension(initWidth, initHeight))
   spinner.setFont(uiParams.valueFont)
   layout(Component.wrap(spinner)) = BorderPanel.Position.Center
   //Listeners
@@ -36,8 +35,7 @@ extends BorderPanel with ToyComponent{
   def setCurrentValue(v:Double) = {
     callChanged = false
     model.setValue(v)
-    callChanged = true}
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+    callChanged = true}}
 
 
 

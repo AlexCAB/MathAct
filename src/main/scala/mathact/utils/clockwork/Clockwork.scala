@@ -8,15 +8,15 @@ package mathact.utils.clockwork
 
 class Clockwork{
   //Variables
-  private var gears = Set[Gear]()
-  private var unInitGears = Set[Gear]()
+  private var gears = List[Gear]()
+  private var unInitGears = List[Gear]()
   private var work = false
   //Functions
   private def initGears() = {
     try{
       unInitGears.foreach(_.doStart())
-      gears ++= unInitGears
-      unInitGears = Set()}
+      gears = (gears ++ unInitGears).sortBy(_.updatePriority)
+      unInitGears = List()}
     catch{case e:Throwable ⇒ {
       e.printStackTrace()
       System.exit(-1)}}}
@@ -29,7 +29,7 @@ class Clockwork{
       stop(-1)}}}
   private def stopAllGears() = {
     gears.foreach(g ⇒ {
-      gears -= g
+      gears = gears.diff(List(g))
       try{g.doStop()}catch{case e:Throwable ⇒ {e.printStackTrace()}}})}
   //Methods
   def start():Unit = {
@@ -38,13 +38,14 @@ class Clockwork{
       println("No components found.")
       stop(0)}
     work = true
-    initGears()}
+    initGears()
+    updateAllGears()} //Firs update
   def stop(code:Int):Unit = {
     println("====== clockwork stop ========")
     work = false
     stopAllGears()
     System.exit(code)}
   //Gear methods
-  def gearCreated(gear:Gear):Unit = {unInitGears += gear}
+  def gearCreated(gear:Gear):Unit = {unInitGears +:= gear}
   def gearChanged(gear:Gear):Unit = {updateAllGears()}
   def gearStopped(gear:Gear):Unit = {stop(0)}}

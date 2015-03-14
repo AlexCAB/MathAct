@@ -1,6 +1,5 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
-import mathact.utils.ui.components.ToyComponent
 import scala.swing._
 
 
@@ -12,11 +11,11 @@ import scala.swing._
 abstract class BorderFrame (
   environment:Environment,
   windowTitle:String,
-  north:Option[Component with ToyComponent] = None,
-  south:Option[Component with ToyComponent] = None,
-  west:Option[Component with ToyComponent] = None,
-  east:Option[Component with ToyComponent] = None,
-  center:Option[Component with ToyComponent] = None)
+  north:Option[Component with UIComponent] = None,
+  south:Option[Component with UIComponent] = None,
+  west:Option[Component with UIComponent] = None,
+  east:Option[Component with UIComponent] = None,
+  center:Option[Component with UIComponent] = None)
 extends Frame {
   //Construction
   title = windowTitle
@@ -34,7 +33,6 @@ extends Frame {
     components.filter{case(c,_) ⇒ c.nonEmpty}.map{case(c,p) ⇒ panel.layout(c.get) = p}
     //Calc size
     val sizes = components.map{
-//      case (Some(c),k) ⇒ (k, (c.initWidth, c.initHeight))
       case (Some(c),k) ⇒ (k, (c.preferredSize.getWidth.toInt, c.preferredSize.getHeight.toInt))
       case (_,k) ⇒ (k,(0,0))}.toMap
     val width = List(sizes(North)._1,sizes(South)._1,List(sizes(West),sizes(Center),sizes(East)).map(_._1).sum).max
@@ -44,7 +42,6 @@ extends Frame {
       panel.preferredSize = new swing.Dimension(
         if(defW != Int.MaxValue) defW else width,
         if(defH != Int.MaxValue) defH else height)}
-    println(panel.preferredSize)
     pack()
     visible = true
     //Locate

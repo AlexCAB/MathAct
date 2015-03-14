@@ -12,18 +12,17 @@ import scala.swing.Label
  * Created by CAB on 13.03.2015.
  */
 
-class NumberLabel (uiParams:UIParams.NumberLabel) extends Label with ToyComponent{
+class NumberLabel (uiParams:UIParams.NumberLabel) extends Label with UIComponent{
   //Helpers
   private val decimal = NumberFormat.getNumberInstance(Locale.ENGLISH).asInstanceOf[DecimalFormat]
   decimal.applyPattern(uiParams.numberFormat)
   //Construction
-  val initWidth = calcStringWidth(uiParams.numberFormat, uiParams.numberFont)
-  val initHeight = uiParams.numberHeight
+  preferredSize = new Dimension(
+    calcStringWidth(uiParams.numberFormat, uiParams.numberFont),
+    uiParams.numberHeight)
   font = uiParams.numberFont
   horizontalAlignment = Left
   text = "---"
-  preferredSize = new Dimension(initWidth, initHeight)
   //Methods
   def setNumber(v:Double):Unit = {
-    text = if(v.isNaN){"---"}else{decimal.format(v)}}
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+    text = if(v.isNaN){"---"}else{decimal.format(v)}}}

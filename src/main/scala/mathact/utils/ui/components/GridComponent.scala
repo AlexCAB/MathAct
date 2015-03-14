@@ -1,7 +1,4 @@
 package mathact.utils.ui.components
-
-import mathact.utils.ui.components.ToyComponent
-
 import scala.swing.Component
 
 
@@ -11,4 +8,4 @@ import scala.swing.Component
  */
 
 trait GridComponent {
-  val gridRow:List[Component with ToyComponent]}
+  val gridRow:List[Component with UIComponent]}

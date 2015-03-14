@@ -8,11 +8,7 @@ import java.awt.{Canvas, Font}
  * Created by CAB on 10.03.2015.
  */
 
-trait ToyComponent {
-  //Abstract
-//  val initWidth:Int
-//  val initHeight:Int
-//  def setNewSize(w:Int,h:Int):Unit
+trait UIComponent {
   //Helpers Methods
   private lazy val canvas = new Canvas()
   def calcStringWidth(string:String, font:Font):Int = canvas.getFontMetrics(font).stringWidth(string)

@@ -1,6 +1,6 @@
 package mathact.utils
 import mathact.utils.clockwork.Clockwork
-import mathact.utils.ui.{Skin, Layout}
+import mathact.utils.ui.{Parameters, Layout}
 
 
 /**
@@ -11,4 +11,4 @@ import mathact.utils.ui.{Skin, Layout}
 case class Environment(
   clockwork:Clockwork,
   layout:Layout,
-  skin:Skin)
+  params:Parameters)

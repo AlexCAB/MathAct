@@ -12,7 +12,7 @@ import scala.swing.Alignment._
  * Created by CAB on 12.03.2015.
  */
 
-class MinMaxAvgPane(uiParams:UIParams.MinMaxAvgPane) extends FlowPanel(Left)() with ToyComponent{
+class MinMaxAvgPane(uiParams:UIParams.MinMaxAvgPane) extends FlowPanel(Left)() with UIComponent{
   //Parameters
   hGap = 1
   vGap = 1
@@ -23,20 +23,18 @@ class MinMaxAvgPane(uiParams:UIParams.MinMaxAvgPane) extends FlowPanel(Left)() w
   val minVal = new NumberLabel(uiParams)
   val maxVal = new NumberLabel(uiParams)
   val avgVal = new NumberLabel(uiParams)
-  val Seq(minSep, maxSep, avgSep) = (0 to 2).map(_ ⇒ new Label with ToyComponent{
+  val Seq(minSep, maxSep, avgSep) = (0 to 2).map(_ ⇒ new Label with UIComponent{
     text = " = "
     font = uiParams.separatorFont
-    val initWidth = calcStringWidth(text, uiParams.separatorFont)
-    val initHeight = uiParams.separatorHeight
+    preferredSize = new Dimension(
+      calcStringWidth(text, uiParams.separatorFont),
+      uiParams.separatorHeight)
     font = uiParams.nameFont
-    horizontalAlignment = Center
-    preferredSize = new Dimension(initWidth, initHeight)
-    //Methods
-    def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}})
+    horizontalAlignment = Center})
   val components = List(minName,minSep,minVal,  maxName,maxSep,maxVal, avgName,avgSep,avgVal)
-  val initHeight = components.map(_.initHeight).max + hGap * 2
-  val initWidth = components.map(_.initWidth).sum + vGap * 9
-  components.foreach(c ⇒ c.setNewSize(c.initWidth, initHeight))
+  preferredSize = new Dimension(
+    components.map(_.preferredSize.getWidth.toInt).sum + vGap * 9,
+    components.map(_.preferredSize.getHeight.toInt).max + hGap * 2)
   contents ++= components
   //Methods
   def update(values:List[Double]):Unit = values match{
@@ -45,5 +43,4 @@ class MinMaxAvgPane(uiParams:UIParams.MinMaxAvgPane) extends FlowPanel(Left)() w
     case l ⇒ {
       minVal.setNumber(values.min)
       maxVal.setNumber(values.max)
-      avgVal.setNumber(values.sum / values.size)}}
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+      avgVal.setNumber(values.sum / values.size)}}}

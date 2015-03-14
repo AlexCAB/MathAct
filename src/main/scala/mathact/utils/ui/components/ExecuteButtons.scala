@@ -10,14 +10,11 @@ import scala.swing.event.ButtonClicked
  * Created by CAB on 11.03.2015.
  */
 
-abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3) with ToyComponent{
+abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3) with UIComponent{
   //Constructions
-//  val initHeight = uiParams.executorButtonsSize
-//  val initWidth = initHeight * 3
-//  preferredSize = new Dimension(initWidth, initHeight)
   preferredSize = new Dimension(
-    uiParams.executorButtonsSize,
-    uiParams.executorButtonsSize * 3)
+    uiParams.executorButtonsSize * 3,
+    uiParams.executorButtonsSize)
   //Buttons
   val startBtn:Button = new Button{
     icon = uiParams.startEnabledIcon
@@ -45,7 +42,5 @@ abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3)
   //Abstract methods
   def start()
   def stop()
-  def step()
-  //Methods
-  def setNewSize(w:Int,h:Int):Unit = {preferredSize = new Dimension(w, h)}}
+  def step()}
 

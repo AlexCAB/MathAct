@@ -1,4 +1,4 @@
-package mathact.toys.pots
+package mathact.tools.pots
 import mathact.utils.Environment
 import mathact.utils.clockwork.Gear
 import mathact.utils.dsl.{VariableBoard, SyntaxException}
@@ -56,7 +56,7 @@ abstract class PotBoard(
   private var pots:List[Potentiometer] = List()
   //Helpers
   private val thisPotBoard = this
-  private val potBoardName = environment.skin.titleFor(name, thisPotBoard, "PotBoard")
+  private val potBoardName = environment.params.titleFor(name, thisPotBoard, "PotBoard")
   private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, defaultMin, defaultMax){
     def createIdValue(id:Int):Double = id.toDouble
     def getId(value:Double):Int = value.toInt
@@ -92,7 +92,7 @@ abstract class PotBoard(
   private val frame = new GridFrame(environment, potBoardName){
      def closing() = gear.endWork()}
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork){
+  private val gear:Gear = new Gear(environment.clockwork, environment.params.PotBoard.updatePriority){
     def start() = {
       //Get vars
       val doubleVars = doubleVarBoard.getVars
@@ -100,7 +100,7 @@ abstract class PotBoard(
       //Construct UI
       val doublePots = doubleVars.map(variable ⇒ {
         new Potentiometer(
-            environment, variable.name, variable.min, variable.max, variable.value, environment.skin.PotBoard){
+            environment, variable.name, variable.min, variable.max, variable.value, environment.params.PotBoard){
           def potValueChanged(v:Double) = {
             variable.field.setDouble(thisPotBoard,v)
             changed()}
@@ -109,7 +109,7 @@ abstract class PotBoard(
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
           new Potentiometer(
-            environment, variable.name + s"_$index", variable.min, variable.max, value, environment.skin.PotBoard){
+            environment, variable.name + s"_$index", variable.min, variable.max, value, environment.params.PotBoard){
             def potValueChanged(v:Double) = {
               variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index) = v
               changed()}

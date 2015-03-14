@@ -1,7 +1,7 @@
-package mathact.toys
+package mathact.tools
 import mathact.utils.Environment
 import mathact.utils.clockwork.Clockwork
-import mathact.utils.ui.{Layout, Skin}
+import mathact.utils.ui.{Layout, Parameters}
 
 
 /**
@@ -11,6 +11,6 @@ import mathact.utils.ui.{Layout, Skin}
 
 abstract class ActBox(x:Int = 10, y:Int = 10, width:Int = Int.MaxValue, height:Int = Int.MaxValue){
   //Fields
-  implicit val environment = Environment(new Clockwork,new Layout(x, y, width, height), new Skin)
+  implicit val environment = Environment(new Clockwork,new Layout(x, y, width, height), new Parameters)
   //Methods
   def main(arg:Array[String]):Unit = environment.clockwork.start()}
