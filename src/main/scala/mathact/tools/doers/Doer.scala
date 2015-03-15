@@ -1,8 +1,8 @@
 package mathact.tools.doers
 import java.awt.event.{ActionListener,ActionEvent}
 import javax.swing.Timer
-import mathact.utils.Environment
-import mathact.utils.clockwork.Gear
+import mathact.utils.{ToolHelper, Environment, Tool}
+import mathact.utils.clockwork.CalculationGear
 import mathact.utils.dsl.SyntaxException
 import mathact.utils.ui.components.{ExecuteButtons, HorizontalSlider, FlowFrame}
 
@@ -19,17 +19,17 @@ abstract class Doer(
   speedInit:Double = 1,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue)
-(implicit environment:Environment){
+(implicit environment:Environment)
+extends Tool{
   //Variables
   private var procs:List[()⇒Unit] = List[()⇒Unit]()
   //DSL Methods
   def make(proc: ⇒Unit) = {procs +:= (()⇒proc)}
   //Helpers
-  private val thisDoer = this
-  private val doerName = environment.params.titleFor(name, thisDoer, "Doer")
+  private val helper = new ToolHelper(this, name, "Doer")
   //Check parameters
   if(speedMax > 1000 || speedMin <= 0 || speedInit > speedMax || speedInit < speedMin){throw new SyntaxException(s"""
-    |Incorrect parameters for Doer with name $doerName:
+    |Incorrect parameters for Doer with name ${helper.toolName}:
     | speedMin($speedMin) <= speedInit($speedInit) <= speedMax($speedMax)
     | and speedMax($speedMax) <= 1000 and speedMin($speedMin) > 0 is false
     |""".stripMargin)}
@@ -49,7 +49,7 @@ abstract class Doer(
     def step() = {
       procs.foreach(p ⇒ p())
       gear.changed()}}
-  private val frame:FlowFrame = new FlowFrame(environment, doerName, List(slider, execBtn)){
+  private val frame:FlowFrame = new FlowFrame(environment, helper.toolName, List(slider, execBtn)){
     def closing() = gear.endWork()}
   frame.setTitleAdd(s" - $speedInit/second")
   //Timer
@@ -58,9 +58,8 @@ abstract class Doer(
       procs.foreach(p ⇒ p())
       gear.changed()}})
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork, environment.params.Doer.updatePriority){
+  private val gear:CalculationGear = new CalculationGear(environment.clockwork, updatePriority = -1){
     def start() = {
-      //Show
       frame.show(screenX, screenY)}
     def update() = {}
     def stop() = {

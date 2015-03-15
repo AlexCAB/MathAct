@@ -9,7 +9,8 @@ import java.awt.{Canvas, Font}
  */
 
 trait UIComponent {
-  //Helpers Methods
+  //Helpers
   private lazy val canvas = new Canvas()
+  //Methods
   def calcStringWidth(string:String, font:Font):Int = canvas.getFontMetrics(font).stringWidth(string)
   def calcDoubleWidth(value:Double, font:Font):Int = calcStringWidth(value.toString,font)}

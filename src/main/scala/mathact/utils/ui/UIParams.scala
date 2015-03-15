@@ -2,6 +2,7 @@ package mathact.utils.ui
 import java.awt.{Color, Font}
 import javax.swing.ImageIcon
 
+
 /**
  * Set of UI components parameters interfaces
  * Created by CAB on 12.03.2015.
@@ -43,10 +44,13 @@ object UIParams {
   trait XYsPlot{
     val backgroundPaint:Color
     val rangeGridlinePaint:Color
-    val domainGridlinePaint:Color
-
-  }
-
-
+    val domainGridlinePaint:Color}
+  trait TextLinePane{
+    val textBackgroundColor:Color
+    val textFont:Font}
+  trait YHistogram{
+    val backgroundPaint:Color
+    val rangeGridlinePaint:Color
+    val domainGridlinePaint:Color}
 
 }

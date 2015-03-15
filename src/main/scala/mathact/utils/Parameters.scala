@@ -1,7 +1,7 @@
-package mathact.utils.ui
+package mathact.utils
 import java.awt.{Color, Font}
 import javax.swing.ImageIcon
-import UIParams._
+import mathact.utils.ui.UIParams._
 
 
 /**
@@ -10,16 +10,8 @@ import UIParams._
  */
 
 class Parameters {
-  //Names
-  def titleFor(name:String, component:Any, default:String):String = {
-    name match{
-      case n if n != "" ⇒ n
-      case _ ⇒ component.getClass.getCanonicalName match{
-        case null ⇒ default
-        case n ⇒ n.split("[.]").last.replace("$","")}}}
   //PotBoard
   object PotBoard extends Potentiometer{
-    val updatePriority = 1
     val sliderHeight = 16
     val sliderWidth = 150
     val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
@@ -30,7 +22,6 @@ class Parameters {
     val valueHeight = 16}
   //Doer
   object Doer extends Executor with Slider{
-    val updatePriority = 0
     val startEnabledIcon = new ImageIcon(getClass.getResource("/start_e.png"))
     val startDisableIcon = new ImageIcon(getClass.getResource("/start_d.png"))
     val stopEnabledIcon = new ImageIcon(getClass.getResource("/stop_e.png"))
@@ -42,7 +33,6 @@ class Parameters {
     val sliderWidth = 180}
   //XTracer
   object XTracer extends MinMaxAvgPane with XYsPlot {
-    val updatePriority = 2
     val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
     val nameHeight = 16
     val numberFormat = "#0.000000000"
@@ -52,8 +42,35 @@ class Parameters {
     val separatorHeight = 16
     val backgroundPaint = Color.WHITE
     val rangeGridlinePaint = Color.BLACK
-    val domainGridlinePaint = Color.BLACK
+    val domainGridlinePaint = Color.BLACK}
+  //Logger
+  object Logger extends TextLinePane{
+    val textBackgroundColor = Color.BLACK
+    val defaultColor = Color.GREEN
+    val textFont:Font = new Font(Font.SERIF, Font.BOLD, 14)}
+  //XYPlot
+  object XYPlot extends MinMaxAvgPane with XYsPlot {
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val nameHeight = 16
+    val numberFormat = "#0.000000000"
+    val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val numberHeight = 16
+    val separatorFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val separatorHeight = 16
+    val backgroundPaint = Color.WHITE
+    val rangeGridlinePaint = Color.BLACK
+    val domainGridlinePaint = Color.BLACK}
+  //Histogram
+  object Histogram extends MinMaxAvgPane with YHistogram {
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val nameHeight = 16
+    val numberFormat = "#0.000000000"
+    val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val numberHeight = 16
+    val separatorFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val separatorHeight = 16
+    val backgroundPaint = Color.WHITE
+    val rangeGridlinePaint = Color.BLACK
+    val domainGridlinePaint = Color.BLACK}
 
-
-  }
 }

@@ -22,7 +22,8 @@ extends BorderPanel with UIComponent{
   //Variables
   private var chart:Option[(JFreeChart,List[XYSeries])] = None
   //Functions
-  private def createPlot(lines:List[(String,Color)], min:Double, max:Double):(JFreeChart,List[XYSeries]) = {
+  private def createPlot(lines:List[(String,Color)], lower:Double, upper:Double, autoRange:Boolean)
+  :(JFreeChart,List[XYSeries]) = {
     //Create plot
     val dss = lines.map{case(n,_) ⇒ new XYSeries(n)}
     val chart = ChartFactory.createXYLineChart(null, null, null, null)
@@ -30,8 +31,8 @@ extends BorderPanel with UIComponent{
     plot.setBackgroundPaint(uiParams.backgroundPaint)
     plot.setRangeGridlinePaint(uiParams.rangeGridlinePaint)
     plot.setDomainGridlinePaint(uiParams.domainGridlinePaint)
-    val a = plot.getRangeAxis
-    a.setRange(min, max)
+    plot.getRangeAxis.setRange(lower, upper)
+    plot.getRangeAxis.setAutoRange(autoRange)
     //Renderer
     val rs = lines.map{case(_,c) ⇒ {
       val r = new XYLineAndShapeRenderer()
@@ -46,10 +47,14 @@ extends BorderPanel with UIComponent{
   //Construction
   preferredSize = new Dimension(width, height)
   //Methods
-  def setLines(lines:List[(String,Color)], minRange:Double, maxRange:Double):Unit = {
-    chart = Some(createPlot(lines, minRange, maxRange))
+  def setLines(lines:List[(String,Color)], lower:Double, upper:Double, autoRange:Boolean):Unit = {
+    chart = Some(createPlot(lines, lower, upper, autoRange))
     layout(Component.wrap(new ChartPanel(chart.get._1))) = BorderPanel.Position.Center}
   def update(xs:List[Double], yss:List[List[Double]]):Unit = chart.map{case (_,dss) ⇒ {
     dss.zip(yss).foreach{case(ds,ys) ⇒ {
+      ds.clear()
+      xs.zip(ys).foreach{case (x,y) => ds.add(x,y)}}}}}
+  def update(xys:List[(List[Double],List[Double])]):Unit = chart.map{case (_,dss) ⇒ {
+    dss.zip(xys).foreach{case(ds,(xs,ys)) ⇒ {
       ds.clear()
       xs.zip(ys).foreach{case (x,y) => ds.add(x,y)}}}}}}

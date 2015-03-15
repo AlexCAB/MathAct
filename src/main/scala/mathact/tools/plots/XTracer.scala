@@ -1,7 +1,7 @@
 package mathact.tools.plots
 import java.awt.Color
-import mathact.utils.Environment
-import mathact.utils.clockwork.Gear
+import mathact.utils.{ToolHelper, Environment, Tool}
+import mathact.utils.clockwork.{VisualisationGear, Gear}
 import mathact.utils.ui.components.{XYsPlot, MinMaxAvgPane, BorderFrame}
 import scala.math.random
 
@@ -18,12 +18,14 @@ abstract class XTracer(
   val step:Double = 0.05,
   minRange:Double = -1,
   maxRange:Double = 1,
+  autoRange:Boolean = false,
   drawPoints:Boolean = false,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
   screenW:Int = 600,
   screenH:Int = 300)
-(implicit environment:Environment){
+(implicit environment:Environment)
+extends Tool{
   //Variables
   private var procs = List[(Color, Double⇒Double, Option[String])]()
   //DSL Methods
@@ -69,42 +71,32 @@ abstract class XTracer(
       procs :+= (color,proc,Some(name))
       proc}}
   //Helpers
-  private val thisXTracer = this
-  private val xTracerName = environment.params.titleFor(name, thisXTracer, "XTracer")
+  private val helper = new ToolHelper(this, name, "XTracer")
   //UI
   private val plot = new XYsPlot(environment.params.XTracer, screenW, screenH, drawPoints)
   private val minMaxAvg = new MinMaxAvgPane(environment.params.XTracer)
-  private val frame = new BorderFrame(environment, xTracerName, south = Some(minMaxAvg), center = Some(plot)){
+  private val frame = new BorderFrame(environment, helper.toolName, south = Some(minMaxAvg), center = Some(plot)){
     def closing() = {gear.endWork()}}
   //Functions
   private def trace() = {
     val xs = (a to b by step).toList
     val yss = procs.map{case ((_,proc,_)) ⇒ {xs.map(x ⇒ proc(x))}}
-
     plot.update(xs, yss)
     minMaxAvg.update(yss.flatMap(e ⇒ e))}
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork, environment.params.XTracer.updatePriority){
+  private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     def start() = {
       //Prepare plot
       val lines = procs.zipWithIndex.map{
         case ((c, _, Some(n)), _) ⇒ (n, c)
         case ((c, _, None), i) ⇒ ("L" + i, c)}
-      plot.setLines(lines, minRange, maxRange)
+      plot.setLines(lines, minRange, maxRange,autoRange)
       //Show
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = {
       trace()}
     def stop() = {
-      frame.hide()}}
-
-
-
-
-
-
-
-}
+      frame.hide()}}}
 
 
 

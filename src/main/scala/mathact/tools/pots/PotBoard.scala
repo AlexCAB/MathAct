@@ -1,9 +1,8 @@
 package mathact.tools.pots
-import mathact.utils.Environment
-import mathact.utils.clockwork.Gear
+import mathact.utils.{ToolHelper, Environment, Tool}
+import mathact.utils.clockwork.VisualisationGear
 import mathact.utils.dsl.{VariableBoard, SyntaxException}
 import mathact.utils.ui.components.{GridFrame, Potentiometer}
-import scala.swing.Point
 import java.lang.reflect.Modifier
 import java.lang.reflect.Field
 
@@ -19,7 +18,8 @@ abstract class PotBoard(
   defaultMax:Double = 1,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue)
-(implicit environment:Environment){
+(implicit environment:Environment)
+extends Tool{
   //DSL Methods
   def in(min: ⇒Double, max: ⇒Double):Double =
     doubleVarBoard.addVarParameter(Some(min), Some(max), None, None, doubleVarBoard.MinMax)
@@ -55,9 +55,8 @@ abstract class PotBoard(
   //Variables
   private var pots:List[Potentiometer] = List()
   //Helpers
-  private val thisPotBoard = this
-  private val potBoardName = environment.params.titleFor(name, thisPotBoard, "PotBoard")
-  private val doubleVarBoard = new VariableBoard[Double](thisPotBoard, defaultMin, defaultMax){
+  private val helper = new ToolHelper(this, name, "PotBoard")
+  private val doubleVarBoard = new VariableBoard[Double](helper.thisTool, defaultMin, defaultMax){
     def createIdValue(id:Int):Double = id.toDouble
     def getId(value:Double):Int = value.toInt
     def checkField(f:Field):Boolean = {f.getType.getName == "double"}
@@ -65,14 +64,14 @@ abstract class PotBoard(
     def checkParameters(min:Double, max:Double, value:Double):(Boolean,String) = (min, max, value) match{
       case _ if value >= min && value <= max ⇒ (true,"")
       case _ ⇒ (false, s"(minimum($min) <= value($value) <= maximum($max)) is false")}}
-  private val arrayVarBoard = new VariableBoard[Array[Double]](thisPotBoard, defaultMin, defaultMax){
+  private val arrayVarBoard = new VariableBoard[Array[Double]](helper.thisTool, defaultMin, defaultMax){
     def createIdValue(id:Int):Array[Double] = Array[Double](id)
     def getId(value:Array[Double]):Int = value(0).toInt
     def checkField(f:Field):Boolean = {
       f.getType.getName match{
         case "[D" ⇒ Modifier.isFinal(f.getModifiers) match{
           case false ⇒ throw new SyntaxException(
-            s"Array definition should be 'val' in ${thisPotBoard.getClass.getCanonicalName}")
+            s"Array definition should be 'val' in ${helper.thisTool.getClass.getCanonicalName}")
           case _ ⇒ true}
         case _ ⇒ false}}
     def fillDefValue(min:Double, max:Double, size:Option[Int]):Array[Double] = {Array.fill(size.get)((max + max) / 2)}
@@ -85,14 +84,14 @@ abstract class PotBoard(
         case le ⇒ (false, "\n" + le.map{case (_,msg) ⇒ msg}.mkString("\n"))}}}
   //Check parameters
   if(defaultMin >= defaultMax ){throw new SyntaxException(s"""
-    |Incorrect parameters for PotBoard with name $potBoardName:
+    |Incorrect parameters for PotBoard with name ${helper.toolName}:
     | defaultMin($defaultMin) < defaultMax($defaultMax) is false
     |""".stripMargin)}
   //UI
-  private val frame = new GridFrame(environment, potBoardName){
+  private val frame = new GridFrame(environment, helper.toolName){
      def closing() = gear.endWork()}
   //Gear
-  private val gear:Gear = new Gear(environment.clockwork, environment.params.PotBoard.updatePriority){
+  private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     def start() = {
       //Get vars
       val doubleVars = doubleVarBoard.getVars
@@ -102,19 +101,21 @@ abstract class PotBoard(
         new Potentiometer(
             environment, variable.name, variable.min, variable.max, variable.value, environment.params.PotBoard){
           def potValueChanged(v:Double) = {
-            variable.field.setDouble(thisPotBoard,v)
-            changed()}
+            variable.field.setDouble(helper.thisTool,v)
+            gear.changed()
+            gear.needUpdate()}
           def getCurrentValue:Double = {
-            variable.field.getDouble(thisPotBoard)}}})
+            variable.field.getDouble(helper.thisTool)}}})
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
           new Potentiometer(
             environment, variable.name + s"_$index", variable.min, variable.max, value, environment.params.PotBoard){
             def potValueChanged(v:Double) = {
-              variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index) = v
-              changed()}
+              variable.field.get(helper.thisTool).asInstanceOf[Array[Double]](index) = v
+              gear.changed()
+              gear.needUpdate()}
             def getCurrentValue:Double = {
-              variable.field.get(thisPotBoard).asInstanceOf[Array[Double]](index)}}}}})
+              variable.field.get(helper.thisTool).asInstanceOf[Array[Double]](index)}}}}})
       //Add to frame
       frame.add(doublePots)
       frame.add(arrayPots)

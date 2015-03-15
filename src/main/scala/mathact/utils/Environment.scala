@@ -1,6 +1,6 @@
 package mathact.utils
 import mathact.utils.clockwork.Clockwork
-import mathact.utils.ui.{Parameters, Layout}
+import mathact.utils.ui.Layout
 
 
 /**

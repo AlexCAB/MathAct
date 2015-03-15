@@ -6,7 +6,9 @@ package mathact.utils.clockwork
  * Created by CAB on 08.03.2015.
  */
 
-abstract class Gear(clockwork:Clockwork, val updatePriority:Int) {  //updatePriority: 0-first, 1-second ...
+trait Gear{
+  //Fields
+  val clockwork:Clockwork
   //Variables
   private var work:Boolean = false //Set after adding to Clockwork and reset after deleting.
   private var isChanged:Boolean = false //Set when component call changed() and reset when Clockwork call doUpdate()
@@ -20,11 +22,13 @@ abstract class Gear(clockwork:Clockwork, val updatePriority:Int) {  //updatePrio
   def changed() = if(work){         //Called by component when it changed
     isChanged = true
     clockwork.gearChanged(this)}
+  def needUpdate()  = if(work){     //Called by component when it need update (without notification of another Gears)
+    clockwork.gearNeedUpdate(this)}
   def endWork() = if(work){         //Called by component when it end work
     stop()
     clockwork.gearStopped(this)
     work = false}
-  //Methods for Clockwork
+  //Methods for Clockworks
   def doStart() = if(! work){       //Called by Clockwork when component start
     work = true
     start()}
