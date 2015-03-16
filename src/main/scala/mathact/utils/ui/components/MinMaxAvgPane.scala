@@ -1,8 +1,7 @@
 package mathact.utils.ui.components
 import java.awt.Dimension
 import mathact.utils.ui.UIParams
-import scala.swing.Label
-import scala.swing.FlowPanel
+import scala.swing.{Swing, Label, FlowPanel}
 import scala.swing.FlowPanel.Alignment.Left
 import scala.swing.Alignment._
 
@@ -17,24 +16,15 @@ class MinMaxAvgPane(uiParams:UIParams.MinMaxAvgPane) extends FlowPanel(Left)() w
   hGap = 1
   vGap = 1
   //Constructions
-  val minName = new NameLabel(uiParams, "min")
-  val maxName = new NameLabel(uiParams, "max")
-  val avgName = new NameLabel(uiParams, "avg")
-  val minVal = new NumberLabel(uiParams)
-  val maxVal = new NumberLabel(uiParams)
-  val avgVal = new NumberLabel(uiParams)
-  val Seq(minSep, maxSep, avgSep) = (0 to 2).map(_ ⇒ new Label with UIComponent{
-    text = " = "
-    font = uiParams.separatorFont
-    preferredSize = new Dimension(
-      calcStringWidth(text, uiParams.separatorFont),
-      uiParams.separatorHeight)
-    font = uiParams.nameFont
-    horizontalAlignment = Center})
+  val Seq(minName, maxName, avgName) = Seq("min","max","avg").map(text ⇒ {
+    new NameLabel(uiParams, text, uiParams.textColor)})
+  val Seq(minVal, maxVal, avgVal) = (0 to 2).map(_ ⇒ new NumberLabel(uiParams, uiParams.textColor))
+  val Seq(minSep, maxSep, avgSep) = (0 to 2).map(_ ⇒ new SeparatorLabel(uiParams, " = ", uiParams.textColor))
   val components = List(minName,minSep,minVal,  maxName,maxSep,maxVal, avgName,avgSep,avgVal)
   preferredSize = new Dimension(
     components.map(_.preferredSize.getWidth.toInt).sum + vGap * 9,
     components.map(_.preferredSize.getHeight.toInt).max + hGap * 2)
+  border = Swing.LineBorder(uiParams.borderColor, uiParams.borderSize)
   contents ++= components
   //Methods
   def update(values:List[Double]):Unit = values match{

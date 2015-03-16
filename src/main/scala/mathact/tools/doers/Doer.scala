@@ -34,9 +34,7 @@ extends Tool{
     | and speedMax($speedMax) <= 1000 and speedMin($speedMin) > 0 is false
     |""".stripMargin)}
   //UI
-  private val slider = new HorizontalSlider(
-      speedMin, speedMax, speedInit,
-      environment.params.Doer.sliderWidth, environment.params.Doer.sliderHeight, 10){
+  private val slider = new HorizontalSlider(environment.params.Doer, speedMin, speedMax, speedInit){
     def valueChanged(v:Double) = {
       frame.setTitleAdd(s" - $v/second")
       timer.setDelay((1000 / v).toInt)
@@ -49,7 +47,8 @@ extends Tool{
     def step() = {
       procs.foreach(p ⇒ p())
       gear.changed()}}
-  private val frame:FlowFrame = new FlowFrame(environment, helper.toolName, List(slider, execBtn)){
+  private val frame:FlowFrame = new FlowFrame(
+      environment.layout, environment.params.Doer, helper.toolName, List(slider, execBtn)){
     def closing() = gear.endWork()}
   frame.setTitleAdd(s" - $speedInit/second")
   //Timer

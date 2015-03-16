@@ -1,5 +1,5 @@
 package mathact.utils.ui.components
-import java.awt.Dimension
+import java.awt.{Color, Dimension}
 import java.text.{NumberFormat, DecimalFormat}
 import java.util.Locale
 import mathact.utils.ui.UIParams
@@ -12,7 +12,7 @@ import scala.swing.Label
  * Created by CAB on 13.03.2015.
  */
 
-class NumberLabel (uiParams:UIParams.NumberLabel) extends Label with UIComponent{
+class NumberLabel (uiParams:UIParams.NumberLabel, textColor:Color = Color.black) extends Label with UIComponent{
   //Helpers
   private val decimal = NumberFormat.getNumberInstance(Locale.ENGLISH).asInstanceOf[DecimalFormat]
   decimal.applyPattern(uiParams.numberFormat)
@@ -21,6 +21,7 @@ class NumberLabel (uiParams:UIParams.NumberLabel) extends Label with UIComponent
     calcStringWidth(uiParams.numberFormat, uiParams.numberFont),
     uiParams.numberHeight)
   font = uiParams.numberFont
+  foreground = textColor
   horizontalAlignment = Left
   text = "---"
   //Methods

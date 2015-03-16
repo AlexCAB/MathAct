@@ -65,12 +65,14 @@ abstract class XYPlot(
     def randColor(line: ⇒(Array[Double],Array[Double])):Unit = {
       val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
       lines :+= (color,()⇒{line},Some(name))}}
+  def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "XYPlot")
   //UI
   private val plot = new XYsPlot(environment.params.XYPlot, screenW, screenH, drawPoints)
   private val minMaxAvg = new MinMaxAvgPane(environment.params.XYPlot)
-  private val frame = new BorderFrame(environment, helper.toolName, south = Some(minMaxAvg), center = Some(plot)){
+  private val frame = new BorderFrame(
+      environment.layout, environment.params.XYPlot, helper.toolName, south = Some(minMaxAvg), center = Some(plot)){
     def closing() = {gear.endWork()}}
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
@@ -85,6 +87,7 @@ abstract class XYPlot(
     def update() = {
       val xys = lines.map{case ((_,line,_)) ⇒ {val (xs,ys) = line(); (xs.toList,ys.toList)}}
       plot.update(xys)
-      minMaxAvg.update(xys.map(_._2).flatMap(e ⇒ e))}
+      minMaxAvg.update(xys.map(_._2).flatMap(e ⇒ e))
+      updated()}
     def stop() = {
       frame.hide()}}}

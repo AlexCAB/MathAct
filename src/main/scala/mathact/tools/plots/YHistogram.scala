@@ -1,7 +1,7 @@
 package mathact.tools.plots
 import java.awt.Color
 import mathact.utils.clockwork.VisualisationGear
-import mathact.utils.ui.components.{BorderFrame, MinMaxAvgPane, YHistogram}
+import mathact.utils.ui.components.{HistPlot, BorderFrame, MinMaxAvgPane}
 import mathact.utils.{ToolHelper, Tool, Environment}
 import scala.math.random
 
@@ -12,11 +12,13 @@ import scala.math.random
  */
 
 
-abstract class Histogram(
+abstract class YHistogram(
   name:String = "",
   minRange:Double = -1,
   maxRange:Double = 1,
   autoRange:Boolean = false,
+  targetLower:Double = 0,
+  targetUpper:Double = 0,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
   screenW:Int = 600,
@@ -64,26 +66,25 @@ extends Tool{
   def randColor(line: ⇒Double):Unit = {
     val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
     datas :+= (color,()⇒{Array(line)})}
+  def updated() = {}
   //Helpers
-  private val helper = new ToolHelper(this, name, "Histogram")
+  private val helper = new ToolHelper(this, name, "YHistogram")
   //UI
-  private val histogram = new YHistogram(environment.params.Histogram, screenW, screenH)
-  private val minMaxAvg = new MinMaxAvgPane(environment.params.Histogram)
-  private val frame = new BorderFrame(environment, helper.toolName, south = Some(minMaxAvg), center = Some(histogram)){
+  private val histogram = new HistPlot(
+    environment.params.YHistogram, screenW, screenH, minRange, maxRange, autoRange, targetLower, targetUpper)
+  private val minMaxAvg = new MinMaxAvgPane(environment.params.YHistogram)
+  private val frame = new BorderFrame(
+      environment.layout, environment.params.YHistogram,
+      helper.toolName, south = Some(minMaxAvg), center = Some(histogram)){
     def closing() = {gear.endWork()}}
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     def start() = {
-      //Prepare plot
-      val bars = datas.flatMap{case ((c,d)) ⇒ d().map(_ ⇒ c)}
-
-      histogram.setBars(bars, minRange, maxRange, autoRange)
-      //Show
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = {
-//      val xys = lines.map{case ((_,line,_)) ⇒ {val (xs,ys) = line(); (xs.toList,ys.toList)}}
-//      plot.update(xys)
-//      minMaxAvg.update(xys.map(_._2).flatMap(e ⇒ e))
-    }
+      val bars = datas.flatMap{case ((c, d)) ⇒ d().map(v ⇒ (c, v))}
+      histogram.updateY(bars)
+      minMaxAvg.update(bars.map(_._2))
+      updated()}
     def stop() = {
       frame.hide()}}}

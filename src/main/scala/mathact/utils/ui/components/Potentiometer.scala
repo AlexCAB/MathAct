@@ -10,19 +10,18 @@ import mathact.utils.ui.UIParams
  */
 
 abstract class Potentiometer(
-  environment:Environment,
+  uiParams:UIParams.Potentiometer,
   varName:String,
   min:Double,
   max:Double,
-  value:Double,
-  uiParams:UIParams.Potentiometer)
+  value:Double)
 extends GridComponent {
   //Variables
   private var vlaue = 0.0
   //Components
   val nameView = new NameLabel(uiParams, varName)
   val diapasonView = new DiapasonLabel(uiParams, min, max)
-  val sliderBar:HorizontalSlider = new HorizontalSlider(min, max, value, uiParams.sliderWidth, uiParams.sliderHeight){
+  val sliderBar:HorizontalSlider = new HorizontalSlider(uiParams, min, max, value){
     def valueChanged(v:Double) = {
       vlaue = v
       editBar.setCurrentValue(v)

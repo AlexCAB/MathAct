@@ -1,5 +1,5 @@
 package mathact.utils.ui.components
-import mathact.utils.Environment
+import mathact.utils.ui.{UIParams, Layout}
 import scala.swing._
 
 
@@ -8,12 +8,17 @@ import scala.swing._
  * Created by CAB on 09.03.2015.
  */
 
-abstract class GridFrame(environment:Environment, windowTitle:String) extends Frame {
+abstract class GridFrame(
+  layout:Layout,
+  uiParams:UIParams.GridFrame,
+  windowTitle:String)
+extends Frame {
   //Variables
   var componentsList = List[GridComponent]()
   //Construction
   title = windowTitle
   private val panel = new GridPanel(0,1)
+  panel.background = uiParams.backgroundColor
   contents = panel
   peer.setDefaultCloseOperation(0)
   override def closeOperation() {closing()}
@@ -38,7 +43,10 @@ abstract class GridFrame(environment:Environment, windowTitle:String) extends Fr
             component}}
           new BorderPanel{
             import BorderPanel.Position._
-            layout(new FlowPanel{contents ++= components.init}) = West
+            background = uiParams.backgroundColor
+            layout(new FlowPanel{
+              background = uiParams.backgroundColor
+              contents ++= components.init}) = West
             layout(components.last) = Center}}}}
       case _ ⇒ {
         preferredSize = new Dimension(300, 50)}}
@@ -46,6 +54,6 @@ abstract class GridFrame(environment:Environment, windowTitle:String) extends Fr
     pack()
     visible = true
     //Locate
-    location = environment.layout.occupyLocation(size, defX, defY)}
+    location = layout.occupyLocation(size, defX, defY)}
   def hide() = {
     visible = false}}

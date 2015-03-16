@@ -1,5 +1,6 @@
 package mathact.utils.ui.components
 import mathact.utils.Environment
+import mathact.utils.ui.{UIParams, Layout}
 import scala.swing._
 
 
@@ -9,7 +10,8 @@ import scala.swing._
  */
 
 abstract class BorderFrame (
-  environment:Environment,
+  layout:Layout,
+  uiParams:UIParams.BorderFrame,
   windowTitle:String,
   north:Option[Component with UIComponent] = None,
   south:Option[Component with UIComponent] = None,
@@ -20,6 +22,7 @@ extends Frame {
   //Construction
   title = windowTitle
   private val panel = new BorderPanel
+  panel.background = uiParams.backgroundColor
   contents = panel
   peer.setDefaultCloseOperation(0)
   override def closeOperation() {closing()}
@@ -45,6 +48,8 @@ extends Frame {
     pack()
     visible = true
     //Locate
-    location = environment.layout.occupyLocation(size, defX, defY)}
+    location = layout.occupyLocation(size, defX, defY)}
   def hide() = {
-    visible = false}}
+    visible = false}
+  def setTitleAdd(add:String) = {
+    title = windowTitle + add}}

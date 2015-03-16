@@ -52,6 +52,7 @@ extends Tool{
       arrayVarBoard.addNextVarParameter(Some(min), None, None, None, arrayVarBoard.Minimum)
     def maximum(max: ⇒Double):Array[Double] =
       arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, arrayVarBoard.Maximum)}
+  def updated():Boolean = {false}
   //Variables
   private var pots:List[Potentiometer] = List()
   //Helpers
@@ -88,7 +89,7 @@ extends Tool{
     | defaultMin($defaultMin) < defaultMax($defaultMax) is false
     |""".stripMargin)}
   //UI
-  private val frame = new GridFrame(environment, helper.toolName){
+  private val frame = new GridFrame(environment.layout, environment.params.PotBoard, helper.toolName){
      def closing() = gear.endWork()}
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
@@ -99,17 +100,18 @@ extends Tool{
       //Construct UI
       val doublePots = doubleVars.map(variable ⇒ {
         new Potentiometer(
-            environment, variable.name, variable.min, variable.max, variable.value, environment.params.PotBoard){
+          environment.params.PotBoard, variable.name, variable.min, variable.max, variable.value){
           def potValueChanged(v:Double) = {
             variable.field.setDouble(helper.thisTool,v)
             gear.changed()
-            gear.needUpdate()}
+            gear.needUpdate()
+            if(updated()){pots.foreach(_.update())}}
           def getCurrentValue:Double = {
             variable.field.getDouble(helper.thisTool)}}})
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
           new Potentiometer(
-            environment, variable.name + s"_$index", variable.min, variable.max, value, environment.params.PotBoard){
+            environment.params.PotBoard, variable.name + s"_$index", variable.min, variable.max, value){
             def potValueChanged(v:Double) = {
               variable.field.get(helper.thisTool).asInstanceOf[Array[Double]](index) = v
               gear.changed()
@@ -123,5 +125,6 @@ extends Tool{
       //Show
       frame.show(screenX, screenY)}
     def update() = {
-      pots.foreach(_.update())}
+      pots.foreach(_.update())
+      if(updated()){pots.foreach(_.update())}}
     def stop() = {frame.hide()}}}

@@ -24,6 +24,8 @@ extends BorderPanel with UIComponent{
   val model = new SpinnerNumberModel(init, min, max, step)
   spinner.setModel(model)
   spinner.setFont(uiParams.valueFont)
+  spinner.setBackground(uiParams.backgroundColor)
+  spinner.setOpaque(true)
   layout(Component.wrap(spinner)) = BorderPanel.Position.Center
   //Listeners
   model.addChangeListener(new ChangeListener{def stateChanged(e:ChangeEvent) = {

@@ -1,9 +1,10 @@
 package examples
 import mathact.tools.ActBox
-import mathact.tools.doers.{Calc, Doer}
+import mathact.tools.doers.{CalcWithManual, Calc, Doer}
 import mathact.tools.loggers.Logger
-import mathact.tools.plots.{Histogram, XYPlot, XTracer}
+import mathact.tools.plots._
 import mathact.tools.pots.PotBoard
+import mathact.tools.values.ValuesBoard
 
 
 /**
@@ -17,6 +18,11 @@ object PotBoardExample extends ActBox{
 
   object MyPotBoard extends PotBoard {
 
+
+    override def updated() = {
+      a = b
+      true
+    }
 
     var a = init(.1)
     var aaaaaaaaaaaa = init(.11111111111111111111111111111111111111111111111)
@@ -67,19 +73,60 @@ object PotBoardExample extends ActBox{
   }
 
 
-  new Histogram("my histogram"){
-    black(MyPotBoard.a)
-    red(MyPotBoard.b)
-    greenArray(MyPotBoard.v1)
-    blueArray(MyPotBoard.v2)
+
+//  new ValuesBoard{
+//    red{MyPotBoard.f}
+//    green{MyPotBoard.e}
+//    "test" black{MyPotBoard.e}
+//
+//  }
 
 
+//  new YChartRecorder(autoUpdate = true){
+//    black(MyPotBoard.a)
+//    "test" red{ MyPotBoard.b }
+//
+//
+//  }
 
 
+//  new CalcWithManual("rrr"){
+//
+//    auth{x ⇒
+//
+//      println("a",x)
+//
+//
+//
+//    }
+//    manual{x ⇒
+//
+//      println("m",x)
+//
+//
+//
+//    }
+//
+//
+//
+//
+//  }
 
-
-
-  }
+//  new YHistogram("my histogram"){
+//    black(MyPotBoard.a)
+//    red(MyPotBoard.b)
+//    greenArray(MyPotBoard.v1)
+//    blueArray(MyPotBoard.v2)
+//
+//  }
+//
+//  new XYHistogram{
+//
+//    black{((0 to MyPotBoard.v1.size).map(_.toDouble).toArray, MyPotBoard.v1)}
+//
+//
+//
+//  }
 
 //  new Calc{
 //

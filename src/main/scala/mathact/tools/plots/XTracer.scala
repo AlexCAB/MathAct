@@ -70,12 +70,14 @@ extends Tool{
       val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
       procs :+= (color,proc,Some(name))
       proc}}
+  def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "XTracer")
   //UI
   private val plot = new XYsPlot(environment.params.XTracer, screenW, screenH, drawPoints)
   private val minMaxAvg = new MinMaxAvgPane(environment.params.XTracer)
-  private val frame = new BorderFrame(environment, helper.toolName, south = Some(minMaxAvg), center = Some(plot)){
+  private val frame = new BorderFrame(
+    environment.layout, environment.params.XTracer, helper.toolName, south = Some(minMaxAvg), center = Some(plot)){
     def closing() = {gear.endWork()}}
   //Functions
   private def trace() = {
@@ -94,7 +96,8 @@ extends Tool{
       //Show
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = {
-      trace()}
+      trace()
+      updated()}
     def stop() = {
       frame.hide()}}}
 
