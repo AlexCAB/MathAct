@@ -12,4 +12,5 @@ case class Variable[T](
   field:Field,
   min:Double,
   max:Double,
-  value:T)
+  value:T,
+  changedFun:Option[T⇒Boolean])

@@ -46,7 +46,6 @@ extends BorderPanel with UIComponent{
   //Renderer
   private val renderer = new ClusteredXYBarRenderer{
     override def getItemPaint(row:Int, column:Int):Paint = {
-      println(colors.size, column)
       colors.size match {
         case s if s > column ⇒ colors(column)
         case _ ⇒ Color.GRAY}}}

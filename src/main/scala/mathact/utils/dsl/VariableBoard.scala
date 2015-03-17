@@ -14,6 +14,7 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
   case object Minimum extends Operator
   case object Maximum extends Operator
   case object MinMax extends Operator
+  case object Changed extends Operator
   //Classes
   case class VarParam(
     id:Int,
@@ -21,6 +22,7 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
     max:Option[Double],
     value:Option[T],
     size:Option[Int],
+    changedFun:Option[T⇒Boolean],
     isFirst:Boolean, //Or next
     operator:Operator)
   //Variables
@@ -41,18 +43,26 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
   def addVarParameter(min:Option[Double], max:Option[Double], value:Option[T], size:Option[Int], operator:Operator)
   :T = {
     idCounter += 1
-    varsParams :+= VarParam(idCounter, min, max, value, size, isFirst = true, operator)
+    varsParams :+= VarParam(idCounter, min, max, value, size, None, isFirst = true, operator)
     createIdValue(idCounter)}
-  def addNextVarParameter(min:Option[Double], max:Option[Double], value:Option[T], size:Option[Int], operator:Operator)
+  def addNextVarParameter(
+    min:Option[Double],
+    max:Option[Double],
+    value:Option[T],
+    size:Option[Int],
+    changedFun:Option[T⇒Boolean],
+    operator:Operator)
   :T = {
     varsParams match{
       case l if l.nonEmpty ⇒ {
-        val VarParam(pId, pMin, pMax, pValue, pSize, pIsFirst, pOperator) = l.last
+        val VarParam(pId, pMin, pMax, pValue, pSize, pChanged, pIsFirst, pOperator) = l.last
         //Check operators sequence
         val isCorrect = (pIsFirst, pOperator, operator) match{
           case (true, Value, Minimum)|(true, Value, Maximum)|(true, Value, MinMax) ⇒ true
           case (true, Minimum, Maximum)|(true, Maximum, Minimum) ⇒ true
+          case (true, Value, Changed) ⇒ true
           case (false, Minimum, Maximum)|(false, Maximum, Minimum) ⇒ true
+          case (false, MinMax, Changed)|(false, Minimum, Changed)|(false, Minimum, Changed) ⇒ true
           case _ ⇒ false}
         if(! isCorrect){throw new SyntaxException(s"""
           |Incorrect operator sequence: $pOperator($pMin,$pMax,$pValue), $operator($min,$max,$value)
@@ -60,6 +70,7 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
           |Use: Value, Minimum | Value, Maximum | Value, MinMax |
           |     Minimum, Maximum | Maximum, Minimum |
           |     Value, Minimum, Maximum | Value, Maximum, Minimum.
+          |     Value, Changed | Value, MinMax, Changed | Value, Minimum, Changed | Value, Minimum, Changed
           |""".stripMargin)}
         //Replacing var param
         varsParams = varsParams.dropRight(1)
@@ -69,6 +80,7 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
           newerValue(pMax,max),
           newerValue(pValue,value),
           newerValue(pSize,size),
+          newerValue(pChanged,changedFun),
           isFirst = false,
           operator)
         createIdValue(pId)}
@@ -111,4 +123,4 @@ abstract class VariableBoard[T](component:AnyRef, defMin:Double, defMax:Double){
       //Set field value
       field.set(component, value)
       //Construct Variable
-      Variable(field.getName, field, min, max, value)})}}
+      Variable(field.getName, field, min, max, value, params.changedFun)})}}

@@ -19,7 +19,7 @@ extends BorderPanel with UIComponent{
   val spinner = new JSpinner
   preferredSize = new Dimension({
       val w = calcDoubleWidth(init, uiParams.valueFont)
-      if(w < 30) 30 else w},
+      if(w < 100) 100 else w},
     uiParams.valueHeight)
   val model = new SpinnerNumberModel(init, min, max, step)
   spinner.setModel(model)

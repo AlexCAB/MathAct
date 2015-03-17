@@ -55,12 +55,15 @@ class Clockwork{
     stopAllGears()
     System.exit(code)}
   //Gear methods
-  def gearCreated(gear:Gear):Unit = {unInitGears +:= gear}
+  def gearCreated(gear:Gear):Unit = {
+    unInitGears :+= gear}
   def gearNeedUpdate(gear:Gear):Unit = {
     try{
       gear.doUpdate()}
     catch{case e:Throwable ⇒ {
       e.printStackTrace()
       System.exit(-1)}}}
-  def gearChanged(gear:Gear):Unit = {updateAllGears()}
-  def gearStopped(gear:Gear):Unit = {stop(0)}}
+  def gearChanged(gear:Gear):Unit = {
+    updateAllGears()}
+  def gearStopped(gear:Gear):Unit = {
+    stop(0)}}

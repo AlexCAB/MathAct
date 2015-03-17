@@ -22,7 +22,7 @@ class Logger(
 extends Tool{
   //Functions
   private def add(msg:String, color:Color) = {
-    textPane.addLine(msg, environment.params.Logger.defaultColor)
+    textPane.addLine(msg, color)
     updated()}
   //DSL Methods
   def log(msg:String):Unit = {add(msg, environment.params.Logger.defaultColor)}

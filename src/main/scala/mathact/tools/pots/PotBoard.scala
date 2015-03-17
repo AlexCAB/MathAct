@@ -33,26 +33,35 @@ extends Tool{
     doubleVarBoard.addVarParameter(None, Some(max), None, None, doubleVarBoard.Maximum)
   def array(first:Double, next:Double*):Array[Double] =
     arrayVarBoard.addVarParameter(None, None, Some(Array(first) ++ next), None, arrayVarBoard.Value)
-  def array:ArrayMethods = new ArrayMethods(0.0)
+  def array:ArrayMethods = new ArrayMethods(()⇒0.0)
   implicit class DoubleEx(v:Double){
     def in(min: ⇒Double, max: ⇒Double):Double =
-      doubleVarBoard.addNextVarParameter(Some(min), Some(max), None, None, doubleVarBoard.MinMax)
+      doubleVarBoard.addNextVarParameter(Some(min), Some(max), None, None, None, doubleVarBoard.MinMax)
     def minimum(min: ⇒Double):Double =
-      doubleVarBoard.addNextVarParameter(Some(min), None, None, None, doubleVarBoard.Minimum)
+      doubleVarBoard.addNextVarParameter(Some(min), None, None, None, None, doubleVarBoard.Minimum)
     def maximum(max: ⇒Double):Double =
-      doubleVarBoard.addNextVarParameter(None, Some(max), None, None, doubleVarBoard.Maximum)}
-  class ArrayMethods(defValue:Double){
-    def len(n: ⇒Int):Array[Double] =
-      arrayVarBoard.addVarParameter(None, None, None, Some(n), arrayVarBoard.Value)
-    def of(v: ⇒Double):ArrayMethods = new ArrayMethods(v)}
+      doubleVarBoard.addNextVarParameter(None, Some(max), None, None, None, doubleVarBoard.Maximum)
+    def changed(cgd:Double⇒Unit):Double =
+      doubleVarBoard.addNextVarParameter(None, None, None, None, Some((v)⇒{cgd(v); false}), doubleVarBoard.Changed)
+    def changedWithUpdate(cgd:Double⇒Unit):Double =
+      doubleVarBoard.addNextVarParameter(None, None, None, None, Some((v)⇒{cgd(v); true}), doubleVarBoard.Changed)}
+  class ArrayMethods(defValue:()⇒Double){
+    def len(n: ⇒Int):Array[Double] = {
+      val value = (0 until n).map(_ ⇒ defValue()).toArray
+      arrayVarBoard.addVarParameter(None, None, Some(value), Some(n), arrayVarBoard.Value)}
+    def of(v: ⇒Double):ArrayMethods = new ArrayMethods(()⇒{v})}
   implicit class ArrayDoubleEx(vd:Array[Double]){
     def in(min: ⇒Double, max: ⇒Double):Array[Double] =
-      arrayVarBoard.addNextVarParameter(Some(min), Some(max), None, None, arrayVarBoard.MinMax)
+      arrayVarBoard.addNextVarParameter(Some(min), Some(max), None, None, None, arrayVarBoard.MinMax)
     def minimum(min: ⇒Double):Array[Double] =
-      arrayVarBoard.addNextVarParameter(Some(min), None, None, None, arrayVarBoard.Minimum)
+      arrayVarBoard.addNextVarParameter(Some(min), None, None, None, None, arrayVarBoard.Minimum)
     def maximum(max: ⇒Double):Array[Double] =
-      arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, arrayVarBoard.Maximum)}
-  def updated():Boolean = {false}
+      arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, None, arrayVarBoard.Maximum)
+    def changed(cgd:Array[Double]⇒Unit):Array[Double] =
+      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); false}), arrayVarBoard.Maximum)
+    def changedWithUpdate(cgd:Array[Double]⇒Unit):Array[Double] =
+      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); true}), arrayVarBoard.Maximum)}
+  def updated() = {}
   //Variables
   private var pots:List[Potentiometer] = List()
   //Helpers
@@ -61,7 +70,7 @@ extends Tool{
     def createIdValue(id:Int):Double = id.toDouble
     def getId(value:Double):Int = value.toInt
     def checkField(f:Field):Boolean = {f.getType.getName == "double"}
-    def fillDefValue(min:Double, max:Double, size:Option[Int]):Double = {(max + max) / 2}
+    def fillDefValue(min:Double, max:Double, size:Option[Int]):Double = {(min + max) / 2}
     def checkParameters(min:Double, max:Double, value:Double):(Boolean,String) = (min, max, value) match{
       case _ if value >= min && value <= max ⇒ (true,"")
       case _ ⇒ (false, s"(minimum($min) <= value($value) <= maximum($max)) is false")}}
@@ -75,7 +84,8 @@ extends Tool{
             s"Array definition should be 'val' in ${helper.thisTool.getClass.getCanonicalName}")
           case _ ⇒ true}
         case _ ⇒ false}}
-    def fillDefValue(min:Double, max:Double, size:Option[Int]):Array[Double] = {Array.fill(size.get)((max + max) / 2)}
+    def fillDefValue(min:Double, max:Double, size:Option[Int]):Array[Double] = {
+      Array.fill(size.get)((min + max) / 2)}
     def checkParameters(min:Double, max:Double, value:Array[Double]):(Boolean,String) = {
       value.toList.zipWithIndex.map{
         case (v,_) if v >= min && v <= max ⇒ (true,"")
@@ -102,20 +112,28 @@ extends Tool{
         new Potentiometer(
           environment.params.PotBoard, variable.name, variable.min, variable.max, variable.value){
           def potValueChanged(v:Double) = {
+            if(variable.changedFun.map(f ⇒ f(v)).getOrElse(false)){
+              gear.needUpdate()}
             variable.field.setDouble(helper.thisTool,v)
             gear.changed()
-            gear.needUpdate()
-            if(updated()){pots.foreach(_.update())}}
+            updated()}
           def getCurrentValue:Double = {
             variable.field.getDouble(helper.thisTool)}}})
       val arrayPots = arrayVars.flatMap(variable ⇒ {
         variable.value.zipWithIndex.map{case (value,index) ⇒ {
           new Potentiometer(
-            environment.params.PotBoard, variable.name + s"_$index", variable.min, variable.max, value){
+              environment.params.PotBoard, variable.name + s"_$index", variable.min, variable.max, value){
+            val arr = variable.field.get(helper.thisTool).asInstanceOf[Array[Double]]
             def potValueChanged(v:Double) = {
-              variable.field.get(helper.thisTool).asInstanceOf[Array[Double]](index) = v
+              val makeUpdate = variable.changedFun.map(f ⇒ {
+                val ca = arr.clone()
+                ca(index) = v
+                f(ca)})
+              if(makeUpdate.getOrElse(false)){
+                gear.needUpdate()}
+              arr(index) = v
               gear.changed()
-              gear.needUpdate()}
+              updated()}
             def getCurrentValue:Double = {
               variable.field.get(helper.thisTool).asInstanceOf[Array[Double]](index)}}}}})
       //Add to frame
@@ -126,5 +144,5 @@ extends Tool{
       frame.show(screenX, screenY)}
     def update() = {
       pots.foreach(_.update())
-      if(updated()){pots.foreach(_.update())}}
+      updated()}
     def stop() = {frame.hide()}}}

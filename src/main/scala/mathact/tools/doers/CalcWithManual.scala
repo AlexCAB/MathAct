@@ -30,7 +30,7 @@ extends Tool{
   //Helpers
   private val helper = new ToolHelper(this, name, "CalcWithManual")
   //DSL Methods
-  def auth(proc:Double⇒Unit) = {authProcs +:= proc}
+  def auto(proc:Double⇒Unit) = {authProcs +:= proc}
   def manual(proc:Double⇒Unit) = {manProcs +:= proc}
   //UI
   private val slider = new HorizontalSlider(environment.params.AuthManPot, min, max, value){
@@ -55,7 +55,7 @@ extends Tool{
     def start() = {
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = currentIsAuth match{
-      case true ⇒ authProcs.foreach(p ⇒ p(currentValue))
+      case true ⇒ {authProcs.foreach(p ⇒ p(currentValue))}
       case false ⇒ manProcs.foreach(p ⇒ p(currentValue))}
     def stop() = {
       frame.hide()}}}

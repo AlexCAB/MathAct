@@ -12,12 +12,12 @@ import mathact.utils.ui.UIParams._
 class Parameters {
   //PotBoard
   object PotBoard extends GridFrame with Potentiometer{
-    val sliderHeight = 16
+    val sliderHeight = 18
     val sliderWidth = 150
-    val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
-    val nameHeight = 16
-    val valueFont = new Font(Font.SERIF, Font.BOLD, 14)
-    val valueHeight = 16
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
+    val nameHeight = 18
+    val valueFont = new Font(Font.SERIF, 0, 14)
+    val valueHeight = 18
     val backgroundColor:Color = Color.WHITE
     val sliderScale = 1000}
   //Doer
@@ -53,7 +53,7 @@ class Parameters {
   object Logger extends BorderFrame with TextLinePane{
     val textBackgroundColor = Color.BLACK
     val defaultColor = Color.GREEN
-    val textFont:Font = new Font(Font.SERIF, Font.BOLD, 14)
+    val textFont:Font = new Font(Font.MONOSPACED, 0, 12)
     val backgroundColor = Color.WHITE}
   //XYPlot
   object XYPlot extends BorderFrame with MinMaxAvgPane with XYsPlot {
@@ -116,7 +116,7 @@ class Parameters {
     val numberHeight = 16
     val separatorFont = new Font(Font.SERIF, Font.BOLD, 14)
     val separatorHeight = 16
-    val gridColor = Color.GRAY
+    val gridColor = new Color(200,200,200)
     val backgroundColor = Color.WHITE
     val borderColor = Color.LIGHT_GRAY
     val borderSize = 1
@@ -135,11 +135,11 @@ class Parameters {
     val valueHeight = 16
     val backgroundColor = Color.WHITE}
   object ValuesBoard extends GridFrame with Measurer{
-    val nameFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
     val nameHeight = 16
     val numberFormat = "#0.000000000000000000"
-    val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val numberFont = new Font(Font.SERIF, 0, 14)
     val numberHeight = 16
-    val separatorFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val separatorFont = new Font(Font.SERIF, 0, 14)
     val separatorHeight = 16
     val backgroundColor = Color.WHITE}}

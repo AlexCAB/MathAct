@@ -1,7 +1,6 @@
 package mathact.utils.ui.components
 import java.awt.{Dimension, Color}
 import mathact.utils.ui.UIParams
-import scala.swing.Alignment.Center
 import scala.swing.FlowPanel.Alignment.Left
 import scala.swing.{Swing, Label, FlowPanel}
 
@@ -31,7 +30,7 @@ class VariablesBar(uiParams:UIParams.VariablesBar) extends FlowPanel(Left)() wit
     val width = labels.flatMap{case (n,s,v) ⇒ List(
       n.preferredSize.getWidth.toInt + vGap,
       s.preferredSize.getWidth.toInt + vGap,
-      v.preferredSize.getWidth.toInt + vGap)}.sum
+      v.preferredSize.getWidth.toInt + vGap)}.sum + vGap * 2
     val height = labels.flatMap{case (n,s,v) ⇒ List(
       n.preferredSize.getHeight.toInt,
       s.preferredSize.getHeight.toInt,
@@ -42,19 +41,3 @@ class VariablesBar(uiParams:UIParams.VariablesBar) extends FlowPanel(Left)() wit
     contents ++= labels.flatMap{case (n,s,v) ⇒ List(n,s,v)}}
   def update(values:List[Double]):Unit = {
     values.zip(valueLabels).foreach{case(v,l) ⇒ l.setNumber(v)}}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
