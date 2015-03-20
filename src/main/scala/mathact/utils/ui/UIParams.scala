@@ -75,7 +75,7 @@ object UIParams {
     val borderColor:Color
     val borderSize:Int
     val backgroundColor:Color}
-  trait AuthManButtons{
+  trait AutoManButtons{
     val authEnabledIcon:ImageIcon
     val manEnabledIcon:ImageIcon
     val authDisableIcon:ImageIcon

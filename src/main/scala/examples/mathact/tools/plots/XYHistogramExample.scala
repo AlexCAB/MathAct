@@ -1,5 +1,6 @@
-package mathact.tools.plots
+package examples.mathact.tools.plots
 import mathact.tools.Workbench
+import mathact.tools.plots.XYHistogram
 import mathact.tools.pots.PotBoard
 
 
@@ -11,13 +12,16 @@ import mathact.tools.pots.PotBoard
 object XYHistogramExample extends Workbench{
   //Creating PotBoard with arrays xs and ys
   val variables = new PotBoard{
+    val x = init(-.5)
+    val y = init(-.2)
     val xs = array(-1,.0,.5,1)
     val ys = array(.8,.6,.4,.2)
   }
   //Creating  XYHistogram
   new XYHistogram{
     import variables._
-    red{(xs.take(2), ys.take(2))}
-    green{(xs.drop(2), ys.drop(2))}
+    red{(x, y)}
+    redArray{(xs.take(2), ys.take(2))}
+    greenArray{(xs.drop(2), ys.drop(2))}
   }
 }

@@ -16,6 +16,6 @@ abstract class Workbench(
     height:Int = Int.MaxValue,
     parameters:Parameters = new Parameters){
   //Fields
-  implicit val environment = Environment(new Clockwork,new Layout(x, y, width, height), new Parameters)
+  implicit val environment = Environment(new Clockwork, new Layout(x, y, width, height), parameters)
   //Methods
   def main(arg:Array[String]):Unit = environment.clockwork.start()}

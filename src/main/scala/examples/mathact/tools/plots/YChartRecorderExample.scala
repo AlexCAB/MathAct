@@ -1,6 +1,7 @@
-package mathact.tools.plots
+package examples.mathact.tools.plots
 import mathact.tools.Workbench
 import mathact.tools.doers.Doer
+import mathact.tools.plots.YChartRecorder
 import mathact.tools.pots.PotBoard
 
 

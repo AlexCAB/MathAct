@@ -1,7 +1,7 @@
-package mathact.tools.pots
+package examples.mathact.tools.pots
 import mathact.tools.Workbench
-import mathact.tools.doers.Doer
 import mathact.tools.plots.YChartRecorder
+import mathact.tools.pots.PotBoard
 
 
 /**

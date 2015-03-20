@@ -10,13 +10,13 @@ import scala.swing.{Button, GridPanel}
  * Created by CAB on 16.03.2015.
  */
 
-abstract class AuthManButton(uiParams:UIParams.AuthManButtons, initIsAuth:Boolean)
+abstract class AutoManButton(uiParams:UIParams.AutoManButtons, initIsAuto:Boolean)
 extends GridPanel(1,2) with UIComponent{
   //Construction
   val authBtn:Button = new Button{
     icon = uiParams.authEnabledIcon
     disabledIcon = uiParams.authDisableIcon
-    enabled = ! initIsAuth
+    enabled = ! initIsAuto
     reactions += {case ButtonClicked(_) ⇒{
       enabled = false
       manBtn.enabled = true
@@ -24,7 +24,7 @@ extends GridPanel(1,2) with UIComponent{
   val manBtn:Button = new Button{
     icon = uiParams.manEnabledIcon
     disabledIcon = uiParams.manDisableIcon
-    enabled = initIsAuth
+    enabled = initIsAuto
     reactions += {case ButtonClicked(_) ⇒{
       enabled = false
       authBtn.enabled = true

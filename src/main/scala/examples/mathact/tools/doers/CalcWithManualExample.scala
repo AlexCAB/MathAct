@@ -1,5 +1,6 @@
-package mathact.tools.doers
+package examples.mathact.tools.doers
 import mathact.tools.Workbench
+import mathact.tools.doers.{Doer, CalcWithManual}
 import mathact.tools.plots.YChartRecorder
 import math._
 

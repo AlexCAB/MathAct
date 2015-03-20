@@ -1,6 +1,7 @@
-package mathact.tools.values
+package examples.mathact.tools.values
 import mathact.tools.Workbench
 import mathact.tools.pots.PotBoard
+import mathact.tools.values.ValuesBoard
 
 
 /**

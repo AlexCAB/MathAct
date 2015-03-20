@@ -122,7 +122,7 @@ class Parameters {
     val borderSize = 1
     val chartBackgroundColor = Color.WHITE}
   //CalcWithManual
-  object AuthManPot extends BorderFrame with HorizontalSlider with NumberSpinner with AuthManButtons{
+  object AuthManPot extends BorderFrame with HorizontalSlider with NumberSpinner with AutoManButtons{
     val authEnabledIcon = new ImageIcon(getClass.getResource("/auth_e.png"))
     val authDisableIcon = new ImageIcon(getClass.getResource("/auth_d.png"))
     val manEnabledIcon = new ImageIcon(getClass.getResource("/man_e.png"))

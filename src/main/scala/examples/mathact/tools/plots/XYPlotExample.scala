@@ -1,7 +1,9 @@
-package mathact.tools.plots
+package examples.mathact.tools.plots
 import mathact.tools.Workbench
+import mathact.tools.plots.XYPlot
 import mathact.tools.pots.PotBoard
 import math._
+
 
 /**
  * Example of using XYPlot tool.

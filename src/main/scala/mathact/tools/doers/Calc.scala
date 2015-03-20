@@ -8,7 +8,7 @@ import mathact.utils.{Tool, Environment}
  * Created by CAB on 15.03.2015.
  */
 
-abstract class Calc(implicit environment:Environment)extends Tool{
+abstract class Calc(implicit environment:Environment) extends Tool{
   //Variables
   private var procs:List[()⇒Unit] = List[()⇒Unit]()
   //DSL Methods

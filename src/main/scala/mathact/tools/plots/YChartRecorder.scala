@@ -30,45 +30,45 @@ extends Tool{
   private var datas = List[(Color, ()⇒Double, Option[String])]()
   private var xCounter = .0
   //DSL Methods
-  def black(line: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{line},None)}
-  def white(line: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{line},None)}
-  def red(line: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{line},None)}
-  def lime(line: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{line},None)}
-  def blue(line: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{line},None)}
-  def yellow(line: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{line},None)}
-  def cyan(line: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{line},None)}
-  def magenta(line: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{line},None)}
-  def silver(line: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{line},None)}
-  def gray(line: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{line},None)}
-  def maroon(line: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{line},None)}
-  def olive(line: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{line},None)}
-  def green(line: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{line},None)}
-  def purple(line: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{line},None)}
-  def teal(line: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{line},None)}
-  def navy(line: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{line},None)}
-  def randColor(line: ⇒Double):Unit = {
+  def black(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{trace},None)}
+  def white(trace: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{trace},None)}
+  def red(trace: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{trace},None)}
+  def lime(trace: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{trace},None)}
+  def blue(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{trace},None)}
+  def yellow(trace: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{trace},None)}
+  def cyan(trace: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{trace},None)}
+  def magenta(trace: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{trace},None)}
+  def silver(trace: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{trace},None)}
+  def gray(trace: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{trace},None)}
+  def maroon(trace: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{trace},None)}
+  def olive(trace: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{trace},None)}
+  def green(trace: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{trace},None)}
+  def purple(trace: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{trace},None)}
+  def teal(trace: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{trace},None)}
+  def navy(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{trace},None)}
+  def randColor(trace: ⇒Double):Unit = {
     val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
-    datas :+= (color,()⇒{line},None)}
+    datas :+= (color,()⇒{trace},None)}
   protected implicit class SecondOperator(name:String){
-    def black(line: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{line},Some(name))}
-    def white(line: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{line},Some(name))}
-    def red(line: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{line},Some(name))}
-    def lime(line: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{line},Some(name))}
-    def blue(line: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{line},Some(name))}
-    def yellow(line: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{line},Some(name))}
-    def cyan(line: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{line},Some(name))}
-    def magenta(line: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{line},Some(name))}
-    def silver(line: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{line},Some(name))}
-    def gray(line: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{line},Some(name))}
-    def maroon(line: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{line},Some(name))}
-    def olive(line: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{line},Some(name))}
-    def green(line: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{line},Some(name))}
-    def purple(line: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{line},Some(name))}
-    def teal(line: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{line},Some(name))}
-    def navy(line: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{line},Some(name))}
-    def randColor(line: ⇒Double):Unit = {
+    def black(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{trace},Some(name))}
+    def white(trace: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{trace},Some(name))}
+    def red(trace: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{trace},Some(name))}
+    def lime(trace: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{trace},Some(name))}
+    def blue(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{trace},Some(name))}
+    def yellow(trace: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{trace},Some(name))}
+    def cyan(trace: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{trace},Some(name))}
+    def magenta(trace: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{trace},Some(name))}
+    def silver(trace: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{trace},Some(name))}
+    def gray(trace: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{trace},Some(name))}
+    def maroon(trace: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{trace},Some(name))}
+    def olive(trace: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{trace},Some(name))}
+    def green(trace: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{trace},Some(name))}
+    def purple(trace: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{trace},Some(name))}
+    def teal(trace: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{trace},Some(name))}
+    def navy(trace: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{trace},Some(name))}
+    def randColor(trace: ⇒Double):Unit = {
       val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
-      datas :+= (color,()⇒{line},Some(name))}}
+      datas :+= (color,()⇒{trace},Some(name))}}
   def update() = {
     val xys = datas.map{case ((_,data,_)) ⇒ Some(xCounter, data())}
     //Chart

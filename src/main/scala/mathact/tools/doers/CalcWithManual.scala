@@ -2,7 +2,7 @@ package mathact.tools.doers
 import java.awt.Dimension
 import mathact.utils.clockwork.CalculationGear
 import mathact.utils.ui.components.BorderFrame
-import mathact.utils.ui.components.{NumberSpinner, AuthManButton, HorizontalSlider}
+import mathact.utils.ui.components.{NumberSpinner, AutoManButton, HorizontalSlider}
 import mathact.utils.{Environment, Tool, ToolHelper}
 
 
@@ -16,8 +16,7 @@ abstract class CalcWithManual(
   min:Double = -1,
   max:Double = 1,
   value:Double = 0,
-  initIsAuth:Boolean = false,
-  speedInit:Double = 1,
+  initIsAuto:Boolean = false,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue)
 (implicit environment:Environment)
@@ -25,7 +24,7 @@ extends Tool{
   //Variables
   private var authProcs:List[Double⇒Unit] = List()
   private var manProcs:List[Double⇒Unit] = List()
-  private var currentIsAuth = initIsAuth
+  private var currentIsAuth = initIsAuto
   private var currentValue = value
   //Helpers
   private val helper = new ToolHelper(this, name, "CalcWithManual")
@@ -41,7 +40,7 @@ extends Tool{
     def valueChanged(v:Double) = {
       slider.setCurrentValue(v)
       currentValue = v}}
-  private val authManBtn = new AuthManButton(environment.params.AuthManPot, initIsAuth){
+  private val authManBtn = new AutoManButton(environment.params.AuthManPot, initIsAuto){
     def stateChanged(isAuth:Boolean) = {
       currentIsAuth = isAuth}}
   private val frame:BorderFrame = new BorderFrame(

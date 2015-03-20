@@ -37,8 +37,7 @@ extends Tool{
   private val slider = new HorizontalSlider(environment.params.Doer, speedMin, speedMax, speedInit){
     def valueChanged(v:Double) = {
       frame.setTitleAdd(s" - $v/second")
-      timer.setDelay((1000 / v).toInt)
-      timer.restart()}}
+      timer.setDelay((1000 / v).toInt)}}
   private val execBtn = new ExecuteButtons(environment.params.Doer){
     def start() = {
       timer.start()}

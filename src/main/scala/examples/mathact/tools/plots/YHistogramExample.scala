@@ -1,5 +1,6 @@
-package mathact.tools.plots
+package examples.mathact.tools.plots
 import mathact.tools.Workbench
+import mathact.tools.plots.YHistogram
 import mathact.tools.pots.PotBoard
 
 
@@ -16,7 +17,7 @@ object YHistogramExample extends Workbench{
     val ys = array(.8,.6,.4,.2)
   }
   //Creating  YHistogram
-  new YHistogram{
+  new YHistogram(targetLower = .5, targetUpper = .8){
     import variables._
     red{a}
     green{b}

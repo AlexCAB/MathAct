@@ -11,7 +11,6 @@ import scala.math.random
  * Created by CAB on 15.03.2015.
  */
 
-
 abstract class YHistogram(
   name:String = "",
   minRange:Double = -1,
@@ -28,44 +27,44 @@ extends Tool{
   //Variables
   private var datas = List[(Color, ()⇒Array[Double])]()
   //DSL Methods
-  def blackArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,0),()⇒{line})}
-  def whiteArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(255,255,255),()⇒{line})}
-  def redArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(255,0,0),()⇒{line})}
-  def limeArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,255,0),()⇒{line})}
-  def blueArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,255),()⇒{line})}
-  def yellowArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(255,255,0),()⇒{line})}
-  def cyanArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,255,255),()⇒{line})}
-  def magentaArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(255,0,255),()⇒{line})}
-  def silverArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(192,192,192),()⇒{line})}
-  def grayArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(128,128,128),()⇒{line})}
-  def maroonArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(128,0,0),()⇒{line})}
-  def oliveArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(128,128,0),()⇒{line})}
-  def greenArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,128,0),()⇒{line})}
-  def purpleArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(128,0,128),()⇒{line})}
-  def tealArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,128,128),()⇒{line})}
-  def navyArray(line: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,128),()⇒{line})}
-  def randColorArray(line: ⇒Array[Double]):Unit = {
+  def black(bar: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{Array(bar)})}
+  def white(bar: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{Array(bar)})}
+  def red(bar: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{Array(bar)})}
+  def lime(bar: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{Array(bar)})}
+  def blue(bar: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{Array(bar)})}
+  def yellow(bar: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{Array(bar)})}
+  def cyan(bar: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{Array(bar)})}
+  def magenta(bar: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{Array(bar)})}
+  def silver(bar: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{Array(bar)})}
+  def gray(bar: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{Array(bar)})}
+  def maroon(bar: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{Array(bar)})}
+  def olive(bar: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{Array(bar)})}
+  def green(bar: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{Array(bar)})}
+  def purple(bar: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{Array(bar)})}
+  def teal(bar: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{Array(bar)})}
+  def navy(bar: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{Array(bar)})}
+  def randColor(bar: ⇒Double):Unit = {
     val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
-    datas :+= (color,()⇒{line})}
-  def black(line: ⇒Double):Unit = {datas :+= (new Color(0,0,0),()⇒{Array(line)})}
-  def white(line: ⇒Double):Unit = {datas :+= (new Color(255,255,255),()⇒{Array(line)})}
-  def red(line: ⇒Double):Unit = {datas :+= (new Color(255,0,0),()⇒{Array(line)})}
-  def lime(line: ⇒Double):Unit = {datas :+= (new Color(0,255,0),()⇒{Array(line)})}
-  def blue(line: ⇒Double):Unit = {datas :+= (new Color(0,0,255),()⇒{Array(line)})}
-  def yellow(line: ⇒Double):Unit = {datas :+= (new Color(255,255,0),()⇒{Array(line)})}
-  def cyan(line: ⇒Double):Unit = {datas :+= (new Color(0,255,255),()⇒{Array(line)})}
-  def magenta(line: ⇒Double):Unit = {datas :+= (new Color(255,0,255),()⇒{Array(line)})}
-  def silver(line: ⇒Double):Unit = {datas :+= (new Color(192,192,192),()⇒{Array(line)})}
-  def gray(line: ⇒Double):Unit = {datas :+= (new Color(128,128,128),()⇒{Array(line)})}
-  def maroon(line: ⇒Double):Unit = {datas :+= (new Color(128,0,0),()⇒{Array(line)})}
-  def olive(line: ⇒Double):Unit = {datas :+= (new Color(128,128,0),()⇒{Array(line)})}
-  def green(line: ⇒Double):Unit = {datas :+= (new Color(0,128,0),()⇒{Array(line)})}
-  def purple(line: ⇒Double):Unit = {datas :+= (new Color(128,0,128),()⇒{Array(line)})}
-  def teal(line: ⇒Double):Unit = {datas :+= (new Color(0,128,128),()⇒{Array(line)})}
-  def navy(line: ⇒Double):Unit = {datas :+= (new Color(0,0,128),()⇒{Array(line)})}
-  def randColor(line: ⇒Double):Unit = {
+    datas :+= (color,()⇒{Array(bar)})}
+  def blackArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,0),()⇒{bars})}
+  def whiteArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(255,255,255),()⇒{bars})}
+  def redArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(255,0,0),()⇒{bars})}
+  def limeArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,255,0),()⇒{bars})}
+  def blueArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,255),()⇒{bars})}
+  def yellowArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(255,255,0),()⇒{bars})}
+  def cyanArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,255,255),()⇒{bars})}
+  def magentaArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(255,0,255),()⇒{bars})}
+  def silverArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(192,192,192),()⇒{bars})}
+  def grayArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(128,128,128),()⇒{bars})}
+  def maroonArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(128,0,0),()⇒{bars})}
+  def oliveArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(128,128,0),()⇒{bars})}
+  def greenArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,128,0),()⇒{bars})}
+  def purpleArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(128,0,128),()⇒{bars})}
+  def tealArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,128,128),()⇒{bars})}
+  def navyArray(bars: ⇒Array[Double]):Unit = {datas :+= (new Color(0,0,128),()⇒{bars})}
+  def randColorArray(bars: ⇒Array[Double]):Unit = {
     val color = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
-    datas :+= (color,()⇒{Array(line)})}
+    datas :+= (color,()⇒{bars})}
   def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "YHistogram")
