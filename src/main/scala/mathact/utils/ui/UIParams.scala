@@ -81,4 +81,9 @@ object UIParams {
     val authDisableIcon:ImageIcon
     val manDisableIcon:ImageIcon
     val authManButtonsSize:Int}
-}
+  trait DropDownList{
+    val listFont:Font
+    val listHeight:Int}
+  trait SelectionBar extends NameLabel with DropDownList{
+    val textColor:Color
+    val backgroundColor:Color}}

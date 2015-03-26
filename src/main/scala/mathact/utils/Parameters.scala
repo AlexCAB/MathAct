@@ -134,6 +134,7 @@ class Parameters {
     val valueFont = new Font(Font.SERIF, Font.BOLD, 14)
     val valueHeight = 16
     val backgroundColor = Color.WHITE}
+  //ValuesBoard
   object ValuesBoard extends GridFrame with Measurer{
     val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
     val nameHeight = 16
@@ -142,4 +143,23 @@ class Parameters {
     val numberHeight = 16
     val separatorFont = new Font(Font.SERIF, 0, 14)
     val separatorHeight = 16
+    val backgroundColor = Color.WHITE}
+  //Stepper
+  object Stepper extends FlowFrame with Executor with HorizontalSlider with SelectionBar{
+    val startEnabledIcon = new ImageIcon(getClass.getResource("/start_e.png"))
+    val startDisableIcon = new ImageIcon(getClass.getResource("/start_d.png"))
+    val stopEnabledIcon = new ImageIcon(getClass.getResource("/stop_e.png"))
+    val stopDisableIcon = new ImageIcon(getClass.getResource("/stop_d.png"))
+    val stepEnabledIcon = new ImageIcon(getClass.getResource("/step_e.png"))
+    val stepDisableIcon = new ImageIcon(getClass.getResource("/step_d.png"))
+    val executorButtonsSize = 28
+    val sliderHeight = 16
+    val sliderWidth = 180
+    val sliderScale = 1000
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
+    val nameHeight = 16
+    val listFont = new Font(Font.SERIF, 0, 18)
+    val listHeight = 28
+    val listInitWidth = 140
+    val textColor:Color = Color.BLACK
     val backgroundColor = Color.WHITE}}

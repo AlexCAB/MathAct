@@ -136,10 +136,11 @@
         </div>
     <h1 style="font-size:90%; font-family:verdana; color:#28AFE0">HOW TO GET</h1>
         <div align="justify">
-            Currently you cat fork this repo or down load sources as a zip file.
+            Currently you can fork this repo or down load sources as a zip file.
         </div>
     <h1 style="font-size:90%; font-family:verdana; color:#28AFE0">TOOLS</h1>
       <a href="#Doer">Doer</a><br>
+      <a href="#Stepper">Stepper</a><br>
       <a href="#Calc">Calc</a><br>
       <a href="#CalcWithManual">CalcWithManual</a><br>
       <a href="#Logger">Logger</a><br>
@@ -191,6 +192,30 @@
             speedMax:Double --   mac times per second (default: 100),
             speedInit:Double  -- initial times per second (default: 1).
         </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0"id="Stepper">Stepper calculation tool</h2>
+        <div align="center">
+            <img border=0 src="docs/Stepper.png">
+        </div>
+        <div align="justify">
+            Execute step{} blocs one by one, N time per second.
+        </div>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/doers/Stepper.scala">Source code</a>,
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/doers/StepperExample.scala">Example code</a>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            step{&lt;code bloc&gt;}
+            &lt;name&gt step{&lt;code bloc&gt;}
+            <p>Where:</p>
+             &lt;code bloc&gt; -- Any Scala code.
+             &lt;name&gt; -- Step name.
+        </pre></div>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int -- general parameters,
+            speedMin:Double -- min times per second (default: .1),
+            speedMax:Double --   mac times per second (default: 100),
+            speedInit:Double  -- initial times per second (default: 1).
+        </pre></div>
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="Calc">Calc calculation  tool</h2>
         <div align="justify">
             Execute one or several <b>make{}</b> blocs by update event.
@@ -223,7 +248,7 @@
             <img border=0 width=500 height=250 src="docs/Logger.png">
         </div>
         <div align="justify">
-            Simple logger with color test. Have methods <b>log(msg:String)</b> which add text with default color (specified in mathact.utils.Parameters) and <b>randColor(msg:String)</b> which add text with random color. Also have <b>black, white, red, lime, blue, yellow, cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy</b> which add text with corresponding color.
+            Simple logger with color text. Have methods <b>log(msg:String)</b> which add text with default color (specified in mathact.utils.Parameters) and <b>randColor(msg:String)</b> which add text with random color. Also have <b>black, white, red, lime, blue, yellow, cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy</b> which add text with corresponding color.
         </div>
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/loggers/Logger.scala">Source code</a>,
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/loggers/LoggerExample.scala">Example code</a>
@@ -247,14 +272,15 @@
             &lt;trace color&gt;{x ⇒ }
             "&lt;trace name&gt;" &lt;trace color&gt;{x ⇒ }
             <p>Where:</p>
-            &lt;trace color&gt; -- one of: randColor, black, white, red, lime, blue, yellow, cyan,
-              magenta, silver, gray, maroon, olive, green, purple, teal, navy.
+            &lt;trace color&gt; -- one of: randColor, black, white, red, lime, blue, yellow,
+              cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
             "&lt;trace name&gt;" -- any String.
             {x ⇒ } --  Double⇒Double function
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general parameters,
+            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general
+              parameters,
             a:Double -- begin of X diapason (default: -1),
             b:Double -- end of X diapason (default: +1),
             step:Double -- trace step by X (default: 0.05),
@@ -365,7 +391,7 @@
             Chart recorder. Add new variables snapshot by update event or by calling update() method.
         </div>
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/plots/YChartRecorder.scala">Source code</a>,
-        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/YChartRecordeExampler.scala">Example code</a>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/YChartRecorderExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
             &lt;trace color&gt;(&lt;Y variable name&gt;)
@@ -419,8 +445,8 @@
             &lt;value&gt; -- Double value of statement (default: (&lt;min&gt; + &lt;max&gt;)  / 2),
             &lt;min&gt;  -- Double, minimum variable value (default: -1),
             &lt;max&gt; -- Double, maximum variable value(default: +1),
-            &lt;function&gt; -- (x)⇒{} anon function called before variable value will be changed,
-              where x is new value.
+            &lt;function&gt; -- (x)⇒{} anon function called before variable value will
+              be changed, where x is new value.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax for array variables:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -460,7 +486,8 @@
             "&lt;value name&gt;" &lt;value color&gt;(&lt;value&gt;)
             <p>Where:</p>
             &lt;value color&gt; -- one of: randColor, black, white, red, lime, blue,
-              yellow, cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
+              yellow, cyan, magenta, silver, gray, maroon, olive, green, purple,
+              teal, navy.
             "&lt;value name&gt;" -- any String.
             &lt;value&gt; --  value source (variable name or statement)
         </pre></div>

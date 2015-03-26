@@ -20,7 +20,7 @@ object PotBoardExample extends Workbench{
     //Simple values
     val a = init(.1)
     val b = init(-.2) in(-5,+5)
-    //Sum of x,y,z be always
+    //Sum of x,y,z be always equal 1
     var x:Double = init(.2) in(0,1) changedWithUpdate(x ⇒ {val (a,b) = norm(x,y,z); y = a; z = b})
     var y:Double = init(.4) in(0,1) changedWithUpdate(y ⇒ {val (a,b) = norm(y,x,z); x = a; z = b})
     var z:Double = init(.4) in(0,1) changedWithUpdate(z ⇒ {val (a,b) = norm(z,x,y); x = a; y = b})
