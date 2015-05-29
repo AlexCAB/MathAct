@@ -20,7 +20,7 @@ object YChartRecorderExample extends Workbench{
   //Creating YChartRecorder
   object MyChart extends YChartRecorder{
     import variables._
-    "Red trace" red(a)
-    "Green trace" green(b)
+    trace(name = "Red trace", color = red) of{a}
+    trace(name = "Green trace", color = green) of{b}
   }
 }

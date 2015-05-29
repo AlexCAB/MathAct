@@ -8,7 +8,7 @@ import mathact.utils.{ToolHelper, Tool, Environment}
 
 
 /**
- * Execute one "step{}" per one time tick
+ * Execute one step per one time tick
  * Created by CAB on 26.03.2015.
  */
 
@@ -22,14 +22,17 @@ abstract class Stepper(
   (implicit environment:Environment)
 extends Tool{
   //Variables
-  private var procs = List[(String, ()⇒Unit)]()
+  private var steps = List[Step]()
   private var nextStepIndex = 0
+  //Classes
+  protected case class Step(name:String, proc:()⇒Unit){
+    def make(proc: ⇒Unit):Step = {
+      val step = Step(name, ()⇒proc)
+      steps :+= step
+      step}}
   //DSL Methods
-  def step(proc: ⇒Unit) = {
-    val name = "S_" + procs.size
-    procs :+= (name, ()⇒proc)}
-  protected implicit class SecondOperator(name:String){
-    def step(proc: ⇒Unit) = {procs :+= (name, ()⇒proc)}}
+  def step(name:String = ""):Step =
+    Step(name match{case s if s == "" ⇒ "S_" + steps.size; case s ⇒ s}, ()⇒{})
   //Helpers
   private val helper = new ToolHelper(this, name, "Stepper")
   //Check parameters
@@ -41,8 +44,8 @@ extends Tool{
     |""".stripMargin)}
   //Functions
   private def nextStep() = {
-    procs(nextStepIndex)._2()
-    nextStepIndex = if(nextStepIndex < procs.size - 1) nextStepIndex + 1 else 0
+    steps(nextStepIndex).proc()
+    nextStepIndex = if(nextStepIndex < steps.size - 1) nextStepIndex + 1 else 0
     dropList.setItem(nextStepIndex)}
   //UI
   private val dropList = new SelectionBar(environment.params.Stepper, "Next step: ", environment.params.Stepper.listInitWidth){
@@ -71,9 +74,9 @@ extends Tool{
   //Gear
   private val gear:CalculationGear = new CalculationGear(environment.clockwork, updatePriority = -1){
     def start() = {
-      if(procs.size == 0){ throw new SyntaxException(s"""
+      if(steps.size == 0){ throw new SyntaxException(s"""
         |Incorrect definition of Stepper with name ${helper.toolName}: Have 0 steps""")}
-      dropList.setList(procs.map(_._1))
+      dropList.setList(steps.map(_.name))
       dropList.setItem(nextStepIndex)
       frame.show(screenX, screenY)}
     def update() = {}

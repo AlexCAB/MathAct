@@ -20,8 +20,8 @@ object XYHistogramExample extends Workbench{
   //Creating  XYHistogram
   new XYHistogram{
     import variables._
-    red{(x, y)}
-    redArray{(xs.take(2), ys.take(2))}
-    greenArray{(xs.drop(2), ys.drop(2))}
+    data(name = "a", color = red) of{(x, y)}
+    data(name = "b", color = red) ofArray{(xs.take(2), ys.take(2))}
+    data(color = green) ofArray{(xs.drop(2), ys.drop(2))}
   }
 }

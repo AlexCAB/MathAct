@@ -19,8 +19,8 @@ object XTracerExample extends Workbench{
   //Creating XTrace
   new XTracer(a = -5, b = 5, autoRange = true){
     import variables._
-    "μ" green{_ ⇒ μ}
-    "σ" blue{_ ⇒ σ}
-    "Gaussian" red{x ⇒ exp(-(pow(x - μ, 2) / (2 * pow(σ, 2)))) / (σ * sqrt(2 * Pi))}
+    trace(name = "μ", color = green) of {_ ⇒ μ}
+    trace(name = "σ", color = blue) of {_ ⇒  σ}
+    trace(name = "Gaussian", color = red) of {x ⇒ exp(-(pow(x - μ, 2) / (2 * pow(σ, 2)))) / (σ * sqrt(2 * Pi))}
   }
 }

@@ -19,7 +19,7 @@ object XYPlotExample extends Workbench{
   //Creating XYPlot
   new XYPlot{
     import variables._
-    "Red line" red{(xs.take(3), ys.take(3))}
-    "Green line" green{(xs.drop(3), ys.drop(3))}
+    line(name = "Red line", color = red) of{(xs.take(3), ys.take(3))}
+    line(name = "Green line", color = green) of{(xs.drop(3), ys.drop(3))}
   }
 }

@@ -14,21 +14,21 @@ abstract class Potentiometer(
   varName:String,
   min:Double,
   max:Double,
-  value:Double)
+  initValue:Double)
 extends GridComponent {
   //Variables
-  private var vlaue = 0.0
+  private var value = 0.0
   //Components
   val nameView = new NameLabel(uiParams, varName)
   val diapasonView = new DiapasonLabel(uiParams, min, max)
-  val sliderBar:HorizontalSlider = new HorizontalSlider(uiParams, min, max, value){
+  val sliderBar:HorizontalSlider = new HorizontalSlider(uiParams, min, max, initValue){
     def valueChanged(v:Double) = {
-      vlaue = v
+      value = v
       editBar.setCurrentValue(v)
       potValueChanged(v)}}
-  val editBar:NumberSpinner = new NumberSpinner(uiParams, min, max, value){
+  val editBar:NumberSpinner = new NumberSpinner(uiParams, min, max, initValue){
     def valueChanged(v:Double) = {
-      vlaue = v
+      value = v
       sliderBar.setCurrentValue(v)
       potValueChanged(v)}}
   val gridRow = List(nameView, diapasonView, sliderBar, editBar)
@@ -41,7 +41,7 @@ extends GridComponent {
     if(v > max || v < min){
       throw new ExecutionException(s"(minimum($min) <= value($v) <= maximum($max)) is false, on var $varName.")}
     //Set new value
-    vlaue = v
+    value = v
     sliderBar.setCurrentValue(v)
     editBar.setCurrentValue(v)}
   def update() = {

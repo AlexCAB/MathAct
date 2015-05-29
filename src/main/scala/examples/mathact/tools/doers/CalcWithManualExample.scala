@@ -14,15 +14,15 @@ object CalcWithManualExample extends Workbench{
   //Variables
   var y = .0
   //Creating helpers tools
-  new Doer{}                                           //<-- Use Doer as update event generator
-  new YChartRecorder(autoUpdate = true){green(y)}      //<-- Use for recording of y value
+  new Doer{}                                                        //<-- Use Doer as update event generator
+  new YChartRecorder(autoUpdate = true){trace(color =green) of(y)}  //<-- Use for recording of y value
   //Create CalcWithManual
   new CalcWithManual{
     auto{x ⇒
-      y = random + x                                   //<-- Evaluate in auto mode
+      y = random + x                                                //<-- Evaluate in auto mode
     }
     manual{x ⇒
-      y = x                                            //<-- Evaluate in manual mode
+      y = x                                                         //<-- Evaluate in manual mode
     }
   }
 }

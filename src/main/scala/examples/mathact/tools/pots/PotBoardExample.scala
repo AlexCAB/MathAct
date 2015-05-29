@@ -34,9 +34,9 @@ object PotBoardExample extends Workbench{
   //Creating YChartRecorder
   new YChartRecorder(autoUpdate = true){
     import variables._
-    green(x)
-    red(y)
-    blue(z)
-    black(a1(0))
+    trace(color = green) of(x)
+    trace(color = red) of(y)
+    trace(color = blue) of(z)
+    trace(color = black) of(a1(0))
   }
 }

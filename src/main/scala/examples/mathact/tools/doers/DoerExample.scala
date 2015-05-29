@@ -15,10 +15,10 @@ object DoerExample extends Workbench{
   var x = .0
   var y = .0
   //Creating helpers tools
-  new YChartRecorder(autoUpdate = true){green(y)}      //<-- Use for recording of y value
+  new YChartRecorder(autoUpdate = true){trace(color =green) of(y)}  //<-- Use for recording of y value
   //Creating Doer
   new Doer{make{
-    y = sin(x)                                         //<-- Will recalculate N times peer second
+    y = sin(x)                                                      //<-- Will recalculate N times peer second
     x += .1
   }}
 }

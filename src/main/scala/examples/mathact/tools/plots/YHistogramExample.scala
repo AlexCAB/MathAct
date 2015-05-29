@@ -19,8 +19,8 @@ object YHistogramExample extends Workbench{
   //Creating  YHistogram
   new YHistogram(targetLower = .5, targetUpper = .8){
     import variables._
-    red{a}
-    green{b}
-    blackArray{ys}
+    data(color = red) of{a}
+    data(green) of{b}
+    data(black) ofArray{ys}
   }
 }

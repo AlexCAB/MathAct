@@ -204,7 +204,7 @@
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
             step{&lt;code bloc&gt;}
-            &lt;name&gt step{&lt;code bloc&gt;}
+            &lt;name&gt; step{&lt;code bloc&gt;}
             <p>Where:</p>
              &lt;code bloc&gt; -- Any Scala code.
              &lt;name&gt; -- Step name.

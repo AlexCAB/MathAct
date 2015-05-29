@@ -28,11 +28,11 @@ object OjaRuleExample extends Workbench{
   }
   //Chart
   val chart = new YChartRecorder{
-    "Input_0" green(xs(0))
-    "Input_1" navy(xs(1))
-    "Weights_0" maroon(ws(0))
-    "Weights_1" red(ws(1))
-    "Output" black(y)
+    trace("Input_0", green) of(xs(0))
+    trace("Input_1", navy) of(xs(1))
+    trace("Weights_0", maroon) of(ws(0))
+    trace("Weights_1", red) of(ws(1))
+    trace("Output", black) of(y)
   }
   //Doer
   new Doer{make{

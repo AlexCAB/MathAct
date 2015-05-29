@@ -10,7 +10,7 @@ import scala.swing.{BorderPanel,Color,Dimension,Component}
 
 
 /**
- * Y bar chart
+ * Y data chart
  * Created by CAB on 16.03.2015.
  */
 
