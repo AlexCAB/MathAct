@@ -162,4 +162,29 @@ class Parameters {
     val listHeight = 28
     val listInitWidth = 140
     val textColor:Color = Color.BLACK
-    val backgroundColor = Color.WHITE}}
+    val backgroundColor = Color.WHITE}
+  //SimpleStaticGraph
+  object SimpleStaticGraph extends BorderFrame{
+    val backgroundColor = Color.WHITE
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
