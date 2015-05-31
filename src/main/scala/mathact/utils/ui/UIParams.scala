@@ -86,4 +86,10 @@ object UIParams {
     val listHeight:Int}
   trait SelectionBar extends NameLabel with DropDownList{
     val textColor:Color
+    val backgroundColor:Color}
+  trait SimpleGraph{
+    val defaultNodeColor:Color
+    val defaultNodeSize:Int
+    val defaultEdgeColor:Color
+    val defaultEdgeSize:Int
     val backgroundColor:Color}}

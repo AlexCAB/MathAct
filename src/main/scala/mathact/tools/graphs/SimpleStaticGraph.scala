@@ -1,9 +1,9 @@
 package mathact.tools.graphs
 import java.awt.{Point, Color}
-import mathact.utils.ui.components.{EdgeEnd, BorderFrame}
+import mathact.utils.ui.components.{SimpleGraph, BorderFrame}
 import mathact.utils.{ToolHelper, Tool, Environment}
 import mathact.utils.clockwork.VisualisationGear
-import mathact.utils.dsl.Colors
+import mathact.utils.dsl.{FunParameter, Colors}
 
 
 /**
@@ -31,88 +31,97 @@ extends Tool with Colors{
   protected case class Node(
     id:String,
     name:Option[String],
-    colorFun:()⇒Color,
-    weightFun:()⇒Double,
-    pointFun:Option[()⇒Point])
+    colorFun:FunParameter[Color],
+    weightFun:FunParameter[Double],
+    pointFun:Option[FunParameter[Point]])
   {
+    //Methods
     def color(color: ⇒Color):Node =
-      addNode(Node(id, name, ()⇒color, weightFun, None))
+      addNode(Node(id, name, FunParameter(()⇒color), weightFun, None))
     def weight(weight: ⇒Double):Node =
-      addNode(Node(id, name, colorFun, ()⇒weight, None))
+      addNode(Node(id, name, colorFun, FunParameter(()⇒weight), None))
     def fixOn(x:Double, y:Double):Node =
-      addNode(Node(id, name, colorFun, weightFun, Some(()⇒new Point(x.toInt,y.toInt))))}
+      addNode(Node(id, name, colorFun, weightFun, Some(FunParameter(()⇒new Point(x.toInt,y.toInt)))))}
   protected case class Edge(
     id:String,
     source:Node,
-    sourceEnd:EdgeEnd,
     target:Node,
-    targetEnd:EdgeEnd,
+    idDirected:Boolean,
     name:Option[String],
-    colorFun:()⇒Color,
-    weightFun:()⇒Double)
+    colorFun:FunParameter[Color],
+    weightFun:FunParameter[Double])
   {
     def color(color: ⇒Color):Edge =
-      addEdge(Edge(id, source, sourceEnd, target, targetEnd, name, ()⇒color, weightFun))
+      addEdge(Edge(id, source, target, idDirected, name, FunParameter(()⇒color), weightFun))
     def weight(weight: ⇒Double):Edge =
-      addEdge(Edge(id, source, sourceEnd, target, targetEnd, name, colorFun, ()⇒weight))}
+      addEdge(Edge(id, source, target, idDirected, name, colorFun, FunParameter(()⇒weight)))}
   //DSL
   def node(name:String = "", color:Color = gray, weight:Double = 1):Node =
     Node(
       nextID,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      ()⇒color,
-      ()⇒weight,
+      FunParameter(()⇒color),
+        FunParameter(()⇒weight),
       None)
   def edge(source:Node, target:Node, name:String = "", color:Color = black, weight:Double = 1):Edge =
     Edge(
       nextID,
       source,
-      EdgeEnd.None,
-      target, EdgeEnd.None,
+      target,
+      idDirected = false,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      ()⇒color,
-      ()⇒weight)
+      FunParameter(()⇒color),
+        FunParameter(()⇒weight))
   def arrow(source:Node, target:Node, name:String = "", color:Color = black, weight:Double = 1):Edge =
     Edge(nextID,
       source,
-      EdgeEnd.None,
       target,
-      EdgeEnd.Arrow,
+      idDirected = true,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      ()⇒color,
-      ()⇒weight)
+      FunParameter(()⇒color),
+        FunParameter(()⇒weight))
   def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "SimpleStaticGraph")
   //UI
-
-
-
-//  private val plot = new XYsPlot(environment.params.XYPlot, screenW, screenH, drawPoints)
-//  private val minMaxAvg = new MinMaxAvgPane(environment.params.XYPlot)
-
-
-
+  private val graph = new SimpleGraph(environment.params.SimpleStaticGraph, screenW, screenH)
   private val frame = new BorderFrame(
-    environment.layout, environment.params.SimpleStaticGraph, helper.toolName, center = None){
+    environment.layout, environment.params.SimpleStaticGraph, helper.toolName, center = Some(graph)){
     def closing() = {gear.endWork()}}
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     def start() = {
-
-
-
-
+      nodes.foreach(n ⇒ {
+        graph.addNode(
+          n.id,
+          n.name,
+          n.colorFun.getValue,
+          n.weightFun.getValue.map(v ⇒ (v * 30).toInt),
+          n.pointFun.flatMap(_.getValue))})
+      edges.foreach(e ⇒ {
+        graph.addEdge(
+          e.id,
+          e.source.id,
+          e.target.id,
+          e.idDirected,
+          e.name,
+          e.colorFun.getValue,
+          e.weightFun.getValue.map(v ⇒ (v * 10).toInt))})
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = {
-//      val bars = datas.flatMap{case Data(c, d) ⇒ d().map(v ⇒ (c, v))}
-//      histogram.updateY(bars)
-//      minMaxAvg.update(bars.map(_._2))
+      nodes.foreach(n ⇒ {
+        graph.updateNode(
+          n.id,
+          None,
+          n.colorFun.getValue,
+          n.weightFun.getValue.map(v ⇒ (v * 30).toInt),
+          None)})
+      edges.foreach(e ⇒ {
+        graph.updateEdge(
+          e.id,
+          None,
+          e.colorFun.getValue,
+          e.weightFun.getValue.map(v ⇒ (v * 10).toInt))})
       updated()}
     def stop() = {
-//      frame.hide()
-
-    }}
-
-
-}
+      frame.hide()}}}

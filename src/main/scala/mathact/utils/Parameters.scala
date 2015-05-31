@@ -164,7 +164,11 @@ class Parameters {
     val textColor:Color = Color.BLACK
     val backgroundColor = Color.WHITE}
   //SimpleStaticGraph
-  object SimpleStaticGraph extends BorderFrame{
+  object SimpleStaticGraph extends BorderFrame with SimpleGraph{
+    val defaultNodeColor = Color.GRAY
+    val defaultNodeSize = 10
+    val defaultEdgeColor = Color.BLACK
+    val defaultEdgeSize = 10
     val backgroundColor = Color.WHITE
   }
 
