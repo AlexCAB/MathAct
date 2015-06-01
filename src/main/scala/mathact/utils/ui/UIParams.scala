@@ -92,4 +92,5 @@ object UIParams {
     val defaultNodeSize:Int
     val defaultEdgeColor:Color
     val defaultEdgeSize:Int
+    val numberFormat:String
     val backgroundColor:Color}}

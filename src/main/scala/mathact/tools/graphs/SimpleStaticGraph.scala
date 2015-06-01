@@ -13,6 +13,8 @@ import mathact.utils.dsl.{FunParameter, Colors}
 
 abstract class SimpleStaticGraph(
   name:String = "",
+  resizeByWeight:Boolean = false,
+  showLabels:Boolean = true,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
   screenW:Int = 600,
@@ -23,6 +25,7 @@ extends Tool with Colors{
   private var idCounter = 0
   private var nodes = List[Node]()
   private var edges = List[Edge]()
+  private val params = environment.params.SimpleStaticGraph
   //Functions
   private def nextID:String = {idCounter += 1; "id_" + idCounter}
   private def addNode(node:Node):Node = {nodes = nodes.filter(_.id != node.id) :+ node; node}
@@ -32,16 +35,22 @@ extends Tool with Colors{
     id:String,
     name:Option[String],
     colorFun:FunParameter[Color],
-    weightFun:FunParameter[Double],
-    pointFun:Option[FunParameter[Point]])
+    weightFun:Option[FunParameter[Double]],
+    pointFun:Option[FunParameter[Point]],
+    vars:List[FunParameter[Double]])
   {
     //Methods
     def color(color: ⇒Color):Node =
-      addNode(Node(id, name, FunParameter(()⇒color), weightFun, None))
+      addNode(Node(id, name, FunParameter(None, ()⇒color), weightFun, pointFun, vars))
     def weight(weight: ⇒Double):Node =
-      addNode(Node(id, name, colorFun, FunParameter(()⇒weight), None))
+      addNode(Node(id, name, colorFun, Some(FunParameter(None, ()⇒weight)), pointFun, vars))
+    def weight(weightName:String, weight: ⇒Double):Node =
+      addNode(Node(id, name, colorFun, Some(FunParameter(Some(weightName), ()⇒weight)), pointFun, vars))
     def fixOn(x:Double, y:Double):Node =
-      addNode(Node(id, name, colorFun, weightFun, Some(FunParameter(()⇒new Point(x.toInt,y.toInt)))))}
+      addNode(Node(id, name, colorFun, weightFun, Some(FunParameter(None, ()⇒new Point(x.toInt,y.toInt))), vars))
+    def variable(varName:String, varProc: ⇒Double):Node =
+      addNode(Node(id, name, colorFun, weightFun, pointFun,
+        vars :+ FunParameter(Some(varName), () ⇒ varProc)))}
   protected case class Edge(
     id:String,
     source:Node,
@@ -49,55 +58,90 @@ extends Tool with Colors{
     idDirected:Boolean,
     name:Option[String],
     colorFun:FunParameter[Color],
-    weightFun:FunParameter[Double])
+    weightFun:Option[FunParameter[Double]],
+    vars:List[FunParameter[Double]])
   {
     def color(color: ⇒Color):Edge =
-      addEdge(Edge(id, source, target, idDirected, name, FunParameter(()⇒color), weightFun))
+      addEdge(Edge(id, source, target, idDirected, name, FunParameter(None,()⇒color), weightFun, vars))
     def weight(weight: ⇒Double):Edge =
-      addEdge(Edge(id, source, target, idDirected, name, colorFun, FunParameter(()⇒weight)))}
+      addEdge(Edge(id, source, target, idDirected, name, colorFun, Some(FunParameter(None,()⇒weight)), vars))
+    def weight(weightName:String, weight: ⇒Double):Edge =
+      addEdge(
+        Edge(id, source, target, idDirected, name, colorFun, Some(FunParameter(Some(weightName),()⇒weight)), vars))
+    def variable(varName:String, varProc: ⇒Double):Edge =
+      addEdge(
+        Edge(id, source, target, idDirected, name, colorFun, weightFun,
+          vars :+ FunParameter(Some(varName), () ⇒ varProc)))}
   //DSL
-  def node(name:String = "", color:Color = gray, weight:Double = 1):Node =
+  def node(
+    name:String = "",
+    color:Color = params.defaultNodeColor,
+    weight:Double = Double.NaN)
+  :Node =
     Node(
       nextID,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      FunParameter(()⇒color),
-        FunParameter(()⇒weight),
-      None)
-  def edge(source:Node, target:Node, name:String = "", color:Color = black, weight:Double = 1):Edge =
+      FunParameter(None, () ⇒ color),
+      weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
+      None,
+      List())
+  def edge(
+    source:Node,
+    target:Node,
+    name:String = "",
+    color:Color = params.defaultEdgeColor,
+    weight:Double = Double.NaN)
+  :Edge =
     Edge(
       nextID,
       source,
       target,
       idDirected = false,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      FunParameter(()⇒color),
-        FunParameter(()⇒weight))
-  def arrow(source:Node, target:Node, name:String = "", color:Color = black, weight:Double = 1):Edge =
+      FunParameter(None, () ⇒ color),
+      weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
+      List())
+  def arrow(
+    source:Node,
+    target:Node,
+    name:String = "",
+    color:Color = params.defaultEdgeColor,
+    weight:Double = Double.NaN)
+  :Edge =
     Edge(nextID,
       source,
       target,
       idDirected = true,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
-      FunParameter(()⇒color),
-        FunParameter(()⇒weight))
+      FunParameter(None, ()⇒color),
+      weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
+      List())
   def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "SimpleStaticGraph")
   //UI
-  private val graph = new SimpleGraph(environment.params.SimpleStaticGraph, screenW, screenH)
+  private val graph = new SimpleGraph(
+    environment.params.SimpleStaticGraph, screenW, screenH, resizeByWeight, showLabels)
   private val frame = new BorderFrame(
     environment.layout, environment.params.SimpleStaticGraph, helper.toolName, center = Some(graph)){
     def closing() = {gear.endWork()}}
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
+    //Function
+    def convertVars(vars:List[FunParameter[Double]]):Option[List[(String,Double)]] = {
+      vars.map(_.getValueWithName) match{
+        case lv if lv.exists(_.nonEmpty) ⇒ Some(lv.flatMap(_.map{case (n,v) ⇒ (n.getOrElse(""),v)}))
+        case _ ⇒ None}}
+    //Methods
     def start() = {
       nodes.foreach(n ⇒ {
         graph.addNode(
           n.id,
           n.name,
           n.colorFun.getValue,
-          n.weightFun.getValue.map(v ⇒ (v * 30).toInt),
-          n.pointFun.flatMap(_.getValue))})
+          n.weightFun.flatMap(_.getValueWithName),
+          n.pointFun.flatMap(_.getValue),
+          convertVars(n.vars))})
       edges.foreach(e ⇒ {
         graph.addEdge(
           e.id,
@@ -106,7 +150,8 @@ extends Tool with Colors{
           e.idDirected,
           e.name,
           e.colorFun.getValue,
-          e.weightFun.getValue.map(v ⇒ (v * 10).toInt))})
+          e.weightFun.flatMap(_.getValueWithName),
+          convertVars(e.vars))})
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
     def update() = {
       nodes.foreach(n ⇒ {
@@ -114,14 +159,16 @@ extends Tool with Colors{
           n.id,
           None,
           n.colorFun.getValue,
-          n.weightFun.getValue.map(v ⇒ (v * 30).toInt),
-          None)})
+          n.weightFun.flatMap(_.getValueWithName),
+          None,
+          convertVars(n.vars))})
       edges.foreach(e ⇒ {
         graph.updateEdge(
           e.id,
           None,
           e.colorFun.getValue,
-          e.weightFun.getValue.map(v ⇒ (v * 10).toInt))})
+          e.weightFun.flatMap(_.getValueWithName),
+          convertVars(e.vars))})
       updated()}
     def stop() = {
       frame.hide()}}}

@@ -26,4 +26,7 @@ trait Colors {
   lazy val purple = new Color(128,0,128)
   lazy val teal = new Color(0,128,128)
   lazy val navy = new Color(0,0,128)
-  def randColor = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)}
+  def randColor = new Color((random * 255).toInt, (random * 255).toInt, (random * 255).toInt)
+  def rgbColor(r:Int,g:Int,b:Int) = new Color(r, g, b)
+  def colorBySign(v:Double, negative:Color = red, zero:Color = gray, positive:Color = green) =
+    if(v > 0) positive else if(v < 0) negative else zero}

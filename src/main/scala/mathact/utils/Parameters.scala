@@ -168,27 +168,6 @@ class Parameters {
     val defaultNodeColor = Color.GRAY
     val defaultNodeSize = 10
     val defaultEdgeColor = Color.BLACK
-    val defaultEdgeSize = 10
-    val backgroundColor = Color.WHITE
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
+    val defaultEdgeSize = 1
+    val numberFormat = "#0.00000"
+    val backgroundColor = Color.WHITE}}
