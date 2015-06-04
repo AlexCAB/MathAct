@@ -78,13 +78,13 @@ extends Tool with Colors{
     color:Color = params.defaultNodeColor,
     weight:Double = Double.NaN)
   :Node =
-    Node(
+    addNode(Node(
       nextID,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
       FunParameter(None, () ⇒ color),
       weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
       None,
-      List())
+      List()))
   def edge(
     source:Node,
     target:Node,
@@ -92,7 +92,7 @@ extends Tool with Colors{
     color:Color = params.defaultEdgeColor,
     weight:Double = Double.NaN)
   :Edge =
-    Edge(
+    addEdge(Edge(
       nextID,
       source,
       target,
@@ -100,22 +100,22 @@ extends Tool with Colors{
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
       FunParameter(None, () ⇒ color),
       weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
-      List())
-  def arrow(
+      List()))
+  def arc(
     source:Node,
     target:Node,
     name:String = "",
     color:Color = params.defaultEdgeColor,
     weight:Double = Double.NaN)
   :Edge =
-    Edge(nextID,
+    addEdge(Edge(nextID,
       source,
       target,
       idDirected = true,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
       FunParameter(None, ()⇒color),
       weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
-      List())
+      List()))
   def updated() = {}
   //Helpers
   private val helper = new ToolHelper(this, name, "SimpleStaticGraph")
@@ -129,8 +129,12 @@ extends Tool with Colors{
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     //Function
     def convertVars(vars:List[FunParameter[Double]]):Option[List[(String,Double)]] = {
-      vars.map(_.getValueWithName) match{
-        case lv if lv.exists(_.nonEmpty) ⇒ Some(lv.flatMap(_.map{case (n,v) ⇒ (n.getOrElse(""),v)}))
+      vars.map(fp ⇒ (fp.getLastValueWithName, fp.getValueWithName)) match{
+        case lv if lv.exists{case (_,v) ⇒ v.nonEmpty} ⇒ Some(
+          lv.map{
+            case (_, Some((n,v))) ⇒ (n.getOrElse(""),v)
+            case (Some((n,v)), _) ⇒ (n.getOrElse(""),v)
+            case _ ⇒ ("", 0.0)})
         case _ ⇒ None}}
     //Methods
     def start() = {

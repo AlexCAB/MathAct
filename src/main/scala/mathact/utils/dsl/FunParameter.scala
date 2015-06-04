@@ -11,5 +11,8 @@ case class FunParameter[T](name:Option[String], fun:()⇒T){
     val v = fun()
     if(lastValue.contains(v)){None}else{lastValue = Some(v); lastValue}}
   def getValueWithName:Option[(Option[String], T)] = {  //Return None if value not chanced
-  val v = fun()
-    if(lastValue.contains(v)){None}else{lastValue = Some(v); lastValue.map(v ⇒ (name, v))}}}
+    val v = fun()
+    if(lastValue.contains(v)){None}else{lastValue = Some(v); lastValue.map(v ⇒ (name, v))}}
+  def getLastValue:Option[T] = lastValue
+  def getLastValueWithName:Option[(Option[String], T)] = lastValue.map(v ⇒ (name,v))
+  def isUpdated:Boolean = {! lastValue.contains(fun())}}

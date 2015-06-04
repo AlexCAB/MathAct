@@ -38,14 +38,14 @@ extends BorderPanel with UIComponent{
     s"$name: ${s}px, ${s}px;"
   private def makeArrowSizeAtr(size:Int):String = size match{
     case s if s != 0 ⇒ {
-      s"arrow-size: ${((size * 10) / math.sqrt(size)).toInt}px, ${((size * 5) / math.sqrt(size)).toInt}px;"}
+      s"arrow-size: ${((size * 6) / math.sqrt(size)).toInt}px, ${((size * 3) / math.sqrt(size)).toInt}px;"}
     case _ ⇒
       "arrow-size: 2px, 2px;"}
   private def calcNodeSize(weight:Option[(Option[String],Double)]):Int = (weight, resizeByWeight) match{
     case (Some((_, w)),true) ⇒ (w * 30).toInt
     case _ ⇒ uiParams.defaultNodeSize}
   private def calcEdgeSize(weight:Option[(Option[String],Double)]):Int = (weight, resizeByWeight) match{
-    case (Some((_, w)),true) ⇒ (w * 31).toInt
+    case (Some((_, w)),true) ⇒ (w * 10).toInt
     case _ ⇒ uiParams.defaultEdgeSize}
   private def buildLabel(
     id:String,
@@ -55,7 +55,7 @@ extends BorderPanel with UIComponent{
   :Option[String] = showLabels match{
     case true ⇒ {
       val stringWeight = weight.map{case(n,w) ⇒ n.getOrElse("w") + "=" + decimal.format(w)}
-      val stringVars = vars.map(_.map{case(n,v) ⇒ n + "=" + decimal.format(v)}.mkString(","))
+      val stringVars = vars.map(_.map{case(n,v) ⇒ n + "=" + decimal.format(v)}.mkString(", "))
       def selectNew(a:Option[String], b:Option[String]) = (a, b) match{
         case (Some(a),_) ⇒ Some(a)
         case (None,Some(b)) ⇒ Some(b)
@@ -71,7 +71,7 @@ extends BorderPanel with UIComponent{
           ld}}
       val varsBlock = (labelData.weight, labelData.vars) match{
         case (None,None) ⇒ None
-        case (sw:Some[String], sv:Some[String]) ⇒ Some("{" + sw.getOrElse("") + "," + sv.getOrElse("") + "}")
+        case (sw:Some[String], sv:Some[String]) ⇒ Some("{" + sw.getOrElse("") + ", " + sv.getOrElse("") + "}")
         case (sw, sv) ⇒ Some("{" + sw.getOrElse("") + sv.getOrElse("") + "}")}
       (labelData.name, varsBlock) match{
         case (None,None) ⇒ None
