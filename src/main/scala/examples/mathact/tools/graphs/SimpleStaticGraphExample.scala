@@ -21,12 +21,12 @@ object SimpleStaticGraphExample extends Workbench{
     val xbEdgeColor = init(0)   in(-1,+1)
   }
   //Creating  XYHistogram
-  new SimpleStaticGraph{
+  new SimpleStaticGraph(resizeByWeight = true){
     import variables._
-    val a1 = node(name = "a1", color = blue) fixOn(10,10)
-    val a2 = node(name = "a2", color = blue) fixOn(40,10)
+    val a1 = node(name = "a1", color = blue, fixOn = (10,10))
+    val a2 = node(name = "a2", color = blue, fixOn = (60,10))
     val x = node(name = "x") color{colorBySign(xColor)} weight{xWeight} variable("xVar", {xVar})
-    val b = node(name = "b", color = blue, weight = .5) fixOn(25,40)
+    val b = node(name = "b", color = blue, weight = .5, fixOn = (35,40))
     arc(a1, x, name = "w1", color = black)  weight{w1Weight} variable("w1Var", {w1Var})
     arc(a2, x, name = "w2", color = black)  weight("myWeight", {w2Weight})
     edge(x, b, weight = .1) color{colorBySign(xbEdgeColor)}

@@ -24,40 +24,42 @@
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0"><a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/general/OjaRuleExample.scala">Code:</a></h2>
 </html>
 ```scala
-        object OjaRuleExample extends Workbench{
 
-          //Variables
-          val potBoard = new PotBoard{
-            val xs = array(.1, .2)   //Input
-            val η = in(0,1)}         //Learning rate
-          import potBoard._
-          var ws = Array(.1, .1)     //Weights
-          var y = .0                 //Output
-
-          //Calculation
-          def calcOutput() = {
-            y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) ⇒ x * w}.sum))
-          }
-          def calcWeights() = {
-            ws = xs.zip(ws).map{case(x,w) ⇒ {w + η * (x * y - y * y * w)}}
-          }
-
-          //Chart
-          val chart = new YChartRecorder{
-            "Input_0" green(xs(0))
-            "Input_1" navy(xs(1))
-            "Weights_0" maroon(ws(0))
-            "Weights_1" red(ws(1))
-            "Output" black(y)
-          }
-
-          //Doer
-            new Doer{make{
-            calcOutput()
-            calcWeights()
-            chart.update()
-          }}
-        }
+  object OjaRuleExample extends Workbench{
+  
+    //Variables
+    val potBoard = new PotBoard{
+      val xs = array(.1, .2)   //Input
+      val η = in(0,1)}         //Learning rate
+    import potBoard._
+    var ws = Array(.1, .1)     //Weights
+    var y = .0                 //Output
+    
+    //Calculation
+    def calcOutput() = {
+      y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) ⇒ x * w}.sum))
+    }
+    def calcWeights() = {
+      ws = xs.zip(ws).map{case(x,w) ⇒ {w + η * (x * y - y * y * w)}}
+    }
+    
+    //Chart
+    val chart = new YChartRecorder{
+      trace("Input_0", green) of(xs(0))
+      trace("Input_1", navy) of(xs(1))
+      trace("Weights_0", maroon) of(ws(0))
+      trace("Weights_1", red) of(ws(1))
+      trace("Output", black) of(y)
+    }
+    
+    //Doer
+    new Doer{make{
+      calcOutput()
+      calcWeights()
+      chart.update()
+    }}
+  }
+          
 ```
 <html>
  <h2 style="font-size:70%; font-family:verdana; color:#28AFE0">Working:</h2>
@@ -113,11 +115,11 @@
         </div>
         <div align="left" style="font-family:Consolas;"><pre>
           val chart = new YChartRecorder{
-            "Input_0" green(xs(0))
-            "Input_1" navy(xs(1))
-            "Weights_0" maroon(ws(0))
-            "Weights_1" red(ws(1))
-            "Output" black(y)
+            trace("Input_0", green) of(xs(0))
+            trace("Input_1", navy) of(xs(1))
+            trace("Weights_0", maroon) of(ws(0))
+            trace("Weights_1", red) of(ws(1))
+            trace("Output", black) of(y)
           }
         </pre></div>
         <div align="justify">
@@ -151,6 +153,7 @@
       <a href="#YChartRecorder">YChartRecorder</a><br>
       <a href="#PotBoard">PotBoard</a><br>
       <a href="#ValuesBoard">ValuesBoard</a><br>
+      <a href="#SimpleStaticGraph">SimpleStaticGraph</a><br>
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0">Tools parameters</h2>
         <div align="justify">
             <p>All tools take parameters by the class constructor arguments.</p>
@@ -197,17 +200,16 @@
             <img border=0 src="docs/Stepper.png">
         </div>
         <div align="justify">
-            Execute step{} blocs one by one, N time per second.
+            Execute the step blocs one by one, N time per second.
         </div>
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/doers/Stepper.scala">Source code</a>,
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/doers/StepperExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            step{&lt;code bloc&gt;}
-            &lt;name&gt; step{&lt;code bloc&gt;}
+            step(&lt;step parameters&gt;) make{&lt;code bloc&gt;}
             <p>Where:</p>
+             &lt;step params&gt; -- name = "...".
              &lt;code bloc&gt; -- Any Scala code.
-             &lt;name&gt; -- Step name.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -269,12 +271,9 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/XTracerExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;trace color&gt;{x ⇒ }
-            "&lt;trace name&gt;" &lt;trace color&gt;{x ⇒ }
+            trace(&lt;trace params&gt;) of{x ⇒ }
             <p>Where:</p>
-            &lt;trace color&gt; -- one of: randColor, black, white, red, lime, blue, yellow,
-              cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
-            "&lt;trace name&gt;" -- any String.
+            &lt;trace params&gt; -- name = "..."; color = black, white, red,...
             {x ⇒ } --  Double⇒Double function
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
@@ -300,17 +299,12 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/YHistogramExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;bar color&gt;(&lt;Y variable name&gt;)
-            &lt;array bars color&gt;(&lt;array of Y variable name&gt;)
+             data(&lt;bar params&gt;) of{&lt;Y variable name&gt;}
+             data(&lt;bar params&gt;) ofArray{&lt;array of Y variable name&gt;}
             <p>Where:</p>
-            &lt;bar color&gt; -- one of: randColor, black, white, red, lime, blue, yellow,
-              cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
-            &lt;array bars color&gt; -- one of: randColorArray, blackArray, whiteArray,
-              redArray, limeArray, blueArray, yellowArray, cyanArray, magentaArray,
-              silverArray, grayArray, maroonArray, oliveArray, greenArray, purpleArray,
-              tealArray, navyArray.
-            &lt;variable name&gt; -- Double variable name.
-            &lt;array variable name&gt; -- Array[Doable] variable name.
+            &lt;bar params&gt; -- color = black, white, red,...
+            &lt;Y variable name&gt; -- Double variable name.
+            &lt;array of Y variable name&gt; -- Array[Doable] variable name.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -333,15 +327,10 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/XYHistogramExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;bar color&gt;((&lt;X&gt;,&lt;Y&gt;))
-            &lt;array bars color&gt;((&lt;array of X&gt;,&lt;array of Y&gt;))
+            data(&lt;bar params&gt;) of{(&lt;X&gt;,&lt;Y&gt;)}
+            data(&lt;bar params&gt;) ofArray{(&lt;array of X&gt;,&lt;array of Y&gt;)}
             <p>Where:</p>
-            &lt;bar color&gt; -- one of: randColor, black, white, red, lime, blue, yellow,
-              cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
-            &lt;array bars color&gt; -- one of: randColorArray, blackArray, whiteArray,
-              redArray, limeArray, blueArray, yellowArray, cyanArray, magentaArray,
-              silverArray, grayArray, maroonArray, oliveArray, greenArray, purpleArray,
-              tealArray, navyArray.
+            &lt;bar params&gt; -- color = black, white, red,...
             (&lt;X&gt;,&lt;Y&gt;) -- Tuple2[Double] variable.
             (&lt;array of X&gt;,&lt;array of Y&gt;) -- Tuple2[Array[Doable], Array[Doable]] variable.
         </pre></div>
@@ -366,13 +355,10 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/XYPlotExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;line color&gt;((&lt;array of X&gt;,&lt;array of Y&gt;))
-            "&lt;line name&gt;" &lt;line color&gt;((&lt;array of X&gt;,&lt;array of Y&gt;))
+            line(&lt;line params&gt;) of{(&lt;X&gt;,&lt;Y&gt;)}
             <p>Where:</p>
-            &lt;line color&gt; -- one of: randColor, black, white, red, lime, blue, yellow,
-              cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
+            &lt;line params&gt; -- name = "..."; color = black, white, red,...
             (&lt;array of X&gt;,&lt;array of Y&gt;) -- Tuple2[Array[Doable], Array[Doable]] variable.
-            "&lt;line name&gt;" -- any String.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -394,12 +380,10 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/YChartRecorderExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;trace color&gt;(&lt;Y variable name&gt;)
-            "&lt;trace name&gt;" &lt;line color&gt;(&lt;Y variable name&gt;)
+            trace(&lt;trace params&gt;) of{&lt;Y variable name&gt;}
             <p>Where:</p>
-            &lt;trace color&gt; -- one of: randColor, black, white, red, lime, blue,
-              yellow, cyan, magenta, silver, gray, maroon, olive, green, purple, teal, navy.
-            "&lt;trace name&gt;" -- any String.
+            &lt;trace params&gt; -- name = "..."; color = black, white, red,...
+            &lt;Y variable name&gt; -- Double variable name.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -444,7 +428,7 @@
             changedWithUpdate -- set value changed function with after update,
             &lt;value&gt; -- Double value of statement (default: (&lt;min&gt; + &lt;max&gt;)  / 2),
             &lt;min&gt;  -- Double, minimum variable value (default: -1),
-            &lt;max&gt; -- Double, maximum variable value(default: +1),
+            &lt;max&gt; -- Double, maximum variable value (default: +1),
             &lt;function&gt; -- (x)⇒{} anon function called before variable value will
               be changed, where x is new value.
         </pre></div>
@@ -482,18 +466,62 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/values/ValuesBoardExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            &lt;value color&gt;(&lt;value&gt;)
-            "&lt;value name&gt;" &lt;value color&gt;(&lt;value&gt;)
+            value(&lt;value params&gt;) of{&lt;value&gt;}
             <p>Where:</p>
-            &lt;value color&gt; -- one of: randColor, black, white, red, lime, blue,
-              yellow, cyan, magenta, silver, gray, maroon, olive, green, purple,
-              teal, navy.
-            "&lt;value name&gt;" -- any String.
-            &lt;value&gt; --  value source (variable name or statement)
+            &lt;value params&gt; -- name = "..."; color = black, white, red,...
+            &lt;value&gt; -- value source (variable name or statement)
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
             name:String, screenX:Int, screenY:Int -- general parameters.
+        </pre></div>
+
+
+
+
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="SimpleStaticGraph">SimpleStaticGraph visualization tool</h2>
+        <div align="center">
+            <img border=0 width=500 height=250 src="docs/SimpleStaticGraph.png">
+        </div>
+        <div align="justify">
+            Visualisation tool for small static graphs (with no adding/deleting of nodes and edges).
+        </div>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/graphs/SimpleStaticGraph.scala">Source code</a>,
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/graphs/SimpleStaticGraphExample.scala">Example code</a>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            node(&lt;node params&gt;)
+            node(&lt;node params&gt;) color{&lt;color&gt;}
+            node(&lt;node params&gt;) color{&lt;color&gt;} weight{&lt;weight&gt;}
+            node(&lt;node params&gt;) color{&lt;color&gt;} weight{&lt;weight&gt;}
+               variable(&lt;var name&gt;, {&lt;var value&gt;})
+            node(&lt;node params&gt;) color{&lt;color&gt;} weight{&lt;weight&gt;}
+               variable(&lt;var name&gt;, {&lt;var value&gt;}) fixOn(&lt;X&gt;,&lt;Y&gt;)
+            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+               color{&lt;color&gt;}
+            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+               color{&lt;color&gt;} weight{&lt;weight&gt;}
+            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+               color{&lt;color&gt;} weight{&lt;weight&gt;}
+               variable(&lt;var name&gt;, {&lt;var value&gt;})
+            <p>Where:</p>
+            &lt;node params&gt; -- name = "..."; color =  black, white, red,...;
+              weight = &lt;Double&gt;; fixOn = (&lt;X(Int)&gt;,&lt;Y(Int)&gt)
+            &lt;edge params&gt; -- name = "..."; color =  black, white, red,...;
+              weight = &lt;Double&gt;
+            &lt;color&gt; -- variable or statement of Color value.
+            &lt;weight&gt; -- variable or statement of Double value.
+            &lt;var name&gt; -- variable or statement of String value.
+            &lt;var value&gt; -- variable or statement of Double value.
+        </pre></div>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general
+               parameters.
+            resizeByWeight:Boolean -- change size of nodes and edges by
+               they weight (default: false),
+            showLabels:Boolean -- show or hide labels of nodes and edges(default: true)
         </pre></div>
 </html>
 

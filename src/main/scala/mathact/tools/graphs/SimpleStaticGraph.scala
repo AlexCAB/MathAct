@@ -46,8 +46,8 @@ extends Tool with Colors{
       addNode(Node(id, name, colorFun, Some(FunParameter(None, ()⇒weight)), pointFun, vars))
     def weight(weightName:String, weight: ⇒Double):Node =
       addNode(Node(id, name, colorFun, Some(FunParameter(Some(weightName), ()⇒weight)), pointFun, vars))
-    def fixOn(x:Double, y:Double):Node =
-      addNode(Node(id, name, colorFun, weightFun, Some(FunParameter(None, ()⇒new Point(x.toInt,y.toInt))), vars))
+//    def fixOn(x:Double, y:Double):Node =
+//      addNode(Node(id, name, colorFun, weightFun, Some(FunParameter(None, ()⇒new Point(x.toInt,y.toInt))), vars))
     def variable(varName:String, varProc: ⇒Double):Node =
       addNode(Node(id, name, colorFun, weightFun, pointFun,
         vars :+ FunParameter(Some(varName), () ⇒ varProc)))}
@@ -76,14 +76,17 @@ extends Tool with Colors{
   def node(
     name:String = "",
     color:Color = params.defaultNodeColor,
-    weight:Double = Double.NaN)
+    weight:Double = Double.NaN,
+    fixOn:(Int,Int) = (Int.MinValue,Int.MinValue))
   :Node =
     addNode(Node(
       nextID,
       name match{case s if s == "" ⇒ None; case s ⇒ Some(s)},
       FunParameter(None, () ⇒ color),
       weight match{case w if w.isNaN ⇒ None; case w ⇒ Some(FunParameter(None, () ⇒ w))},
-      None,
+      fixOn match{
+        case (x,y) if x == Int.MinValue || y == Int.MinValue ⇒ None
+        case (x,y) ⇒ Some(FunParameter(None, ()⇒new Point(x.toInt,y.toInt)))},
       List()))
   def edge(
     source:Node,

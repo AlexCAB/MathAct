@@ -17,8 +17,7 @@ object ValuesBoardExample extends Workbench{
   }
   //Creating ValuesBoard
   new ValuesBoard("MyVals"){
-    import variables._
-    "a" red(a)
-    "b" green(b)
+    value(name = "a", color = red) of{variables.a}
+    value(name = "b", color = green) of{variables.b}
   }
 }
