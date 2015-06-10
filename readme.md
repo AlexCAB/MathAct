@@ -475,10 +475,6 @@
         <div align="left" style="font-family:Consolas;"><pre>
             name:String, screenX:Int, screenY:Int -- general parameters.
         </pre></div>
-
-
-
-
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="SimpleStaticGraph">SimpleStaticGraph visualization tool</h2>
         <div align="center">
             <img border=0 width=500 height=250 src="docs/SimpleStaticGraph.png">
