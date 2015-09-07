@@ -33,6 +33,8 @@ extends Tool{
     doubleVarBoard.addVarParameter(None, Some(max), None, None, doubleVarBoard.Maximum)
   def array(first:Double, next:Double*):Array[Double] =
     arrayVarBoard.addVarParameter(None, None, Some(Array(first) ++ next), None, arrayVarBoard.Value)
+  def array(arr:Array[Double]):Array[Double] =
+    arrayVarBoard.addVarParameter(None, None, Some(arr), None, arrayVarBoard.Value)
   def array:ArrayMethods = new ArrayMethods(()⇒0.0)
   implicit class DoubleEx(v:Double){
     def in(min: ⇒Double, max: ⇒Double):Double =
@@ -58,9 +60,9 @@ extends Tool{
     def maximum(max: ⇒Double):Array[Double] =
       arrayVarBoard.addNextVarParameter(None ,Some(max), None, None, None, arrayVarBoard.Maximum)
     def changed(cgd:Array[Double]⇒Unit):Array[Double] =
-      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); false}), arrayVarBoard.Maximum)
+      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); false}), arrayVarBoard.Changed)
     def changedWithUpdate(cgd:Array[Double]⇒Unit):Array[Double] =
-      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); true}), arrayVarBoard.Maximum)}
+      arrayVarBoard.addNextVarParameter(None ,None, None, None, Some((v)⇒{cgd(v); true}), arrayVarBoard.Changed)}
   def updated() = {}
   //Variables
   private var pots:List[Potentiometer] = List()

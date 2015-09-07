@@ -493,12 +493,12 @@
                variable(&lt;var name&gt;, {&lt;var value&gt;})
             node(&lt;node params&gt;) color{&lt;color&gt;} weight{&lt;weight&gt;}
                variable(&lt;var name&gt;, {&lt;var value&gt;}) fixOn(&lt;X&gt;,&lt;Y&gt;)
-            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
-            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+            &lt;arc|edge&gt;(&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+            &lt;arc|edge&gt;(&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
                color{&lt;color&gt;}
-            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+            &lt;arc|edge&gt;(&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
                color{&lt;color&gt;} weight{&lt;weight&gt;}
-            [arc|edge](&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
+            &lt;arc|edge&gt;(&lt;source&gt;,&lt;target&gt;,&lt;edge params&gt;)
                color{&lt;color&gt;} weight{&lt;weight&gt;}
                variable(&lt;var name&gt;, {&lt;var value&gt;})
             <p>Where:</p>

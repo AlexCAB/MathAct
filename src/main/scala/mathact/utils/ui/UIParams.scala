@@ -1,4 +1,5 @@
 package mathact.utils.ui
+import java.awt.image.BufferedImage
 import java.awt.{Color, Font}
 import javax.swing.ImageIcon
 
@@ -93,4 +94,49 @@ object UIParams {
     val defaultEdgeColor:Color
     val defaultEdgeSize:Int
     val numberFormat:String
-    val backgroundColor:Color}}
+    val backgroundColor:Color}
+  trait Pacman{
+    val squareSize:Int
+    val maze0:BufferedImage
+    val maze1U:BufferedImage
+    val maze1D:BufferedImage
+    val maze1L:BufferedImage
+    val maze1R:BufferedImage
+    val maze2U:BufferedImage
+    val maze2D:BufferedImage
+    val maze2L:BufferedImage
+    val maze2R:BufferedImage
+    val maze3U:BufferedImage
+    val maze3D:BufferedImage
+    val maze3L:BufferedImage
+    val maze3R:BufferedImage
+    val maze4:BufferedImage
+    val mazeV:BufferedImage
+    val mazeH:BufferedImage
+    val mazeE:BufferedImage
+    val pacman:BufferedImage
+    val pacmanSU:BufferedImage
+    val pacmanSD:BufferedImage
+    val pacmanSL:BufferedImage
+    val pacmanSR:BufferedImage
+    val pacmanBU:BufferedImage
+    val pacmanBD:BufferedImage
+    val pacmanBL:BufferedImage
+    val pacmanBR:BufferedImage
+    val ghostB:BufferedImage
+    val ghostBU:BufferedImage
+    val ghostBD:BufferedImage
+    val ghostBL:BufferedImage
+    val ghostBR:BufferedImage
+    val ghostR:BufferedImage
+    val ghostRU:BufferedImage
+    val ghostRD:BufferedImage
+    val ghostRL:BufferedImage
+    val ghostRR:BufferedImage
+    val ghostW:BufferedImage
+    val ghostWU:BufferedImage
+    val ghostWD:BufferedImage
+    val ghostWL:BufferedImage
+    val ghostWR:BufferedImage
+    val pellet:BufferedImage
+    val powerPellet:BufferedImage}}
