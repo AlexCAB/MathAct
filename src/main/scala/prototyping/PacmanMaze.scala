@@ -81,7 +81,7 @@ object PacmanMaze extends App{
   val walls = List(
     List(true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true),
     List(true,false,false,false,false,false,false,false,true,false,false,false,false,false,false,true),
-    List(true,true,true,true,true,false,true,true,true,false,true,true,false,true,false,true),
+    List(true,true,false,true,true,false,true,true,true,false,true,true,false,true,false,true),
     List(true,false,false,false,true,false,false,false,false,false,false,false,false,true,false,true),
     List(true,false,true,true,true,true,true,false,true,true,false,true,false,true,false,true),
     List(true,false,false,false,false,true,false,false,false,true,false,true,false,true,false,true),
@@ -97,20 +97,20 @@ object PacmanMaze extends App{
   case object Left extends Position
   case object Right extends Position
   //Classes
-  trait MazeObj
-  case class Pacman(x:Int, y:Int) extends MazeObj
-  case class SmallPacman(x:Int, y:Int, pos:Position) extends MazeObj
-  case class BigPacman(x:Int, y:Int, pos:Position) extends MazeObj
-  case class Pellet(x:Int, y:Int) extends MazeObj
-  case class PowerPellet(x:Int, y:Int) extends MazeObj
-  case class BlueGhost(x:Int, y:Int, pos:Position) extends MazeObj
-  case class RedGhost(x:Int, y:Int, pos:Position) extends MazeObj
-  case class WhiteGhost(x:Int, y:Int, pos:Position) extends MazeObj
+  trait MazeObj // x and y in columns and lines of maze
+  case class Pacman(x:Double, y:Double) extends MazeObj
+  case class SmallPacman(x:Double, y:Double, pos:Position) extends MazeObj
+  case class BigPacman(x:Double, y:Double, pos:Position) extends MazeObj
+  case class Pellet(x:Double, y:Double) extends MazeObj
+  case class PowerPellet(x:Double, y:Double) extends MazeObj
+  case class BlueGhost(x:Double, y:Double, pos:Position) extends MazeObj
+  case class RedGhost(x:Double, y:Double, pos:Position) extends MazeObj
+  case class WhiteGhost(x:Double, y:Double, pos:Position) extends MazeObj
   //
   class Maze(uiParams:UIParams.Pacman, maze:List[List[Boolean]]) extends Panel{
     //Calc and set size
-    private val n = walls.size       //Lines
-    private val m = walls.head.size  //Columns
+    val n = walls.size       //Lines
+    val m = walls.head.size  //Columns
     private val imgW = m * uiParams.squareSize
     private val imgH = n * uiParams.squareSize
     preferredSize = new Dimension(imgW, imgH)
@@ -183,39 +183,31 @@ object PacmanMaze extends App{
         case WhiteGhost(x,y,Down)   ⇒ (x, y, uiParams.ghostWD)
         case WhiteGhost(x,y,Left)   ⇒ (x, y, uiParams.ghostWL)
         case WhiteGhost(x,y,Right)  ⇒ (x, y, uiParams.ghostWR)}
-      .foreach{case(x, y, img) ⇒ graphics.drawImage(img, x, y, null)}
-      graphics.dispose()}
+      .foreach{case(x, y, img) ⇒ {
+        val ix = (x * uiParams.squareSize).toInt
+        val iy = (y * uiParams.squareSize).toInt
+        val iw = img.getWidth
+        val ih = img.getHeight
+        val sh = uiParams.squareSize / 2
+        graphics.drawImage(img, ix - (iw / 2) + sh, iy - (ih / 2) + sh, null)}}
+      //Dispose and update
+      graphics.dispose()
+      revalidate()}
     //Override methods
     override def paintComponent(g:Graphics2D) =
       g.drawImage(screanImg, 0, 0, size.getWidth.toInt, size.getHeight.toInt, null)}
-
-
-
-
-
-
   //
   class MyFrame extends Frame{
     //
     val maze = new Maze(Params, walls)
     //
     contents = maze
-    override def closeOperation() = {System.exit(1)}
+    override def closeOperation() = System.exit(1)
     //
-
-
-
-
-    maze.update(List(
-      BigPacman(25,12,Right),
-      Pellet(50,12),
-      BlueGhost(75,12,Right)
-
-
-
-
-
-
+   maze.update(List(
+      BigPacman(1,1,Right),
+      Pellet(3,3),
+      BlueGhost(1,3,Right)
     ))
 
 

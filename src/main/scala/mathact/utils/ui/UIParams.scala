@@ -12,6 +12,8 @@ import javax.swing.ImageIcon
 object UIParams {
   trait BorderFrame{
     val backgroundColor:Color}
+  trait TVFrame{
+    val backgroundColor:Color}
   trait FlowFrame{
     val backgroundColor:Color}
   trait GridFrame{
@@ -52,6 +54,9 @@ object UIParams {
     val stepEnabledIcon:ImageIcon
     val stepDisableIcon:ImageIcon
     val executorButtonsSize:Int}
+  trait ResetButton{
+    val resetButtonIcon:ImageIcon
+    val resetButtonSize:Int}
   trait MinMaxAvgPane extends NameLabel with NumberLabel with SeparatorLabel{
     val textColor:Color
     val borderColor:Color
