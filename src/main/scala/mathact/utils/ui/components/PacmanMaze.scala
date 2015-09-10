@@ -77,7 +77,7 @@ extends Panel with UIComponent{
       graphics.drawImage(background, 0, 0, null)
       //Draw objects
       objects.flatMap{
-        case Pacman2(x,y)          ⇒ Some(x, y, uiParams.pacman)
+        case Pacman2(x,y,_)        ⇒ Some(x, y, uiParams.pacman)
         case Pacman1(x,y,Up)       ⇒ Some(x, y, uiParams.pacmanSU)
         case Pacman1(x,y,Down)     ⇒ Some(x, y, uiParams.pacmanSD)
         case Pacman1(x,y,Left)     ⇒ Some(x, y, uiParams.pacmanSL)
@@ -113,6 +113,7 @@ extends Panel with UIComponent{
         graphics.drawImage(img, ix - (iw / 2) + sh, iy - (ih / 2) + sh, null)}}
       //Dispose and update
       graphics.dispose()
+      repaint()
       revalidate()}
     case _ ⇒}
   def getN:Int = n

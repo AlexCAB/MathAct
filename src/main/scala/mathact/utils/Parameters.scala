@@ -175,7 +175,7 @@ class Parameters {
   //SimpleClassicPacman
   object SimpleClassicPacman extends Pacman
   with TVFrame with HorizontalSlider with Executor with ResetButton with NameLabel with NumberLabel{
-    val backgroundColor = Color.BLACK
+    val backgroundColor = new Color(199,217,235)
     val squareSize:Int = 25
     val maze0       = ImageIO.read(getClass.getResource("/maze_0.png"))
     val maze1U      = ImageIO.read(getClass.getResource("/maze_1_u.png"))
@@ -232,27 +232,9 @@ class Parameters {
     val executorButtonsSize = 28
     val resetButtonIcon:ImageIcon = new ImageIcon(getClass.getResource("/reset.png"))
     val resetButtonSize:Int = 28
-    val textColor:Color = Color.YELLOW
+    val textColor:Color = Color.BLUE
     val nameFont:Font = new Font(Font.SERIF, Font.BOLD, 14)
     val nameHeight:Int = 16
-    val numberFormat = "#0.000000"
-    val numberFont = new Font(Font.SERIF, 0, 14)
-    val numberHeight = 16
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
+    val numberFormat = "#0000000"
+    val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
+    val numberHeight = 16}}

@@ -12,7 +12,7 @@ trait MazeObj
 object MazeObj {
   case class Pacman0(x:Double, y:Double, move:Move) extends MazeObj
   case class Pacman1(x:Double, y:Double, move:Move) extends MazeObj
-  case class Pacman2(x:Double, y:Double) extends MazeObj
+  case class Pacman2(x:Double, y:Double, move:Move) extends MazeObj
   case class Pellet(x:Double, y:Double) extends MazeObj
   case class PowerPellet(x:Double, y:Double) extends MazeObj
   case class BlueGhost(x:Double, y:Double, move:Move) extends MazeObj

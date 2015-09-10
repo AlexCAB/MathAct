@@ -39,6 +39,10 @@ abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3)
     reactions += {case ButtonClicked(_) ⇒{
       step()}}}
   contents ++= List(startBtn, stopBtn, stepBtn)
+  //Methods
+  def setStarted(isStarted:Boolean):Unit = {
+    startBtn.enabled = ! isStarted
+    stopBtn.enabled = isStarted}
   //Abstract methods
   def start()
   def stop()

@@ -3,7 +3,7 @@ package mathact.utils.definitions
 
 /**
  * Moves.
- * Created by WORK on 09.09.2015.
+ * Created by CAB on 09.09.2015.
  */
 
 trait Move
