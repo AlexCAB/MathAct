@@ -39,7 +39,10 @@ object SimpleClassicPacmanExample extends Workbench{
          █,○,○,○,○,○,○,○,○,○,○,○,○,○,○,█,⏎,
          █,█,█,█,█,█,█,█,█,█,█,█,█,█,█,█)
 
-    pacmanFunction{(x,y,t,availableMoves,prevMove) ⇒
+
+    AgentState.Dead
+
+    pacmanFunction{(x, y, t, s, availableMoves, prevMove) ⇒
       val m = direction match{
         case 0 ⇒ Move.Stay
         case 1 ⇒ Move.Up
@@ -50,7 +53,8 @@ object SimpleClassicPacmanExample extends Workbench{
       m
     }
 
-    def ghostFun(x:Int,y:Int,t:Long,availableMoves:Set[Move],prevMove:Move):Move = {
+
+    def ghostFun(x:Int, y:Int, t:Long, s:AgentState, availableMoves:Set[Move], prevMove:Move):Move = {
       (prevMove, availableMoves.filter(_ != Move.Stay)) match{
         case (_, ms) if ms.size == 1 ⇒ ms.head
         case (pm, ms) if ms.size == 2 && ms.contains(pm) ⇒ pm

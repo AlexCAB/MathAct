@@ -16,7 +16,7 @@ abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3)
     uiParams.executorButtonsSize * 3,
     uiParams.executorButtonsSize)
   //Buttons
-  val startBtn:Button = new Button{
+  private val startBtn:Button = new Button{
     icon = uiParams.startEnabledIcon
     disabledIcon = uiParams.startDisableIcon
     reactions += {case ButtonClicked(_) ⇒{
@@ -24,7 +24,7 @@ abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3)
       stopBtn.enabled = true
       stepBtn.enabled = false
       start()}}}
-  val stopBtn:Button = new Button{
+  private val stopBtn:Button = new Button{
     icon = uiParams.stopEnabledIcon
     disabledIcon = uiParams.stopDisableIcon
     enabled = false
@@ -33,16 +33,23 @@ abstract class ExecuteButtons(uiParams:UIParams.Executor) extends GridPanel(1,3)
       startBtn.enabled = true
       stepBtn.enabled = true
       stop()}}}
-  val stepBtn:Button = new Button{
+  private val stepBtn:Button = new Button{
     icon = uiParams.stepEnabledIcon
     disabledIcon = uiParams.stepDisableIcon
     reactions += {case ButtonClicked(_) ⇒{
       step()}}}
-  contents ++= List(startBtn, stopBtn, stepBtn)
+  private val buttons = List(startBtn, stopBtn, stepBtn)
+  contents ++= buttons
   //Methods
   def setStarted(isStarted:Boolean):Unit = {
     startBtn.enabled = ! isStarted
     stopBtn.enabled = isStarted}
+  def setEnable(isEnable:Boolean):Unit = isEnable match{
+    case false ⇒ buttons.foreach(_.enabled = false)
+    case true ⇒ {
+      startBtn.enabled = true
+      stopBtn.enabled = false
+      stepBtn.enabled = true}}
   //Abstract methods
   def start()
   def stop()

@@ -1,8 +1,9 @@
 package mathact.utils.ui.components
 import java.awt.Dimension
 import java.awt.image.BufferedImage
-import mathact.utils.definitions.MazeObj
-import mathact.utils.definitions.MazeObj._
+import mathact.utils.definitions.PacmanImg._
+import mathact.utils.definitions.PacmanObj
+import mathact.utils.definitions.PacmanObj._
 import mathact.utils.definitions.Move._
 import mathact.utils.ui.UIParams
 import scala.swing._
@@ -70,40 +71,42 @@ extends Panel with UIComponent{
       img.getColorModel,
       img.copyData(null),
       img.isAlphaPremultiplied, null))}
-  def update(objects:List[MazeObj]):Unit = (backgroundImg, screenImg) match{
+  def update(objects:List[PacmanObj]):Unit = (backgroundImg, screenImg) match{
     case (Some(background), Some(screen)) ⇒ {
       val graphics = screen.createGraphics()
       //Draw background
       graphics.drawImage(background, 0, 0, null)
       //Draw objects
       objects.flatMap{
-        case Pacman2(x,y,_)        ⇒ Some(x, y, uiParams.pacman)
-        case Pacman1(x,y,Up)       ⇒ Some(x, y, uiParams.pacmanSU)
-        case Pacman1(x,y,Down)     ⇒ Some(x, y, uiParams.pacmanSD)
-        case Pacman1(x,y,Left)     ⇒ Some(x, y, uiParams.pacmanSL)
-        case Pacman1(x,y,Right)    ⇒ Some(x, y, uiParams.pacmanSR)
-        case Pacman0(x,y,Up)       ⇒ Some(x, y, uiParams.pacmanBU)
-        case Pacman0(x,y,Down)     ⇒ Some(x, y, uiParams.pacmanBD)
-        case Pacman0(x,y,Left)     ⇒ Some(x, y, uiParams.pacmanBL)
-        case Pacman0(x,y,Right)    ⇒ Some(x, y, uiParams.pacmanBR)
-        case Pellet(x,y)           ⇒ Some(x, y, uiParams.pellet)
-        case PowerPellet(x,y)      ⇒ Some(x, y, uiParams.powerPellet)
-        case BlueGhost(x,y,Stay)   ⇒ Some(x, y, uiParams.ghostB)
-        case BlueGhost(x,y,Up)     ⇒ Some(x, y, uiParams.ghostBU)
-        case BlueGhost(x,y,Down)   ⇒ Some(x, y, uiParams.ghostBD)
-        case BlueGhost(x,y,Left)   ⇒ Some(x, y, uiParams.ghostBL)
-        case BlueGhost(x,y,Right)  ⇒ Some(x, y, uiParams.ghostBR)
-        case RedGhost(x,y,Stay)    ⇒ Some(x, y, uiParams.ghostR)
-        case RedGhost(x,y,Up)      ⇒ Some(x, y, uiParams.ghostRU)
-        case RedGhost(x,y,Down)    ⇒ Some(x, y, uiParams.ghostRD)
-        case RedGhost(x,y,Left)    ⇒ Some(x, y, uiParams.ghostRL)
-        case RedGhost(x,y,Right)   ⇒ Some(x, y, uiParams.ghostRR)
-        case WhiteGhost(x,y,Stay)  ⇒ Some(x, y, uiParams.ghostW)
-        case WhiteGhost(x,y,Up)    ⇒ Some(x, y, uiParams.ghostWU)
-        case WhiteGhost(x,y,Down)  ⇒ Some(x, y, uiParams.ghostWD)
-        case WhiteGhost(x,y,Left)  ⇒ Some(x, y, uiParams.ghostWL)
-        case WhiteGhost(x,y,Right) ⇒ Some(x, y, uiParams.ghostWR)
-        case Empty ⇒ None}
+        case ImgObj(x,y,Up,Pacman0)        ⇒ Some(x, y, uiParams.pacmanBU)
+        case ImgObj(x,y,Down,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBD)
+        case ImgObj(x,y,Left,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBL)
+        case ImgObj(x,y,Right,Pacman0)     ⇒ Some(x, y, uiParams.pacmanBR)
+        case ImgObj(x,y,Stay,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBR)
+        case ImgObj(x,y,Up,Pacman1)        ⇒ Some(x, y, uiParams.pacmanSU)
+        case ImgObj(x,y,Down,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSD)
+        case ImgObj(x,y,Left,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSL)
+        case ImgObj(x,y,Right,Pacman1)     ⇒ Some(x, y, uiParams.pacmanSR)
+        case ImgObj(x,y,Stay,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSR)
+        case ImgObj(x,y,_,Pacman2)         ⇒ Some(x, y, uiParams.pacman)
+        case Pellet(x,y)                   ⇒ Some(x, y, uiParams.pellet)
+        case PowerPellet(x,y)              ⇒ Some(x, y, uiParams.powerPellet)
+        case ImgObj(x,y,Stay,RedGhost)     ⇒ Some(x, y, uiParams.ghostB)
+        case ImgObj(x,y,Up,RedGhost)       ⇒ Some(x, y, uiParams.ghostBU)
+        case ImgObj(x,y,Down,RedGhost)     ⇒ Some(x, y, uiParams.ghostBD)
+        case ImgObj(x,y,Left,RedGhost)     ⇒ Some(x, y, uiParams.ghostBL)
+        case ImgObj(x,y,Right,RedGhost)    ⇒ Some(x, y, uiParams.ghostBR)
+        case ImgObj(x,y,Stay,BlueGhost)    ⇒ Some(x, y, uiParams.ghostR)
+        case ImgObj(x,y,Up,BlueGhost)      ⇒ Some(x, y, uiParams.ghostRU)
+        case ImgObj(x,y,Down,BlueGhost)    ⇒ Some(x, y, uiParams.ghostRD)
+        case ImgObj(x,y,Left,BlueGhost)    ⇒ Some(x, y, uiParams.ghostRL)
+        case ImgObj(x,y,Right,BlueGhost)   ⇒ Some(x, y, uiParams.ghostRR)
+        case ImgObj(x,y,Stay,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostW)
+        case ImgObj(x,y,Up,WhiteGhost)     ⇒ Some(x, y, uiParams.ghostWU)
+        case ImgObj(x,y,Down,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWD)
+        case ImgObj(x,y,Left,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWL)
+        case ImgObj(x,y,Right,WhiteGhost)  ⇒ Some(x, y, uiParams.ghostWR)
+        case ImgObj(_,_,_,EmptyImg) ⇒ None}
         .foreach{case(x, y, img) ⇒ {
         val ix = (x * uiParams.squareSize).toInt
         val iy = (y * uiParams.squareSize).toInt
