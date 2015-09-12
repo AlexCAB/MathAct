@@ -11,11 +11,9 @@ import math.random
  */
 
 object SimpleClassicPacmanExample extends Workbench{
-
+  //Variables
   var direction = 0
-
-
-
+  //Keyboard input for the pacman control.
   new KeyboardInput{
     keyPressed{
       case UP    ⇒ {direction = 1}
@@ -23,37 +21,28 @@ object SimpleClassicPacmanExample extends Workbench{
       case LEFT  ⇒ {direction = 3}
       case RIGHT ⇒ {direction = 4}
     }
-
   }
-
-
+  //Game instance
   new SimpleClassicPacman("Pacman example"){
-
-    maze(█,█,█,█,█,█,█,█,█,█,█,█,█,█,█,█,⏎,
-         █,ᗧ,○,○,○,○,○,○,█,○,○,○,○,○,○,█,⏎,
-         █,█,○,█,█,○,█,█,█,○,█,█,○,█,○,█,⏎,
-         █,○,○,●,█,○,○,○,○,○,○,○,○,█,○,█,⏎,
-         █,○,█,█,█,█,█,○,█,█,○,█,○,█,○,█,⏎,
-         █,○,○,○,○,█,B,▒,I,█,○,█,●,█,○,█,⏎,
-         █,○,█,█,○,█,█,█,█,█,○,█,█,█,○,█,⏎,
-         █,○,○,○,○,○,○,○,○,○,○,○,○,○,○,█,⏎,
+    //Maze
+    maze(█,█,█,█,█,█,█,█,█,█,█,█,█,█,█,█,⏎,   //ᗧ | C - Pacman
+         █,ᗧ,○,○,○,○,○,○,█,○,○,○,○,○,○,█,⏎,   //B     - Blinky
+         █,█,○,█,█,○,█,█,█,○,█,█,○,█,○,█,⏎,   //I     - Inky
+         █,○,○,●,█,○,○,○,○,○,○,○,○,█,○,█,⏎,   //○ | o - Pellet
+         █,○,█,█,█,█,█,○,█,█,○,█,○,█,○,█,⏎,   //● | P - Power pellet
+         █,○,○,○,○,█,B,▒,I,█,○,█,●,█,○,█,⏎,   //█ | H - Wall
+         █,○,█,█,○,█,█,█,█,█,○,█,█,█,○,█,⏎,   //▒ | E - Empty space
+         █,○,○,○,○,○,○,○,○,○,○,○,○,○,○,█,⏎,   //⏎ | R - New line
          █,█,█,█,█,█,█,█,█,█,█,█,█,█,█,█)
-
-
-    AgentState.Dead
-
-    pacmanFunction{(x, y, t, s, availableMoves, prevMove) ⇒
-      val m = direction match{
-        case 0 ⇒ Move.Stay
-        case 1 ⇒ Move.Up
-        case 2 ⇒ Move.Down
-        case 3 ⇒ Move.Left
-        case 4 ⇒ Move.Right}
-      direction = 0
-      m
-    }
-
-
+    //Pacman function
+    pacmanFunction{(x, y, t, s, availableMoves, prevMove) ⇒ direction match{
+      case 0 ⇒ Move.Stay
+      case 1 ⇒ Move.Up
+      case 2 ⇒ Move.Down
+      case 3 ⇒ Move.Left
+      case 4 ⇒ Move.Right
+    }}
+    //Ghost function (same fof both ghost)
     def ghostFun(x:Int, y:Int, t:Long, s:AgentState, availableMoves:Set[Move], prevMove:Move):Move = {
       (prevMove, availableMoves.filter(_ != Move.Stay)) match{
         case (_, ms) if ms.size == 1 ⇒ ms.head
@@ -65,18 +54,13 @@ object SimpleClassicPacmanExample extends Workbench{
             case Move.Left ⇒ Move.Right
             case Move.Right ⇒ Move.Left
             case m ⇒ m}
-          ms.filter(_ != rpm).toList((random * ms.size - 1).toInt)}}
+          ms.filter(_ != rpm).toList((random * ms.size - 1).toInt)
+        }
+      }
     }
-
+    //Set ghost function for Blinky
     blinkyFunction(ghostFun)
-
+    //Set ghost function for Inky
     inkyFunction(ghostFun)
-
-
-
-
-
-
   }
-
 }

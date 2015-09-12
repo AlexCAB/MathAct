@@ -24,7 +24,7 @@ abstract class SimpleClassicPacman(
   blinkyTimeout:Int = 6,
   inkyTimeout:Int = 7,
   initScore:Int = 100,
-  funkyTimeout:Int = 100,              //Before out of Funky state
+  funkyTimeout:Int = 200,              //Before out of Funky state
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
   screenW:Int = Int.MaxValue,
@@ -88,9 +88,9 @@ extends Tool {
     x:Double, y:Double, move:Move, img:PacmanImg, time:Int, state:AgentState, fun:AgentFun, collision:Option[(Int,Int)])
     extends MazeObj[Inky](x, y, move, img, time, state, fun, collision)
   //Variables
+  private var maze:List[List[MazeDefObj]] = List(List())
   private var gameTime:Long = 0
-  private var score:Int = initScore
-  private var maze:List[List[(Int,Int, MazeDefObj)]] = List(List())
+  private var gameScore:Int = initScore
   private var pacman:Pacman = MazeObj[Pacman]()
   private var blinky:Blinky = MazeObj[Blinky]()
   private var inky:Inky = MazeObj[Inky]()
@@ -106,11 +106,26 @@ extends Tool {
   def pacmanFunction(f:AgentFun) = {pacman = pacman.setFun(f)}
   def blinkyFunction(f:AgentFun) = {blinky = blinky.setFun(f)}
   def inkyFunction(f:AgentFun) = {inky = inky.setFun(f)}
-  def updated() = {}
+  def time:Long = gameTime
+  def score:Int = gameScore
+  def pacmanPos:(Int,Int) = (pacman.x.toInt, pacman.y.toInt)
+  def pacmanMove:Move = pacman.move
+  def pacmanState:AgentState = pacman.state
+  def blinkyPos:(Int,Int) = (blinky.x.toInt, blinky.y.toInt)
+  def blinkyMove:Move = blinky.move
+  def blinkyState:AgentState = blinky.state
+  def inkyPos:(Int,Int) = (inky.x.toInt, inky.y.toInt)
+  def inkyMove:Move = inky.move
+  def inkyState:AgentState = inky.state
+  def mazeM:Int = maze.size        //Lines
+  def mazeN:Int = maze.head.size   //Columns
+  def mazeObjAt(x:Int,y:Int):MazeDefObj = (x,y) match{
+    case (x,y) if x < 0 || x >= mazeN || y < 0 || y >= mazeM ⇒ E
+    case (x,y) ⇒ maze(x)(y)}
   //Functions
   private def buildMazeObjects():List[PacmanObj] =
     pellets.toList ++ powerPellets.toList ++ List(blinky, inky, pacman).filter(_.eState != AgentState.NotDefined)
-  private def prepareAndCheckMaze(objs:Seq[MazeDefObj]):List[List[(Int,Int,MazeDefObj)]] = {
+  private def prepareAndCheckMaze(objs:Seq[MazeDefObj]):List[List[MazeDefObj]] = {
     val maze  = objs
       .foldRight(List(List[MazeDefObj]())){
       case (e,ll) if e == ⏎ || e == R  ⇒ List() +: ll
@@ -134,10 +149,10 @@ extends Tool {
       throw new SyntaxException("Incorrect maze: must be only not more then one Blinky ghost")}
     if(maze.map(_.count(_ == I)).sum > 1){
       throw new SyntaxException("Incorrect maze: must be only not more then one Inky ghost")}
-    maze.zipWithIndex.map{case (l,y) ⇒ l.zipWithIndex.map{case(e,x) ⇒ (x,y,e)}}}
+    maze}
   private def buildInitState():Unit = {
     //Build maze objects
-    val iMaze = maze.flatMap(e ⇒ e)
+    val iMaze = maze.zipWithIndex.map{case (l,y) ⇒ l.zipWithIndex.map{case(e,x) ⇒ (x,y,e)}}.flatMap(e ⇒ e)
     def findObj[T <: MazeObj[T] : Manifest](prev:T, d:MazeDefObj, img:PacmanImg, state:AgentState):T = {
       iMaze.find{case (_,_,e) ⇒ e == d} match{
         case Some((x,y,_)) ⇒ prev.setXY(x,y).setImg(img).setState(state)
@@ -152,7 +167,7 @@ extends Tool {
   private def getSetOfAvailableMoves(x:Int, y:Int):Set[Move] = {
     Set((Move.Up, x ,y - 1),(Move.Down, x, y + 1),(Move.Left,x - 1 ,y),(Move.Right,x + 1 ,y),(Move.Stay, x, y)).flatMap{
       case (m,nx,ny) if nx < 0 || ny < 0 || nx >= maze.head.size || ny >= maze.size ⇒ None
-      case (m,nx,ny) if maze(ny)(nx)._3 == H ⇒ None
+      case (m,nx,ny) if maze(ny)(nx) == H ⇒ None
       case (m,_,_) ⇒ Some(m)}}
   private def eRounding(x:Double):Double = x match{
     case x if (1 - (x - x.toInt)) < .0001 ⇒ x.toInt + 1
@@ -169,8 +184,8 @@ extends Tool {
     (eRounding(nx), eRounding(ny))}
   private def ghostCollision[T <: MazeObj[T]](ghost:T):T = ghost.eState match {
     case AgentState.Funky ⇒ {
-      score += 30
-      val gs = maze.flatMap(_.find{
+      gameScore += 30
+      val gs = maze.zipWithIndex.map{case (l,y) ⇒ l.zipWithIndex.map{case(e,x) ⇒ (x,y,e)}}.flatMap(_.find{
         case (_,_,e) if ghost.isInstanceOf[Blinky] ⇒ e == B
         case (_,_,e) if ghost.isInstanceOf[Inky] ⇒ e == I
         case _ ⇒ false})
@@ -178,7 +193,7 @@ extends Tool {
        case Some((x,y,_)) ⇒ ghost.setXY(x,y).setTime(0)
        case _ ⇒ ghost}}
     case AgentState.Vagrant | AgentState.Pursuer | AgentState.Live ⇒ {
-      score -= 20
+      gameScore -= 20
       ghost}
     case _ ⇒ ghost}
   private def updateGhostState(state:AgentState):Unit = {
@@ -196,12 +211,24 @@ extends Tool {
     gameBegin = true
     updateGhostState(AgentState.Vagrant)}
   private def gameReStart():Unit = if(gameBegin || gameOver){
-
-
-
-
-
-  }
+    //Clear data
+    gameTime = 0
+    gameScore = initScore
+    pacman = MazeObj[Pacman](pacman.fun)
+    blinky = MazeObj[Blinky](blinky.fun)
+    inky = MazeObj[Inky](inky.fun)
+    pellets = Set()
+    powerPellets = Set()
+    funkyTimer = 0
+    gameBegin = false
+    gameOver = false
+    //Rebuilg maze objects
+    buildInitState()
+    uiMaze.update(buildMazeObjects())
+    uiScore.setNumber(Double.NaN)
+    //Set buttons state and stop timer
+    uiExecBtn.setEnable(true)
+    timer.stop()}
   private def gameEnd():Unit = if(! gameOver){
     gameOver = true
     updateGhostState(AgentState.Dead)
@@ -211,8 +238,7 @@ extends Tool {
     //Init
     val pPellets = pellets
     val pPowerPellets = powerPellets
-    val pScope = score
-    //Object interaction logic
+    val pScope = gameScore
     val (px, py) = (pacman.x.toInt, pacman.y.toInt)
     //Check for ghost collision
     def checkCol[T <: MazeObj[T]](ghost: T):T = (ghost.ex, ghost.ey, ghost.eCol) match {
@@ -227,13 +253,13 @@ extends Tool {
     pellets.foreach{
       case p:PacmanObj.Pellet if p.x.toInt == px  && p.y.toInt == py ⇒ {
         pellets = pellets.filter(_ != p)
-        score += 9}
+        gameScore += 9}
       case _ ⇒}
     //Check for power pellet
     powerPellets.foreach{
       case p:PacmanObj.PowerPellet if p.x.toInt == px  && p.y.toInt == py ⇒ {
       powerPellets = powerPellets.filter(_ != p)
-        score += 100
+        gameScore += 100
         updateGhostState(AgentState.Funky)
         funkyTimer = funkyTimeout}
       case _ ⇒}
@@ -249,10 +275,14 @@ extends Tool {
           case (nm, true) if nm != Move.Stay ⇒ {
             val (px,py) = calcPartPositionByMove(x, y, nm, if(animation) 5 else 1)
             Pacman(px, py, nm, img, 4, state, fun)}
-          case (nm, false) if nm != Move.Stay ⇒ {
+          case (nm, false) ⇒ {
             Pacman(x, y, nm, img, 0, state, fun)}
+          case (Move.Stay, _)⇒ {
+            Pacman(x, y, Move.Stay, img, 0, state, fun)}
           case _ ⇒ {
             pacman}}}
+      case Pacman(x, y, move, img, time, state, fun) if (! animation) && time != 0 ⇒ {
+        Pacman(x, y, move, img, time - 1, state, fun)}
       case Pacman(x, y, move, _, time, state, fun) if animation && time == 4 ⇒ {
         val (px,py) = calcPartPositionByMove(x, y, move, 5)
         Pacman(px, py, move, PacmanImg.Pacman1, 3, state, fun)}
@@ -278,6 +308,8 @@ extends Tool {
           //Apply move, set Timer
           val (px,py) = calcPartPositionByMove(x, y, nextMove, if(animation) timeout else 1)
           ghost.setXY(px,py).setMove(nextMove).setTime(if(nextMove != Move.Stay) timeout - 1 else 0)}
+      case (x, y, move, time, _, _) if (! animation) && time != 0 ⇒ {
+        ghost.setTime(time - 1)}
       case (x, y, move, time, _, _) if animation && time != 0 ⇒ {
         val (px,py) = calcPartPositionByMove(x, y, move, timeout)
         ghost.setXY(px,py).setTime(time - 1)}
@@ -294,23 +326,23 @@ extends Tool {
         0}
       case t ⇒ t - 1}
     //Check for game over
-    if((score < 0 || pellets.isEmpty) && pacman.state != AgentState.NotDefined && (gameTime % 5) == 0){gameEnd()}
+    if((gameScore < 0 || pellets.isEmpty) && pacman.state != AgentState.NotDefined && (gameTime % 5) == 0){
+      gameEnd()}
     //Decrease scope if not change and 5 tics gone
-    if(pScope == score && (gameTime % 5) == 0 && pacman.state != AgentState.NotDefined && (! gameOver)){score -= 1}
+    if(pScope == gameScore && (gameTime % 5) == 0 && pacman.state != AgentState.NotDefined && (! gameOver)){
+      gameScore -= 1}
     //Update maze and
-    uiScore.setNumber(score)
+    uiScore.setNumber(gameScore)
     val update =
-      pPacman != pacman ||
-      pBlinky != blinky ||
-      pInky != inky ||
+      (pPacman.x,pPacman.y,pPacman.img) != (pacman.x,pacman.y,pacman.img) ||
+      (pBlinky.x,pBlinky.y,pBlinky.img) != (blinky.x,blinky.y,blinky.img) ||
+      (pInky.x,  pInky.y,  pInky.img)   != (inky.x,  inky.y,  inky.img) ||
       pPellets != pellets ||
       pPowerPellets != powerPellets
     if(update){
       uiMaze.update(buildMazeObjects())}
-    //Call gear update function
-
-    //???
-
+    //Call gear update function each zero time
+    if(pacman.time == 0 || blinky.time == 0 || inky.time == 0){gear.changed()}
     //Increment time
     gameTime += 1}
   //Timer
@@ -347,7 +379,7 @@ extends Tool {
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     def start() = {
       //Construct maze
-      uiMaze.setWalls(maze.map(_.map(_._3 == H)))
+      uiMaze.setWalls(maze.map(_.map(_ == H)))
       uiMaze.update(buildMazeObjects())
       //Show
       frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)

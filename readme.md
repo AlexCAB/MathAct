@@ -154,6 +154,9 @@
       <a href="#PotBoard">PotBoard</a><br>
       <a href="#ValuesBoard">ValuesBoard</a><br>
       <a href="#SimpleStaticGraph">SimpleStaticGraph</a><br>
+      <a href="#KeyboardInput">KeyboardInput</a><br>
+      <a href="#PacmanView">PacmanView</a><br>
+      <a href="#SimpleClassicPacman">SimpleClassicPacman</a><br>
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0">Tools parameters</h2>
         <div align="justify">
             <p>All tools take parameters by the class constructor arguments.</p>
@@ -518,6 +521,101 @@
             resizeByWeight:Boolean -- change size of nodes and edges by
                they weight (default: false),
             showLabels:Boolean -- show or hide labels of nodes and edges(default: true)
+        </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="KeyboardInput">KeyboardInput tool</h2>
+        <div align="justify">
+            Input tool for listing of keyboard input.
+        </div>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/input/KeyboardInput.scala">Source code</a>,
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/input/KeyboardInputExample.scala">Example code</a>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            keyPressed{
+              case &lt;key name&gt; => &lt;make something&gt;
+            }
+            keyReleased{
+              case &lt;key name&gt; => &lt;make something&gt;
+            }
+        </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="PacmanView">PacmanView visualization tool</h2>
+        <div align="center">
+            <img border=0 src="docs/PacmanView.png">
+        </div>
+        <div align="justify">
+            Very simple visualisation tool, which just show of Pacman and Ghosts position in the maze.
+        </div>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/games/PacmanView.scala">Source code</a>,
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/games/PacmanViewExample.scala">Example code</a>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            maze(&lt;maze objects&gt;)
+            mazeM                     //Return num of lines
+            mazeN                     //Return num of columns
+            mazeObjAt(&lt;coordinates&gt;)  //Return maze object at given coordinates
+            pacmanOf{&lt;coordinates&gt;}
+            blinkyOf{&lt;coordinates&gt;}
+            inkyOf{&lt;coordinates&gt;}
+            <p>Where:</p>
+            &lt;maze objects&gt; -- Maze objects separated by a comma:
+              P - Power pellet; o - Pelle; H - Wall; E - Empty space;
+              R - New line.
+            &lt;coordinates&gt; -- (X,Y) double value.
+        </pre></div>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general
+               parameters.
+        </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="SimpleClassicPacman">SimpleClassicPacman calculation/visualization tool</h2>
+        <div align="center">
+            <img border=0 src="docs/SimpleClassicPacman.png">
+        </div>
+        <div align="justify">
+            Simple (with two ghost) classic Pacman game implementation, inspired by <a href="http://ai.berkeley.edu/project_overview.html">UC Berkeley the Pac-Man Projects</a>.
+        </div>
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/games/SimpleClassicPacman.scala">Source code</a>,
+        <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/games/SimpleClassicPacmanExample.scala">Example code</a>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            maze(&lt;maze objects&gt;)
+            mazeM                     //Return num of lines
+            mazeN                     //Return num of columns
+            mazeObjAt(&lt;coordinates&gt;)  //Return maze object at given coordinates
+            pacmanFunction{&lt;agent function&gt;}
+            blinkyFunction{&lt;agent function&gt;}
+            inkyFunction{&lt;agent function&gt;}
+            time                      //Return dame time (Long)
+            score                     //Return dame score (Int)
+            pacmanPos                 //Return pacman position ((Int,Int))
+            pacmanMove                //Return pacman last move (Up, Down, Left, Right)
+            pacmanState               //Return pacman state (NotDefined, Dead, Live)
+            blinkyPos
+            blinkyMove
+            blinkyState               //Return pacman state (NotDefined, Dead, Live, Funky, Vagrant)
+            inkyPos
+            inkyMove
+            inkyState:AgentState
+            <p>Where:</p>
+            &lt;maze objects&gt; -- Maze objects separated by a comma:
+              C - Pacman; B - Blinky, I - Inky; P - Power pellet; o - Pelle; H - Wall;
+              E - Empty space; R - New line.
+            &lt;coordinates&gt; -- (X,Y) integer value.
+            &lt;agent function&gt; -- (x:Int, y:Int, t:Long, s:AgentState,
+              availableMoves:Set[Move], prevMove:Move) => Move function.
+       </pre></div>
+        <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+        <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general
+               parameters.
+            speedInit:Double -- Speed of game, time in hertz (default: 20).
+            speedMin:Double -- Min speed (default: .1).
+            speedMax:Double -- Max speed (default: 100).
+            animation:Boolean -- ON/OFF animation (default: true).
+            started:Boolean -- Start right after creation (default: false).
+            blinkyTimeout:Int -- Influence on Blinky speed (default: 6).
+            inkyTimeout:Int -- Influence on Inky speed (default: 7).
+            initScore:Int -- Init score (default: 100).
+            funkyTimeout:Int -- Before out of Funky state (default: 200).
         </pre></div>
 </html>
 

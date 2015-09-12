@@ -21,6 +21,7 @@ extends BorderPanel with UIComponent{
   private var callChanged = true
   //Construction
   val slider = new JSlider
+  slider.setFocusable(false)
 //  val initWidth = sliderWidth
 //  val initHeight = sliderHeight
   preferredSize = new Dimension(uiParam.sliderWidth, uiParam.sliderHeight)

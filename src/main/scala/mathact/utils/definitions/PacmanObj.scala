@@ -12,5 +12,7 @@ abstract class PacmanObj(ox:Double, oy:Double)
 object PacmanObj {
   case class Pellet(x:Double, y:Double) extends PacmanObj(x,y)
   case class PowerPellet(x:Double, y:Double) extends PacmanObj(x,y)
-  object ImgObj{def unapply(o:ImgObj):Option[(Double,Double,Move,PacmanImg)] = Some((o.mx,o.my,o.mMove,o.mImg))}
-  abstract class ImgObj(val mx:Double, val my:Double, val mMove:Move,val mImg:PacmanImg) extends PacmanObj(mx,my)}
+  object ImgObj{
+    def apply(x:Double, y:Double, move:Move, img:PacmanImg):ImgObj = new ImgObj(x, y, move, img)
+    def unapply(o:ImgObj):Option[(Double,Double,Move,PacmanImg)] = Some((o.mx,o.my,o.mMove,o.mImg))}
+  class ImgObj(val mx:Double, val my:Double, val mMove:Move,val mImg:PacmanImg) extends PacmanObj(mx,my)}
