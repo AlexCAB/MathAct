@@ -22,15 +22,12 @@ extends BorderPanel with UIComponent{
   //Construction
   val slider = new JSlider
   slider.setFocusable(false)
-//  val initWidth = sliderWidth
-//  val initHeight = sliderHeight
   preferredSize = new Dimension(uiParam.sliderWidth, uiParam.sliderHeight)
   slider.setOrientation(SwingConstants.HORIZONTAL)
   slider.setMinimum((min * uiParam.sliderScale).toInt)
   slider.setMaximum((max * uiParam.sliderScale).toInt)
   slider.setValue((init * uiParam.sliderScale).toInt)
   slider.setBackground(uiParam.backgroundColor)
-//  slider.setPreferredSize(new Dimension(sliderWidth, initHeight))
   layout(Component.wrap(slider)) = BorderPanel.Position.Center
   //Listeners
   slider.addChangeListener(new ChangeListener {def stateChanged(e: ChangeEvent) = {

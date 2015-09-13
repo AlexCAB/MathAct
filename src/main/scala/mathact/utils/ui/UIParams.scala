@@ -23,6 +23,11 @@ object UIParams {
     val sliderWidth:Int
     val sliderScale:Int
     val backgroundColor:Color}
+  trait DiscreteHorizontalSlider{
+    val discreteSliderFont:Font
+    val discreteSliderTextColor:Color
+    val discreteSliderHeight:Int
+    val backgroundColor:Color}
   trait DiapasonLabel{
     val valueFont:Font
     val valueHeight:Int}
@@ -45,6 +50,11 @@ object UIParams {
     val sliderWidth:Int
     val valueFont:Font
     val valueHeight:Int}
+  trait Switch extends NameLabel with DiscreteHorizontalSlider{
+    val discreteSliderFont:Font
+    val discreteSliderTextColor:Color
+    val discreteSliderHeight:Int
+    val backgroundColor:Color}
   trait Measurer extends NameLabel with SeparatorLabel with NumberLabel
   trait Executor{
     val startEnabledIcon:ImageIcon

@@ -12,8 +12,8 @@ import scala.swing.{Graphics2D, Frame, Panel}
  * Created by CAB on 07.09.2015.
  */
 
-object PacmanMaze extends App{
-  println("==== PacmanMaze ====")
+object PacmanMazeProto extends App{
+  println("==== PacmanMazeProto ====")
   //
   object Params extends UIParams.Pacman{
     val squareSize:Int = 25
@@ -202,63 +202,14 @@ object PacmanMaze extends App{
     val maze = new Maze(Params, walls)
     //
     contents = maze
-    override def closeOperation() = System.exit(1)
+    override def closeOperation() = System.exit(0)
     //
    maze.update(List(
       BigPacman(1,1,Right),
       Pellet(3,3),
       BlueGhost(1,3,Right)
     ))
-
-
-
-
-
-
-
-
-
-
   }
-
-
   val m = new MyFrame
   m.visible = true
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

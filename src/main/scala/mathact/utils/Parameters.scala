@@ -238,6 +238,7 @@ class Parameters {
     val numberFormat = "#0000000"
     val numberFont = new Font(Font.SERIF, Font.BOLD, 14)
     val numberHeight = 16}
+  //PacmanView
   object PacmanView extends Pacman with BorderFrame {
     val backgroundColor = Color.BLACK
     val squareSize:Int = 25
@@ -283,4 +284,12 @@ class Parameters {
     val ghostWL     = ImageIO.read(getClass.getResource("/ghost_w_l.png"))
     val ghostWR     = ImageIO.read(getClass.getResource("/ghost_w_r.png"))
     val pellet      = ImageIO.read(getClass.getResource("/pellet.png"))
-    val powerPellet = ImageIO.read(getClass.getResource("/power_pellet.png"))}}
+    val powerPellet = ImageIO.read(getClass.getResource("/power_pellet.png"))}
+  //SwitchBoard
+  object SwitchBoard extends GridFrame with Switch{
+    val discreteSliderFont:Font = new Font(Font.SERIF, Font.ITALIC, 13)
+    val discreteSliderTextColor:Color = Color.BLACK
+    val discreteSliderHeight:Int = 50
+    val backgroundColor:Color = Color.WHITE
+    val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
+    val nameHeight = 50}}
