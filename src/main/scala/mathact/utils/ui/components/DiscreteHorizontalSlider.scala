@@ -17,7 +17,7 @@ abstract class DiscreteHorizontalSlider(uiParam:UIParams.DiscreteHorizontalSlide
 extends BorderPanel with UIComponent{
   //Variables
   private var callChanged = true
-  //Set size
+  //Set size and border
   private val width =
     options.map(e ⇒ calcStringWidth(e, uiParam.discreteSliderFont)).max * options.size  + (options.size - 1) * 2
   preferredSize = new Dimension(width, uiParam.discreteSliderHeight)

@@ -1,9 +1,8 @@
 package mathact.utils.ui.components
-import mathact.utils.clockwork.ExecutionException
 import mathact.utils.ui.UIParams
 
 /**
- *
+ * Switch UI component
  * Created by CAB on 13.09.2015.
  */
 
@@ -16,7 +15,7 @@ extends GridComponent {
   //Variables
   private var index = initIndex
   //Components
-  private val nameView = new NameLabel(uiParams, varName)
+  private val nameView = new NameLabel(uiParams, varName + ": ")
   private val sliderBar:DiscreteHorizontalSlider = new DiscreteHorizontalSlider(uiParams, options, initIndex){
     def indexChanged(i:Int):Unit = if(index != i){
       index = i

@@ -19,6 +19,7 @@ class Parameters {
     val nameHeight = 18
     val valueFont = new Font(Font.SERIF, 0, 14)
     val valueHeight = 18
+    val border = None
     val backgroundColor:Color = Color.WHITE
     val sliderScale = 1000}
   //Doer
@@ -144,6 +145,7 @@ class Parameters {
     val numberHeight = 16
     val separatorFont = new Font(Font.SERIF, 0, 14)
     val separatorHeight = 16
+    val border = None
     val backgroundColor = Color.WHITE}
   //Stepper
   object Stepper extends FlowFrame with Executor with HorizontalSlider with SelectionBar{
@@ -171,6 +173,7 @@ class Parameters {
     val defaultEdgeColor = Color.BLACK
     val defaultEdgeSize = 1
     val numberFormat = "#0.00000"
+    val border = None
     val backgroundColor = Color.WHITE}
   //SimpleClassicPacman
   object SimpleClassicPacman extends Pacman
@@ -287,9 +290,21 @@ class Parameters {
     val powerPellet = ImageIO.read(getClass.getResource("/power_pellet.png"))}
   //SwitchBoard
   object SwitchBoard extends GridFrame with Switch{
-    val discreteSliderFont:Font = new Font(Font.SERIF, Font.ITALIC, 13)
-    val discreteSliderTextColor:Color = Color.BLACK
-    val discreteSliderHeight:Int = 50
-    val backgroundColor:Color = Color.WHITE
+    val discreteSliderFont = new Font(Font.SERIF, Font.ITALIC, 13)
+    val discreteSliderTextColor = Color.BLACK
+    val discreteSliderHeight = 38
+    val border = Some((Color.GRAY, 1))
+    val backgroundColor = Color.WHITE
     val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
-    val nameHeight = 50}}
+    val nameHeight = 38}
+  //SamIamBayesNet
+  object SamIamBayesNet extends TVFrame with SimpleGraph with ResetButton{
+    val defaultNodeColor = Color.DARK_GRAY
+    val defaultNodeSize = 10
+    val defaultEdgeColor = Color.BLACK
+    val defaultEdgeSize = 1
+    val numberFormat = "#0.00000"
+    val border = Some((Color.GRAY, 1))
+    val backgroundColor = Color.GRAY
+    val resetButtonIcon:ImageIcon = new ImageIcon(getClass.getResource("/reset.png"))
+    val resetButtonSize:Int = 28}}

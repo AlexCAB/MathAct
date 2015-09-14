@@ -20,6 +20,7 @@ object SwitchBoardUIProto extends App{
     val discreteSliderFont:Font = new Font(Font.SERIF, Font.ITALIC, 13)
     val discreteSliderTextColor:Color = Color.BLACK
     val discreteSliderHeight:Int = 50
+    val borderColor:Color = Color.BLACK
     val backgroundColor:Color = Color.WHITE}
   //
   abstract class DiscreteHorizontalSlider(uiParam:UIParams.DiscreteHorizontalSlider, options:List[String], initIndex:Int)

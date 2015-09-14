@@ -77,12 +77,15 @@ extends Tool{
       case (s,f) ⇒ throw new SyntaxException(s"Error:  Not match of field type ($f) and switch type ($s).")}}
   private def buildSwitches():Unit = {
     val params = environment.params.SwitchBoard
+    def exception(v:String, ops:String, n:String):SyntaxException =
+      new SyntaxException(
+        s"Error:  Programmably been set incorrect value $v to the variable ${helper.toolName}.$n, available options $ops")
     switchs = switchs.map{
       case s:SwitchBool  ⇒ {
         val ui = new Switch(params, s.field.getName, List("False", "True"), s.init match{case true ⇒ 1; case _ ⇒ 0}){
           def getCurrentIndex: Int = {
             s.field.getBoolean(helper.thisTool) match{case true ⇒ 1; case _ ⇒ 0}}
-          def switchIndexChanged(i: Int): Unit = {
+          def switchIndexChanged(i:Int):Unit = {
             if(s.changed()){gear.needUpdate()}
             s.field.setBoolean(helper.thisTool, i match{case 1 ⇒ true; case _ ⇒ false})
             gear.changed()
@@ -91,47 +94,38 @@ extends Tool{
       case s:SwitchInt ⇒ {
         val ui = new Switch(params, s.field.getName, s.vs.map(_.toString), s.vs.indexOf(s.init)){
           def getCurrentIndex: Int = {
-
-
-            //          def potValueChanged(v:Double) = {
-            //            if(variable.changedFun.map(f ⇒ f(v)).getOrElse(false)){
-            //              gear.needUpdate()}
-            //            variable.field.setDouble(helper.thisTool,v)
-            //            gear.changed()
-            //            updated()}
-            //          def getCurrentValue:Double = {
-            //            variable.field.getDouble(helper.thisTool)}}})
-
-
-
-
-            1}
-          def switchIndexChanged(i: Int): Unit = {
-
-
-          }}
+            val nv = s.field.getInt(helper.thisTool)
+            if(! s.vs.contains(nv)){throw exception(nv.toString, s.vs.toString(), s.field.getName)}
+            s.vs.indexOf(nv)}
+          def switchIndexChanged(i:Int):Unit = {
+            if(s.changed()){gear.needUpdate()}
+            s.field.setInt(helper.thisTool, s.vs(i))
+            gear.changed()
+            updated()}}
         SwitchInt(s.init, s.vs ,s.changed, s.field, ui)}
       case s:SwitchDouble ⇒ {
         val ui = new Switch(params, s.field.getName, s.vs.map(_.toString),  s.vs.indexOf(s.init)){
           def getCurrentIndex: Int = {
-
-
-            1}
+            val nv = s.field.getDouble(helper.thisTool)
+            if(! s.vs.contains(nv)){throw exception(nv.toString, s.vs.toString(), s.field.getName)}
+            s.vs.indexOf(nv)}
           def switchIndexChanged(i: Int): Unit = {
-
-
-          }}
+            if(s.changed()){gear.needUpdate()}
+            s.field.setDouble(helper.thisTool, s.vs(i))
+            gear.changed()
+            updated()}}
         SwitchDouble(s.init, s.vs, s.changed, s.field, ui)}
       case s:SwitchString ⇒ {
         val ui = new Switch(params, s.field.getName, s.vs.map(_.toString),  s.vs.indexOf(s.init)){
           def getCurrentIndex: Int = {
-
-
-            1}
+            val nv = s.field.get(helper.thisTool).asInstanceOf[String]
+            if(! s.vs.contains(nv)){throw exception(nv, s.vs.toString(), s.field.getName)}
+            s.vs.indexOf(nv)}
           def switchIndexChanged(i: Int): Unit = {
-
-
-          }}
+            if(s.changed()){gear.needUpdate()}
+            s.field.set(helper.thisTool, s.vs(i))
+            gear.changed()
+            updated()}}
         SwitchString(s.init, s.vs, s.changed, s.field, ui)}}}
   //DSL
   protected def init(v:Boolean):Boolean = {switchs +:= new SwitchBool(v); v}

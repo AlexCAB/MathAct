@@ -39,7 +39,7 @@ object SwitchBoardExample extends Workbench{
   //Calc
   new Calc{ import variables._
     make{
-      log.blue(s"bool = $bool, int = $int, double = $double, string = $string")
+      log.white(s"bool = $bool, int = $int, double = $double, string = $string")
       log.red(s"boolVar = $boolVar, intVar = $intVar, doubleVar = $doubleVar, stringVar = $stringVar")
     }
   }

@@ -32,7 +32,7 @@ extends Frame {
     componentsList.size match{
       case s if s != 0 ⇒ {
         //Calc Size
-        val widths = componentsList.toList.map(_.gridRow.map(_.preferredSize.getWidth.toInt))
+        val widths = componentsList.map(_.gridRow.map(_.preferredSize.getWidth.toInt))
         val nCol = widths.map(_.size).max
         val colWidths = widths.map(l ⇒ l ++ (l.size until nCol).map(_ ⇒ 0)).transpose.map(_.max)
         val rowHeights = componentsList.toList.map(_.gridRow.map(_.preferredSize.getHeight.toInt)).map(_.max)
@@ -43,6 +43,7 @@ extends Frame {
             component}}
           new BorderPanel{
             import BorderPanel.Position._
+            uiParams.border.foreach{case (c,i) ⇒ border = Swing.LineBorder(c, i)}
             background = uiParams.backgroundColor
             layout(new FlowPanel{
               background = uiParams.backgroundColor

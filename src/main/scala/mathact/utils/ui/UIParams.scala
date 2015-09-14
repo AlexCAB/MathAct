@@ -17,6 +17,7 @@ object UIParams {
   trait FlowFrame{
     val backgroundColor:Color}
   trait GridFrame{
+    val border:Option[(Color,Int)]
     val backgroundColor:Color}
   trait HorizontalSlider{
     val sliderHeight:Int
@@ -109,6 +110,7 @@ object UIParams {
     val defaultEdgeColor:Color
     val defaultEdgeSize:Int
     val numberFormat:String
+    val border:Option[(Color,Int)]
     val backgroundColor:Color}
   trait Pacman{
     val squareSize:Int

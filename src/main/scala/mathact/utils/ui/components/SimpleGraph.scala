@@ -1,7 +1,7 @@
 package mathact.utils.ui.components
 import java.text.{DecimalFormat, NumberFormat}
 import java.util.Locale
-import scala.swing.{Component, Dimension, Color, BorderPanel, Point}
+import scala.swing._
 import scala.collection.mutable.{Map ⇒ MutMap}
 import mathact.utils.ui.UIParams
 import org.graphstream.graph.implementations.MultiGraph
@@ -87,6 +87,7 @@ extends BorderPanel with UIComponent{
   box.setGravityFactor(0.05)
   graph.addAttribute("ui.stylesheet", "graph {" + makeColorAtr(uiParams.backgroundColor) + "}")
   graph.setAutoCreate(false)
+  uiParams.border.foreach{case (c,i) ⇒ border = Swing.LineBorder(c,i)}
   //Show
   layout(Component.wrap(viewer.addDefaultView(false))) = BorderPanel.Position.Center
   //Methods
