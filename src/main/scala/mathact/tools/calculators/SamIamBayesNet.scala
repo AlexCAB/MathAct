@@ -2,9 +2,9 @@ package mathact.tools.calculators
 import java.awt.Point
 import java.io.File
 import edu.ucla.belief.io.hugin.HuginNode
-import edu.ucla.belief.{InferenceEngine, BeliefNetwork}
+import edu.ucla.belief.{FiniteVariable, InferenceEngine, BeliefNetwork}
 import edu.ucla.belief.io.{PropertySuperintendent, NetworkIO}
-import mathact.utils.clockwork.VisualisationGear
+import mathact.utils.clockwork.{ExecutionException, VisualisationGear}
 import mathact.utils.dsl.SyntaxException
 import mathact.utils.ui.components.{SimpleGraph, ResetButton, TVFrame}
 import scala.language.implicitConversions
@@ -22,7 +22,9 @@ abstract class SamIamBayesNet(
   netPath:String,
   name:String = "",
   showUI:Boolean = true,                    //ON/OFF graphical UI
-  showLabels:Boolean = true,
+  showInference:Boolean = true,             //Shove|Hide node inference values and prop
+  showCPT:Boolean = false,                  //Shove|Hide node CPT
+  autoUpdate:Boolean = true,
   engineTimeout:Long = 10000,
   engineMaxIterations:Int = 100,
   engineScheduler:MessagePassingScheduler = edu.ucla.belief.approx.MessagePassingScheduler.TOPDOWNBOTTUMUP,
@@ -34,19 +36,20 @@ abstract class SamIamBayesNet(
  (implicit environment:Environment)
 extends Tool{
   //Private definition
+  private case class CPTData(node:HuginNode, linesNames:List[String], columnsIndexes:Map[List[String],Int])
   private trait Node
   private trait NoneVar extends Node{
     val nodeID:String
-    var node:Option[HuginNode] = None}
+    var node:Option[CPTData] = None}
   private trait Prop extends Node
   private case class BinTableProb(
     nodeID:String, v:()⇒Double) extends Prop with NoneVar
   private case class TableProb(
     nodeID:String, vs:Seq[()⇒Double]) extends Prop with NoneVar
   private case class BinColumnProb(
-    nodeID:String, colName:Seq[String], v:()⇒Double) extends Prop with NoneVar
+    nodeID:String, colName:List[String], v:()⇒Double) extends Prop with NoneVar
   private case class ColumnProb(
-    nodeID:String, colName:Seq[String], vs:Seq[()⇒Double]) extends Prop with NoneVar
+    nodeID:String, colName:List[String], vs:Seq[()⇒Double]) extends Prop with NoneVar
   private trait Evidence extends Node
   private case class NodeEvidence(
     nodeID:String, v:()⇒String) extends Evidence with NoneVar
@@ -71,51 +74,59 @@ extends Tool{
   private var probabilities = List[Prop]()
   private var evidences = List[Evidence]()
   private var inferences = List[Inference]()
-  private var beliefNet:Option[(BeliefNetwork, InferenceEngine)] = None
+  private var beliefNet:Option[BeliefNetwork] = None
   private var ui:Option[(TVFrame, SimpleGraph)] = None
-
   //Functions
-  private def getAndCheckNode(vertices:Map[String, HuginNode], node:Node with NoneVar):HuginNode = {
-    //Get id and vertice
+  private def getAndCheckNode(net:BeliefNetwork, node:Node with NoneVar):CPTData = {
+    //Get date
     val id = node.nodeID
+    val vertices = net.vertices().toArray.flatMap{case n:HuginNode ⇒ Some((n.getID, n)); case _ ⇒ None}.toMap
     if(! vertices.contains(id)){
       throw new SyntaxException(s"Error: In '$netPath' not found node with ID '$id', exist: ${vertices.keySet}")}
-    val vertice = vertices(id)
+    val vertex = vertices(id)
+    val cptTable = vertex.getCPTShell.getCPT
+    val linesNames = vertex.instances.asInstanceOf[java.util.List[String]].asScala.toList
+    val instNames = cptTable.variables.asInstanceOf[java.util.List[FiniteVariable]].asScala.toList.dropRight(1)
+      .map(_.instances.asInstanceOf[java.util.List[String]].asScala.toList)
+    def buildIndexes(il:List[List[String]]):List[List[String]] = il match{
+      case h :: t if t.nonEmpty ⇒  h.flatMap(e ⇒ buildIndexes(t).map(l ⇒ e +: l))
+      case h :: Nil ⇒ h.map(e ⇒ List(e))
+      case Nil ⇒ List()}
+    val columnsIndexes = buildIndexes(instNames).zipWithIndex.toMap
     //Check definitions
+    def incorrectDef(msg:String):SyntaxException =
+      new SyntaxException(s"Error, for node with id ='$id': $msg.")
     node match {
       case BinTableProb(_,v) ⇒ {
-
-      }
+        if(cptTable.getCPLength != 2){
+          throw incorrectDef(s"CPT is not a binary (length(${cptTable.getCPLength}) != 2)")}}
       case TableProb( _,vs) ⇒ {
-
-      }
-      case BinColumnProb( _,colName, v) ⇒ {
-
-      }
-      case ColumnProb(_,colName, vs) ⇒ {
-
-      }
-      case NodeEvidence(_,v) ⇒ {
-
-      }
-      case BinaryInference(_,p) ⇒ {
-
-      }
-      case AllProbInference(_,p) ⇒ {
-
-      }
-      case ValueInference(_,p) ⇒ {
-
-      }
-      case ValueProbInference(_,valueName,p) ⇒ {
-
-      }
+        if(cptTable.getCPLength != vs.size){
+          throw incorrectDef(s"CPT size not equal to table size (${cptTable.getCPLength} != ${vs.size}})")}}
+      case BinColumnProb( _, colName, v) ⇒ {
+        if(! columnsIndexes.contains(colName)){
+          throw incorrectDef(s"Unknown column name '$colName', available: ${columnsIndexes.keySet}")}
+        if(linesNames.size != 2){
+          throw incorrectDef(s"Column $colName not binary(${linesNames.size} != 2)")}}
+      case ColumnProb(_, colName, vs) ⇒ {
+        if(! columnsIndexes.contains(colName)){
+          throw incorrectDef(s"Unknown column name '$colName', available: ${columnsIndexes.keySet}")}
+        if(linesNames.size != vs.size){
+          throw incorrectDef(s"Column '$colName' not match number of cell (${linesNames.size} != ${vs.size}})")}}
+      case BinaryInference(_, p) ⇒ {
+        if(linesNames.size != 2){
+          throw incorrectDef(s"Node not binary(${linesNames.size} != 2)")}}
+      case ValueProbInference(_, valueName, p) ⇒ {
+        if(! linesNames.contains(valueName)){
+          throw incorrectDef(s"Node  have no value '$valueName', available: $linesNames")}}
+      case AllProbInference(_, p) ⇒
+      case ValueInference(_, p) ⇒
+      case NodeEvidence(_, v) ⇒
       case _:AllInference ⇒
       case _:AllValuesInference ⇒}
-    vertice}
+    //Return data
+    CPTData(vertex, linesNames, columnsIndexes)}
   private def loadNet():Unit = {
-    //Stop prev engine
-    beliefNet.foreach{case (_,e) ⇒ e.die()}
     //Load net
     val file = new File(netPath)
     if((! file.exists()) || file.isDirectory){
@@ -127,14 +138,11 @@ extends Tool{
     settings.setMaxIterations(engineMaxIterations)
     settings.setScheduler(engineScheduler)
     settings.setConvergenceThreshold(engineConvergenceThreshold)
-    //Engine
-    val engine = dynamator.manufactureInferenceEngine(bayesNet)
-    beliefNet = Some(bayesNet,engine)
+    beliefNet = Some(bayesNet)
     //Map nodes to Prop probabilities, evidences, inferences
-    val vertices = bayesNet.vertices().toArray.flatMap{case n:HuginNode ⇒ Some((n.getID, n)); case _ ⇒ None}.toMap
-    probabilities = probabilities.map{case n:NoneVar  ⇒ {n.node = Some(getAndCheckNode(vertices, n)); n}; case e ⇒ e}
-    evidences = evidences.map{case n:NoneVar ⇒ {n.node = Some(getAndCheckNode(vertices, n)); n}; case e ⇒ e}
-    inferences = inferences.map{case n:NoneVar ⇒ {n.node = Some(getAndCheckNode(vertices, n)); n}; case e ⇒ e}}
+    probabilities = probabilities.map{case n:NoneVar  ⇒ {n.node = Some(getAndCheckNode(bayesNet, n)); n}; case e ⇒ e}
+    evidences = evidences.map{case n:NoneVar ⇒ {n.node = Some(getAndCheckNode(bayesNet, n)); n}; case e ⇒ e}
+    inferences = inferences.map{case n:NoneVar ⇒ {n.node = Some(getAndCheckNode(bayesNet, n)); n}; case e ⇒ e}}
   private def buildGraph(graph:SimpleGraph, net:BeliefNetwork):Unit = {
     //Clear old
     graph.clear()
@@ -156,21 +164,124 @@ extends Tool{
     loadNet()
     //Build UI
     (ui,beliefNet) match{
-      case (Some((frame,graph)),Some((net,_))) ⇒ {
+      case (Some((frame,graph)),Some(net)) ⇒ {
         buildGraph(graph,net)}
       case _ ⇒ }}
+  private def updateUI(
+    net:BeliefNetwork,
+    evds:List[(HuginNode, String)],
+    vars:Map[String, List[(String, Double)]])
+  :Unit = ui.foreach{ case (_, garaph) ⇒{
+
+
+    println("updateUI")
+
+    //    showInference:Boolean = true,             //Shove|Hide node inference values and prop
+    //    showCPT:Boolean = false,                  //Shove|Hide node CPT
+
+  }
+
+
+
+  }
+  private def doCalc(evidence:Map[String,String]):Map[String, Map[String, Double]] = beliefNet match{
+    case Some(net) ⇒ {
+      //Functions
+      def checkOutOfBonds(p:Double, nodeID:String):Unit = if(p > 1 || p < 0){
+        throw new ExecutionException(s"Error: Prob value '$p' for node '$nodeID' is out of bounds 1 >= v >= 0.")}
+      def checkOutOfSun(ps:List[List[Double]], nodeID:String):Unit = ps.zipWithIndex.foreach{
+        case (c,i) if c.sum != 1.0 ⇒
+          throw new ExecutionException(s"Error: Sum of column '$i' in node '$nodeID' not equals 1.")
+        case _ ⇒}
+      def normColumn(ps:List[Double]):List[Double] = ps.sum match {
+        case 0.0 ⇒ ps.map(_ ⇒ 0.0)
+        case s ⇒ ps.map(e ⇒ e / s)}
+      def normTable(n:Int, ps:List[Double]):List[List[Double]] = { //Return columns
+        val sl = ps.size / n
+        def split(ps:List[Double]):List[List[Double]] = ps match{
+          case Nil ⇒ List()
+          case l ⇒ ps.take(sl) +: split(ps.drop(sl))}
+        split(ps).transpose.map(c ⇒ normColumn(c))}
+      def updateColumn(v:HuginNode, n:Int, ci:Int, data:Array[Double]):Unit = {
+        val cpd = v.getCPTShell.getCPT
+        (n * ci until n * ci + data.length).zip(data).foreach{case (i, d) ⇒ cpd.setCP(i,d)}}
+      //Get and set probabilities
+      probabilities.foreach{
+        case n:BinTableProb if n.node.nonEmpty ⇒ {
+          val CPTData(v, _, _) = n.node.get
+          val p = n.v()
+          checkOutOfBonds(p, n.nodeID)
+          v.getCPTShell.getCPT.setValues(Array(p, 1.0 - p))}
+        case n:TableProb if n.node.nonEmpty ⇒ {
+          val CPTData(v, ls, _) = n.node.get
+          val ps = n.vs.map(_()).toList
+          ps.foreach(p ⇒ checkOutOfBonds(p, n.nodeID))
+          val nps = normTable(ls.size, ps)
+          checkOutOfSun(nps, n.nodeID)
+          v.getCPTShell.getCPT.setValues(nps.flatMap(e ⇒ e).toArray)}
+        case n:BinColumnProb if n.node.nonEmpty ⇒ {
+          val CPTData(v, ls, cs) = n.node.get
+          val p = n.v()
+          checkOutOfBonds(p, n.nodeID)
+          val ci = cs(n.colName)
+          updateColumn(v, ls.size, ci, Array(p, 1.0 - p))}
+        case n:ColumnProb if n.node.nonEmpty ⇒ {
+          val CPTData(v, ls, cs) = n.node.get
+          val ps = n.vs.map(_()).toList
+          ps.foreach(p ⇒ checkOutOfBonds(p, n.nodeID))
+          val nps = normColumn(ps)
+          checkOutOfSun(List(nps), n.nodeID)
+          val ci = cs(n.colName)
+          updateColumn(v, ls.size, ci, nps.toArray)}
+        case _ ⇒}
+      //Get evidence
+      val evds = evidences.flatMap{
+        case  n:NodeEvidence if n.node.nonEmpty ⇒ {
+          val CPTData(v, ls, cs) = n.node.get
+            n.v() match{
+             case "none" ⇒ None
+             case s if ls.contains(s) ⇒ Some((v,s))
+             case s ⇒ throw new ExecutionException(s"Error: Incorrect evidence value '$s' for node '${n.nodeID}'.")}}
+        case _ ⇒ None}
+      //Calc
+      val engine = dynamator.manufactureInferenceEngine(net)
+      net.getEvidenceController.setObservations(evds.toMap.asJava)
+      val vars = net.vertices().toArray.flatMap{
+        case v:HuginNode ⇒ {
+          val ls = v.instances.asInstanceOf[java.util.List[String]].asScala.toList
+          val ps = engine.conditional(v).dataclone().toList
+          Some((v.getID, ls.zip(ps)))}
+        case _ ⇒ None}.toMap
+      val varsMap = vars.map{case(k, m) ⇒ (k, m.toMap)}
+      //Call inferences
+      inferences.foreach{
+        case BinaryInference(id, p) ⇒ p(vars(id).head._2)
+        case ValueProbInference(id, valueName, p) ⇒ p(varsMap(id)(valueName))
+        case AllProbInference(id, p) ⇒ p(varsMap(id))
+        case ValueInference(id, p) ⇒ p(varsMap(id).maxBy(_._2)._1)
+        case AllInference(p) ⇒ p(varsMap)
+        case AllValuesInference(p) ⇒ p(varsMap.map{case (k, m) ⇒ (k, m.maxBy(_._2)._1)})}
+      //Update UI
+      updateUI(net, evds, vars)
+      //Return
+      varsMap}
+    case _ ⇒ Map()}
   //DSL
   protected implicit def byNameToNoArg[T](v: ⇒ T):()⇒T = {() ⇒ v}
   protected def cpt:ProbNode = new ProbNode
   protected class ProbNode{
     def node(id:String):ProbCPD = new ProbCPD(id)}
   protected class ProbCPD(nodeID:String){
-    def binary(cell0: ⇒Double):Unit = {probabilities :+= BinTableProb(nodeID, ()⇒{cell0})}
+    def binary(cell0: ⇒Double):Unit = {
+      probabilities :+= BinTableProb(nodeID, ()⇒{cell0})}
     def column(name0:String, nameN:String*):ProbColumn = new ProbColumn(nodeID, name0 +: nameN)
-    def table(cell0:()⇒Double, cellN:(()⇒Double)*):Unit = {probabilities :+= TableProb(nodeID, cell0 +: cellN)}}
+    def table(cell0:()⇒Double, cellN:(()⇒Double)*):Unit = {
+      probabilities :+= TableProb(nodeID, cell0 +: cellN)}}
   protected class ProbColumn(nodeID:String, colName:Seq[String]){
-    def binary(cell0: ⇒ Double): Unit = {probabilities :+= BinColumnProb(nodeID, colName, ()⇒{cell0})}
-    def of(cell1: () ⇒ Double, cellN: (() ⇒ Double)*): Unit = {probabilities :+= ColumnProb(nodeID, colName, cellN)}}
+    def binary(cell0: ⇒ Double): Unit = {
+      probabilities :+= BinColumnProb(nodeID, colName.toList, ()⇒{cell0})}
+    def of(cell0: () ⇒ Double, cellN: (() ⇒ Double)*): Unit = {
+      probabilities :+= ColumnProb(nodeID, colName.toList, cell0 +: cellN)}}
   protected def evidence:EvdNode = new EvdNode
   protected class EvdNode{
       def node(id:String):EvdValue = new EvdValue(id)}
@@ -188,13 +299,31 @@ extends Tool{
     def valueProb(name:String):InfValue = new InfValue(nodeID, name)}
   protected class InfValue(nodeID:String, name:String){
     def prob(p:Double⇒Unit):Unit = {inferences :+= ValueProbInference(nodeID, name, p)}}
+  //Methods
+  /**
+   * Do update
+   */
+  def update():Unit = doCalc(Map())
+  /**
+   * Calc values
+   * @param evidence - Map(< node name >,< value name >)
+   * @return - Map(< node name >,< value name >)
+   */
+  def values(evidence:Map[String,String]):Map[String,String] =
+    doCalc(evidence).map{case (k, m) ⇒ (k, m.maxBy(_._2)._1)}
+  /**
+   * Calc probabilities
+   * @param evidence - Map(< node name >,< value name >)
+   * @return - Map(< node name >,Map(< value name >,< probability >))
+   */
+  def probabilities(evidence:Map[String,String]):Map[String, Map[String, Double]] = doCalc(evidence)
   //Construction
   if(netPath == ""){
     throw new SyntaxException("Error: 'netPath' should not be empty.")}
   //UI
   ui = showUI match{
     case true ⇒ {
-      val uiGraph = new SimpleGraph(uiParams, screenW, screenH, false, showLabels)
+      val uiGraph = new SimpleGraph(uiParams, screenW, screenH, false, true)
       val uiReset = new ResetButton(uiParams){
         def reset() = {reload()}}
       val uiFrame:TVFrame = new TVFrame(
@@ -207,21 +336,13 @@ extends Tool{
     def start() = {
       //Load net
       loadNet()
-
-
-
-
-
       //Build UI
       (ui,beliefNet) match{
-        case (Some((frame,graph)),Some((net,_))) ⇒ {
+        case (Some((frame,graph)),Some(net)) ⇒ {
           buildGraph(graph,net)
           frame.show(screenX, screenY, Int.MaxValue, Int.MaxValue)}
         case _ ⇒ }}
-    def update() = {
-
-
-
-    }
+    def update() = if(autoUpdate){
+      doCalc(Map())}
     def stop() = {
       ui.foreach{case (frame,_) ⇒ frame.hide()}}}}

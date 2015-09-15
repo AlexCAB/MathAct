@@ -15,7 +15,7 @@ object SamIamBayesNetExample extends Workbench{
 
 
   //
-  new SamIamBayesNet(netPath = "docs/StudentBayesianNetwork.net", name = "Student net"){
+  new SamIamBayesNet(netPath = "docs/StudentBayesianNetwork.net", name = "Student net", showCPT = true){
 
 
     //Probabilities

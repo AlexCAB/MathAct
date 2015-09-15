@@ -1,19 +1,20 @@
 net
 {
-	propagationenginegenerator1791944048146838126L = "edu.ucla.belief.approx.BeliefPropagationSettings@a4f4dbf";
+	propagationenginegenerator1791944048146838126L = "edu.ucla.belief.approx.BeliefPropagationSettings@acc4ce9";
 	recoveryenginegenerator6944530267470113528l = "edu.ucla.util.SettingsImpl@5c793be2";
-	node_size = (130 55);
+	node_size = (130.0 55.0);
 }
 
-node Difficulty
+node Letter
 {
-	states = ("d0" "d1" );
-	position = (394 -172);
+	states = ("l0" "l1" );
+	position = (512 -476);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
-	ID = "variable0";
-	label = "Difficulty";
+	ID = "variable4";
+	label = "Letter";
 	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
 node SAT
@@ -25,28 +26,19 @@ node SAT
 	ID = "variable3";
 	label = "SAT";
 	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
-node Letter
+node Difficulty
 {
-	states = ("l0" "l1" );
-	position = (512 -476);
+	states = ("d0" "d1" );
+	position = (394 -172);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
-	ID = "variable4";
-	label = "Letter";
+	ID = "variable0";
+	label = "Difficulty";
 	DSLxSUBMODEL = "Root Submodel";
-	diagnosistype = "AUXILIARY";
-}
-node Grade
-{
-	states = ("g0" "g1" "g2" );
-	position = (512 -338);
-	excludepolicy = "include whole CPT";
-	ismapvariable = "false";
-	ID = "variable2";
-	label = "Grade";
-	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
 node Intelligence
@@ -58,16 +50,20 @@ node Intelligence
 	ID = "variable1";
 	label = "Intelligence";
 	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
-potential ( Difficulty | )
+node Grade
 {
-	data = (	0.6	0.4	);
-}
-potential ( SAT | Intelligence )
-{
-	data = ((	0.95	0.05	)
-		(	0.2	0.8	));
+	states = ("g0" "g1" "g2" );
+	position = (512 -338);
+	excludepolicy = "include whole CPT";
+	ismapvariable = "false";
+	ID = "variable2";
+	label = "Grade";
+	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
+	diagnosistype = "AUXILIARY";
 }
 potential ( Letter | Grade )
 {
@@ -75,14 +71,23 @@ potential ( Letter | Grade )
 		(	0.4	0.6	)
 		(	0.99	0.01	));
 }
+potential ( SAT | Intelligence )
+{
+	data = ((	0.95	0.05	)
+		(	0.2	0.8	));
+}
+potential ( Difficulty | )
+{
+	data = (	0.6	0.4	);
+}
+potential ( Intelligence | )
+{
+	data = (	0.7	0.3	);
+}
 potential ( Grade | Difficulty Intelligence )
 {
 	data = (((	0.3	0.4	0.3	)
 		(	0.05	0.25	0.7	))
 		((	0.9	0.08	0.02	)
 		(	0.5	0.3	0.2	)));
-}
-potential ( Intelligence | )
-{
-	data = (	0.7	0.3	);
 }
