@@ -1,14 +1,26 @@
 net
 {
-	propagationenginegenerator1791944048146838126L = "edu.ucla.belief.approx.BeliefPropagationSettings@acc4ce9";
+	propagationenginegenerator1791944048146838126L = "edu.ucla.belief.approx.BeliefPropagationSettings@45d6aa8e";
 	recoveryenginegenerator6944530267470113528l = "edu.ucla.util.SettingsImpl@5c793be2";
 	node_size = (130.0 55.0);
 }
 
+node Grade
+{
+	states = ("g0" "g1" "g2" );
+	position = (429 -431);
+	excludepolicy = "include whole CPT";
+	ismapvariable = "false";
+	ID = "variable2";
+	label = "Grade";
+	DSLxSUBMODEL = "Root Submodel";
+	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
+	diagnosistype = "AUXILIARY";
+}
 node Letter
 {
 	states = ("l0" "l1" );
-	position = (512 -476);
+	position = (429 -704);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
 	ID = "variable4";
@@ -17,22 +29,10 @@ node Letter
 	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
-node SAT
-{
-	states = ("s0" "s1" );
-	position = (791 -333);
-	excludepolicy = "include whole CPT";
-	ismapvariable = "false";
-	ID = "variable3";
-	label = "SAT";
-	DSLxSUBMODEL = "Root Submodel";
-	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
-	diagnosistype = "AUXILIARY";
-}
 node Difficulty
 {
 	states = ("d0" "d1" );
-	position = (394 -172);
+	position = (181 -168);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
 	ID = "variable0";
@@ -44,7 +44,7 @@ node Difficulty
 node Intelligence
 {
 	states = ("i0" "i1" );
-	position = (618 -174);
+	position = (505 -205);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
 	ID = "variable1";
@@ -53,28 +53,30 @@ node Intelligence
 	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
 }
-node Grade
+node SAT
 {
-	states = ("g0" "g1" "g2" );
-	position = (512 -338);
+	states = ("s0" "s1" );
+	position = (629 -338);
 	excludepolicy = "include whole CPT";
 	ismapvariable = "false";
-	ID = "variable2";
-	label = "Grade";
+	ID = "variable3";
+	label = "SAT";
 	DSLxSUBMODEL = "Root Submodel";
 	DSLxEXTRA_DEFINITIONxDIAGNOSIS_TYPE = "AUXILIARY";
 	diagnosistype = "AUXILIARY";
+}
+potential ( Grade | Difficulty Intelligence )
+{
+	data = (((	0.3	0.4	0.3	)
+		(	0.05	0.25	0.7	))
+		((	0.9	0.08	0.02	)
+		(	0.5	0.3	0.2	)));
 }
 potential ( Letter | Grade )
 {
 	data = ((	0.1	0.9	)
 		(	0.4	0.6	)
 		(	0.99	0.01	));
-}
-potential ( SAT | Intelligence )
-{
-	data = ((	0.95	0.05	)
-		(	0.2	0.8	));
 }
 potential ( Difficulty | )
 {
@@ -84,10 +86,8 @@ potential ( Intelligence | )
 {
 	data = (	0.7	0.3	);
 }
-potential ( Grade | Difficulty Intelligence )
+potential ( SAT | Intelligence )
 {
-	data = (((	0.3	0.4	0.3	)
-		(	0.05	0.25	0.7	))
-		((	0.9	0.08	0.02	)
-		(	0.5	0.3	0.2	)));
+	data = ((	0.95	0.05	)
+		(	0.2	0.8	));
 }

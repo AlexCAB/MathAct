@@ -140,12 +140,16 @@ class Parameters {
   object ValuesBoard extends GridFrame with Measurer{
     val nameFont = new Font(Font.SERIF, Font.BOLD, 16)
     val nameHeight = 16
-    val numberFormat = "#0.000000000000000000"
+    val numberFormat = "#0.00000000000000000"
     val numberFont = new Font(Font.SERIF, 0, 14)
     val numberHeight = 16
     val separatorFont = new Font(Font.SERIF, 0, 14)
     val separatorHeight = 16
     val border = None
+    val booleanFieldColor = new Color(170,60,79)
+    val intFieldColor = new Color(159,83,166)
+    val doubleFieldColor = new Color(217,26,92)
+    val stringFieldColor = new Color(54,207,73)
     val backgroundColor = Color.WHITE}
   //Stepper
   object Stepper extends FlowFrame with Executor with HorizontalSlider with SelectionBar{
@@ -300,10 +304,13 @@ class Parameters {
   //SamIamBayesNet
   object SamIamBayesNet extends TVFrame with SimpleGraph with ResetButton{
     val defaultNodeColor = Color.DARK_GRAY
-    val defaultNodeSize = 10
+    val evidenceNodeColor =  new Color(0,0,255)
+    val activeNodeColor = new Color(255,0,0)
+    val passiveNodeColor = new Color(0,255,0)
+    val defaultNodeSize = 15
     val defaultEdgeColor = Color.BLACK
     val defaultEdgeSize = 1
-    val numberFormat = "#0.00000"
+    val numberFormat = "#0.000"
     val border = Some((Color.GRAY, 1))
     val backgroundColor = Color.GRAY
     val resetButtonIcon:ImageIcon = new ImageIcon(getClass.getResource("/reset.png"))

@@ -1,16 +1,19 @@
 package mathact.tools.calculators
 import java.awt.Point
 import java.io.File
+import java.text.{DecimalFormat, NumberFormat}
+import java.util.Locale
 import edu.ucla.belief.io.hugin.HuginNode
-import edu.ucla.belief.{FiniteVariable, InferenceEngine, BeliefNetwork}
+import edu.ucla.belief.{FiniteVariable, BeliefNetwork}
 import edu.ucla.belief.io.{PropertySuperintendent, NetworkIO}
-import mathact.utils.clockwork.{ExecutionException, VisualisationGear}
+import mathact.utils.clockwork.{CalculationGear, ExecutionException, VisualisationGear}
 import mathact.utils.dsl.SyntaxException
 import mathact.utils.ui.components.{SimpleGraph, ResetButton, TVFrame}
 import scala.language.implicitConversions
 import edu.ucla.belief.approx.{MessagePassingScheduler, PropagationEngineGenerator}
 import mathact.utils.{ToolHelper, Tool, Environment}
 import scala.collection.JavaConverters._
+import scala.swing.Color
 
 
 /**
@@ -22,7 +25,7 @@ abstract class SamIamBayesNet(
   netPath:String,
   name:String = "",
   showUI:Boolean = true,                    //ON/OFF graphical UI
-  showInference:Boolean = true,             //Shove|Hide node inference values and prop
+  showInference:Boolean = true,             //Shove|Hide node inference values and prob
   showCPT:Boolean = false,                  //Shove|Hide node CPT
   autoUpdate:Boolean = true,
   engineTimeout:Long = 10000,
@@ -31,7 +34,7 @@ abstract class SamIamBayesNet(
   engineConvergenceThreshold:Double = 1.0E-7,
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue,
-  screenW:Int = 600,
+  screenW:Int = 800,
   screenH:Int = 300)
  (implicit environment:Environment)
 extends Tool{
@@ -67,9 +70,11 @@ extends Tool{
   private case class ValueProbInference(
     nodeID:String, valueName:String, p:Double⇒Unit) extends Inference with NoneVar
   //Helpers
-  private val helper = new ToolHelper(this, name, netPath.replace("\\","/").split("/").last)
+  private val helper = new ToolHelper(this, name + s" - [$netPath]", netPath.replace("\\","/").split("/").last)
   private val dynamator = new PropagationEngineGenerator
   private val uiParams = environment.params.SamIamBayesNet
+  private val decimal = NumberFormat.getNumberInstance(Locale.ENGLISH).asInstanceOf[DecimalFormat]
+  decimal.applyPattern(uiParams.numberFormat)
   //Variables
   private var probabilities = List[Prop]()
   private var evidences = List[Evidence]()
@@ -150,9 +155,9 @@ extends Tool{
     val nodes = net.vertices().toArray.flatMap{
       case v:HuginNode ⇒ {
         val id = v.getID
-        val props = v.getProperties
-        val List(x, y) = props.get("position").asInstanceOf[java.util.ArrayList[Int]].asScala.toList
-        val l = props.get("label").toString
+        val probs = v.getProperties
+        val List(x, y) = probs.get("position").asInstanceOf[java.util.ArrayList[Int]].asScala.toList
+        val l = probs.get("label").toString
         graph.addNode(id, Some(l), None, None, Some(new Point(x, y * -1)), None)
         Some((id, v))}
       case _ ⇒ None}
@@ -165,43 +170,67 @@ extends Tool{
     //Build UI
     (ui,beliefNet) match{
       case (Some((frame,graph)),Some(net)) ⇒ {
-        buildGraph(graph,net)}
+        buildGraph(graph,net)
+        doCalc(Map())}
       case _ ⇒ }}
+  private def mixColors(a:Color, b:Color, p:Double):Color = {
+    val List(cr,cg,cb) = List(a.getRed, a.getGreen, a.getBlue).zip(List(b.getRed, b.getGreen, b.getBlue))
+      .map{case (ac, bc) ⇒ (ac * p + bc * (1 - p)).toInt}
+      .map{case c if c > 255 ⇒ 255; case c if c < 0 ⇒ 0; case c ⇒ c}
+    new Color(cr,cg,cb)}
+  private def splitByColumns(columnSize:Int, table:List[Double]):List[List[Double]] = {
+    val sl = columnSize
+    def split(ps:List[Double]):List[List[Double]] = ps match{
+      case Nil ⇒ List()
+      case l ⇒ ps.take(sl) +: split(ps.drop(sl))}
+    split(table)}
   private def updateUI(
     net:BeliefNetwork,
-    evds:List[(HuginNode, String)],
+    evds:List[String],
     vars:Map[String, List[(String, Double)]])
-  :Unit = ui.foreach{ case (_, garaph) ⇒{
-
-
-    println("updateUI")
-
-    //    showInference:Boolean = true,             //Shove|Hide node inference values and prop
-    //    showCPT:Boolean = false,                  //Shove|Hide node CPT
-
-  }
-
-
-
-  }
+  :Unit = ui.foreach{ case(_, graph) ⇒ vars.foreach{ case (nodeID, probs) ⇒
+    //Value
+    val (value, prob) = probs.maxBy(_._2)
+    //Color node
+    val color = (nodeID, probs) match{
+      case (id,ps) if evds.contains(id) ⇒ uiParams.evidenceNodeColor
+      case (id,ps) if probs.size == 2 ⇒ mixColors(uiParams.activeNodeColor, uiParams.passiveNodeColor, probs.head._2)
+      case (id,ps) ⇒ mixColors(
+        uiParams.activeNodeColor,
+        uiParams.passiveNodeColor,
+        probs.indexOf((value, prob)).toDouble / probs.size)}
+    //Inference
+    val infVars = showInference match{
+      case true ⇒ {
+        (probs.map{case (v,p) ⇒ s"$v=${decimal.format(p)}"}.mkString(", "), showCPT) match{
+          case (str, true) ⇒ Some(("", s"[$str]"))
+          case (str, false) ⇒ Some(("", str))}}
+      case _ ⇒ None}
+    //CPD
+    val cptVars = showCPT match{
+      case true ⇒ {
+        val cpt = splitByColumns(
+          probs.size,
+          net.forID(nodeID).asInstanceOf[HuginNode].getCPTShell.getCPT.dataclone.toList)
+        Some(("", s"(${cpt.map(c ⇒ s"(${c.map(v ⇒ decimal.format(v)).mkString(", ")})").mkString(",")}})"))}
+      case _ ⇒ None}
+    //Update graph
+    val gVars = List(infVars, cptVars).flatMap(e ⇒ e) match{case Nil ⇒ None; case l ⇒ Some(l)}
+    graph.updateNode(nodeID, None, Some(color), None, None, gVars)}}
   private def doCalc(evidence:Map[String,String]):Map[String, Map[String, Double]] = beliefNet match{
     case Some(net) ⇒ {
       //Functions
       def checkOutOfBonds(p:Double, nodeID:String):Unit = if(p > 1 || p < 0){
         throw new ExecutionException(s"Error: Prob value '$p' for node '$nodeID' is out of bounds 1 >= v >= 0.")}
       def checkOutOfSun(ps:List[List[Double]], nodeID:String):Unit = ps.zipWithIndex.foreach{
-        case (c,i) if c.sum != 1.0 ⇒
+        case (c,i) if (c.sum - 1.0).abs > 0.000000001 ⇒
           throw new ExecutionException(s"Error: Sum of column '$i' in node '$nodeID' not equals 1.")
         case _ ⇒}
       def normColumn(ps:List[Double]):List[Double] = ps.sum match {
         case 0.0 ⇒ ps.map(_ ⇒ 0.0)
         case s ⇒ ps.map(e ⇒ e / s)}
       def normTable(n:Int, ps:List[Double]):List[List[Double]] = { //Return columns
-        val sl = ps.size / n
-        def split(ps:List[Double]):List[List[Double]] = ps match{
-          case Nil ⇒ List()
-          case l ⇒ ps.take(sl) +: split(ps.drop(sl))}
-        split(ps).transpose.map(c ⇒ normColumn(c))}
+        splitByColumns(ps.size / n, ps).transpose.map(c ⇒ normColumn(c))}
       def updateColumn(v:HuginNode, n:Int, ci:Int, data:Array[Double]):Unit = {
         val cpd = v.getCPTShell.getCPT
         (n * ci until n * ci + data.length).zip(data).foreach{case (i, d) ⇒ cpd.setCP(i,d)}}
@@ -262,7 +291,7 @@ extends Tool{
         case AllInference(p) ⇒ p(varsMap)
         case AllValuesInference(p) ⇒ p(varsMap.map{case (k, m) ⇒ (k, m.maxBy(_._2)._1)})}
       //Update UI
-      updateUI(net, evds, vars)
+      updateUI(net, evds.map(_._1.getID), vars)
       //Return
       varsMap}
     case _ ⇒ Map()}
@@ -332,7 +361,7 @@ extends Tool{
       Some((uiFrame, uiGraph))}
     case _ ⇒ None  }
   //Gear
-  private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
+  private val gear:CalculationGear = new CalculationGear(environment.clockwork, updatePriority = 1){
     def start() = {
       //Load net
       loadNet()

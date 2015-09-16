@@ -1,5 +1,7 @@
 package mathact.tools.graphs
 import java.awt.{Point, Color}
+import java.text.{DecimalFormat, NumberFormat}
+import java.util.Locale
 import mathact.utils.ui.components.{SimpleGraph, BorderFrame}
 import mathact.utils.{ToolHelper, Tool, Environment}
 import mathact.utils.clockwork.VisualisationGear
@@ -26,6 +28,8 @@ extends Tool with Colors{
   private var nodes = List[Node]()
   private var edges = List[Edge]()
   private val params = environment.params.SimpleStaticGraph
+  private val decimal = NumberFormat.getNumberInstance(Locale.ENGLISH).asInstanceOf[DecimalFormat]
+  decimal.applyPattern(params.numberFormat)
   //Functions
   private def nextID:String = {idCounter += 1; "id_" + idCounter}
   private def addNode(node:Node):Node = {nodes = nodes.filter(_.id != node.id) :+ node; node}
@@ -131,13 +135,13 @@ extends Tool with Colors{
   //Gear
   private val gear:VisualisationGear = new VisualisationGear(environment.clockwork){
     //Function
-    def convertVars(vars:List[FunParameter[Double]]):Option[List[(String,Double)]] = {
+    def convertVars(vars:List[FunParameter[Double]]):Option[List[(String,String)]] = {
       vars.map(fp ⇒ (fp.getLastValueWithName, fp.getValueWithName)) match{
         case lv if lv.exists{case (_,v) ⇒ v.nonEmpty} ⇒ Some(
           lv.map{
-            case (_, Some((n,v))) ⇒ (n.getOrElse(""),v)
-            case (Some((n,v)), _) ⇒ (n.getOrElse(""),v)
-            case _ ⇒ ("", 0.0)})
+            case (_, Some((n,v))) ⇒ (n.getOrElse(""), decimal.format(v))
+            case (Some((n,v)), _) ⇒ (n.getOrElse(""), decimal.format(v))
+            case _ ⇒ ("", "0.0")})
         case _ ⇒ None}}
     //Methods
     def start() = {

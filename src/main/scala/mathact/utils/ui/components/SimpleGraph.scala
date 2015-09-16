@@ -31,7 +31,7 @@ extends BorderPanel with UIComponent{
   private val labelsData = MutMap[String, LabelData]()
   //Functions
   private def makeColorAtr(c:Color):String =
-    s"fill-color: rgb(${c.getRed().toString},${c.getGreen()},${c.getBlue()});"
+    s"fill-color: rgb(${c.getRed.toString},${c.getGreen},${c.getBlue});"
   private def makeSizeAtr(name:String, w:Int, h:Int):String =
     s"$name: ${w}px, ${h}px;"
   private def makeSizeAtr(name:String, s:Int):String =
@@ -51,11 +51,11 @@ extends BorderPanel with UIComponent{
     id:String,
     name:Option[String],
     weight:Option[(Option[String],Double)],
-    vars:Option[List[(String,Double)]])
+    vars:Option[List[(String,String)]])
   :Option[String] = showLabels match{
     case true ⇒ {
       val stringWeight = weight.map{case(n,w) ⇒ n.getOrElse("w") + "=" + decimal.format(w)}
-      val stringVars = vars.map(_.map{case(n,v) ⇒ n + "=" + decimal.format(v)}.mkString(", "))
+      val stringVars = vars.map(_.map{case("",v) ⇒ v; case(n,v) ⇒ n + "=" + v}.mkString(", "))
       def selectNew(a:Option[String], b:Option[String]) = (a, b) match{
         case (Some(a),_) ⇒ Some(a)
         case (None,Some(b)) ⇒ Some(b)
@@ -97,7 +97,7 @@ extends BorderPanel with UIComponent{
     color:Option[Color],
     weight:Option[(Option[String],Double)],
     position:Option[Point],
-    vars:Option[List[(String,Double)]])
+    vars:Option[List[(String,String)]])
   :Unit = {
     val n = graph.addNode[Node](id)
     buildLabel(id, name,weight,vars).foreach(nn ⇒ n.addAttribute("ui.label", nn))
@@ -116,7 +116,7 @@ extends BorderPanel with UIComponent{
     name:Option[String],
     color:Option[Color],
     weight:Option[(Option[String],Double)],
-    vars:Option[List[(String,Double)]])
+    vars:Option[List[(String,String)]])
   :Unit = {
     val e = graph.addEdge[Edge](id, sourceId, targetId, idDirected)
     buildLabel(id, name,weight,vars).foreach(en ⇒ e.addAttribute("ui.label", en))
@@ -133,7 +133,7 @@ extends BorderPanel with UIComponent{
     color:Option[Color],
     weight:Option[(Option[String],Double)],
     position:Option[(Boolean,Point)],
-    vars:Option[List[(String,Double)]])
+    vars:Option[List[(String,String)]])
   :Unit= {
     val n = graph.getNode[Node](id)
     buildLabel(id, name,weight,vars).foreach(nn ⇒ n.addAttribute("ui.label", nn))
@@ -151,7 +151,7 @@ extends BorderPanel with UIComponent{
     name:Option[String],
     color:Option[Color],
     weight:Option[(Option[String],Double)],
-    vars:Option[List[(String,Double)]])
+    vars:Option[List[(String,String)]])
   :Unit = {
     val e = graph.getEdge[Edge](id)
     buildLabel(id, name,weight,vars).foreach(en ⇒ e.addAttribute("ui.label", en))

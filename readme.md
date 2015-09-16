@@ -37,10 +37,10 @@
     
     //Calculation
     def calcOutput() = {
-      y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) ⇒ x * w}.sum))
+      y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) => x * w}.sum))
     }
     def calcWeights() = {
-      ws = xs.zip(ws).map{case(x,w) ⇒ {w + η * (x * y - y * y * w)}}
+      ws = xs.zip(ws).map{case(x,w) => {w + η * (x * y - y * y * w)}}
     }
     
     //Chart
@@ -99,7 +99,7 @@
         </div>
         <div align="left" style="font-family:Consolas;"><pre>
           def calcOutput() = {
-            y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) ⇒ x * w}.sum))
+            y = 1 / (1 + exp( - xs.zip(ws).map{case(x,w) => x * w}.sum))
           }
         </pre></div>
         <div align="justify">
@@ -107,7 +107,7 @@
         </div>
         <div align="left" style="font-family:Consolas;"><pre>
           def calcWeights() = {
-            ws = xs.zip(ws).map{case(x,w) ⇒ {w + η * (x * y - y * y * w)}}
+            ws = xs.zip(ws).map{case(x,w) => {w + η * (x * y - y * y * w)}}
           }
         </pre></div>
         <div align="justify">
@@ -152,11 +152,13 @@
       <a href="#XYPlot">XYPlot</a><br>
       <a href="#YChartRecorder">YChartRecorder</a><br>
       <a href="#PotBoard">PotBoard</a><br>
+      <a href="#SwitchBoard">SwitchBoard</a><br>
       <a href="#ValuesBoard">ValuesBoard</a><br>
       <a href="#SimpleStaticGraph">SimpleStaticGraph</a><br>
       <a href="#KeyboardInput">KeyboardInput</a><br>
       <a href="#PacmanView">PacmanView</a><br>
       <a href="#SimpleClassicPacman">SimpleClassicPacman</a><br>
+      <a href="#SamIamBayesNet">SamIamBayesNet</a><br>
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0">Tools parameters</h2>
         <div align="justify">
             <p>All tools take parameters by the class constructor arguments.</p>
@@ -236,7 +238,7 @@
             <img border=0 src="docs/CalcWithManual.png">
         </div>
         <div align="justify">
-            Execute one/several <b>auto{x ⇒ }</b> blocs if auto mode on, or one/several <b>manual{x ⇒ }</b> blocks if manual mode on. The <b>x</b> is value specified by UI.
+            Execute one/several <b>auto{x => }</b> blocs if auto mode on, or one/several <b>manual{x => }</b> blocks if manual mode on. The <b>x</b> is value specified by UI.
         </div>
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/doers/CalcWithManual.scala">Source code</a>,
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/doers/CalcWithManualExample.scala">Example code</a>
@@ -268,16 +270,16 @@
             <img border=0 width=500 height=250 src="docs/XTracer.png">
         </div>
         <div align="justify">
-            Trace given <b>Double⇒Double</b> functions on [a,b] diapason by update event.
+            Trace given <b>Double=>Double</b> functions on [a,b] diapason by update event.
         </div>
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/plots/XTracer.scala">Source code</a>,
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/plots/XTracerExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            trace(&lt;trace params&gt;) of{x ⇒ }
+            trace(&lt;trace params&gt;) of{x => }
             <p>Where:</p>
             &lt;trace params&gt; -- name = "..."; color = black, white, red,...
-            {x ⇒ } --  Double⇒Double function
+            {x => } --  Double=>Double function
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
@@ -432,7 +434,7 @@
             &lt;value&gt; -- Double value of statement (default: (&lt;min&gt; + &lt;max&gt;)  / 2),
             &lt;min&gt;  -- Double, minimum variable value (default: -1),
             &lt;max&gt; -- Double, maximum variable value (default: +1),
-            &lt;function&gt; -- (x)⇒{} anon function called before variable value will
+            &lt;function&gt; -- (x)=>{} anon function called before variable value will
               be changed, where x is new value.
         </pre></div>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax for array variables:</h3>
@@ -458,6 +460,43 @@
             defaultMin:Double -- default min value for all variables (default: -1),
             defaultMax:Double -- default max value for all variables (default: +1).
         </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="SwitchBoard">SwitchBoard visualization tool</h2>
+    <div align="center">
+        <img border=0 src="docs/SwitchBoard.png">
+    </div>
+    <div align="justify">
+        Variables (val and var) visualization and pick from finite list.
+    </div>
+    <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/pots/SwitchBoard.scala">Source code</a>,
+    <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/pots/SwitchBoardExample.scala">Example code</a>
+    <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax for single variables:</h3>
+    <div align="left" style="font-family:Consolas;"><pre>
+            [val|var] &lt;name&gt; = init(&lt;value&gt;)                      //Only for boolean
+              [changed(&lt;function&gt;)|changedWithUpdate(&lt;function&gt;)]
+            [val|var] &lt;name&gt; = init(&lt;value&gt;) options(&lt;options&gt;)
+              [changed(&lt;function&gt;)|changedWithUpdate(&lt;function&gt;)]
+            [val|var] &lt;name&gt; = init(&lt;value&gt;) in(&lt;from&gt;,&lt;to&gt;,&lt;by&gt;) //For double and int
+              [changed(&lt;function&gt;)|changedWithUpdate(&lt;function&gt;)]
+            <p>Where:</p>
+            [val|var] -- Scala keywords,
+            &lt;name&gt; - Scala variable name,
+            init -- operator set initial value,
+            options -- operator set option list,
+            in -- set value diapason
+            changed -- set value changed function,
+            changedWithUpdate -- set value changed function with after update,
+            &lt;value&gt; -- Boolean, Ind, Double or String init value,
+            &lt;options&gt; -- Sequence or List of pick options,
+            &lt;from&gt;  -- Start of range,
+            &lt;to&gt; -- End of range,
+            &lt;by&gt; -- Step of range (default: 1),
+            &lt;function&gt; -- (x)=>{} anon function called before variable value will
+              be changed, where x is new value.
+        </pre></div>
+    <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+    <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int -- general parameters.
+        </pre></div>
     <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="ValuesBoard">ValuesBoard visualization tool</h2>
         <div align="center">
             <img border=0 src="docs/ValuesBoard.png">
@@ -469,7 +508,11 @@
         <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/values/ValuesBoardExample.scala">Example code</a>
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
-            value(&lt;value params&gt;) of{&lt;value&gt;}
+            value(&lt;value params&gt;) of{&lt;value&gt;}           //Same as ofDouble{...}
+            value(&lt;value params&gt;) ofDouble{&lt;value&gt;}
+            value(&lt;value params&gt;) ofBoolean{&lt;value&gt;}
+            value(&lt;value params&gt;) ofInt{&lt;value&gt;}
+            value(&lt;value params&gt;) ofString{&lt;value&gt;}
             <p>Where:</p>
             &lt;value params&gt; -- name = "..."; color = black, white, red,...
             &lt;value&gt; -- value source (variable name or statement)
@@ -616,6 +659,79 @@
             inkyTimeout:Int -- Influence on Inky speed (default: 7).
             initScore:Int -- Init score (default: 100).
             funkyTimeout:Int -- Before out of Funky state (default: 200).
+        </pre></div>
+    <h2 style="font-size:70%; font-family:verdana; color:#28AFE0" id="SamIamBayesNet">SamIamBayesNet calculation/visualization tool</h2>
+    <div align="center">
+        <img border=0 width=700 height=300 src="docs/SamIamBayesNet.png">
+    </div>
+    <div align="justify">
+        Wrapper for <a href="http://reasoning.cs.ucla.edu/samiam/index.php">SamIam</a> bayes net inference engine.
+    </div>
+    <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/mathact/tools/calculators/SamIamBayesNet.scala">Source code</a>,
+    <a href="https://github.com/AlexCAB/MathAct/blob/master/src/main/scala/examples/mathact/tools/calculators/SamIamBayesNetExample.scala">Example code</a>
+    <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
+    <div align="left" style="font-family:Consolas;"><pre>
+            //Set of probabilities
+            cpt node &lt;node ID&gt; table(&lt;sequence of probs sources&gt;)
+            cpt node &lt;node ID&gt; binary{&lt;binary prob source&gt;}
+            cpt node &lt;node ID&gt; column(&lt;name sequence&gt;)
+              of(&lt;sequence of probs sources&gt;)
+            cpt node &lt;node ID&gt; column(&lt;name sequence&gt;)
+              binary{&lt;binary prob source&gt;}
+            //Set of evidence
+            evidence node &lt;node ID&gt; of{&lt;evidence sources&gt;}
+            //Handling of inference
+            inference{ allNodes =>
+              //Map(&lt;node ID&lt; -> Map(&lt;value name&gt; -> &lt;probability&gt;))
+              &lt;do something&gt;
+            }
+            inference allValues{ allValues =>
+              //Map(&lt;node name&gt; -> &lt;value name&gt;)
+              &lt;do something&gt;
+            }
+            inference node &lt;node ID&gt; binaryProb{ s0Prob =>
+              &lt;do something&gt;
+            }
+            inference node &lt;node ID&gt; allProb{ allProb =>
+              //Map(&lt;value name&gt; -> &lt;probability&gt;)
+              &lt;do something&gt;
+            }
+            inference node &lt;node ID&gt; value{ valueName =>
+              &lt;do something&gt;
+            }
+            inference node &lt;node ID&gt; valueProb &lt;value name&gt; prob{ g1Prob =>
+              &lt;do something&gt;
+            }
+            //Methods
+            def update():Unit
+            def values(evidence:Map[String,String]):Map[String,String]
+            def probabilities(evidence:Map[String,String]):Map[String, Map[String, Double]]
+            <p>Where:</p>
+            &lt;node ID&gt; -- ID from SamIam
+            &lt;sequence of probs sources&gt; -- Seq args of Double expressions,
+              number of which should mach number of cells in table or in column,
+            &lt;binary prob source&gt; -- probability for the firs of the two cell
+              in binary table or column, probability for the second cell will be calc
+              as 1 - first.
+            &lt;name sequence&gt; -- Seq args of values names which identify the
+              CPT column.
+            &lt;evidence sources&gt; -- Expression which return string name of
+              node value or string 'none' (no evidence)
+       </pre></div>
+    <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Parameters:</h3>
+    <div align="left" style="font-family:Consolas;"><pre>
+            name:String, screenX:Int, screenY:Int, screenW:Int, screenH:Int -- general
+              parameters,
+            netPath:String -- Path to the *.net file,
+            showUI:Boolean -- ON/OFF graphical UI (default: true),
+            showInference:Boolean -- Shove|Hide node inference (default: true),
+            showCPT:Boolean -- Shove|Hide node CPT (default: false),
+            autoUpdate:Boolean -- Update after each change, if false update by
+              calling 'update()' method (default: true),
+            engineTimeout:Long -- (default: 10000),
+            engineMaxIterations:Int -- (default: 100),
+            engineScheduler:MessagePassingScheduler -- (default: TOPDOWNBOTTUMUP),
+            engineConvergenceThreshold:Double -- (default: 1.0E-7).
         </pre></div>
 </html>
 

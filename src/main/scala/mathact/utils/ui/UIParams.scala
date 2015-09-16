@@ -56,7 +56,8 @@ object UIParams {
     val discreteSliderTextColor:Color
     val discreteSliderHeight:Int
     val backgroundColor:Color}
-  trait Measurer extends NameLabel with SeparatorLabel with NumberLabel
+  trait Measurer extends NameLabel with SeparatorLabel{
+    val numberFormat:String}
   trait Executor{
     val startEnabledIcon:ImageIcon
     val startDisableIcon:ImageIcon

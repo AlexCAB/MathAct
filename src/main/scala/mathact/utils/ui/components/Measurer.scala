@@ -1,6 +1,7 @@
 package mathact.utils.ui.components
 import swing.Color
 import mathact.utils.ui.UIParams
+import scala.swing.Alignment.Left
 
 
 /**
@@ -11,13 +12,15 @@ import mathact.utils.ui.UIParams
 class Measurer(
  uiParams:UIParams.Measurer,
  varName:String,
- color:Color)
+ color:Color,
+ initValue:String)
 extends GridComponent {
   //Components
   val name = new NameLabel(uiParams, varName, color)
   val separator = new SeparatorLabel(uiParams, " = ", color)
-  val value = new NumberLabel(uiParams, color)
+  val width = name.calcStringWidth(initValue, uiParams.nameFont) + 8
+  val value = new NameLabel(uiParams, initValue, color, Left, Some(width))
   val gridRow = List(name, separator, value)
   //Methods
-  def update(v:Double) = {
-    value.setNumber(v)}}
+  def update(v:String) = {
+    value.setName(v)}}

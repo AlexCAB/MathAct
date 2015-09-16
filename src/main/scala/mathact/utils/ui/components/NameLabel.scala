@@ -14,13 +14,16 @@ class NameLabel(
   uiParams:UIParams.NameLabel,
   labText:String,
   textColor:Color = Color.black,
-  alignment:Alignment.Value = Right)
+  alignment:Alignment.Value = Right,
+  width:Option[Int] = None)
 extends Label with UIComponent{
   //Construction
   preferredSize = new Dimension(
-    calcStringWidth(labText, uiParams.nameFont),
+    width.getOrElse(calcStringWidth(labText, uiParams.nameFont)),
     uiParams.nameHeight)
   font = uiParams.nameFont
   foreground = textColor
   horizontalAlignment = alignment
-  text = labText}
+  text = labText
+  //Methods
+  def setName(name:String):Unit = {text = name}}
