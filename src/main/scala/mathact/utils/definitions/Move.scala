@@ -13,7 +13,8 @@ object Move {
   case object Down extends Move
   case object Left extends Move
   case object Right extends Move
-  case object Stay extends Move}
+  case object Stay extends Move
+  case object None extends Move}
 
 
 

@@ -212,6 +212,8 @@
         <h3 style="font-size:50%; font-family:verdana; color:#28AFE0">Syntax:</h3>
         <div align="left" style="font-family:Consolas;"><pre>
             step(&lt;step parameters&gt;) make{&lt;code bloc&gt;}
+            onStart{&lt;code bloc&gt;}                             //Execute on start
+            onStop{&lt;code bloc&gt;}                              //Execute on stop
             <p>Where:</p>
              &lt;step params&gt; -- name = "...".
              &lt;code bloc&gt; -- Any Scala code.
@@ -598,6 +600,7 @@
             pacmanOf{&lt;coordinates&gt;}
             blinkyOf{&lt;coordinates&gt;}
             inkyOf{&lt;coordinates&gt;}
+            availableMoves(&lt;coordinates&gt;) //Return set of available moves
             <p>Where:</p>
             &lt;maze objects&gt; -- Maze objects separated by a comma:
               P - Power pellet; o - Pelle; H - Wall; E - Empty space;

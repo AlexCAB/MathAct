@@ -1,6 +1,6 @@
 package mathact.tools.games
 import mathact.utils.clockwork.VisualisationGear
-import mathact.utils.definitions.{Move, PacmanObj, PacmanImg}
+import mathact.utils.definitions.{PacmanObj, PacmanImg}
 import mathact.utils.dsl.SyntaxException
 import mathact.utils.ui.components.{BorderFrame, PacmanMaze}
 import mathact.utils.{ToolHelper, Tool, Environment}
@@ -20,6 +20,8 @@ abstract class PacmanView(
   (implicit environment:Environment)
 extends Tool {
   //Definitions
+  val Move = mathact.utils.definitions.Move
+  type Move = mathact.utils.definitions.Move
   protected trait MazeDefObj
   protected case object ○ extends MazeDefObj  //Pellet
   protected case object o extends MazeDefObj  //Pellet
@@ -42,20 +44,25 @@ extends Tool {
   private var pellets:Set[PacmanObj.Pellet] = Set()
   private var powerPellets:Set[PacmanObj.PowerPellet] = Set()
   //DSL
-  def maze(objs:MazeDefObj*):Unit = {
+  protected def maze(objs:MazeDefObj*):Unit = {
     maze = prepareAndCheckMaze(objs.toSeq)
     buildInitState()}
   def mazeM:Int = maze.size        //Lines
   def mazeN:Int = maze.head.size   //Columns
   def mazeObjAt(x:Double,y:Double):MazeDefObj = (x.toInt,y.toInt) match{
       case (x,y) if x < 0 || x >= mazeN || y < 0 || y >= mazeM ⇒ E
-      case (x,y) ⇒ maze(x)(y)}
+      case (x,y) ⇒ maze(y)(x)}
   def pacmanOf(f: ⇒(Double,Double)) = {
     pacmanFun = Some(()⇒{f})}
   def blinkyOf(f: ⇒(Double,Double)) = {
     blinkyFun = Some(()⇒{f})}
   def inkyOf(f: ⇒(Double,Double)) = {
     inkyFun = Some(()⇒{f})}
+  def availableMoves(x:Int, y:Int):Set[Move] = {
+    Set((Move.Up, x ,y - 1),(Move.Down, x, y + 1),(Move.Left,x - 1 ,y),(Move.Right,x + 1 ,y),(Move.Stay, x, y)).flatMap{
+      case (m,nx,ny) if nx < 0 || ny < 0 || nx >= maze.head.size || ny >= maze.size ⇒ None
+      case (m,nx,ny) if maze(ny)(nx) == H ⇒ None
+      case (m,_,_) ⇒ Some(m)}}
   //Functions
   private def buildMazeObjects():List[PacmanObj] =
     pellets.toList ++ powerPellets.toList ++ List(blinky, inky, pacman).flatMap(e ⇒ e)

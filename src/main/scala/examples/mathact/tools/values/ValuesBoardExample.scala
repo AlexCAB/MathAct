@@ -16,6 +16,7 @@ object ValuesBoardExample extends Workbench{
     val a = zero
     val b = init(1)
   }
+  //Creating SwitchBoard
   val options = new SwitchBoard("Options"){
     val bool      =  init(true)
     val int       =  init(1)      in(1, 3)

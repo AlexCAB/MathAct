@@ -8,6 +8,7 @@ package mathact.utils.definitions
 trait PacmanImg
 
 object PacmanImg{
+  case object None extends PacmanImg
   case object EmptyImg extends PacmanImg
   case object WhiteGhost extends PacmanImg
   case object RedGhost extends PacmanImg

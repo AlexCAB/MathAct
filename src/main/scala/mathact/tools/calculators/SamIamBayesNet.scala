@@ -235,6 +235,7 @@ extends Tool{
         val cpd = v.getCPTShell.getCPT
         (n * ci until n * ci + data.length).zip(data).foreach{case (i, d) ⇒ cpd.setCP(i,d)}}
       //Get and set probabilities
+      val vertices = net.vertices().toArray.flatMap{case v:HuginNode ⇒ Some((v.getID,v)); case _ ⇒ None}.toMap
       probabilities.foreach{
         case n:BinTableProb if n.node.nonEmpty ⇒ {
           val CPTData(v, _, _) = n.node.get
@@ -264,23 +265,30 @@ extends Tool{
           updateColumn(v, ls.size, ci, nps.toArray)}
         case _ ⇒}
       //Get evidence
-      val evds = evidences.flatMap{
+      val intEvds = evidences.flatMap{
         case  n:NodeEvidence if n.node.nonEmpty ⇒ {
           val CPTData(v, ls, cs) = n.node.get
             n.v() match{
              case "none" ⇒ None
              case s if ls.contains(s) ⇒ Some((v,s))
              case s ⇒ throw new ExecutionException(s"Error: Incorrect evidence value '$s' for node '${n.nodeID}'.")}}
-        case _ ⇒ None}
+        case _ ⇒ None}.toMap
+      val extEvds = evidence.flatMap{
+        case (_, value) if value == "none" ⇒ None
+        case (nodeID, value) if vertices.contains(nodeID) ⇒ {
+          val n = vertices(nodeID)
+          val vs = n.instances.asInstanceOf[java.util.List[String]].asScala
+          value match{
+            case v if n.instances.asInstanceOf[java.util.List[String]].asScala.contains(v) ⇒ Some((n, value))
+            case v ⇒ throw new ExecutionException(s"Error: Incorrect evidence value '$v' for node '${nodeID}'.")}}
+        case (nodeID, _) ⇒ throw new ExecutionException(s"Error: Incorrect node name '$nodeID'.")}
       //Calc
       val engine = dynamator.manufactureInferenceEngine(net)
-      net.getEvidenceController.setObservations(evds.toMap.asJava)
-      val vars = net.vertices().toArray.flatMap{
-        case v:HuginNode ⇒ {
-          val ls = v.instances.asInstanceOf[java.util.List[String]].asScala.toList
-          val ps = engine.conditional(v).dataclone().toList
-          Some((v.getID, ls.zip(ps)))}
-        case _ ⇒ None}.toMap
+      net.getEvidenceController.setObservations((intEvds ++ extEvds).asJava)
+      val vars = vertices.map{case (nodeID,v) ⇒
+        val ls = v.instances.asInstanceOf[java.util.List[String]].asScala.toList
+        val ps = engine.conditional(v).dataclone().toList
+        (v.getID, ls.zip(ps))}.toMap
       val varsMap = vars.map{case(k, m) ⇒ (k, m.toMap)}
       //Call inferences
       inferences.foreach{
@@ -291,7 +299,7 @@ extends Tool{
         case AllInference(p) ⇒ p(varsMap)
         case AllValuesInference(p) ⇒ p(varsMap.map{case (k, m) ⇒ (k, m.maxBy(_._2)._1)})}
       //Update UI
-      updateUI(net, evds.map(_._1.getID), vars)
+      updateUI(net, (intEvds ++ extEvds).map{case (n,_) ⇒ n.getID}.toList, vars)
       //Return
       varsMap}
     case _ ⇒ Map()}

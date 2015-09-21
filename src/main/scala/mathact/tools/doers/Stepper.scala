@@ -22,17 +22,41 @@ abstract class Stepper(
   (implicit environment:Environment)
 extends Tool{
   //Variables
+  private var onStart = List[Step]()
+  private var onStop = List[Step]()
   private var steps = List[Step]()
   private var nextStepIndex = 0
-  //Classes
+  //Functions
+  private def doStart():Unit = {
+    onStart.foreach(_.proc())
+    execBtn.setStarted(true)
+    timer.start()}
+  private def doStop():Unit = {
+    timer.stop()
+    execBtn.setStarted(false)
+    onStop.foreach(_.proc())}
+  private def doStep():Unit = {
+    nextStep()
+    gear.changed()}
+  //DSL Methods
   protected case class Step(name:String, proc:()⇒Unit){
     def make(proc: ⇒Unit):Step = {
       val step = Step(name, ()⇒proc)
       steps :+= step
       step}}
-  //DSL Methods
-  def step(name:String = ""):Step =
+  protected def onStart(proc: ⇒Unit):Unit = {onStart :+= Step("", ()⇒proc)}
+  protected def onStop(proc: ⇒Unit):Unit = {onStop :+= Step("", ()⇒proc)}
+  protected def step(name:String = ""):Step =
     Step(name match{case s if s == "" ⇒ "S_" + steps.size; case s ⇒ s}, ()⇒{})
+  //Methods
+  /**
+   * Start stepper
+   */
+  def start():Unit = doStart()
+  /**
+   * Stop stepper
+   */
+  def stop():Unit = doStop()
   //Helpers
   private val helper = new ToolHelper(this, name, "Stepper")
   //Check parameters
@@ -55,13 +79,9 @@ extends Tool{
       frame.setTitleAdd(s" - $v/second")
       timer.setDelay((1000 / v).toInt)}}
   private val execBtn = new ExecuteButtons(environment.params.Stepper){
-    def start() = {
-      timer.start()}
-    def stop() = {
-      timer.stop()}
-    def step() = {
-      nextStep()
-      gear.changed()}}
+    def start() = doStart()
+    def stop() = doStop()
+    def step() = doStep()}
   private val frame:FlowFrame = new FlowFrame(
     environment.layout, environment.params.Stepper, helper.toolName, List(dropList, slider, execBtn)){
     def closing() = gear.endWork()}

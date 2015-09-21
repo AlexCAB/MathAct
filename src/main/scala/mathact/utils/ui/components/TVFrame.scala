@@ -50,7 +50,6 @@ extends Frame {
       case (Some(c), _) ⇒ (c.preferredSize.getWidth.toInt, c.preferredSize.getHeight.toInt)
       case _ ⇒
         (100,100)}
-
     //Show
     if(defW == Int.MaxValue && defH == Int.MaxValue){
       borderPanel.preferredSize = new swing.Dimension(

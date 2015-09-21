@@ -121,7 +121,7 @@ extends Tool {
   def mazeN:Int = maze.head.size   //Columns
   def mazeObjAt(x:Int,y:Int):MazeDefObj = (x,y) match{
     case (x,y) if x < 0 || x >= mazeN || y < 0 || y >= mazeM ⇒ E
-    case (x,y) ⇒ maze(x)(y)}
+    case (x,y) ⇒ maze(y)(x)}
   //Functions
   private def buildMazeObjects():List[PacmanObj] =
     pellets.toList ++ powerPellets.toList ++ List(blinky, inky, pacman).filter(_.eState != AgentState.NotDefined)

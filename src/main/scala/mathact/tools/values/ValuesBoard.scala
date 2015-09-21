@@ -19,7 +19,7 @@ class ValuesBoard(
   screenX:Int = Int.MaxValue,
   screenY:Int = Int.MaxValue)
 (implicit environment:Environment)
-  extends Tool with Colors{
+extends Tool with Colors{
   //Private definitions
   private case class Value(name:Option[String], color:Color, proc:()⇒String)
   //Variables

@@ -16,8 +16,10 @@ object StepperExample extends Workbench{
   new YChartRecorder(autoUpdate = true){trace(color =green) of(x)}
   //Creating Stepper
   new Stepper{
+    onStart{println("Stepper started")}
     step(name = "a") make{x = 0}
     step() make{x = .5}
     step(name = "c") make{x = 1}
+    onStop{println("Stepper stopped")}
   }
 }
