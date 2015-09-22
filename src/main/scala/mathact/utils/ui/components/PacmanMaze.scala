@@ -1,10 +1,9 @@
 package mathact.utils.ui.components
 import java.awt.Dimension
 import java.awt.image.BufferedImage
-import mathact.utils.definitions.PacmanImg._
 import mathact.utils.definitions.PacmanObj
-import mathact.utils.definitions.PacmanObj._
-import mathact.utils.definitions.Move._
+import mathact.utils.definitions.Move
+import mathact.utils.definitions.PacmanImg
 import mathact.utils.ui.UIParams
 import scala.swing._
 
@@ -78,35 +77,35 @@ extends Panel with UIComponent{
       graphics.drawImage(background, 0, 0, null)
       //Draw objects
       objects.flatMap{
-        case ImgObj(x,y,Up,Pacman0)        ⇒ Some(x, y, uiParams.pacmanBU)
-        case ImgObj(x,y,Down,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBD)
-        case ImgObj(x,y,Left,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBL)
-        case ImgObj(x,y,Right,Pacman0)     ⇒ Some(x, y, uiParams.pacmanBR)
-        case ImgObj(x,y,Stay,Pacman0)      ⇒ Some(x, y, uiParams.pacmanBR)
-        case ImgObj(x,y,Up,Pacman1)        ⇒ Some(x, y, uiParams.pacmanSU)
-        case ImgObj(x,y,Down,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSD)
-        case ImgObj(x,y,Left,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSL)
-        case ImgObj(x,y,Right,Pacman1)     ⇒ Some(x, y, uiParams.pacmanSR)
-        case ImgObj(x,y,Stay,Pacman1)      ⇒ Some(x, y, uiParams.pacmanSR)
-        case ImgObj(x,y,_,Pacman2)         ⇒ Some(x, y, uiParams.pacman)
-        case Pellet(x,y)                   ⇒ Some(x, y, uiParams.pellet)
-        case PowerPellet(x,y)              ⇒ Some(x, y, uiParams.powerPellet)
-        case ImgObj(x,y,Stay,RedGhost)     ⇒ Some(x, y, uiParams.ghostB)
-        case ImgObj(x,y,Up,RedGhost)       ⇒ Some(x, y, uiParams.ghostBU)
-        case ImgObj(x,y,Down,RedGhost)     ⇒ Some(x, y, uiParams.ghostBD)
-        case ImgObj(x,y,Left,RedGhost)     ⇒ Some(x, y, uiParams.ghostBL)
-        case ImgObj(x,y,Right,RedGhost)    ⇒ Some(x, y, uiParams.ghostBR)
-        case ImgObj(x,y,Stay,BlueGhost)    ⇒ Some(x, y, uiParams.ghostR)
-        case ImgObj(x,y,Up,BlueGhost)      ⇒ Some(x, y, uiParams.ghostRU)
-        case ImgObj(x,y,Down,BlueGhost)    ⇒ Some(x, y, uiParams.ghostRD)
-        case ImgObj(x,y,Left,BlueGhost)    ⇒ Some(x, y, uiParams.ghostRL)
-        case ImgObj(x,y,Right,BlueGhost)   ⇒ Some(x, y, uiParams.ghostRR)
-        case ImgObj(x,y,Stay,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostW)
-        case ImgObj(x,y,Up,WhiteGhost)     ⇒ Some(x, y, uiParams.ghostWU)
-        case ImgObj(x,y,Down,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWD)
-        case ImgObj(x,y,Left,WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWL)
-        case ImgObj(x,y,Right,WhiteGhost)  ⇒ Some(x, y, uiParams.ghostWR)
-        case ImgObj(_,_,_,EmptyImg) ⇒ None}
+        case PacmanObj.ImgObj(x,y,Move.Up,PacmanImg.Pacman0)        ⇒ Some(x, y, uiParams.pacmanBU)
+        case PacmanObj.ImgObj(x,y,Move.Down,PacmanImg.Pacman0)      ⇒ Some(x, y, uiParams.pacmanBD)
+        case PacmanObj.ImgObj(x,y,Move.Left,PacmanImg.Pacman0)      ⇒ Some(x, y, uiParams.pacmanBL)
+        case PacmanObj.ImgObj(x,y,Move.Right,PacmanImg.Pacman0)     ⇒ Some(x, y, uiParams.pacmanBR)
+        case PacmanObj.ImgObj(x,y,Move.Stay,PacmanImg.Pacman0)      ⇒ Some(x, y, uiParams.pacmanBR)
+        case PacmanObj.ImgObj(x,y,Move.Up,PacmanImg.Pacman1)        ⇒ Some(x, y, uiParams.pacmanSU)
+        case PacmanObj.ImgObj(x,y,Move.Down,PacmanImg.Pacman1)      ⇒ Some(x, y, uiParams.pacmanSD)
+        case PacmanObj.ImgObj(x,y,Move.Left,PacmanImg.Pacman1)      ⇒ Some(x, y, uiParams.pacmanSL)
+        case PacmanObj.ImgObj(x,y,Move.Right,PacmanImg.Pacman1)     ⇒ Some(x, y, uiParams.pacmanSR)
+        case PacmanObj.ImgObj(x,y,Move.Stay,PacmanImg.Pacman1)      ⇒ Some(x, y, uiParams.pacmanSR)
+        case PacmanObj.ImgObj(x,y,_,PacmanImg.Pacman2)              ⇒ Some(x, y, uiParams.pacman)
+        case PacmanObj.Pellet(x,y)                                  ⇒ Some(x, y, uiParams.pellet)
+        case PacmanObj.PowerPellet(x,y)                             ⇒ Some(x, y, uiParams.powerPellet)
+        case PacmanObj.ImgObj(x,y,Move.Stay,PacmanImg.RedGhost)     ⇒ Some(x, y, uiParams.ghostB)
+        case PacmanObj.ImgObj(x,y,Move.Up,PacmanImg.RedGhost)       ⇒ Some(x, y, uiParams.ghostBU)
+        case PacmanObj.ImgObj(x,y,Move.Down,PacmanImg.RedGhost)     ⇒ Some(x, y, uiParams.ghostBD)
+        case PacmanObj.ImgObj(x,y,Move.Left,PacmanImg.RedGhost)     ⇒ Some(x, y, uiParams.ghostBL)
+        case PacmanObj.ImgObj(x,y,Move.Right,PacmanImg.RedGhost)    ⇒ Some(x, y, uiParams.ghostBR)
+        case PacmanObj.ImgObj(x,y,Move.Stay,PacmanImg.BlueGhost)    ⇒ Some(x, y, uiParams.ghostR)
+        case PacmanObj.ImgObj(x,y,Move.Up,PacmanImg.BlueGhost)      ⇒ Some(x, y, uiParams.ghostRU)
+        case PacmanObj.ImgObj(x,y,Move.Down,PacmanImg.BlueGhost)    ⇒ Some(x, y, uiParams.ghostRD)
+        case PacmanObj.ImgObj(x,y,Move.Left,PacmanImg.BlueGhost)    ⇒ Some(x, y, uiParams.ghostRL)
+        case PacmanObj.ImgObj(x,y,Move.Right,PacmanImg.BlueGhost)   ⇒ Some(x, y, uiParams.ghostRR)
+        case PacmanObj.ImgObj(x,y,Move.Stay,PacmanImg.WhiteGhost)   ⇒ Some(x, y, uiParams.ghostW)
+        case PacmanObj.ImgObj(x,y,Move.Up,PacmanImg.WhiteGhost)     ⇒ Some(x, y, uiParams.ghostWU)
+        case PacmanObj.ImgObj(x,y,Move.Down,PacmanImg.WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWD)
+        case PacmanObj.ImgObj(x,y,Move.Left,PacmanImg.WhiteGhost)   ⇒ Some(x, y, uiParams.ghostWL)
+        case PacmanObj.ImgObj(x,y,Move.Right,PacmanImg.WhiteGhost)  ⇒ Some(x, y, uiParams.ghostWR)
+        case PacmanObj.ImgObj(_,_,_,PacmanImg.EmptyImg) ⇒ None}
         .foreach{case(x, y, img) ⇒ {
         val ix = (x * uiParams.squareSize).toInt
         val iy = (y * uiParams.squareSize).toInt
