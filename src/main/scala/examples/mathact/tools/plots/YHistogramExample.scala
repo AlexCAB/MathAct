@@ -24,3 +24,4 @@ object YHistogramExample extends Workbench{
     data(black) ofArray{ys}
   }
 }
+

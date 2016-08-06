@@ -13,10 +13,11 @@ import scala.math._
 
 object OjaRuleExample extends Workbench{
   //Variables
-  val potBoard = new PotBoard{
+  val input = new PotBoard{
     val xs = array(.1, .2)   //Input
-    val η = in(0,1)}         //Learning rate
-  import potBoard._
+    val η = in(0,1)          //Learning rate
+  }
+  import input._
   var ws = Array(.1, .1)     //Weights
   var y = .0                 //Output
   //Calculation
@@ -41,3 +42,6 @@ object OjaRuleExample extends Workbench{
     chart.update()
   }}
 }
+
+
+
