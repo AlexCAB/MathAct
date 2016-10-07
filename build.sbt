@@ -1,17 +1,19 @@
 name := "MathAct"
 
-version := "0.1"
+version := "0.2.0"
 
-scalaVersion := "2.11.6"
+lazy val mathact_core = project in file("mathact_core")
 
-libraryDependencies  ++= Seq(
-  "org.scalanlp" %% "breeze" % "0.10",
-  "org.jfree" % "jfreechart" % "1.0.19",
-  "org.scala-lang.modules" %% "scala-swing" % "1.0.1",
-  "net.sf.jchart2d" % "jchart2d" % "3.3.2",
-  "org.graphstream" % "gs-core" % "1.3",
-  "org.graphstream" % "gs-algo" % "1.3",
-  "org.graphstream" % "gs-ui" % "1.3"
-)
+  
+lazy val mathact_tools = (project in file("mathact_tools"))
+  .dependsOn(mathact_core)
+  .aggregate(mathact_core)
+  
+  
+lazy val mathact_examples = (project in file("mathact_examples"))
+  .dependsOn(mathact_core, mathact_tools)
+  .aggregate(mathact_core, mathact_tools)  
+  
 
-
+lazy val root = (project in file("."))
+  .aggregate(mathact_core, mathact_tools, mathact_examples)
