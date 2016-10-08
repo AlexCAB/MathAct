@@ -34,38 +34,38 @@ class VisualizationTest extends UIActorTestSpec {
     //Test config
     val testConfig = new VisualizationConfigLike{}
     //Helpers actors
-    val workbenchController = TestProbe("TestSketchController_" + randomString())
+    val sketchController = TestProbe("TestSketchController_" + randomString())
     //UI Actor
-    val visualization = system.actorOf(Props(new VisualizationActor(testConfig, workbenchController.ref)))
-    workbenchController.watch(visualization)}
+    val visualization = system.actorOf(Props(new VisualizationActor(testConfig, sketchController.ref)))
+    sketchController.watch(visualization)}
   //Testing
   "Visualization" should{
     "visualise tools" in new TestCase {
       //Show UI
-      workbenchController.send(visualization, M.ShowVisualizationUI)
-      workbenchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
+      sketchController.send(visualization, M.ShowVisualizationUI)
+      sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
       sleep(2.second)
       //
 
 
 
+      sleep(60.second)
 
 
-
-      //Test close button
-      println("[VisualizationTest] Click close button (X).")
-      sleep(2.second)
-      workbenchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
-      workbenchController.send(visualization, M.ShowVisualizationUI)
-      workbenchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
-      sleep(2.second)
+//      //Test close button
+//      println("[VisualizationTest] Click close button (X).")
+//      sleep(2.second)
+//      sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
+//      sketchController.send(visualization, M.ShowVisualizationUI)
+//      sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
+//      sleep(2.second)
       //Hide UI
-      workbenchController.send(visualization, M.HideVisualizationUI)
-      workbenchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
+      sketchController.send(visualization, M.HideVisualizationUI)
+      sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
       sleep(2.second)
       //Terminate UI
-      workbenchController.send(visualization, M.TerminateVisualization)
-      workbenchController.expectMsg(M.VisualizationTerminated)
-      workbenchController.expectTerminated(visualization)}
+      sketchController.send(visualization, M.TerminateVisualization)
+      sketchController.expectMsg(M.VisualizationTerminated)
+      sketchController.expectTerminated(visualization)}
   }
 }

@@ -42,7 +42,7 @@ import scalafx.stage.Stage
 
 private [mathact] class SketchUIViewAndController(
   config: SketchUIConfigLike,
-  workbenchController: ActorRef,
+  sketchController: ActorRef,
   log: LoggingAdapter)
 extends Stage {
   //Params
@@ -98,12 +98,12 @@ extends Stage {
   //Functions
   def actionTriggered(elem: SketchUIElement, state: SketchUiElemState): Unit = {
     log.debug(s"[SketchUI.actionTriggered] Hit elem $elem in state: $state")
-    workbenchController ! M.SketchUIActionTriggered(elem, state)}
+    sketchController ! M.SketchUIActionTriggered(elem, state)}
   //Close operation
   delegate.setOnCloseRequest(new EventHandler[WindowEvent]{
     def handle(event: WindowEvent): Unit = {
       log.debug("[SketchUI.onCloseRequest] Close is hit, send SketchUIActionTriggered(CloseBtn, Unit).")
-      workbenchController ! M.SketchUIActionTriggered(CloseBtn, Unit)
+      sketchController ! M.SketchUIActionTriggered(CloseBtn, Unit)
       event.consume()}})
   //UI Components
   val logBtn = new MWButton[SketchUiElemState](

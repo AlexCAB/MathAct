@@ -31,11 +31,7 @@ extends ActorBase with JFXInteraction { import Visualization._
   //Variables
   private var isShow = false
   //Construction
-  private val window = runNow{
-    val stg = new VisualizationViewAndController(config, self, log)
-    stg.resizable = false
-    stg.sizeToScene()
-    stg}
+  private val window = runNow{ new VisualizationViewAndController(config, self, log) }
 
 
   //Messages handling with logging
