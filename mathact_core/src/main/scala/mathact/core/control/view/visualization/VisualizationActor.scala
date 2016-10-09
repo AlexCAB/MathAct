@@ -47,6 +47,8 @@ extends ActorBase with JFXInteraction { import Visualization._
 
 
 
+
+
     //
 
 
@@ -63,6 +65,59 @@ extends ActorBase with JFXInteraction { import Visualization._
       isShow = true
       runAndWait(window.show())
       workbenchController ! M.VisualizationUIChanged(isShow)
+
+
+
+
+      runAndWait{
+        window.drawGraph(GraphData(
+          tools = List(
+            ToolData(
+              toolId = 1,
+              toolName = "A",
+              toolImage = None,
+              inlets = Map(1 → Some("i_1")),
+              outlets = Map(1 → Some("o_1"), 2 → Some("o_2"))),
+            ToolData(
+              toolId = 2,
+              toolName = "B",
+              toolImage = None,
+              inlets = Map(1 → Some("i_1"), 2 → Some("i_2")),
+              outlets = Map(1 → Some("o_1"), 2 → Some("o_2"))),
+            ToolData(
+              toolId = 3,
+              toolName = "C",
+              toolImage = Some(ToolImageData (20,20, "/mathact/userLog/info_img.png")),
+              inlets = Map(1 → Some("i_1")),
+              outlets = Map(1 → Some("o_1")))),
+          connections = List(
+            ConnectionData(
+              inletToolId = 1,
+              inletId = 1,
+              outletToolId = 2,
+              outletId = 1),
+            ConnectionData(
+              inletToolId = 2,
+              inletId = 1,
+              outletToolId = 3,
+              outletId = 1),
+            ConnectionData(
+              inletToolId = 3,
+              inletId = 1,
+              outletToolId = 1,
+              outletId = 1),
+            ConnectionData(
+              inletToolId = 2,
+              inletId = 2,
+              outletToolId = 2,
+              outletId = 2))))
+        window.doLayout(LayoutType.TreeLayout)}
+
+
+
+
+
+
     //Hide UI
     case M.HideVisualizationUI ⇒
       isShow = false
