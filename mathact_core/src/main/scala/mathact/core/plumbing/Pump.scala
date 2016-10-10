@@ -29,10 +29,10 @@ import scalafx.scene.image.Image
   */
 
 class Pump(
-            context: SketchContext,
-            val tool: Fitting,
-            val toolName: String,
-            val toolImage: Option[Image])
+  context: SketchContext,
+  val tool: Fitting,
+  val toolName: String,
+  val toolImagePath: Option[String])
 extends PumpLike{
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)

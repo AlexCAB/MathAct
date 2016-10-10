@@ -93,8 +93,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         @volatile private var procTimeout: Option[Duration] = None
         @volatile private var procError: Option[Throwable] = None
         //Pump
-        val pump: Pump = new Pump(testSketchContext, this, "TestTool", None){
-          }
+        val pump: Pump = new Pump(testSketchContext, this, "TestTool", None){}
         //Pipes
         val testPipe = new TestIncut[Double]
         lazy val outlet = Outlet(testPipe, "testOutlet")
@@ -231,7 +230,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       println(s"[PumpAndDriveTest] builtInfo: $builtInfo")
       builtInfo.toolId    shouldEqual testToolId
       builtInfo.toolName  shouldEqual "TestTool"
-      builtInfo.toolImage shouldEqual None
+      builtInfo.toolImagePath shouldEqual None
       builtInfo.inlets    should have size 1
       builtInfo.inlets.values.head.toolId     shouldEqual testToolId
       builtInfo.inlets.values.head.inletId    shouldEqual inlet.pipeId
@@ -267,7 +266,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       println(s"[PumpAndDriveTest] builtInfo: $builtInfo")
       builtInfo.toolId    shouldEqual testToolId
       builtInfo.toolName  shouldEqual "TestTool"
-      builtInfo.toolImage shouldEqual None
+      builtInfo.toolImagePath shouldEqual None
       builtInfo.inlets    shouldBe empty
       builtInfo.outlets should have size 1
       builtInfo.outlets.values.head.toolId     shouldEqual testToolId
@@ -550,6 +549,17 @@ class PumpAndDriveTest extends ActorTestSpec{
       driveLoad2.inletQueueSize shouldEqual 0
       //Termination
       sleep(2.second) //Wait for second slow message will processed
+      testPumping.expectMsg(M.DriveStopped)
+      testPumping.expectMsg(M.DriveTerminated)
+      testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
+    "by TerminateDrive, do terminating if in Building state" in new TestCase {
+      //Preparing
+      tools.builtTool
+      testPumping.watch(tools.testDrive)
+      //Send TerminateDrive
+      testPumping.send(tools.testDrive, M.TerminateDrive)
+      sleep(1.second) //Wait for TerminateDrive processed
+      //Termination
       testPumping.expectMsg(M.DriveTerminated)
       testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
     "by SkipTimeoutTask, not skip task if no timeout, and skip if it is" in new TestCase {

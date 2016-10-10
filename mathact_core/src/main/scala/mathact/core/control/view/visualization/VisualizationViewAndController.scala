@@ -47,6 +47,7 @@ import scalafx.stage.Stage
   * Created by CAB on 28.09.2016.
   */
 
+//TODO Write some custom layouts.
 class VisualizationViewAndController(
   config: VisualizationConfigLike,
   visualizationActor: ActorRef,
@@ -57,9 +58,7 @@ extends Stage { import Visualization._
   val windowPrefWidth = 800
   val windowPrefHeight = 600
   val graphBackgroundColor = Color.WHITE
-  val layoutMorphingSteps = 20
   val layoutMorphingEase = 1.2
-  val layoutMorphingDelay = 50 //Im milli seconds
   val layoutChoiceItems = ObservableBuffer(
     "Organic Layout",
     "Circle Layout",
@@ -197,7 +196,7 @@ extends Stage { import Visualization._
           val (toolStyle, verWidth, verHeight) = tool.toolImage
             .map{ image ⇒
               val styleName = "TOOL_" + tool.toolId
-              val style = toolNodeImageStyle + (STYLE_IMAGE → image.patch)
+              val style = toolNodeImageStyle + (STYLE_IMAGE → image.path)
               graph.getStylesheet.putCellStyle(styleName, buildStyle(style))
               (styleName, image.width.toDouble, image.height.toDouble)}
             .getOrElse(("TOOL", toolNodeSize.toDouble, toolNodeSize.toDouble))
@@ -233,7 +232,7 @@ extends Stage { import Visualization._
       graph.getModel.endUpdate()}}
   /** Applying given layout to the graph
     * @param layoutType - LayoutType */
-  def doLayout(layoutType: LayoutType): Unit = {
+  def doLayout(layoutType: LayoutType, numberOfIterations: Int, iterationDelay: Int): Unit = {
     log.debug("[VisualizationViewAndController.drawGraph] Try to do layout.")
     SwingUtilities.invokeLater(new Runnable{ override def run(): Unit = {
       graph.getModel.beginUpdate()
@@ -245,7 +244,7 @@ extends Stage { import Visualization._
           case LayoutType.ParallelEdgeLayout ⇒ parallelEdgeLayout.execute(graph.getDefaultParent)
           case LayoutType.StackLayout ⇒ stackLayout.execute(graph.getDefaultParent)}}
       finally {
-        val morph = new mxMorphing(graphComponent, layoutMorphingSteps, layoutMorphingEase, layoutMorphingDelay)
+        val morph = new mxMorphing(graphComponent, numberOfIterations, layoutMorphingEase, iterationDelay)
         morph.addListener(mxEvent.DONE, new mxIEventListener() {
           override def invoke(arg0: Object,  arg1: mxEventObject): Unit = graph.getModel.endUpdate()})
         morph.startAnimation()}}})}}

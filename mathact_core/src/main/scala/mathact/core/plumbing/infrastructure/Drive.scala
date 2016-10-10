@@ -32,12 +32,12 @@ import scala.collection.mutable.{Map ⇒ MutMap, Queue ⇒ MutQueue}
   */
 
 private [mathact] class Drive(
-                               val config: DriveConfigLike,
-                               val toolId: Int,
-                               val pump: PumpLike,
-                               val pumping: ActorRef,
-                               val userLogging: ActorRef,
-                               val visualization: ActorRef)
+  val config: DriveConfigLike,
+  val toolId: Int,
+  val pump: PumpLike,
+  val pumping: ActorRef,
+  val userLogging: ActorRef,
+  val visualization: ActorRef)
 extends StateActorBase(ActorState.Building) with IdGenerator with DriveBuilding with DriveConnectivity
 with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._, TaskKind._
   //Supervisor strategy
@@ -77,7 +77,7 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
     case (M.StopDrive, Working) ⇒
       state = Stopping
       doStopping()
-    case (M.TerminateDrive, Stopping) ⇒
+    case (M.TerminateDrive, Starting | Stopping) ⇒
       state = Terminating
       doTerminating()}
   /** Handling after reaction executed */
@@ -97,7 +97,7 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
       case true ⇒
         log.debug(
           s"[Drive.postHandling @ Starting] Started, send M.DriveStarted, " +
-          s"run message processing and switch to Working mode.")
+            s"run message processing and switch to Working mode.")
         state = Working
         startUserMessageProcessing()
         pumping ! M.DriveStarted

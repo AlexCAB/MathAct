@@ -32,6 +32,7 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
   private case class SendTo(to: ActorRef, msg: Any)
   private case class WatchFor(to: ActorRef)
   //Variables
+  private object Mutex
   @volatile private var receivedMessages = List[Any]()
   @volatile private var processedMessages = List[Any]()
   //Actor
@@ -50,7 +51,7 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
               res.foreach(m ⇒ sender ! m)
             case None ⇒
               println("[TestActor] Received message: " + msg)
-              receivedMessages :+= msg}}}),
+              Mutex.synchronized{ receivedMessages :+= msg }}}}),
     name)
   //Classes
   class Response(data: Option[Any]){
@@ -73,7 +74,6 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
     * @param to - ActorRef, target actor
     * @param msg - Any, message */
   def send(to: ActorRef, msg: Any): Unit = {
-    receivedMessages = List()
     ref ! SendTo(to, msg)
     println(s"[TestActor] Send message: $msg, to: $to")}
   /** Receive given number of messages and return
@@ -81,13 +81,13 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
     * @return - Seq[Any], received messages */
   def expectNMsg(number: Int)(implicit duration: FiniteDuration = expectMsgTimeout): List[Any] = {
     var counter = duration.toMillis / 10
-    var msg = receivedMessages
-    while (msg.size < number && counter > 0){
+    while (Mutex.synchronized{ receivedMessages.size } < number && counter > 0){
       Thread.sleep(10)
-      msg = receivedMessages
       counter -= 1}
-    receivedMessages = List()
-    msg}
+    Mutex.synchronized{
+      val received = receivedMessages.take(number)
+      receivedMessages = receivedMessages.drop(received.size)
+      received}}
   /** Receive given all of messages during duration and return
     * @return - Seq[Any], received messages */
   def expectAllMsg(implicit duration: FiniteDuration = expectMsgTimeout): List[Any] = {

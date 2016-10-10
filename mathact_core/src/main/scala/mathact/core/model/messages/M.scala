@@ -106,6 +106,7 @@ private [mathact] object M {
   case class LogError(toolId: Option[Int], toolName: String, error: Option[Throwable], message: String) extends Msg
   //Visualization - Drive
   case class ToolBuilt(builtInfo: ToolBuiltInfo) extends Msg   //Send to Visualization from Drive after tool built
+  case object AllToolBuilt
   case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to Drive from Visualization
   case object SkipTimeoutTask extends Msg
   case object ShowToolUi extends Msg  //Send to Drive from Visualization to show it's UI

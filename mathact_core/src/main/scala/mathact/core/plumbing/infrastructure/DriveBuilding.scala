@@ -79,7 +79,7 @@ private [mathact] trait DriveBuilding { _: Drive ⇒
     val builtInfo = ToolBuiltInfo(
       toolId,
       pump.toolName,
-      pump.toolImage,
+      pump.toolImagePath,
       inlets = inlets
         .map{ case (inletId, inletData) ⇒ (inletId, InletConnectionsInfo(
           toolId,

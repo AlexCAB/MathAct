@@ -14,8 +14,6 @@
 
 package mathact.core.control.view.visualization
 
-import scalafx.scene.image.Image
-
 
 /** Visualization object
   * Created by CAB on 28.09.2016.
@@ -32,9 +30,9 @@ object Visualization {
   type LayoutType = LayoutType.Value
   //Data
   case class ToolImageData(
+    path: String,
     width: Int,
-    height: Int,
-    patch: String)
+    height: Int)
   case class ToolData(
     toolId: Int,
     toolName: String,

@@ -24,10 +24,10 @@ import scalafx.scene.image.Image
 case class ToolBuiltInfo(
   toolId: Int,
   toolName: String,
-  toolImage: Option[Image],
+  toolImagePath: Option[String],
   inlets: Map[Int, InletConnectionsInfo],
   outlets: Map[Int, OutletConnectionsInfo])
 {
   override def toString =
-    s"InletConnectionsInfo(toolId: $toolId, toolName: $toolName, toolImage: $toolImage, " +
+    s"InletConnectionsInfo(toolId: $toolId, toolName: $toolName, toolImagePath: $toolImagePath, " +
     s"inlets: $inlets, outlets: $outlets)"}
