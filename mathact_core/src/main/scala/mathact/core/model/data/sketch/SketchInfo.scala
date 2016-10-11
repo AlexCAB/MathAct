@@ -12,22 +12,17 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.config
+package mathact.core.model.data.sketch
 
-import com.typesafe.config.Config
-
-import scala.concurrent.duration.FiniteDuration
+import mathact.core.model.enums.SketchStatus
 
 
-/** Main config
-  * Created by CAB on 03.09.2016.
+/** Sketch info
+  * Created by CAB on 11.10.2016.
   */
 
-trait MainConfigLike {
-  val config: Config
-  val sketchBuildingTimeout: FiniteDuration
-  val pumping: PumpingConfigLike
-  val sketchUI: SketchUIConfigLike
-  val mainUI: MainUIConfigLike
-  val userLogging: UserLoggingConfigLike
-  val visualization:  VisualizationConfigLike}
+case class SketchInfo(
+  className: String,
+  sketchName: Option[String],
+  sketchDescription: Option[String],
+  lastRunStatus: SketchStatus)

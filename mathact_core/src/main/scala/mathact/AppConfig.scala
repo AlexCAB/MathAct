@@ -47,6 +47,8 @@ private [mathact] class AppConfig extends MainConfigLike{
       val uiOperationTimeout = config.getInt("plumbing.ui.operation.timeout").millis}}
   //Build SketchUI config
   val sketchUI = new SketchUIConfigLike{}
+  //Main SketchUI config
+  val mainUI = new MainUIConfigLike{}
   //Parse user logging
   val userLogging = new UserLoggingConfigLike{
     val showUIOnError = config.getBoolean("view.logging.show.ui.on.error")}

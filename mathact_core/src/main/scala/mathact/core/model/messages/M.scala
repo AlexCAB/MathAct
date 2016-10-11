@@ -17,7 +17,7 @@ package mathact.core.model.messages
 import akka.actor.ActorRef
 import mathact.core.bricks.WorkbenchLike
 import mathact.core.model.data.pipes.{InletData, OutletData}
-import mathact.core.model.data.sketch.SketchData
+import mathact.core.model.data.sketch.{SketchInfo, SketchData}
 import mathact.core.model.data.visualisation.ToolBuiltInfo
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
@@ -35,6 +35,12 @@ private [mathact] object M {
   //Application - MainController
   case class MainControllerStart(sketches: List[SketchData]) extends Msg
   case class NewSketchContext(workbench: WorkbenchLike) extends Msg
+  //MainController - MainUI
+  case class SetSketchList(sketches: List[SketchInfo])  //Show UI
+  case class RunSketch(sketch: SketchInfo)      //MainUI sends it and Hide UI
+  case object MainCloseBtnHit
+  case object TerminateMainUI extends Msg
+  case object MainUITerminated extends Msg
   //MainController - SketchController
   case object StartSketchController extends StateMsg
   case class GetSketchContext(sender: ActorRef) extends Msg

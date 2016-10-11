@@ -89,14 +89,14 @@ extends Stage {
       graphic = images(newState)
       currentStates = newState
       disable = newState == states.head._1}}
-  class ButtonBox(spacing: Double, buttons: Seq[Node]) extends HBox(spacing){
+  private class ButtonBox(spacing: Double, buttons: Seq[Node]) extends HBox(spacing){
     alignment = Pos.Center
     prefHeight = buttonsImageSize
     prefWidth = buttonsImageSize * 3
     padding = Insets(4.0, 4.0, 4.0, 4.0)
     children = buttons}
   //Functions
-  def actionTriggered(elem: SketchUIElement, state: SketchUiElemState): Unit = {
+  private def actionTriggered(elem: SketchUIElement, state: SketchUiElemState): Unit = {
     log.debug(s"[SketchUI.actionTriggered] Hit elem $elem in state: $state")
     sketchController ! M.SketchUIActionTriggered(elem, state)}
   //Close operation

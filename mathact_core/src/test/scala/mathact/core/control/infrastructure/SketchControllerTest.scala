@@ -54,6 +54,7 @@ class SketchControllerTest extends ActorTestSpec {
           val stopFunctionTimeout = 1.second
           val impellerMaxQueueSize = 0
           val uiOperationTimeout = 1.second}}
+      val mainUI = null
       val sketchUI = null
       val userLogging = null
       val visualization = null}

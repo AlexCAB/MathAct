@@ -14,20 +14,11 @@
 
 package mathact.core.model.config
 
-import com.typesafe.config.Config
 
-import scala.concurrent.duration.FiniteDuration
-
-
-/** Main config
-  * Created by CAB on 03.09.2016.
+/** Main UI config like
+  * Created by CAB on 11.10.2016.
   */
 
-trait MainConfigLike {
-  val config: Config
-  val sketchBuildingTimeout: FiniteDuration
-  val pumping: PumpingConfigLike
-  val sketchUI: SketchUIConfigLike
-  val mainUI: MainUIConfigLike
-  val userLogging: UserLoggingConfigLike
-  val visualization:  VisualizationConfigLike}
+trait MainUIConfigLike {
+
+}

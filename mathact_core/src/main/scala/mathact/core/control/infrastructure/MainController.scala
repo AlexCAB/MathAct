@@ -24,7 +24,7 @@ import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums.SketchStatus
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.ActorBase
-import mathact.core.gui.SelectSketchWindow
+//import mathact.core.gui.SelectSketchWindow
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -51,9 +51,9 @@ class MainController(doStop: Int⇒Unit, config: AppConfig) extends ActorBase{
     def started(): CurrentSketch = CurrentSketch(sketch, isWorking = true, controller)
     def withController(controller: ActorRef): CurrentSketch = CurrentSketch(sketch, isWorking, Some(controller))}
   //UI definitions
-  val uiSelectSketch = new SelectSketchWindow(log){
-    def sketchSelected(sketchClassName: String): Unit = {self ! RunSketch(sketchClassName)}
-    def windowClosed(): Unit = {self ! DoStop}}
+//  val uiSelectSketch = new SelectSketchWindow(log){
+//    def sketchSelected(sketchClassName: String): Unit = {self ! RunSketch(sketchClassName)}
+//    def windowClosed(): Unit = {self ! DoStop}}
   //Variables
   var sketches = List[SketchData]()
   var currentSketch: Option[CurrentSketch] = None
@@ -88,6 +88,8 @@ class MainController(doStop: Int⇒Unit, config: AppConfig) extends ActorBase{
 //    sketches = sketches.map{
 //      case s if s.className == cs.sketch.className ⇒ s.copy(status = newStat)
 //      case s ⇒ s}}
+
+
   def cleanCurrentSketch(): Unit = {
     currentSketch.foreach(_.controller.foreach(_ ! M.ShutdownSketchController))
     currentSketch = None}
