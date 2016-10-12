@@ -76,7 +76,7 @@ class SketchControllerTest extends ActorTestSpec {
     def testAskMainController(workbenchController: ActorRef) = system.actorOf(Props(
       new Actor{
         def receive = {
-          case M.NewSketchContext(workbench) ⇒
+          case M.NewSketchContext(workbench, sketchClassName) ⇒
             println(
               s"[SketchControllerTest.testAskMainController] Send GetSketchContext, " +
               s"sender: $sender, workbench: $workbench")
@@ -330,7 +330,9 @@ class SketchControllerTest extends ActorTestSpec {
       //Construct Workbench and do ask
       val workbench = new WorkbenchLike{
         val res: Either[Exception,SketchContext]  = Await.result(
-          ask(askMainController, M.NewSketchContext(this))(askTimeout).mapTo[Either[Exception,SketchContext]],
+          ask(
+            askMainController,
+            M.NewSketchContext(this, "sketch.class"))(askTimeout).mapTo[Either[Exception,SketchContext]],
           askTimeout)
         println("[SketchControllerTest.workbench] res: " + res)
         res.isRight shouldEqual true

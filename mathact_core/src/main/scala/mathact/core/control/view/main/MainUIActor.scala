@@ -30,32 +30,44 @@ private [mathact] class MainUIActor(
   mainController: ActorRef)
 extends ActorBase with JFXInteraction {
   //Construction
-  private val window = runNow{
-    val stg = new MainUIViewAndController(config, mainController, log)
+  val window = runNow{
+    val stg = new MainUIViewAndController(config, self, log)
     stg.resizable = false
     stg.sizeToScene()
     stg}
   //Variables
-  private var isShow = false
+  var isShow = false
+  var isSelected = false
   //Messages handling with logging
   def reaction: PartialFunction[Any, Unit]  = {
     //Set sketch list
     case M.SetSketchList(sketches) ⇒
-      if(isShow) runAndWait(window.hide())
-      runAndWait{
-        window.setTableData(sketches)
-        window.show()}
+      runAndWait(window.setTableData(sketches))
+      if(! isShow) runAndWait(window.show())
       isShow = true
+      isSelected = false
     //Run sketch
-    case M.RunSketch(sketch) ⇒
-      runAndWait(window.hide())
-      mainController ! M.RunSketch(sketch)
+    case M.RunSketch(sketch) ⇒ isSelected match{
+      case false ⇒
+        log.debug("[MainUIActor @ RunSketch] Sketch: " + sketch)
+        runAndWait(window.disableRunButtonsExceptGiven(sketch))
+        mainController ! M.RunSketch(sketch)
+        isSelected = true
+      case true ⇒
+        log.debug("[MainUIActor @ RunSketch] An sketch already selected, do nothing.")}
+    //Hide main UI
+    case M.HideMainUI ⇒
+      if(isShow) runAndWait(window.hide())
       isShow = false
     //Main close btn hit
-    case M.MainCloseBtnHit ⇒
-      runAndWait(window.hide())
-      mainController ! M.MainCloseBtnHit
-      isShow = false
+    case M.MainCloseBtnHit ⇒ isSelected match{
+      case false ⇒
+        log.debug("[MainUIActor @ MainCloseBtnHit] Hide UI and send MainCloseBtnHit to main controller.")
+        runAndWait(window.hide())
+        mainController ! M.MainCloseBtnHit
+        isShow = false
+      case true ⇒
+        log.debug("[MainUIActor @ MainCloseBtnHit] An sketch selected, do nothing.")}
     //Terminate UI
     case M.TerminateMainUI ⇒
       runAndWait(window.close())

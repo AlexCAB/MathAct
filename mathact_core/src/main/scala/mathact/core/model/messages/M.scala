@@ -34,11 +34,12 @@ import scalafx.scene.paint.Color
 private [mathact] object M {
   //Application - MainController
   case class MainControllerStart(sketches: List[SketchData]) extends Msg
-  case class NewSketchContext(workbench: WorkbenchLike) extends Msg
+  case class NewSketchContext(workbench: WorkbenchLike, sketchClassName: String) extends Msg
   //MainController - MainUI
-  case class SetSketchList(sketches: List[SketchInfo])  //Show UI
-  case class RunSketch(sketch: SketchInfo)      //MainUI sends it and Hide UI
-  case object MainCloseBtnHit
+  case class SetSketchList(sketches: List[SketchInfo]) extends Msg //Show UI
+  case class RunSketch(sketch: SketchInfo) extends Msg     //MainUI sends it and Hide UI
+  case object HideMainUI extends Msg
+  case object MainCloseBtnHit extends Msg
   case object TerminateMainUI extends Msg
   case object MainUITerminated extends Msg
   //MainController - SketchController

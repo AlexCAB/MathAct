@@ -18,6 +18,8 @@ import akka.actor.{PoisonPill, Props, ActorRef, ActorSystem}
 import akka.event.Logging
 import akka.util.Timeout
 import mathact.core.control.infrastructure.MainController
+import mathact.core.control.view.main.MainUIActor
+import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums.SketchStatus
 import mathact.core.gui.JFXApplication
@@ -51,11 +53,19 @@ private [mathact] object Application{
   private val config = new AppConfig
   log.info(s"[Application] Starting of program...")
   //Main controller
-  private val mainController: ActorRef = system.actorOf(Props(new MainController(doStop, config)), "MainControllerActor")
+  private val mainController: ActorRef = system.actorOf(Props(
+    new MainController(config, doStop){
+      val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
+      def createSketchController(config: MainConfigLike, sketchData: SketchData, mainController: ActorRef): ActorRef = {
+
+        ???
+
+      }}),
+    "MainControllerActor")
   //Stop proc
   private def doStop(exitCode: Int): Unit = Future{
     state = State.Stopping
-    log.debug(s"[Application.doStop] Stopping of program, terminate timeout: $beforeTerminateTimeout milliseconds.")
+    log.info(s"[Application.doStop] Stopping of program, before terminate timeout: $beforeTerminateTimeout milliseconds.")
     Thread.sleep(beforeTerminateTimeout.toMillis)
     Platform.exit()
     system.terminate().onComplete{_ ⇒ System.exit(exitCode)}}
@@ -88,37 +98,36 @@ private [mathact] object Application{
   /** Get of SketchContext for new Workbench
     * @param workbench - Workbench
     * @return - MainController ActorRef or thrown exception */
-  def getSketchContext(workbench: WorkbenchLike): SketchContext = ???
-
-
-//    state match{
-//    case State.Work ⇒
-//      val opClassName = Option(workbench.getClass.getCanonicalName)
-//      val askTimeout = Timeout(creatingSketchContextTimeout).duration
-//      log.debug(
-//        s"[Application.getSketchContext] Try to create SketchContext for workbench $workbench, " +
-//        s"class name: $opClassName, askTimeout: $askTimeout.")
-//      //Check className
-//      opClassName match{
-//        case Some(className) ⇒
-//          //Ask for new context
-//          Await
-//            .result(
-//              ask(mainController, M.NewSketchContext(workbench))(askTimeout).mapTo[Either[Exception,SketchContext]],
-//              askTimeout)
-//            .fold(
-//              e ⇒ {
-//                log.debug(s"[Application.getSketchContext] Error on ask for ${workbench.getClass.getName}, err: $e.")
-//                throw e},
-//              wc ⇒ {
-//                log.debug(s"[Application.getSketchContext] SketchContext created for ${workbench.getClass.getName}.")
-//                wc})
-//        case None ⇒
-//          throw new IllegalArgumentException(
-//            s"[Application.getSketchContext] No canonical name of workbench class $workbench")}
-//    case st ⇒
-//      throw new IllegalStateException(
-//        s"[Application.getSketchContext] This method can be called only if App in Work state, current state: $st")}
+  def getSketchContext(workbench: WorkbenchLike): SketchContext = state match{
+    case State.Work ⇒
+      val opClassName = Option(workbench.getClass.getCanonicalName)
+      val askTimeout = Timeout(creatingSketchContextTimeout).duration
+      log.debug(
+        s"[Application.getSketchContext] Try to create SketchContext for workbench $workbench, " +
+        s"class name: $opClassName, askTimeout: $askTimeout.")
+      //Check className
+      opClassName match{
+        case Some(className) ⇒
+          //Ask for new context
+          Await
+            .result(
+              ask(
+                mainController,
+                M.NewSketchContext(workbench, className))(askTimeout).mapTo[Either[Exception,SketchContext]],
+              askTimeout)
+            .fold(
+              e ⇒ {
+                log.debug(s"[Application.getSketchContext] Error on ask for ${workbench.getClass.getName}, err: $e.")
+                throw e},
+              wc ⇒ {
+                log.debug(s"[Application.getSketchContext] SketchContext created for ${workbench.getClass.getName}.")
+                wc})
+        case None ⇒
+          throw new IllegalArgumentException(
+            s"[Application.getSketchContext] No canonical name of workbench class $workbench")}
+    case st ⇒
+      throw new IllegalStateException(
+        s"[Application.getSketchContext] This method can be called only if App in Work state, current state: $st")}
   //Logging methods
   object appLog {
     def debug(msg: String): Unit = log.debug(s"[Application.appLog] $msg")

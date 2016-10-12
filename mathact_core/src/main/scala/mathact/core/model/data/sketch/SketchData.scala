@@ -14,6 +14,8 @@
 
 package mathact.core.model.data.sketch
 
+import mathact.core.model.enums.SketchStatus
+
 
 /** SketchData model
   * Created by CAB on 19.06.2016.
@@ -27,3 +29,6 @@ case class SketchData(
   autorun: Boolean, //false - manual run
   showUserLogUiAtStart: Boolean,
   showVisualisationUiAtStart: Boolean)
+{
+  //Converters
+  def toSketchInfo(status: SketchStatus) = SketchInfo(className, sketchName, sketchDescription, status)}

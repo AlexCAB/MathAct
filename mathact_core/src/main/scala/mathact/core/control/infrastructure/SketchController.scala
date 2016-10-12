@@ -27,7 +27,7 @@ import mathact.core.StateActorBase
   * Created by CAB on 21.05.2016.
   */
 
-abstract class SketchController(
+private [mathact] abstract class SketchController(
   val config: MainConfigLike,
   val sketchData: SketchData,
   val mainController: ActorRef)
@@ -43,7 +43,7 @@ with SketchControllerLife with SketchControllerUIActions
   case object SketchDestructed extends StateMsg
   //Variables
   var isShutdown = false
-  //Sub actors
+  //Sub actors (abstract fields defined here to capture this actor context)
   val sketchUi: ActorRef
   val userLogging: ActorRef
   val visualization: ActorRef

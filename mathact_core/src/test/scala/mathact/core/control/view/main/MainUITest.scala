@@ -34,6 +34,23 @@ class MainUITest extends UIActorTestSpec {
   trait TestCase extends Suite{
     //Test config
     val mainUIConfig = new MainUIConfigLike{}
+    //TestSketchList
+    val sketchList = List(
+      SketchInfo(
+        className = "sketch_class_1",
+        sketchName = Some("Sketch A"),
+        sketchDescription = Some("My first sketch"),
+        lastRunStatus = SketchStatus.Ready),
+      SketchInfo(
+        className = "sketch_class_2",
+        sketchName = None,
+        sketchDescription = Some("My first sketch"),
+        lastRunStatus = SketchStatus.Ended),
+      SketchInfo(
+        className = "sketch_class_3",
+        sketchName = Some("Sketch C"),
+        sketchDescription = None,
+        lastRunStatus = SketchStatus.Failed))
     //Helpers actors
     val testMainController = TestProbe("TestMainController_" + randomString())
     //UI Actor
@@ -54,26 +71,32 @@ class MainUITest extends UIActorTestSpec {
       testMainController.expectTerminated(ui)}
     "show sketches list and run one of" in new TestCase {
       //Set empty list of sketch
-      testMainController.send(ui, M.SetSketchList(List(
-        SketchInfo(
-          className = "sketch_class_1",
-          sketchName = Some("Sketch A"),
-          sketchDescription = Some("My first sketch"),
-          lastRunStatus = SketchStatus.Ready),
-        SketchInfo(
-          className = "sketch_class_2",
-          sketchName = None,
-          sketchDescription = Some("My first sketch"),
-          lastRunStatus = SketchStatus.Autorun),
-        SketchInfo(
-          className = "sketch_class_3",
-          sketchName = Some("Sketch C"),
-          sketchDescription = None,
-          lastRunStatus = SketchStatus.Failed))))
+      testMainController.send(ui, M.SetSketchList(sketchList))
       println("[MainUITest] PLEASE HIT FIRST RUN BUTTON")
       //Wait for hit of first sketch
-      val ranSketch = testMainController.expectMsgType[M.RunSketch](30.seconds).sketch
-      ranSketch.className shouldEqual "sketch_class_1"
+      testMainController.expectMsgType[M.RunSketch](30.seconds).sketch.className shouldEqual "sketch_class_1"
+      //Hide UI
+      sleep(2.second)
+      testMainController.send(ui, M.HideMainUI)
+      //Show UI
+      sleep(2.second)
+      testMainController.send(
+        ui,
+        M.SetSketchList(sketchList match{
+          case h :: l ⇒  h.copy(lastRunStatus = SketchStatus.Ended) :: l
+          case Nil ⇒ Nil}))
+      println("[MainUITest] PLEASE HIT SECOND RUN BUTTON")
+      testMainController.expectMsgType[M.RunSketch](30.seconds).sketch.className shouldEqual "sketch_class_2"
+      sleep(2.second)
+      testMainController.send(
+        ui,
+        M.SetSketchList(sketchList match{
+          case h :: s :: l ⇒  h :: s.copy(lastRunStatus = SketchStatus.Failed) :: l
+          case h :: l ⇒ h :: l
+          case Nil ⇒ Nil}))
+      //Close
+      println("[MainUITest] PLEASE HIT CLOSE (X) BUTTON")
+      testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
       //Terminate UI
       testMainController.send(ui, M.TerminateMainUI)
       testMainController.expectMsg(M.MainUITerminated)

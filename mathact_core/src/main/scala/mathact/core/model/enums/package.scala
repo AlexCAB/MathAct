@@ -21,7 +21,7 @@ package mathact.core.model
 package object enums {
   //SketchStatus
   object SketchStatus extends Enumeration {
-    val Autorun, Ready, Ended, Failed = Value}
+    val Ready, Ended, Failed = Value}
   type SketchStatus = SketchStatus.Value
   //StepMode
   object StepMode extends Enumeration {

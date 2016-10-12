@@ -69,7 +69,6 @@ extends Stage {
     val name = sketch.sketchName.getOrElse(className)
     val description = sketch.sketchDescription.getOrElse("---")
     val status = sketch.lastRunStatus match{
-      case SketchStatus.Autorun ⇒ "autorun"
       case SketchStatus.Ready ⇒ "ready"
       case SketchStatus.Ended ⇒ "ended"
       case SketchStatus.Failed ⇒ "failed"
@@ -88,6 +87,8 @@ extends Stage {
         case false ⇒
           graphic = new ImageView{image = startBtnDImg}
           disable = true}}}
+  //Variables
+  private var sketchList = List[SketchData]()
   //Close operation
   delegate.setOnCloseRequest(new EventHandler[WindowEvent]{
     def handle(event: WindowEvent): Unit = {
@@ -148,5 +149,11 @@ extends Stage {
       contentHolder.children = noSketchesLabel
     case _ ⇒
       log.debug("[MainUIViewAndController.setTableData] Show sketches: " + sketches)
-      sketchesTable.items =  ObservableBuffer(sketches.map( data ⇒ new SketchData(data)))
-      contentHolder.children = selectionUi}}
+      sketchList = sketches.map( data ⇒ new SketchData(data))
+      sketchesTable.items = ObservableBuffer(sketchList)
+      contentHolder.children = selectionUi}
+  /** Disable run buttons except given one
+    * @param info - SketchInfo, sketch to skip */
+  def disableRunButtonsExceptGiven(info: SketchInfo): Unit = sketchList.foreach{
+    case sketch if sketch.className != info.className ⇒ sketch.runBtn.setEnabled(false)
+    case _ ⇒}}
