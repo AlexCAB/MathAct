@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.fitting
 
-import mathact.Application
+import mathact.core.app.Application
 
 
 /** Event receiver must be implemented by Inlet

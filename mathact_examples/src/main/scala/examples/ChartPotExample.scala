@@ -14,7 +14,7 @@
 
 package examples
 
-import mathact.Application
+import mathact.core.app.Application
 import mathact.core.bricks.Workbench
 import mathact.tools.plots.YChartRecorder
 import mathact.tools.pots.PotBoard

@@ -31,14 +31,14 @@ import scala.collection.mutable.{Map ⇒ MutMap, Queue ⇒ MutQueue}
   * Created by CAB on 15.05.2016.
   */
 
-private [mathact] class Drive(
+private [mathact] class DriveActor(
   val config: DriveConfigLike,
   val toolId: Int,
   val pump: PumpLike,
   val pumping: ActorRef,
   val userLogging: ActorRef,
   val visualization: ActorRef)
-extends StateActorBase(ActorState.Building) with IdGenerator with DriveBuilding with DriveConnectivity
+extends StateActorBase(ActorState.Init) with IdGenerator with DriveBuilding with DriveConnectivity
 with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._, TaskKind._
   //Supervisor strategy
   override val supervisorStrategy = OneForOneStrategy(){ case _: Throwable ⇒ Resume }
@@ -65,19 +65,21 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
   val inlets = MutMap[Int, InletState]()    //(Inlet ID, OutletData)
   var visualisationLaval: VisualisationLaval = VisualisationLaval.None
   //On start
-  val impeller = context.actorOf(Props(new Impeller(self, config.impellerMaxQueueSize)), "ImpellerOf_" + pump.toolName)
+  val impeller = context.actorOf(Props(new ImpellerActor(self, config.impellerMaxQueueSize)), "ImpellerOf_" + pump.toolName)
   context.watch(impeller)
   //Receives
   /** Reaction on StateMsg'es */
   def onStateMsg: PartialFunction[(StateMsg, ActorState), Unit] = {
-    case (M.BuildDrive, Building) ⇒
+    case (M.BuildDrive, Init) ⇒
+      state = Building
       doConnectivity()
-    case (M.StartDrive, Starting) ⇒
+    case (M.StartDrive, Built) ⇒
+      state = Starting
       doStarting()
     case (M.StopDrive, Working) ⇒
       state = Stopping
       doStopping()
-    case (M.TerminateDrive, Starting | Stopping) ⇒
+    case (M.TerminateDrive, Built | BuildingFailed | Starting | Stopping) ⇒
       state = Terminating
       doTerminating()}
   /** Handling after reaction executed */
@@ -86,38 +88,42 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
     case (_: M.PipesConnected | M.BuildDrive, Building) ⇒ isAllConnected match{
       case true ⇒
         log.debug(
-          s"[Drive.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
-        state = Starting
+          s"[DriveActor.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
+        state = Built
         pumping ! M.DriveBuilt
         buildAndSendToolBuiltInfo()
       case false ⇒
-        log.debug(s"[Drive.postHandling @ Building] Not all pipes connected.")}
+        log.debug(s"[DriveActor.postHandling @ Building] Not all pipes connected.")}
+    //This drive fail building
+    case (M.DriveBuildingError, Init | Building) ⇒
+      state = BuildingFailed
+      buildingFailed()
     //Check if user start function executed in Starting state
     case (M.StartDrive | _: M.TaskDone | _: M.TaskFailed, Starting) ⇒ isStarted match{
       case true ⇒
         log.debug(
-          s"[Drive.postHandling @ Starting] Started, send M.DriveStarted, " +
+          s"[DriveActor.postHandling @ Starting] Started, send M.DriveStarted, " +
             s"run message processing and switch to Working mode.")
         state = Working
         startUserMessageProcessing()
         pumping ! M.DriveStarted
       case false ⇒
-        log.debug(s"[Drive.postHandling @ Starting] Not started yet.")}
+        log.debug(s"[DriveActor.postHandling @ Starting] Not started yet.")}
     //Check if user stop function executed in Stopping state
     case (M.StopDrive | _: M.TaskDone | _: M.TaskFailed, Stopping) ⇒ isStopped match{
       case true ⇒
-        log.debug(s"[Drive.postHandling @ Stopping] Stopped, send M.DriveStopped")
+        log.debug(s"[DriveActor.postHandling @ Stopping] Stopped, send M.DriveStopped")
         pumping ! M.DriveStopped
       case false ⇒
-        log.debug(s"[Drive.postHandling @ Stopping] Not stopped yet.")}
+        log.debug(s"[DriveActor.postHandling @ Stopping] Not stopped yet.")}
     //Check if all message queues is empty in Terminating, and if so do terminating
     case (M.TerminateDrive | _: M.TaskDone | _: M.TaskFailed, Terminating) ⇒ isAllMsgProcessed match{
       case true ⇒
-        log.debug(s"[Drive.postHandling @ Terminating] Terminated, send M.DriveTerminated, and PoisonPill")
+        log.debug(s"[DriveActor.postHandling @ Terminating] Terminated, send M.DriveTerminated, and PoisonPill")
         pumping ! M.DriveTerminated
         self ! PoisonPill
       case false ⇒
-        log.debug(s"[Drive.postHandling @ Terminating] Not terminated yet.")}}
+        log.debug(s"[DriveActor.postHandling @ Terminating] Not terminated yet.")}}
   /** Actor reaction on messages */
   def reaction: PartialFunction[(Msg, ActorState), Unit] = {
     //Construction, adding pipes, ask from object
@@ -149,11 +155,11 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
     case (M.SkipTimeoutTask, _) ⇒ impeller ! M.SkipAllTimeoutTask
     case (M.SetVisualisationLaval(laval), _) ⇒ visualisationLaval = laval
     //UI control
-    case (M.ShowToolUi, Starting | Working | Stopping) ⇒ showToolUi()
+    case (M.ShowToolUi, Built | Starting | Working | Stopping) ⇒ showToolUi()
     case (M.TaskDone(ShowUI, _, time, _), _) ⇒ showToolUiTaskDone(time)
     case (M.TaskTimeout(ShowUI, _, time), _) ⇒ showToolUiTaskTimeout(time)
     case (M.TaskFailed(ShowUI, _, time, error), _) ⇒ showToolUiTaskFailed(time, error)
-    case (M.HideToolUi, Starting | Working | Stopping) ⇒ hideToolUi()
+    case (M.HideToolUi, Built | Starting | Working | Stopping) ⇒ hideToolUi()
     case (M.TaskDone(HideUI, _, time, _), _) ⇒ hideToolUiTaskDone(time)
     case (M.TaskTimeout(HideUI, _, time), _) ⇒ hideToolUiTaskTimeout(time)
     case (M.TaskFailed(HideUI, _, time, error), _) ⇒ hideToolUiTaskFailed(time, error)}}

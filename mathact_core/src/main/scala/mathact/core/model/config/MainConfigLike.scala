@@ -23,7 +23,7 @@ import scala.concurrent.duration.FiniteDuration
   * Created by CAB on 03.09.2016.
   */
 
-trait MainConfigLike {
+private [mathact] trait MainConfigLike {
   val config: Config
   val sketchBuildingTimeout: FiniteDuration
   val pumping: PumpingConfigLike

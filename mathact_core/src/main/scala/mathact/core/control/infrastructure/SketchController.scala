@@ -163,8 +163,8 @@ with SketchControllerLife with SketchControllerUIActions
     case (M.SketchUIActionTriggered(ShowAllToolsUiBtn, _), Working) ⇒ showAllToolsUiBtnHit()
     case (M.SketchUIActionTriggered(HideAllToolsUiBtn, _), Working) ⇒ hideAllToolsUiBtnHit()
     case (M.SketchUIActionTriggered(SkipAllTimeoutTaskBtn, _), Working) ⇒ skipAllTimeoutTaskBtnHit()
-    case (M.SketchUIActionTriggered(LogBtn, act: SketchUiElemState), Working) ⇒ logBtnHit(act)
-    case (M.SketchUIActionTriggered(VisualisationBtn, act: SketchUiElemState), Working) ⇒ visualisationBtnHit(act)
+    case (M.SketchUIActionTriggered(LogBtn, act: SketchUiElemState), _) ⇒ logBtnHit(act)
+    case (M.SketchUIActionTriggered(VisualisationBtn, act: SketchUiElemState), _) ⇒ visualisationBtnHit(act)
     case (M.SketchUIActionTriggered(StopSketchBtn, _), Working) ⇒ stopPumping()
     case (M.SketchUIActionTriggered(CloseBtn, _), s) if s != Init ⇒ closeBtnHit()
     //UI terminated

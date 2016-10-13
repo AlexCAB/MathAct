@@ -23,7 +23,7 @@ import org.scalatest.{Matchers, WordSpecLike, Suite}
 import scala.concurrent.duration._
 
 
-/** Testing of Impeller actor
+/** Testing of ImpellerActor actor
   * Created by CAB on 11.08.2016.
   */
 
@@ -32,9 +32,9 @@ class ImpellerTest extends ActorTestSpec with WordSpecLike with Matchers{
   trait TestCase extends Suite{
     //Helpers infrastructure
     val testDriver = TestProbe("TestDrive_" + randomString())
-    //Impeller actor
+    //ImpellerActor actor
     val impeller = system.actorOf(
-      Props(new Impeller(testDriver.ref, maxQueueSize = 2)),
+      Props(new ImpellerActor(testDriver.ref, maxQueueSize = 2)),
       "Impeller_" + randomString())
     //Test tasks0
     val sleepTask = (req: (FiniteDuration, String))⇒()⇒{
@@ -46,7 +46,7 @@ class ImpellerTest extends ActorTestSpec with WordSpecLike with Matchers{
       sleep({req._1})
       throw req._2}}
   //Testing
-  "Impeller" should{
+  "ImpellerActor" should{
     "run task on RunTask and model with TaskDone on end of execution" in new TestCase {
       //Run 3 tasks
       (1 to 3).foreach{ i ⇒

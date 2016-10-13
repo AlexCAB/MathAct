@@ -19,7 +19,7 @@ package mathact.core.model.config
   * Created by CAB on 28.09.2016.
   */
 
-trait VisualizationConfigLike {
+private [mathact] trait VisualizationConfigLike {
 
   //TODO
 

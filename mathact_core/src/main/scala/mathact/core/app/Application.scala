@@ -12,26 +12,27 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact
+package mathact.core.app
 
-import akka.actor.{PoisonPill, Props, ActorRef, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem, PoisonPill, Props}
 import akka.event.Logging
+import akka.pattern.ask
 import akka.util.Timeout
-import mathact.core.control.infrastructure.MainController
+import mathact.core.bricks.{SketchContext, WorkbenchLike}
+import mathact.core.control.infrastructure.{MainController, SketchController}
+import mathact.core.control.view.logging.UserLoggingActor
 import mathact.core.control.view.main.MainUIActor
+import mathact.core.control.view.sketch.SketchUIActor
+import mathact.core.control.view.visualization.VisualizationActor
+import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
-import mathact.core.model.enums.SketchStatus
-import mathact.core.gui.JFXApplication
 import mathact.core.model.messages.M
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
-import scala.collection.mutable.{ArrayBuffer ⇒ MutList}
-import scala.concurrent.{Await, Future}
-import scala.reflect.ClassTag
-import scala.reflect._
-import scalafx.application.Platform
-import akka.pattern.ask
+import mathact.core.plumbing.infrastructure.PumpingActor
+
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scalafx.application.Platform
 
 
 /** Root application object and class
@@ -42,36 +43,23 @@ private [mathact] object Application{
   //Parameters
   private val beforeTerminateTimeout = 1.seconds
   private val creatingSketchContextTimeout = 5.seconds
-  //Enums
-  object State extends Enumeration { val Starting, Work, Stopping = Value }
   //Variables
-  private var state: State.Value = State.Starting
+  private var mainController: Option[ActorRef] = None
   //Actor system
+  private val config = new AppConfig
   private val system = ActorSystem("MathActActorSystem")
   private implicit val execContext = system.dispatcher
   private val log = Logging.getLogger(system, this)
-  private val config = new AppConfig
   log.info(s"[Application] Starting of program...")
-  //Main controller
-  private val mainController: ActorRef = system.actorOf(Props(
-    new MainController(config, doStop){
-      val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
-      def createSketchController(config: MainConfigLike, sketchData: SketchData, mainController: ActorRef): ActorRef = {
-
-        ???
-
-      }}),
-    "MainControllerActor")
   //Stop proc
   private def doStop(exitCode: Int): Unit = Future{
-    state = State.Stopping
     log.info(s"[Application.doStop] Stopping of program, before terminate timeout: $beforeTerminateTimeout milliseconds.")
     Thread.sleep(beforeTerminateTimeout.toMillis)
     Platform.exit()
     system.terminate().onComplete{_ ⇒ System.exit(exitCode)}}
   private def doTerminate(): Unit = {
     log.error(s"[Application.doStop] Application, terminated.")
-    mainController ! PoisonPill
+    mainController.foreach(_ ! PoisonPill)
     doStop(-1)}
   //Methods
   /** Starting of application
@@ -80,17 +68,40 @@ private [mathact] object Application{
   def start(sketches: List[SketchData], args: Array[String]): Unit =
     try{
       //Check state
-      state match{
-        case State.Starting ⇒
+      mainController match{
+        case None ⇒
           //Run Java FX Application
           JFXApplication.init(args, log)
           Platform.implicitExit = false
           log.debug(s"[Application.start] JFXApplication created, starting application.")
-          state = State.Work
-          mainController ! M.MainControllerStart(sketches)
-        case st ⇒
+          //Create main controller
+          val controller = system.actorOf(Props(
+          new MainController(config, doStop){
+            val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
+            context.watch(mainUi)
+            def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
+              context.actorOf(Props(
+                new SketchController(config, sketchData, self){
+                  val sketchUi = context.actorOf(Props(
+                    new SketchUIActor(config.sketchUI, self)),
+                    "SketchUIActor_" + sketchData.className)
+                  val userLogging = context.actorOf(Props(
+                    new UserLoggingActor(config.userLogging, self)),
+                    "UserLoggingActor_" + sketchData.className)
+                  val visualization = context.actorOf(Props(
+                    new VisualizationActor(config.visualization, self)),
+                    "VisualizationActor_" + sketchData.className)
+                  val pumping = context.actorOf(Props(
+                    new PumpingActor(config.pumping, self, sketchName, userLogging, visualization)),
+                    "PumpingActor_" + sketchData.className)}),
+                "SketchControllerActor_" + sketchData.className)}}),
+          "MainControllerActor")
+          //Start main controller
+          mainController = Some(controller)
+          controller ! M.MainControllerStart(sketches)
+        case Some(c) ⇒
           throw new IllegalStateException(
-            s"[Application.start] This method can be called only if App in Starting state, current state: $st")}}
+            s"[Application.start] This method can be called only on start, mainController: $c")}}
     catch { case e: Throwable ⇒
       log.error(s"[Application.start] Error on start: $e, terminate ActorSystem.")
       doTerminate()
@@ -98,8 +109,8 @@ private [mathact] object Application{
   /** Get of SketchContext for new Workbench
     * @param workbench - Workbench
     * @return - MainController ActorRef or thrown exception */
-  def getSketchContext(workbench: WorkbenchLike): SketchContext = state match{
-    case State.Work ⇒
+  def getSketchContext(workbench: WorkbenchLike): SketchContext = mainController match{
+    case Some(controller) ⇒
       val opClassName = Option(workbench.getClass.getCanonicalName)
       val askTimeout = Timeout(creatingSketchContextTimeout).duration
       log.debug(
@@ -112,7 +123,7 @@ private [mathact] object Application{
           Await
             .result(
               ask(
-                mainController,
+                controller,
                 M.NewSketchContext(workbench, className))(askTimeout).mapTo[Either[Exception,SketchContext]],
               askTimeout)
             .fold(
@@ -125,43 +136,13 @@ private [mathact] object Application{
         case None ⇒
           throw new IllegalArgumentException(
             s"[Application.getSketchContext] No canonical name of workbench class $workbench")}
-    case st ⇒
+    case None ⇒
       throw new IllegalStateException(
-        s"[Application.getSketchContext] This method can be called only if App in Work state, current state: $st")}
-  //Logging methods
-  object appLog {
-    def debug(msg: String): Unit = log.debug(s"[Application.appLog] $msg")
-    def info(msg: String): Unit = log.info(s"[Application.appLog] $msg")
-    def warning(msg: String): Unit = log.warning(s"[Application.appLog] $msg")
-    def error(msg: String): Unit = log.error(s"[Application.appLog] $msg")}}
+        s"[Application.getSketchContext] This method can be called only after start().")}}
 
 
-class Application {
-  //Variables
-  private val sketchList = MutList[SketchDsl]() //Canonical class name → SketchDsl
-  //Add sketch DSL
-  class SketchDsl(clazz: Class[_], sName: Option[String], sDesc: Option[String], isAutorun: Boolean) {
-    //Add to list
-    sketchList += this
-    //Methods
-    def name(n: String): SketchDsl = new SketchDsl(clazz, n match{case "" ⇒ None ;case _ ⇒ Some(n)}, sDesc, isAutorun)
-    def description(s: String): SketchDsl = new SketchDsl(clazz, sName, s match{case "" ⇒ None; case _ ⇒ Some(s)}, isAutorun)
-    def autorun:  SketchDsl = new SketchDsl(clazz, sName, sDesc, true)
-    private[mathact] def getData:(Class[_],Option[String],Option[String],Option[String],Boolean) =
-      (clazz, Option(clazz.getCanonicalName), sName, sDesc, isAutorun)}
-  def sketchOf[T <: WorkbenchLike : ClassTag]: SketchDsl = new SketchDsl(classTag[T].runtimeClass,None,None,false)
+private [mathact] abstract class Application {
+  //Sketch list
+  def sketchList: List[SketchData]
   //Main
-  def main(arg: Array[String]):Unit = {
-    //Build sketch list
-    val sketches = sketchList
-      .toList
-      .map(_.getData)
-      .foldRight(List[SketchData]()){
-        case (s,l) if s._2.isEmpty ⇒
-          throw new IllegalArgumentException(s"[Application.main] No canonical class name for: $s" )
-        case (s,l) if l.exists(_.clazz.getCanonicalName == s._1.getCanonicalName) ⇒
-          l
-        case ((c, Some(cn), n, d, a), l) ⇒
-          SketchData(c, cn, n, d, a, ???, ???) +: l}
-    //Construct Application
-    Application.start(sketches, arg)}}
+  def main(arg: Array[String]):Unit = Application.start(sketchList, arg)}

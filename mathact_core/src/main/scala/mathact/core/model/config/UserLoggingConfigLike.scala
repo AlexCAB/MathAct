@@ -19,5 +19,5 @@ package mathact.core.model.config
   * Created by CAB on 23.09.2016.
   */
 
-trait UserLoggingConfigLike {
+private [mathact] trait UserLoggingConfigLike {
   val showUIOnError: Boolean}

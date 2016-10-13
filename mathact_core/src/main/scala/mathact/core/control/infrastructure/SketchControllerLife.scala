@@ -29,7 +29,7 @@ import scalafx.scene.paint.Color
   * Created by CAB on 04.09.2016.
   */
 
-trait SketchControllerLife { _: SketchController ⇒
+private [mathact] trait SketchControllerLife { _: SketchController ⇒
   import SketchUiElemState._, SketchUIElement._
   //Variables
   private var isSketchContextBuilt = false
@@ -139,7 +139,7 @@ trait SketchControllerLife { _: SketchController ⇒
     log.debug(s"[SketchControllerLife.startPumping] Send StartPumping")
     pumping ! M.StartPumping
     sketchUi ! M.SetSketchUIStatusString("Starting of pumping...", Color.Black)}
-  /** Pumping started, update UI and log to user log */
+  /** PumpingActor started, update UI and log to user log */
   def pumpingStarted(): Unit = {
     log.debug(s"[SketchControllerLife.pumpingStarted] Started.")
     //Update UI
@@ -150,15 +150,15 @@ trait SketchControllerLife { _: SketchController ⇒
       HideAllToolsUiBtn → ElemEnabled,
       SkipAllTimeoutTaskBtn → ElemEnabled))
     //User log
-    userLogging ! M.LogInfo(None, "Workbench", s"Pumping started.")
+    userLogging ! M.LogInfo(None, "Workbench", s"PumpingActor started.")
     //Update status string
-    sketchUi ! M.SetSketchUIStatusString("Pumping started. Working...", Color.Green)}
-  /** Try to stop Pumping, send StopPumping */
+    sketchUi ! M.SetSketchUIStatusString("PumpingActor started. Working...", Color.Green)}
+  /** Try to stop PumpingActor, send StopPumping */
   def stopPumping(): Unit = {
-    log.debug(s"[SketchControllerLife.stopPumping] Try to stop Pumping.")
+    log.debug(s"[SketchControllerLife.stopPumping] Try to stop PumpingActor.")
     pumping ! M.StopPumping
     sketchUi ! M.SetSketchUIStatusString("Stopping of pumping...", Color.Black)}
-  /** Pumping stopped, log to user logger */
+  /** PumpingActor stopped, log to user logger */
   def pumpingStopped(): Unit = {
     log.debug(s"[SketchControllerLife.pumpingStopped] Stopped.")
     //Log to user log
@@ -171,7 +171,7 @@ trait SketchControllerLife { _: SketchController ⇒
       SkipAllTimeoutTaskBtn → ElemDisabled,
       StopSketchBtn → ElemDisabled))
     //Update status string
-    sketchUi ! M.SetSketchUIStatusString("Pumping stopped.", Color.Black)}
+    sketchUi ! M.SetSketchUIStatusString("PumpingActor stopped.", Color.Black)}
   /** Sketch built, but SketchBuiltTimeout received earlier */
   def lateSketchBuilt(): Unit = {
     log.debug(
@@ -190,5 +190,5 @@ trait SketchControllerLife { _: SketchController ⇒
   /** Terminate self */
   def terminateSelf(): Unit = {
     log.debug(s"[SketchControllerLife.terminateSelf] Send SketchControllerTerminated and terminate.")
-    mainController ! M.SketchControllerTerminated
+    mainController ! M.SketchControllerTerminated(sketchData.className)
     self ! PoisonPill}}

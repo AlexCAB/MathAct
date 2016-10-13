@@ -26,14 +26,14 @@ import scala.collection.mutable.{Map ⇒ MutMap}
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveConnectivity { _: Drive ⇒
+private [mathact] trait DriveConnectivity { _: DriveActor ⇒
   //Variables
   private val pendingConnections = MutMap[Int, M.ConnectPipes]()
   //Methods
   /** Adding of ConnectPipes to pending connections
     * @param message = ConnectPipes */
   def connectPipesAsk(message: M.ConnectPipes, state: ActorState): Either[Throwable,Int] = state match{
-    case ActorState.Building ⇒
+    case ActorState.Init ⇒
       //On create store to pending connections
       val connectionId = nextIntId
       pendingConnections += (connectionId → message)
@@ -41,7 +41,7 @@ private [mathact] trait DriveConnectivity { _: Drive ⇒
       Right(connectionId)
     case s ⇒
       //Incorrect state
-      val msg = s"[DriveConnectivity.connectPipes] Incorrect state $s, required Building"
+      val msg = s"[DriveConnectivity.connectPipes] Incorrect state $s, required Init"
       log.error(msg)
       Left(new IllegalStateException(msg))}
   /** Connecting of pipes on build of drive
@@ -51,6 +51,7 @@ private [mathact] trait DriveConnectivity { _: Drive ⇒
       case (outlet: OutPipe[_], inlet: InPipe[_]) ⇒
         inlet.pipeData.toolDrive ! M.AddConnection(connectionId, self, inlet.pipeData.pipeId, outlet.pipeData)
       case (o, i) ⇒
+        self ! M.DriveBuildingError
         log.error(
           s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance of Outlet[_] or Inlet[_], out: $o, in: $i.")}}
   /** Adding of connection to given inlet (inletId), send  M.ConnectTo to outlet
@@ -65,6 +66,7 @@ private [mathact] trait DriveConnectivity { _: Drive ⇒
         outlet.toolDrive ! M.ConnectTo(connectionId, initiator, outlet.pipeId, inState.pipe.pipeData)
         log.debug(s"[DriveConnectivity.addConnection] Connection added from $outlet to $inState.")
       case None ⇒
+        self ! M.DriveBuildingError
         log.error(s"[DriveConnectivity.addConnection] Inlet with ID $outletId, not in inlets list.")}
   /** Adding of connection to given outlet (outletId), and send M.PipesConnected
     * @param connectionId - Int
@@ -79,6 +81,7 @@ private [mathact] trait DriveConnectivity { _: Drive ⇒
         initiator ! M.PipesConnected(connectionId, outletId, inlet.pipeId)
         log.debug(s"[ConnectTo] Connection added, from: $outlet, to: $inlet")
       case None ⇒
+        self ! M.DriveBuildingError
         log.error(s"[DriveConnectivity.connectTo] Outlet with outletId: $outletId, not exist.")}
   /** Remove connected connection from pendingConnections list
     * @param connectionId - Int
@@ -90,10 +93,17 @@ private [mathact] trait DriveConnectivity { _: Drive ⇒
         log.debug(s"[DriveConnectivity.pipesConnected] Connected, connectionId: $connectionId.")
         pendingConnections -= connectionId
       case false ⇒
+        self ! M.DriveBuildingError
         log.error(s"[DriveConnectivity.pipesConnected] Unknown connection with connectionId: $connectionId.")}
   /** Check if all connections connected
     * @return - true if all connected */
   def isAllConnected: Boolean = pendingConnections.isEmpty
   /** Get of pending list, used in test
     * @return -  Map[Int, M.ConnectPipes] */
-  def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}
+  def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap
+  /** Drive building failed
+    * Sends M.DriveBuildingError to plumping, and terminate self */
+  def buildingFailed(): Unit = {
+    log.error(s"[DriveConnectivity.buildingFailed] Send M.DriveBuildingError to plumping, and terminate self.")
+    pumping ! M.DriveBuildingError
+    self ! M.TerminateDrive}}

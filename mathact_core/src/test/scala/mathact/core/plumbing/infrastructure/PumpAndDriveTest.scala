@@ -30,7 +30,7 @@ import org.scalatest.Suite
 import scala.concurrent.duration._
 
 
-/** Testing of Pump with Drive actor
+/** Testing of Pump with DriveActor actor
   * Created by CAB on 15.08.2016.
   */
 
@@ -60,7 +60,7 @@ class PumpAndDriveTest extends ActorTestSpec{
     lazy val testPumping = TestActor("TestPumping_" + randomString())(self ⇒ {
       case M.NewDrive(toolPump) ⇒ Some{ Right{
         val drive = system.actorOf(Props(
-          new Drive(testDriveConfig, testToolId, toolPump, self, testUserLogging.ref, testVisualization.ref){
+          new DriveActor(testDriveConfig, testToolId, toolPump, self, testUserLogging.ref, testVisualization.ref){
             //Get actor state
             override def receive: PartialFunction[Any, Unit]  = {
               case GetDriveState ⇒ sender ! DriveState(
@@ -323,6 +323,25 @@ class PumpAndDriveTest extends ActorTestSpec{
       println("[PumpAndDriveTest] logError: " + logError)
       testPumping.expectMsg(M.DriveStarted)
       tools.testTool.isOnStartCalled shouldEqual true}
+    "on error of building send DriveBuildingError and terminate" in new TestCase {
+      //Preparing
+      val outlet = tools.testTool.outlet.asInstanceOf[OutPipe[Double]].pipeData
+      val inlet = tools.otherTool.inlet.asInstanceOf[InPipe[Double]].pipeData
+      testPumping.watch(tools.testDrive)
+      //Connecting (test tool have outlet)
+      tools.testTool.outlet.attach(tools.otherTool.inlet)
+      tools.testDrive.askForState[DriveState].pendingConnections should have size 1
+      //Send BuildDrive
+      testPumping.send(tools.testDrive, M.BuildDrive)
+      //Test connecting with incorrect outletId in response
+      val addConnection = tools.otherDrive.expectMsgType[M.AddConnection]
+      tools.otherDrive.send(
+        tools.testDrive,
+        M.ConnectTo(addConnection.connectionId, addConnection.initiator, 123456789, inlet))
+      //Expect termination
+      testPumping.expectMsg(M.DriveBuildingError)
+      testPumping.expectMsg(M.DriveTerminated)
+      testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
   }
   "On user message" should{
     "by call pour(value), send UserData, to all inlets of connected drives" in new TestCase {

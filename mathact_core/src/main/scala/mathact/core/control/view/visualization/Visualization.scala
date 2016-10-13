@@ -19,7 +19,7 @@ package mathact.core.control.view.visualization
   * Created by CAB on 28.09.2016.
   */
 
-object Visualization {
+private [mathact] object Visualization {
   //Enums
   object LayoutType extends Enumeration {
     val OrganicLayout = Value

@@ -25,7 +25,7 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 26.08.2016.
   */
 
-private [mathact] trait DriveStartStop { _: Drive ⇒
+private [mathact] trait DriveStartStop { _: DriveActor ⇒
   //Variables
   private var started = false
   private var stopped = false

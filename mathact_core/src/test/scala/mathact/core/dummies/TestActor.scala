@@ -46,11 +46,11 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
         case msg ⇒
           customReceive(self).lift(msg) match{
             case Some(res) ⇒
-              println("[TestActor] Processed message: " + msg)
+              println(s"[TestActor: $name] Processed message: $msg")
               processedMessages :+= msg
               res.foreach(m ⇒ sender ! m)
             case None ⇒
-              println("[TestActor] Received message: " + msg)
+              println(s"[TestActor: $name] Received message: $msg")
               Mutex.synchronized{ receivedMessages :+= msg }}}}),
     name)
   //Classes
@@ -75,7 +75,7 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
     * @param msg - Any, message */
   def send(to: ActorRef, msg: Any): Unit = {
     ref ! SendTo(to, msg)
-    println(s"[TestActor] Send message: $msg, to: $to")}
+    println(s"[TestActor: $name] Send message: $msg, to: $to")}
   /** Receive given number of messages and return
     * @param number - Int
     * @return - Seq[Any], received messages */

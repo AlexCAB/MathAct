@@ -19,7 +19,7 @@ package mathact.core.control.view.logging
   * Created by CAB on 28.09.2016.
   */
 
-object UserLogging {
+private [mathact] object UserLogging {
   //Enums
   object LogType extends Enumeration {
     val Info = Value

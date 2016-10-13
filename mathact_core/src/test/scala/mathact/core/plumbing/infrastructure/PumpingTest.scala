@@ -25,7 +25,7 @@ import org.scalatest.Suite
 import scala.concurrent.duration._
 
 
-/** Testing of Pumping actor
+/** Testing of PumpingActor actor
   * Created by CAB on 30.08.2016.
   */
 
@@ -54,10 +54,10 @@ class PumpingTest extends ActorTestSpec{
         val stopFunctionTimeout = 1.second
         val impellerMaxQueueSize = 0
         val uiOperationTimeout = 1.second}}
-    //Pumping
+    //PumpingActor
     object actors{
       lazy val pumping = system.actorOf(Props(
-        new Pumping(testPumpingConfig, testController.ref,  "TestSketch", testUserLogging.ref, testVisualization.ref){
+        new PumpingActor(testPumpingConfig, testController.ref,  "TestSketch", testUserLogging.ref, testVisualization.ref){
           override def createDriveActor(toolPump: PumpLike): (ActorRef, Int)  = {
             val index = toolPump.asInstanceOf[TestPump].index
             (List(testDrive1.ref, testDrive2.ref)(index),index + 1)}}),
@@ -83,7 +83,7 @@ class PumpingTest extends ActorTestSpec{
         testVisualization.expectMsg(M.AllToolBuilt)
         pumpingWithDrives}}}
   //Testing
-  "Pumping actor" should{
+  "PumpingActor actor" should{
     "by M.NewDrive, create and return new drive actor" in new TestCase {
       //Create first drive
       testController.send(actors.pumping, M.NewDrive(TestPump(0)))

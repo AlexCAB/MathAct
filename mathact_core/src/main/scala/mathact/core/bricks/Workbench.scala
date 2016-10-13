@@ -14,7 +14,7 @@
 
 package mathact.core.bricks
 
-import mathact.Application
+import mathact.core.app.Application
 
 
 /** Box class for placing of tools

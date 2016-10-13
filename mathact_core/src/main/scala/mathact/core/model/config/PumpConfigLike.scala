@@ -21,7 +21,7 @@ import akka.util.Timeout
   * Created by CAB on 03.09.2016.
   */
 
-trait PumpConfigLike {
+private [mathact] trait PumpConfigLike {
   val askTimeout: Timeout
 
   //TODO Add more

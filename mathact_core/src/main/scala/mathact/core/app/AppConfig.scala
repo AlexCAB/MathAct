@@ -12,17 +12,13 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact
-
-import javafx.scene.Parent
+package mathact.core.app
 
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core.model.config._
 
 import scala.concurrent.duration._
-import scalafx.scene.image.Image
-import scalafxml.core.{FXMLLoader, NoDependencyResolver, FXMLView}
 
 
 /** Read and hold main commonConfig
@@ -39,12 +35,12 @@ private [mathact] class AppConfig extends MainConfigLike{
     val pump = new PumpConfigLike{
       val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}
     val drive = new DriveConfigLike{
-      val pushTimeoutCoefficient = config.getInt("plumbing.push.timeout.coefficient")
-      val startFunctionTimeout = config.getInt("plumbing.start.function.timeout").millis
-      val messageProcessingTimeout = config.getInt("plumbing.message.processing.timeout").millis
-      val stopFunctionTimeout = config.getInt("plumbing.stop.function.timeout").millis
-      val impellerMaxQueueSize = config.getInt("plumbing.impeller.max.queue.size")
-      val uiOperationTimeout = config.getInt("plumbing.ui.operation.timeout").millis}}
+      val pushTimeoutCoefficient = config.getInt("plumbing.drive.push.timeout.coefficient")
+      val startFunctionTimeout = config.getInt("plumbing.drive.start.function.timeout").millis
+      val messageProcessingTimeout = config.getInt("plumbing.drive.message.processing.timeout").millis
+      val stopFunctionTimeout = config.getInt("plumbing.drive.stop.function.timeout").millis
+      val impellerMaxQueueSize = config.getInt("plumbing.drive.impeller.max.queue.size")
+      val uiOperationTimeout = config.getInt("plumbing.drive.ui.operation.timeout").millis}}
   //Build SketchUI config
   val sketchUI = new SketchUIConfigLike{}
   //Main SketchUI config

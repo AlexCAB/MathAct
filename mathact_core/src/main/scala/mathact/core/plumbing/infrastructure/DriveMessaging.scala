@@ -24,7 +24,7 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveMessaging { _: Drive ⇒
+private [mathact] trait DriveMessaging { _: DriveActor ⇒
   //Functions
   private def buildTask(inlet: InletState, value: Any): M.RunTask[Unit] = M.RunTask(
     kind = TaskKind.Massage,
@@ -127,7 +127,7 @@ private [mathact] trait DriveMessaging { _: Drive ⇒
     case Some(inlet) ⇒
       //Check state
       state match{
-        case ActorState.Starting ⇒
+        case ActorState.Built | ActorState.Starting   ⇒
           //Add task to the queue and reply with load message
           enqueueMessageTask(inlet, value)
           sendLoadMessage(inlet)
@@ -136,7 +136,7 @@ private [mathact] trait DriveMessaging { _: Drive ⇒
           enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))
         case s ⇒
           //Incorrect state
-          log.error(s"[DriveMessaging.userMessage] Incorrect state: $s, required Starting, Working or Stopping")}
+          log.error(s"[DriveMessaging.userMessage] Incorrect state: $s, required Built, Starting, Working or Stopping")}
       case None ⇒
         //Incorrect inletId
         log.error(s"[DriveMessaging.userMessage] Inlet with inletId: $inletId, not exist.")}

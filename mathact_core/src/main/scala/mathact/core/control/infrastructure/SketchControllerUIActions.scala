@@ -21,7 +21,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 07.09.2016.
   */
 
-trait SketchControllerUIActions { _: SketchController ⇒
+private [mathact] trait SketchControllerUIActions { _: SketchController ⇒
   import SketchUiElemState._, SketchUIElement._
   //Methods
   /** Hit run button */

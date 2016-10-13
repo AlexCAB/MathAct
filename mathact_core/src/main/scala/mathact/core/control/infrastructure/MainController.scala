@@ -33,12 +33,14 @@ extends ActorBase{
   //Variables
   var sketchList = List[(SketchData, SketchStatus)]()
   var currentSketch: Option[(ActorRef,SketchData)] = None
+  var isFatalError = false
   //Abstract methods
-  def createSketchController(config: MainConfigLike, sketchData: SketchData, mainController: ActorRef): ActorRef
+  def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef
   //Functions
   def runSketch(sketch: SketchData): Unit = {
     //Create actor
-    val sketchController = createSketchController(config, sketch, self)
+    val sketchController = createSketchController(config, sketch)
+    context.watch(sketchController)
     //Run actor
     sketchController ! M.StartSketchController
     //Set current
@@ -81,20 +83,43 @@ extends ActorBase{
     case M.SketchBuilt(className, workbench) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
       if(! sketch.autorun) mainUi ! M.HideMainUI}
     //Sketch done
-    case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
-      setSketchSate(className, SketchStatus.Ended)
-      setAndShowUISketchTable()
-      currentSketch = None}
+    case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
+      setSketchSate(className, SketchStatus.Ended)}
     //Sketch error
-    case M.SketchError(className, error) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
+    case M.SketchError(className, error) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       log.error(error, "[MainController @ SketchError] Sketch failed.")
-      setSketchSate(className, SketchStatus.Failed)
+      setSketchSate(className, SketchStatus.Failed)}
+    //Sketch controller terminated, show UI
+    case M.SketchControllerTerminated(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
+      context.unwatch(sender)
       setAndShowUISketchTable()
-      currentSketch = None}
+      currentSketch = None
+      if(isFatalError) self ! PoisonPill}
     //Main close hit, terminate UI
     case M.MainCloseBtnHit if currentSketch.isEmpty ⇒
       mainUi ! M.TerminateMainUI
     //Main close hit, call do stop and terminate self
     case M.MainUITerminated ⇒
-      doStop(0)
-      self ! PoisonPill}}
+      context.unwatch(mainUi)
+      self ! PoisonPill
+    //Termination of actor
+    case Terminated(actor) ⇒ actor match{
+      case a if a == mainUi ⇒
+        log.error(s"[MainController @ Terminated] Main UI terminated suddenly, currentSketch: $currentSketch" )
+        //Stop application
+        isFatalError = true
+        currentSketch match {
+          case Some(sketch) ⇒ sketch._1 ! M.ShutdownSketchController
+          case None ⇒ self ! PoisonPill}
+      case a if currentSketch.map(_._1).contains(a) ⇒
+        log.error(s"[MainController @ Terminated] Current sketch terminated suddenly, currentSketch: $currentSketch")
+        setSketchSate(currentSketch.get._2.className, SketchStatus.Failed)
+        setAndShowUISketchTable()
+        currentSketch = None
+      case a ⇒
+        log.error("[MainController @ Terminated] Unknown actor: " + a)}}
+  //Do stop on termination
+  override def postStop(): Unit =  {
+    super.postStop()
+    log.debug("[MainController.postStop] Call doStop.")
+    doStop(if(isFatalError) -1 else 0)}}

@@ -46,10 +46,10 @@ private [mathact] object M {
   case object StartSketchController extends StateMsg
   case class GetSketchContext(sender: ActorRef) extends Msg
   case object ShutdownSketchController extends StateMsg
-  case object SketchControllerTerminated extends StateMsg
   case class SketchBuilt(className: String, workbench: WorkbenchLike) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, error: Throwable) extends Msg
+  case class SketchControllerTerminated(className: String) extends StateMsg
   //SketchController - SketchUI
   case object ShowSketchUI extends Msg
   case object HideSketchUI extends Msg
@@ -71,7 +71,10 @@ private [mathact] object M {
   case class VisualizationUIChanged(isShow: Boolean) extends Msg
   case object TerminateVisualization extends Msg
   case object VisualizationTerminated extends Msg
-  //SketchController - Pumping
+  //SketchController - PumpingActor
+  case object BuildPumping extends StateMsg
+  case object PumpingBuilt extends Msg
+  case object PumpingBuildingError extends Msg
   case object StartPumping extends StateMsg
   case object PumpingStarted extends Msg
   case object StopPumping extends StateMsg
@@ -79,29 +82,30 @@ private [mathact] object M {
   case object SkipAllTimeoutTask extends Msg
   case object ShowAllToolUi extends Msg
   case object HideAllToolUi extends Msg
-  //Object Pump - Pumping (ask)
+  //Object Pump - PumpingActor (ask)
   case class NewDrive(toolPump: PumpLike) extends Msg     //Name and image for display in UI
-  //Object Pump - Drive (ask)
+  //Object Pump - DriveActor (ask)
   case class AddOutlet(pipe: OutPipe[_], name: Option[String]) extends Msg
   case class AddInlet(pipe: InPipe[_], name: Option[String]) extends Msg
   case class ConnectPipes(out: ()⇒Plug[_], in: ()⇒Socket[_]) extends Msg
   case class UserData[T](outletId: Int, value: T) extends Msg
-  //Pumping - Drive
+  //PumpingActor - DriveActor
   case object BuildDrive extends StateMsg //Creating of connections from pending list
   case object DriveBuilt extends Msg
+  case object DriveBuildingError extends Msg
   case object StartDrive extends StateMsg //Run init user code
   case object DriveStarted extends Msg
   case object StopDrive extends StateMsg  //Run sopping user code
   case object DriveStopped extends Msg
   case object TerminateDrive extends StateMsg //Disconnect all connection and terminate
   case object DriveTerminated extends Msg
-  //Drive - Drive
+  //DriveActor - DriveActor
   case class AddConnection(connectionId: Int, initiator: ActorRef, inletId: Int, outlet: OutletData) extends Msg
   case class ConnectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData) extends Msg
   case class PipesConnected(connectionId: Int, outletId: Int, inletId: Int) extends Msg
   case class UserMessage[T](outletId: Int, inletId: Int, value: T) extends Msg
   case class DriveLoad(subscriberId: (ActorRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
-  //Drive - Impeller
+  //DriveActor - ImpellerActor
   case class RunTask[R](kind: TaskKind, id: Int, timeout: FiniteDuration, task: ()⇒R) extends Msg
   case object SkipCurrentTask extends Msg //Makes impeller to skip the current task, but not terminate it (impeller just will not wait for this more)
   case class TaskDone(kind: TaskKind, id: Int, execTime: FiniteDuration, taskRes: Any) extends Msg
@@ -111,13 +115,13 @@ private [mathact] object M {
   case class LogInfo(toolId: Option[Int], toolName: String, message: String) extends Msg
   case class LogWarning(toolId: Option[Int], toolName: String, message: String) extends Msg
   case class LogError(toolId: Option[Int], toolName: String, error: Option[Throwable], message: String) extends Msg
-  //Visualization - Drive
-  case class ToolBuilt(builtInfo: ToolBuiltInfo) extends Msg   //Send to Visualization from Drive after tool built
+  //Visualization - DriveActor
+  case class ToolBuilt(builtInfo: ToolBuiltInfo) extends Msg   //Send to Visualization from DriveActor after tool built
   case object AllToolBuilt
-  case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to Drive from Visualization
+  case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to DriveActor from Visualization
   case object SkipTimeoutTask extends Msg
-  case object ShowToolUi extends Msg  //Send to Drive from Visualization to show it's UI
-  case object HideToolUi extends Msg  //Send to Drive from Visualization to hide it's UI
+  case object ShowToolUi extends Msg  //Send to DriveActor from Visualization to show it's UI
+  case object HideToolUi extends Msg  //Send to DriveActor from Visualization to hide it's UI
 
   //TODO Add more
 

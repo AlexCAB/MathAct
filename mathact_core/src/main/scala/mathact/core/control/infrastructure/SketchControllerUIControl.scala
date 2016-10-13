@@ -22,7 +22,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 04.09.2016.
   */
 
-trait SketchControllerUIControl { _: SketchController ⇒
+private [mathact] trait SketchControllerUIControl { _: SketchController ⇒
   import SketchUiElemState._, SketchUIElement._
   //Variables
   private var isSketchUiShowed = false
@@ -43,8 +43,8 @@ trait SketchControllerUIControl { _: SketchController ⇒
       HideAllToolsUiBtn → ElemDisabled,
       SkipAllTimeoutTaskBtn → ElemDisabled,
       StopSketchBtn → ElemDisabled,
-      LogBtn → (if(sketchData.showUserLogUiAtStart) ElemShow else ElemHide),
-      VisualisationBtn → (if(sketchData.showVisualisationUiAtStart) ElemShow else ElemHide)))
+      LogBtn → (if(sketchData.showUserLogUiAtStart) ElemHide else ElemShow),
+      VisualisationBtn → (if(sketchData.showVisualisationUiAtStart) ElemHide else ElemShow)))
     //User logging
     sketchData.showUserLogUiAtStart match{
       case true ⇒ userLogging ! M.ShowUserLoggingUI
@@ -71,13 +71,13 @@ trait SketchControllerUIControl { _: SketchController ⇒
   def userLoggingUIChanged(isShow: Boolean): Unit = {
     log.debug(s"[SketchControllerUIControl.userLoggingUIChanged] isShow: $isShow")
     isUserLogShowed = isShow
-    sketchUi ! M.UpdateSketchUIState(Map(LogBtn → (if(isShow) ElemShow else ElemHide)))}
+    sketchUi ! M.UpdateSketchUIState(Map(LogBtn → (if(isShow) ElemHide else ElemShow)))}
   /** Visualization UI changed
     * @param isShow - true if shown */
   def visualizationUIChanged(isShow: Boolean): Unit = {
     log.debug(s"[SketchControllerUIControl.visualizationUIChanged] isShow: $isShow")
     isVisualisationShowed = isShow
-    sketchUi ! M.UpdateSketchUIState(Map(VisualisationBtn → (if(isShow) ElemShow else ElemHide)))}
+    sketchUi ! M.UpdateSketchUIState(Map(VisualisationBtn → (if(isShow) ElemHide else ElemShow)))}
   /** Terminate all UI and */
   def terminateAllUi(): Unit = {
     log.debug("[SketchControllerUIControl.terminateAllUi] Send Terminate... messages to all UI.")

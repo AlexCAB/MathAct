@@ -21,6 +21,6 @@ import mathact.core.control.view.logging.UserLogging.LogRow
   * Created by CAB on 07.10.2016.
   */
 
-trait UserLogUIControllerLike {
+private [mathact] trait UserLogUIControllerLike {
   def setActor(actor: ActorRef): Unit
   def setRows(rows: List[LogRow]): Unit}

@@ -183,7 +183,7 @@ class SketchControllerTest extends ActorTestSpec {
       val info1 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info1: " + info1) //LogInfo(None,Workbench,Sketch 'TestSketch1' successfully built.)
       val info2 = testUserLogging.expectMsgType[M.LogInfo]
-      println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,Pumping started.)
+      println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,PumpingActor started.)
       //Sketch built
       testMainController.expectMsgType[M.SketchBuilt].workbench.asInstanceOf[TestSketchWithSmallTimeout]
       val statusStr5 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
@@ -350,7 +350,7 @@ class SketchControllerTest extends ActorTestSpec {
       val controller = newBuiltSketchController()
       //Send start
       testSketchUi.send(controller, M.SketchUIActionTriggered(RunBtn, Unit))
-      //Run Pumping
+      //Run PumpingActor
       testPumping.expectMsg(M.StartPumping)
       testPumping.send(controller, M.PumpingStarted)
       //UI update
@@ -487,7 +487,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      testMainController.expectMsgType[M.SketchControllerTerminated]
       testMainController.expectTerminated(controller)}
     "stop in Building state" in new TestCase {
       //Preparing
@@ -551,9 +551,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithSmallTimeout].getName
       val endData = testMainController.expectMsgType[M.SketchDone]
-      endData.className shouldEqual classOf[TestSketchWithSmallTimeout].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      endData.className shouldEqual className
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
     "stop in Built state" in new TestCase {
       //Preparing
@@ -580,9 +581,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithSmallTimeout].getName
       val endData = testMainController.expectMsgType[M.SketchDone]
       endData.className shouldEqual classOf[TestSketchWithSmallTimeout].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
     "stop in BuildingFailed state" in new TestCase {
       //Preparing
@@ -644,9 +646,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithError].getName
       val endData = testMainController.expectMsgType[M.SketchError]
-      endData.className shouldEqual classOf[TestSketchWithError].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      endData.className shouldEqual className
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
     "stop in Starting state" in new TestCase {
       //Preparing
@@ -663,7 +666,7 @@ class SketchControllerTest extends ActorTestSpec {
       testMainController.send(controller, M.ShutdownSketchController)
       val info1 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info1: " + info1) //LogInfo(None,Workbench,The Shutdown signal received, sketch will terminated.)
-      //Pumping started
+      //PumpingActor started
       testPumping.send(controller, M.PumpingStarted)
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
@@ -671,7 +674,7 @@ class SketchControllerTest extends ActorTestSpec {
       println("[SketchControllerTest] statusStr3 " + statusStr3)
       testSketchUi.expectMsgType[M.UpdateSketchUIState]
       val info2 = testUserLogging.expectMsgType[M.LogInfo]
-      println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,Pumping started.)
+      println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,PumpingActor started.)
       //Sopping of pumping
       testPumping.expectMsg(M.StopPumping)
       testPumping.send(controller, M.PumpingStopped)
@@ -713,9 +716,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithSmallTimeout].getName
       val endData = testMainController.expectMsgType[M.SketchDone]
-      endData.className shouldEqual classOf[TestSketchWithSmallTimeout].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      endData.className shouldEqual className
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
     "stop in Working state" in new TestCase {
       //Preparing
@@ -768,9 +772,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithSmallTimeout].getName
       val endData = testMainController.expectMsgType[M.SketchDone]
-      endData.className shouldEqual classOf[TestSketchWithSmallTimeout].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      endData.className shouldEqual className
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
     "stop by hit of UI close button" in new TestCase {
       //Preparing
@@ -797,9 +802,10 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.TerminateSketchUI)
       testSketchUi.send(controller, M.SketchUITerminated)
       //Terminating of controller
+      val className = classOf[TestSketchWithSmallTimeout].getName
       val endData = testMainController.expectMsgType[M.SketchDone]
-      endData.className shouldEqual classOf[TestSketchWithSmallTimeout].getName
-      testMainController.expectMsg(M.SketchControllerTerminated)
+      endData.className shouldEqual className
+      testMainController.expectMsgType[M.SketchControllerTerminated].className shouldEqual className
       testMainController.expectTerminated(controller)}
   }
 }

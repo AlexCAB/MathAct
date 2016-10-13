@@ -57,7 +57,7 @@ abstract class StateActorBase(initState: ActorState) extends Actor{
       log.debug(s"MESSAGE: $message, FROM: $sender, STATE: $currentState")
       reaction.applyOrElse[(Msg, ActorState), Unit](
         (message, currentState),
-        _ ⇒ log.error(s"LAST MESSAGE NOT HANDLED: $message"))
+        _ ⇒ log.error(s"LAST MESSAGE NOT HANDLED: $message, STATE: $currentState"))
       postHandling.applyOrElse[(Msg, ActorState), Unit](
         (message, currentState),
         _ ⇒ Unit)

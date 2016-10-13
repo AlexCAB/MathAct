@@ -24,7 +24,7 @@ import scala.concurrent.duration.FiniteDuration
   * Created by CAB on 31.08.2016.
   */
 
-private [mathact] trait DriveUIControl { _: Drive ⇒
+private [mathact] trait DriveUIControl { _: DriveActor ⇒
   /** Show tool UI */
   def showToolUi(): Unit = pump.tool match{
     case task: UIControl ⇒

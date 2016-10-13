@@ -20,17 +20,17 @@ import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting.{InPipe, OutPipe}
 
 
-/** Drive construction
+/** DriveActor construction
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveBuilding { _: Drive ⇒
+private [mathact] trait DriveBuilding { _: DriveActor ⇒
   /** Adding of new outlet, called from object
     * @param pipe - Outlet[_]
     * @param name - Option[String]
     * @return - Either[Throwable, pipeId] */
   def addOutletAsk(pipe: OutPipe[_], name: Option[String], state: ActorState): Either[Throwable,(Int,Int)] = state match {
-    case ActorState.Building ⇒
+    case ActorState.Init ⇒
       //Check of already added
       outlets.values.filter(_.pipe == pipe) match{
         case Nil ⇒
@@ -46,7 +46,7 @@ private [mathact] trait DriveBuilding { _: Drive ⇒
           Left(new IllegalArgumentException(msg))}
     case s ⇒
       //Incorrect state
-      val msg = s"[DriveBuilding.addOutletAsk] Incorrect state $s, required Building"
+      val msg = s"[DriveBuilding.addOutletAsk] Incorrect state $s, required Init"
       log.error(msg)
       Left(new IllegalStateException(msg))}
   /** Adding of new inlet, called from object
@@ -54,7 +54,7 @@ private [mathact] trait DriveBuilding { _: Drive ⇒
     * @param name - Option[String]
     * @return - Either[Throwable, pipeId] */
   def addInletAsk(pipe: InPipe[_], name: Option[String], state: ActorState): Either[Throwable,(Int,Int)] = state match {
-    case ActorState.Building ⇒
+    case ActorState.Init ⇒
       //Check if pipe already added
       inlets.values.filter(_.pipe == pipe) match{
         case Nil ⇒
@@ -70,7 +70,7 @@ private [mathact] trait DriveBuilding { _: Drive ⇒
           Left(new IllegalArgumentException(msg))}
     case s ⇒
       //Incorrect state
-      val msg = s"[DriveBuilding.addInletAsk] Incorrect state $s, required Building"
+      val msg = s"[DriveBuilding.addInletAsk] Incorrect state $s, required Init"
       log.error(msg)
       Left(new IllegalStateException(msg))}
   /** Build ToolBuiltInfo and send to visualization actor */

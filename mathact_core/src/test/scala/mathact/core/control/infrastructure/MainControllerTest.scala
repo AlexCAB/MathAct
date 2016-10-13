@@ -14,7 +14,7 @@
 
 package mathact.core.control.infrastructure
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.{PoisonPill, Terminated, ActorRef, Props}
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import mathact.core.model.data.sketch.SketchData
@@ -61,7 +61,8 @@ class MainControllerTest extends ActorTestSpec {
     val mainController = system.actorOf(Props(
       new MainController(testMainConfig, i ⇒ {exitCode = Some(i)}){
         val mainUi = testMainUi.ref
-        def createSketchController(c: MainConfigLike, d: SketchData, mc: ActorRef): ActorRef = testSketchController.ref}),
+        context.watch(testMainUi.ref)
+        def createSketchController(c: MainConfigLike, d: SketchData): ActorRef = testSketchController.ref}),
       "TestAskMainController_" + randomString())
     testApplication.watch(mainController)
     //Methods
@@ -87,6 +88,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
       //Send SketchDone
       testSketchController.send(mainController, M.SketchDone(sketchData.className))
+      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
       val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
       sketches1.head.className shouldEqual sketchData.className
       sketches1.head.lastRunStatus shouldEqual SketchStatus.Ended
@@ -109,6 +111,7 @@ class MainControllerTest extends ActorTestSpec {
       testMainUi.expectMsg(M.HideMainUI)
       //Send SketchError
       testSketchController.send(mainController, M.SketchError(sketchData.className, new Exception("Oops!!!")))
+      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
       val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
       sketches1.head.className shouldEqual sketchData.className
       sketches1.head.lastRunStatus shouldEqual SketchStatus.Failed
@@ -118,5 +121,52 @@ class MainControllerTest extends ActorTestSpec {
       testMainUi.send(mainController, M.MainUITerminated)
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(0)}
+    "if sketch controller terminated, mark it Failed and show main UI" in new TestCase {
+      //Send MainControllerStart
+      testApplication.send(mainController, M.MainControllerStart(List(sketchData)))
+      testMainUi.expectMsgType[M.SetSketchList].sketches.head.className shouldEqual sketchData.className
+      //Run sketch
+      testMainUi.send(mainController, M.RunSketch(sketchData.toSketchInfo(SketchStatus.Ready)))
+      testSketchController.expectMsg(M.StartSketchController)
+      testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
+      testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testMainUi.expectMsg(M.HideMainUI)
+      //Send Terminated(SketchController)
+      testSketchController.testActor ! PoisonPill
+      val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
+      sketches1.head.className shouldEqual sketchData.className
+      sketches1.head.lastRunStatus shouldEqual SketchStatus.Failed
+      //Stop app
+      testMainUi.send(mainController, M.MainCloseBtnHit)
+      testMainUi.expectMsg(M.TerminateMainUI)
+      testMainUi.send(mainController, M.MainUITerminated)
+      testApplication.expectTerminated(mainController)
+      getExitCode shouldEqual Some(0)}
+    "if main UI terminated, stop application" in new TestCase {
+      //Send MainControllerStart
+      testApplication.send(mainController, M.MainControllerStart(List(sketchData)))
+      testMainUi.expectMsgType[M.SetSketchList].sketches.head.className shouldEqual sketchData.className
+      //Send Terminated(MainUI)
+      testMainUi.testActor ! PoisonPill
+      testApplication.expectTerminated(mainController)
+      getExitCode shouldEqual Some(-1)}
+    "if main UI terminated, shutdown worked sketch and stop application" in new TestCase {
+      //Send MainControllerStart
+      testApplication.send(mainController, M.MainControllerStart(List(sketchData)))
+      testMainUi.expectMsgType[M.SetSketchList].sketches.head.className shouldEqual sketchData.className
+      //Run sketch
+      testMainUi.send(mainController, M.RunSketch(sketchData.toSketchInfo(SketchStatus.Ready)))
+      testSketchController.expectMsg(M.StartSketchController)
+      testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
+      testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testMainUi.expectMsg(M.HideMainUI)
+      //Send Terminated(MainUI)
+      testMainUi.testActor ! PoisonPill
+      testSketchController.expectMsg(M.ShutdownSketchController)
+      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
+      testApplication.expectTerminated(mainController)
+      getExitCode shouldEqual Some(-1)}
   }
 }

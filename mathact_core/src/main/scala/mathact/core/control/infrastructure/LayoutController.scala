@@ -24,7 +24,7 @@ import mathact.core.model.config.UserLoggingConfigLike
   * Created by CAB on 28.09.2016.
   */
 
-class LayoutController(
+private [mathact] class LayoutController(
   config: UserLoggingConfigLike,
   workbenchController: ActorRef)
 extends ActorBase with JFXInteraction {
