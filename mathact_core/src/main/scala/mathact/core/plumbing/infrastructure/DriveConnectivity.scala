@@ -100,10 +100,4 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒
   def isAllConnected: Boolean = pendingConnections.isEmpty
   /** Get of pending list, used in test
     * @return -  Map[Int, M.ConnectPipes] */
-  def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap
-  /** Drive building failed
-    * Sends M.DriveBuildingError to plumping, and terminate self */
-  def buildingFailed(): Unit = {
-    log.error(s"[DriveConnectivity.buildingFailed] Send M.DriveBuildingError to plumping, and terminate self.")
-    pumping ! M.DriveBuildingError
-    self ! M.TerminateDrive}}
+  def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}

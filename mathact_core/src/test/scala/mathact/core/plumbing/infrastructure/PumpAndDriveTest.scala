@@ -143,12 +143,14 @@ class PumpAndDriveTest extends ActorTestSpec{
       lazy val builtTool = {
         testPumping.send(testTool.pump.drive, M.BuildDrive)
         testPumping.expectMsg(M.DriveBuilt)
+        testUserLogging.expectMsgType[M.LogInfo]
         testVisualization.expectMsgType[M.ToolBuilt]
         testTool.isOnStartCalled shouldEqual false
         testTool}
       lazy val startedTool = {
         testPumping.send(testTool.pump.drive, M.BuildDrive)
         testPumping.expectMsg(M.DriveBuilt)
+        testUserLogging.expectMsgType[M.LogInfo]
         testVisualization.expectMsgType[M.ToolBuilt]
         testPumping.send(testTool.pump.drive, M.StartDrive)
         testPumping.expectMsg(M.DriveStarted)
@@ -175,6 +177,7 @@ class PumpAndDriveTest extends ActorTestSpec{
           connectTo.initiator,
           M.PipesConnected(connectTo.connectionId, connectTo.inlet.pipeId, connectTo.outletId))
         testPumping.expectMsg(M.DriveBuilt)
+        testUserLogging.expectMsgType[M.LogInfo]
         testVisualization.expectMsgType[M.ToolBuilt]
         //Starting
         testPumping.send(testDrive, M.StartDrive)
@@ -269,7 +272,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       builtInfo.toolImagePath shouldEqual None
       builtInfo.inlets    shouldBe empty
       builtInfo.outlets should have size 1
-      builtInfo.outlets.values.head.toolId     shouldEqual testToolId
+      builtInfo.outlets.values.head.toolId      shouldEqual testToolId
       builtInfo.outlets.values.head.outletId    shouldEqual outlet.pipeId
       builtInfo.outlets.values.head.outletName  shouldEqual outlet.pipeName
       builtInfo.outlets.values.head.subscribers should have size 1
@@ -340,8 +343,8 @@ class PumpAndDriveTest extends ActorTestSpec{
         M.ConnectTo(addConnection.connectionId, addConnection.initiator, 123456789, inlet))
       //Expect termination
       testPumping.expectMsg(M.DriveBuildingError)
-      testPumping.expectMsg(M.DriveTerminated)
-      testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
+      val logError = testUserLogging.expectMsgType[M.LogError]
+      println("[PumpAndDriveTest] logError: " + logError)}
   }
   "On user message" should{
     "by call pour(value), send UserData, to all inlets of connected drives" in new TestCase {

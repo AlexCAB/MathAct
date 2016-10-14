@@ -85,7 +85,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsg(M.StartSketchController)
       testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
-      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       //Send SketchDone
       testSketchController.send(mainController, M.SketchDone(sketchData.className))
       testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
@@ -107,7 +107,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsg(M.StartSketchController)
       testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
-      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       testMainUi.expectMsg(M.HideMainUI)
       //Send SketchError
       testSketchController.send(mainController, M.SketchError(sketchData.className, new Exception("Oops!!!")))
@@ -130,7 +130,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsg(M.StartSketchController)
       testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
-      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       testMainUi.expectMsg(M.HideMainUI)
       //Send Terminated(SketchController)
       testSketchController.testActor ! PoisonPill
@@ -160,7 +160,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsg(M.StartSketchController)
       testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
-      testSketchController.send(mainController, M.SketchBuilt(sketchData.className, null))
+      testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       testMainUi.expectMsg(M.HideMainUI)
       //Send Terminated(MainUI)
       testMainUi.testActor ! PoisonPill

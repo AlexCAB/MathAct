@@ -74,7 +74,13 @@ private [mathact] trait DriveBuilding { _: DriveActor ⇒
       log.error(msg)
       Left(new IllegalStateException(msg))}
   /** Build ToolBuiltInfo and send to visualization actor */
-  def buildAndSendToolBuiltInfo(): Unit = {
+  def buildingSuccess(): Unit = {
+    log.debug(
+      s"[DriveActor.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
+    //Report to pumping
+    pumping ! M.DriveBuilt
+    //Log to user logger
+    userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful built.")
     //Build
     val builtInfo = ToolBuiltInfo(
       toolId,
@@ -100,6 +106,14 @@ private [mathact] trait DriveBuilding { _: DriveActor ⇒
         .toMap)
     //Send
     visualization ! M.ToolBuilt(builtInfo)}
+  /** Drive building failed
+    * Sends M.DriveBuildingError to plumping, and terminate self */
+  def buildingFailed(): Unit = {
+    log.error(s"[DriveConnectivity.buildingFailed] Send M.DriveBuildingError to plumping, and terminate self.")
+    //Log to user logger
+    userLogging ! M.LogError(Some(toolId), pump.toolName, None, s"Tool building failed.")
+    //Report to pumping
+    pumping ! M.DriveBuildingError}
   /** Terminating of this drive, currently here only logging */
   def doTerminating(): Unit = {
     log.debug(s"[DriveBuilding.doTerminating] Start of terminating of drive.")}}

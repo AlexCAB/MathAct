@@ -33,8 +33,11 @@ private [mathact] trait SketchControllerUIControl { _: SketchController ⇒
   private var isVisualisationTerminated = false
   //Methods
   /** Show all UI, and log to user logging */
-  def showAllUi(): Unit = {
-    log.debug("[SketchControllerUIControl.showAllUi] Try to show.")
+  def showAllSketchUi(): Unit = {
+    log.debug(
+      s"[SketchControllerUIControl.showAllSketchUi] Try to show, " +
+      s"showUserLogUiAtStart: ${sketchData.showUserLogUiAtStart}, " +
+      s"showVisualisationUiAtStart: ${sketchData.showVisualisationUiAtStart}")
     //Sketch UI
     sketchUi ! M.ShowSketchUI
     sketchUi ! M.UpdateSketchUIState(Map(
@@ -48,11 +51,11 @@ private [mathact] trait SketchControllerUIControl { _: SketchController ⇒
     //User logging
     sketchData.showUserLogUiAtStart match{
       case true ⇒ userLogging ! M.ShowUserLoggingUI
-      case false ⇒ log.debug("[SketchControllerUIControl.showAllUi] User Logging UI stay hided.")}
+      case false ⇒ log.debug("[SketchControllerUIControl.showAllSketchUi] User Logging UI stay hided.")}
     //Visualisation
     sketchData.showVisualisationUiAtStart match{
       case true ⇒ visualization ! M.ShowVisualizationUI
-      case false ⇒ log.debug("[SketchControllerUIControl.showAllUi] Visualization UI stay hided.")}}
+      case false ⇒ log.debug("[SketchControllerUIControl.showAllSketchUi] Visualization UI stay hided.")}}
   /** Check if all UI shown
     * @return - true if all shown */
   def isAllUiShowed: Boolean = {

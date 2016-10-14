@@ -111,6 +111,8 @@ class SketchControllerTest extends ActorTestSpec {
       testActor.send(controller, M.GetSketchContext(testActor.ref))
       testActor.expectMsgType[Either[Exception, SketchContext]]
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuilt)
       testSketchUi.expectMsgType[M.UpdateSketchUIState]
       testUserLogging.expectMsgType[M.LogInfo]
       testMainController.expectMsgType[M.SketchBuilt]
@@ -147,23 +149,27 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemShow,
-        VisualisationBtn → ElemShow)
+        LogBtn →  ElemHide,
+        VisualisationBtn → ElemHide)
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       //Show user logging UI
       testUserLogging.expectMsg(M.ShowUserLoggingUI)
       testUserLogging.send(controller, M.UserLoggingUIChanged(isShow = true))
-      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(LogBtn → ElemShow)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(LogBtn → ElemHide)
       //Show visualization UI
       testVisualization.expectMsg(M.ShowVisualizationUI)
       testVisualization.send(controller, M.VisualizationUIChanged(isShow = true))
-      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(VisualisationBtn → ElemShow)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(VisualisationBtn → ElemHide)
       //Get context
       testActor.send(controller, M.GetSketchContext(testActor.ref))
       testActor.expectMsgType[Either[Exception, SketchContext]]
       //Update user UI
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
+      //Build plumbing
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuilt)
+      //Update user UI
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(RunBtn → ElemDisabled)
       //Run plumbing
       testPumping.expectMsg(M.StartPumping)
@@ -185,7 +191,7 @@ class SketchControllerTest extends ActorTestSpec {
       val info2 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,PumpingActor started.)
       //Sketch built
-      testMainController.expectMsgType[M.SketchBuilt].workbench.asInstanceOf[TestSketchWithSmallTimeout]
+      testMainController.expectMsgType[M.SketchBuilt].className shouldEqual classOf[TestSketchWithSmallTimeout].getName
       val statusStr5 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr5 " + statusStr5)
       //Run plumbing
@@ -213,8 +219,8 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemHide,
-        VisualisationBtn → ElemHide)
+        LogBtn →  ElemShow,
+        VisualisationBtn → ElemShow)
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       //Get context
       testActor.send(controller, M.GetSketchContext(testActor.ref))
@@ -222,12 +228,16 @@ class SketchControllerTest extends ActorTestSpec {
       //Update user UI
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
+      //Build plumbing
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuilt)
+      //Update user UI
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(RunBtn → ElemEnabled)
       //Log info
       val info1 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info1: " + info1)
       //Sketch built
-      testMainController.expectMsgType[M.SketchBuilt].workbench.asInstanceOf[TestSketchWithSmallTimeout]
+      testMainController.expectMsgType[M.SketchBuilt].className shouldEqual classOf[TestSketchWithSmallTimeout].getName
       //Update status str
       val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr3 " + statusStr3)
@@ -237,7 +247,7 @@ class SketchControllerTest extends ActorTestSpec {
       testUserLogging.expectNoMsg(1.second)
       testVisualization.expectNoMsg(1.second)
       testPumping.expectNoMsg(1.second)}
-    "by SketchControllerStart, terminate sketch if not build in time" in new TestCase {
+    "by SketchControllerStart, response with error if not build in time" in new TestCase {
       //Preparing
       val controller = newSketchController( newTestSketchData(
         clazz = classOf[TestSketchWithBigTimeout],
@@ -256,8 +266,8 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemHide,
-        VisualisationBtn → ElemHide)
+        LogBtn →  ElemShow,
+        VisualisationBtn → ElemShow)
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       //Wait for time out
       sleep(5.second)
@@ -275,7 +285,7 @@ class SketchControllerTest extends ActorTestSpec {
         StopSketchBtn → ElemDisabled)
       //Sketch error
       testMainController.expectMsgType[M.SketchError]}
-    "by SketchControllerStart, terminate sketch if error on build" in new TestCase {
+    "by SketchControllerStart, response with error if error on build" in new TestCase {
       //Preparing
       val controller = newSketchController( newTestSketchData(
         clazz = classOf[TestSketchWithError],
@@ -294,8 +304,8 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemHide,
-        VisualisationBtn → ElemHide)
+        LogBtn →  ElemShow,
+        VisualisationBtn → ElemShow)
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       //Error log
       val error1 = testUserLogging.expectMsgType[M.LogError]
@@ -309,6 +319,44 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled)
+      //Sketch error
+      testMainController.expectMsgType[M.SketchError]}
+    "by SketchControllerStart, response with error if error on pumping build" in new TestCase {
+      //Preparing
+      val controller = newSketchController( newTestSketchData(
+        clazz = classOf[TestSketchWithSmallTimeout],
+        autorun = true,
+        showUserLogUi = false,
+        showVisualisationUi = false))
+      //Send start
+      testMainController.send(controller, M.StartSketchController)
+      //Show sketch UI
+      val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr1 " + statusStr1)
+      testSketchUi.expectMsg(M.ShowSketchUI)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState]
+      testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
+      //Get context
+      testActor.send(controller, M.GetSketchContext(testActor.ref))
+      testActor.expectMsgType[Either[Exception, SketchContext]]
+      //Update user UI
+      val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr2 " + statusStr2)
+      //Build plumbing
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuildingError)
+      //Error log
+      val error1 = testUserLogging.expectMsgType[M.LogError]
+      println("[SketchController] error1: " + error1)
+      //Sketch UI update
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+        RunBtn → ElemDisabled,
+        ShowAllToolsUiBtn → ElemDisabled,
+        HideAllToolsUiBtn → ElemDisabled,
+        SkipAllTimeoutTaskBtn → ElemDisabled,
+        StopSketchBtn → ElemDisabled)
+      val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr3 " + statusStr3)
       //Sketch error
       testMainController.expectMsgType[M.SketchError]}
     "by GetSketchContext, create and return SketchContext" in new TestCase {
@@ -340,6 +388,8 @@ class SketchControllerTest extends ActorTestSpec {
       //UI update, log and built
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuilt)
       testSketchUi.expectMsgType[M.UpdateSketchUIState]
       testUserLogging.expectMsgType[M.LogInfo]
       testMainController.expectMsgType[M.SketchBuilt]}
@@ -396,31 +446,31 @@ class SketchControllerTest extends ActorTestSpec {
       val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr1 " + statusStr1)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
-        LogBtn → ElemShow)
+        LogBtn → ElemHide)
       testSketchUi.send(controller, M.SketchUIActionTriggered(LogBtn, ElemHide))
       testUserLogging.expectMsg(M.HideUserLoggingUI)
       testUserLogging.send(controller, M.UserLoggingUIChanged(isShow = false))
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
-        LogBtn → ElemHide)
+        LogBtn → ElemShow)
       //Hit VisualisationBtn
       testSketchUi.send(controller, M.SketchUIActionTriggered(VisualisationBtn, ElemShow))
       testVisualization.expectMsg(M.ShowVisualizationUI)
       testVisualization.send(controller, M.VisualizationUIChanged(isShow = true))
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
-        VisualisationBtn → ElemShow)
+        VisualisationBtn → ElemHide)
       testSketchUi.send(controller, M.SketchUIActionTriggered(VisualisationBtn, ElemHide))
       testVisualization.expectMsg(M.HideVisualizationUI)
       testVisualization.send(controller, M.VisualizationUIChanged(isShow = false))
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
-        VisualisationBtn → ElemHide)}
+        VisualisationBtn → ElemShow)}
     "by StopSketchBtn hit, stop sketch" in new TestCase {
       //Preparing
       val controller = newStartedSketchController()
       //Send stop
       testSketchUi.send(controller, M.SketchUIActionTriggered(StopSketchBtn, Unit))
       //Sopping of pumping
-      testPumping.expectMsg(M.StopPumping)
-      testPumping.send(controller, M.PumpingStopped)
+      testPumping.expectMsg(M.StopAndTerminatePumping)
+      testPumping.send(controller, M.PumpingTerminated)
       //Log
       val info3 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info3: " + info3) //LogInfo(None,Workbench,The Shutdown signal received, sketch will terminated.)
@@ -513,6 +563,10 @@ class SketchControllerTest extends ActorTestSpec {
       //UI update
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
+      //Build plumbing
+      testPumping.expectMsg(M.BuildPumping)
+      testPumping.send(controller, M.PumpingBuilt)
+      //Update user UI
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemEnabled)
       //Log
@@ -606,8 +660,8 @@ class SketchControllerTest extends ActorTestSpec {
         HideAllToolsUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemHide,
-        VisualisationBtn → ElemHide)
+        LogBtn →  ElemShow,
+        VisualisationBtn → ElemShow)
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
@@ -676,8 +730,8 @@ class SketchControllerTest extends ActorTestSpec {
       val info2 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info2: " + info2) //LogInfo(None,Workbench,PumpingActor started.)
       //Sopping of pumping
-      testPumping.expectMsg(M.StopPumping)
-      testPumping.send(controller, M.PumpingStopped)
+      testPumping.expectMsg(M.StopAndTerminatePumping)
+      testPumping.send(controller, M.PumpingTerminated)
       //UI update
       val statusStr4 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr4 " + statusStr4)
@@ -730,8 +784,8 @@ class SketchControllerTest extends ActorTestSpec {
       val info1 = testUserLogging.expectMsgType[M.LogInfo]
       println("[SketchController] info1: " + info1) //LogInfo(None,Workbench,The Shutdown signal received, sketch will terminated.)
       //Sopping of pumping
-      testPumping.expectMsg(M.StopPumping)
-      testPumping.send(controller, M.PumpingStopped)
+      testPumping.expectMsg(M.StopAndTerminatePumping)
+      testPumping.send(controller, M.PumpingTerminated)
       //UI update
       val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr1 " + statusStr1)

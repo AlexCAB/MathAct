@@ -67,6 +67,21 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
   //On start
   val impeller = context.actorOf(Props(new ImpellerActor(self, config.impellerMaxQueueSize)), "ImpellerOf_" + pump.toolName)
   context.watch(impeller)
+
+
+
+  //TODO Добавить трайт UI, для котрого сдесь реализовать:
+  //TODO Если инструмент имеет трайт UI то при постройке вызвать метод "показать UI", а при терминировании "закрыть UI".
+  //TODO Эти мотоды можно вызывать в контексте потока актора (а ни импелера), та как там не будут кода пользователя,
+  //TODO и он только отправить собщение потоку UI но фактически ничего не будет делать.
+  //TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
+  //TODO Так же не стоит забывать о сообщениях ShowToolUi и HideToolUi
+
+
+
+
+
+
   //Receives
   /** Reaction on StateMsg'es */
   def onStateMsg: PartialFunction[(StateMsg, ActorState), Unit] = {
@@ -87,11 +102,8 @@ with DriveStartStop with DriveMessaging with DriveUIControl{ import ActorState._
     //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and ToolBuilt
     case (_: M.PipesConnected | M.BuildDrive, Building) ⇒ isAllConnected match{
       case true ⇒
-        log.debug(
-          s"[DriveActor.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
         state = Built
-        pumping ! M.DriveBuilt
-        buildAndSendToolBuiltInfo()
+        buildingSuccess()
       case false ⇒
         log.debug(s"[DriveActor.postHandling @ Building] Not all pipes connected.")}
     //This drive fail building

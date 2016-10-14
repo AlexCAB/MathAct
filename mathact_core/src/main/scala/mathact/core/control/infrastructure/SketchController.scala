@@ -55,7 +55,7 @@ with SketchControllerLife with SketchControllerUIActions
     case (M.StartSketchController, Init) ⇒
       state = Creating
       startSketchController()
-      showAllUi()
+      showAllSketchUi()
     //On SketchControllerStart trigger shutdown process on any state
     case (M.ShutdownSketchController, _) ⇒
       shutdownSketchController()
@@ -92,7 +92,7 @@ with SketchControllerLife with SketchControllerUIActions
         case false ⇒
           log.debug(s"[Creating] Not all UI showed yet.")}
     //Sketch built, set Built state if no autorun or Starting else
-    case (_: SketchBuilt, Building) ⇒ isShutdown match{
+    case (M.PumpingBuilt, Building) ⇒ isShutdown match{
       case false ⇒
         sketchData.autorun match{
           case false ⇒
@@ -107,7 +107,7 @@ with SketchControllerLife with SketchControllerUIActions
         state = Destructing
         destructSketch()}
     //If receive SketchBuiltError or SketchBuiltTimeout in Building state, switch state to BuildingFailed
-    case (_: SketchBuiltError | SketchBuiltTimeout, Building) ⇒
+    case (_: SketchBuiltError | SketchBuiltTimeout | M.PumpingBuildingError, Building) ⇒
       state = BuildingFailed
     //If RunBtn hit switch to Starting state
     case (M.SketchUIActionTriggered(RunBtn, _), Built) ⇒
@@ -126,14 +126,14 @@ with SketchControllerLife with SketchControllerUIActions
     case (M.SketchUIActionTriggered(StopSketchBtn, _), Working) ⇒
       state = Stopping
     //If pumping stopped, deconstruct sketch
-    case (M.PumpingStopped, Stopping) ⇒
+    case (M.PumpingTerminated, Stopping) ⇒
       isShutdown match{
         case true ⇒
-          log.debug(s"[PumpingStopped] isShutdown == true, continue shutdown.")
+          log.debug(s"[PumpingTerminated] isShutdown == true, continue shutdown.")
           state = Destructing
           destructSketch()
         case false ⇒
-          log.debug(s"[PumpingStopped] isShutdown == false, switch to Stopped.")
+          log.debug(s"[PumpingTerminated] isShutdown == false, switch to Stopped.")
           state = Stopped}
     //If All UI terminated, response with SketchControllerTerminated t main controller and  stop a self.
     case (M.SketchUITerminated | M.UserLoggingTerminated | M.VisualizationTerminated, Terminating) ⇒
@@ -153,11 +153,16 @@ with SketchControllerLife with SketchControllerUIActions
     case (M.VisualizationUIChanged(isShow), _) ⇒ visualizationUIChanged(isShow)
     //Sketch building
     case (SketchBuilt(sketchInstance), Building) ⇒ sketchBuilt(sketchInstance)
-    case (SketchBuilt(sketchInstance), BuildingFailed) ⇒ lateSketchBuilt()
+    case (M.PumpingBuilt, Building) ⇒ pumpingBuilt()
     case (SketchBuiltError(error), Building) ⇒ sketchBuiltError(error)
+    case (M.PumpingBuildingError, Building) ⇒ pumpingBuildingError()
+    case (SketchBuilt(sketchInstance), BuildingFailed) ⇒ lateBuiltMessage()
+    case (M.PumpingBuilt, BuildingFailed) ⇒ lateBuiltMessage()
+    case (M.PumpingBuildingAbort, Building) ⇒ pumpingBuildingAbort()
     case (SketchBuiltTimeout, state) ⇒ sketchBuiltTimeout(state)
     case (M.PumpingStarted, Starting) ⇒ pumpingStarted()
-    case (M.PumpingStopped, Stopping) ⇒ pumpingStopped()
+    case (M.PumpingStartingAbort, Starting) ⇒ pumpingStartingAbort()
+    case (M.PumpingTerminated, Stopping) ⇒ pumpingStopped()
     //UI actions
     case (M.SketchUIActionTriggered(RunBtn, _), Built) ⇒ hitRunBtn()
     case (M.SketchUIActionTriggered(ShowAllToolsUiBtn, _), Working) ⇒ showAllToolsUiBtnHit()

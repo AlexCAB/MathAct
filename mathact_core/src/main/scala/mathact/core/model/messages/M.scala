@@ -46,7 +46,7 @@ private [mathact] object M {
   case object StartSketchController extends StateMsg
   case class GetSketchContext(sender: ActorRef) extends Msg
   case object ShutdownSketchController extends StateMsg
-  case class SketchBuilt(className: String, workbench: WorkbenchLike) extends Msg
+  case class SketchBuilt(className: String) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, error: Throwable) extends Msg
   case class SketchControllerTerminated(className: String) extends StateMsg
@@ -75,10 +75,12 @@ private [mathact] object M {
   case object BuildPumping extends StateMsg
   case object PumpingBuilt extends Msg
   case object PumpingBuildingError extends Msg
+  case object PumpingBuildingAbort extends Msg
   case object StartPumping extends StateMsg
   case object PumpingStarted extends Msg
-  case object StopPumping extends StateMsg
-  case object PumpingStopped extends Msg
+  case object PumpingStartingAbort extends Msg
+  case object StopAndTerminatePumping extends StateMsg
+  case object PumpingTerminated extends Msg
   case object SkipAllTimeoutTask extends Msg
   case object ShowAllToolUi extends Msg
   case object HideAllToolUi extends Msg

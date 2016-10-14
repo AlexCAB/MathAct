@@ -98,24 +98,29 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
     //Check if SketchContext built
     isSketchContextBuilt match{
       case true ⇒
-        log.debug(s"[SketchControllerLife.sketchBuilt] workbench: $workbench")
-        //User log
-        val autorunMsg = sketchData.autorun match{
-          case false ⇒ ". Auto-run is off, hit 'play' button to start sketch."
-          case true ⇒ "."}
-        userLogging ! M.LogInfo(None, "Workbench", s"Sketch '$sketchName' successfully built$autorunMsg")
-        //Update UI
-        sketchUi !  M.UpdateSketchUIState(Map(RunBtn → (if(sketchData.autorun) ElemDisabled else ElemEnabled)))
-        //Send started to main controller
-        mainController ! M.SketchBuilt(sketchData.className, workbench)
-        //Update status string
-        sketchUi ! M.SetSketchUIStatusString(
-          s"Sketch built. ${if(sketchData.autorun) "" else "Wait for start."}",
-          if(sketchData.autorun) Color.Black else Color.Green)
+        log.debug(s"[SketchControllerLife.sketchBuilt] workbench: $workbench, run of pumping building.")
+        //Run pumping building
+        pumping ! M.BuildPumping
       case false ⇒
         log.error(s"[SketchControllerLife.sketchBuilt] Building failed, SketchContext is not built.")
         buildingError(new IllegalStateException(
           "[SketchControllerLife.sketchBuilt] SketchContext is not built."))}}
+  /** Pumping successfully built */
+  def pumpingBuilt(): Unit = {
+    log.debug("[SketchControllerLife.pumpingBuilt] Pumping successfully built.")
+    //User log
+    val autorunMsg = sketchData.autorun match{
+      case false ⇒ ". Auto-run is off, hit 'play' button to start sketch."
+      case true ⇒ "."}
+    userLogging ! M.LogInfo(None, "Workbench", s"Sketch '$sketchName' successfully built$autorunMsg")
+    //Update UI
+    sketchUi !  M.UpdateSketchUIState(Map(RunBtn → (if(sketchData.autorun) ElemDisabled else ElemEnabled)))
+    //Send started to main controller
+    mainController ! M.SketchBuilt(sketchData.className)
+    //Update status string
+    sketchUi ! M.SetSketchUIStatusString(
+      s"Sketch built. ${if(sketchData.autorun) "" else "Wait for start."}",
+      if(sketchData.autorun) Color.Black else Color.Green)}
   /** Error during sketch building
     * @param error - Throwable */
   def sketchBuiltError(error: Throwable): Unit = {
@@ -123,6 +128,12 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
       error,
       s"[SketchControllerLife.sketchBuildingError] Error on creating Sketch extends Workbench instance.")
      buildingError(error)}
+  /** Error during pumping building */
+  def pumpingBuildingError(): Unit = {
+    log.error(
+      s"[SketchControllerLife.pumpingBuildingError] Error on building of pumping.")
+    buildingError(new Exception(
+      "[SketchControllerLife.pumpingBuildingError] Error on building of pumping."))}
   /** Sketch not build in required time.
     * @param state - ActorState */
   def sketchBuiltTimeout(state: ActorState): Unit = state match{
@@ -134,11 +145,17 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
         s"[SketchControllerLife.sketchBuiltTimeout] Sketch not built in ${config.sketchBuildingTimeout}"))
     case st ⇒
       log.debug(s"[SketchControllerLife.sketchBuiltTimeout] Not a Building state do nothing, state: $st")}
+  /** Pumping starting aborted */
+  def pumpingBuildingAbort(): Unit = {
+    log.debug(s"[SketchControllerLife.pumpingBuildingAbort] For now do nothing.")}
   /** Start pumping */
   def startPumping(): Unit = {
     log.debug(s"[SketchControllerLife.startPumping] Send StartPumping")
     pumping ! M.StartPumping
     sketchUi ! M.SetSketchUIStatusString("Starting of pumping...", Color.Black)}
+  /** Pumping starting aborted */
+  def pumpingStartingAbort(): Unit = {
+    log.debug(s"[SketchControllerLife.pumpingStartingAbort] For now do nothing.")}
   /** PumpingActor started, update UI and log to user log */
   def pumpingStarted(): Unit = {
     log.debug(s"[SketchControllerLife.pumpingStarted] Started.")
@@ -153,10 +170,10 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
     userLogging ! M.LogInfo(None, "Workbench", s"PumpingActor started.")
     //Update status string
     sketchUi ! M.SetSketchUIStatusString("PumpingActor started. Working...", Color.Green)}
-  /** Try to stop PumpingActor, send StopPumping */
+  /** Try to stop PumpingActor, send StopAndTerminatePumping */
   def stopPumping(): Unit = {
     log.debug(s"[SketchControllerLife.stopPumping] Try to stop PumpingActor.")
-    pumping ! M.StopPumping
+    pumping ! M.StopAndTerminatePumping
     sketchUi ! M.SetSketchUIStatusString("Stopping of pumping...", Color.Black)}
   /** PumpingActor stopped, log to user logger */
   def pumpingStopped(): Unit = {
@@ -173,7 +190,7 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
     //Update status string
     sketchUi ! M.SetSketchUIStatusString("PumpingActor stopped.", Color.Black)}
   /** Sketch built, but SketchBuiltTimeout received earlier */
-  def lateSketchBuilt(): Unit = {
+  def lateBuiltMessage(): Unit = {
     log.debug(
       s"[Building] SketchBuilt receive but state BuildingFailed (probably SketchBuiltTimeout received earlier).")}
   /** Starting of destruct sketch */
