@@ -18,11 +18,11 @@ import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
 
-/** SketchController UI control
+/** SketchControllerActor UI control
   * Created by CAB on 04.09.2016.
   */
 
-private [mathact] trait SketchControllerUIControl { _: SketchController ⇒
+private [mathact] trait SketchControllerUIControl { _: SketchControllerActor ⇒
   import SketchUiElemState._, SketchUIElement._
   //Variables
   private var isSketchUiShowed = false

@@ -67,7 +67,7 @@ class MainUITest extends UIActorTestSpec {
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
       //Terminate UI
       testMainController.send(ui, M.TerminateMainUI)
-      testMainController.expectMsg(M.MainUITerminated)
+      ??? //testMainController.expectMsg(M.MainUITerminated)
       testMainController.expectTerminated(ui)}
     "show sketches list and run one of" in new TestCase {
       //Set empty list of sketch
@@ -99,7 +99,7 @@ class MainUITest extends UIActorTestSpec {
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
       //Terminate UI
       testMainController.send(ui, M.TerminateMainUI)
-      testMainController.expectMsg(M.MainUITerminated)
+      ??? //testMainController.expectMsg(M.MainUITerminated)
       testMainController.expectTerminated(ui)}
   }
 }

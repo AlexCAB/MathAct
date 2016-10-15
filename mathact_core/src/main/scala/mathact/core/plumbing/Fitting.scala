@@ -70,12 +70,12 @@ trait Fitting {
     case Some(p) ⇒
       new OutPipe(out, name match{ case "" ⇒ None; case n ⇒ Some(n) }, p)
     case None ⇒
-      throw new IllegalThreadStateException("[Fitting.registerOutlet] Pump not set.")}
+      throw new IllegalStateException("[Fitting.registerOutlet] Pump not set.")}
   private def registerInlet[H](in: Inlet[H], name: String): Socket[H] = Option(pump) match{
     case Some(p) ⇒
       new InPipe(in, name match{ case "" ⇒ None; case n ⇒ Some(n) }, p)
     case None ⇒
-      throw new IllegalThreadStateException("[Fitting.registerInlet] Pump not set.")}
+      throw new IllegalStateException("[Fitting.registerInlet] Pump not set.")}
   //Registration if Outlet
   protected object Outlet{
     def apply[H](out: Outlet[H], name: String = ""): Plug[H] = registerOutlet(out, name)

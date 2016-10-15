@@ -32,13 +32,13 @@ class UserLoggingTest extends UIActorTestSpec {
   //Test model
   trait TestCase extends Suite{
     //Test config
-    def newConfig(showOnErr: Boolean) = new UserLoggingConfigLike{
+    protected def newConfig(showOnErr: Boolean) = new UserLoggingConfigLike{
       val uiFxmlPath = "mathact/userLog/ui.fxml"
       val showUIOnError = showOnErr}
     //Helpers actors
     val workbenchController = TestProbe("TestSketchController_" + randomString())
     //UI Actor
-    def newUserLog(config: UserLoggingConfigLike) = system.actorOf(
+    protected def newUserLog(config: UserLoggingConfigLike) = system.actorOf(
       Props(new UserLoggingActor(config, workbenchController.ref)),
       "UserLogging_" + randomString())}
   //Testing
@@ -87,7 +87,7 @@ class UserLoggingTest extends UIActorTestSpec {
       sleep(30.second)  //Time for playing with UI
       //Terminate UI
       workbenchController.send(userLog, M.TerminateUserLogging)
-      workbenchController.expectMsg(M.UserLoggingTerminated)
+      ??? //workbenchController.expectMsg(M.UserLoggingTerminated)
       workbenchController.expectTerminated(userLog)}
   }
 }

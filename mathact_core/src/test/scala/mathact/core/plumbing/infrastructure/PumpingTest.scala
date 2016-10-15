@@ -71,6 +71,10 @@ class PumpingTest extends ActorTestSpec{
       lazy val builtPumping = {
         pumpingWithDrives
         testController.send(actors.pumping, M.BuildPumping)
+        testDrive1.expectMsg(M.ConstructDrive)
+        testDrive1.send(actors.pumping, M.DriveConstructed)
+        testDrive2.expectMsg(M.ConstructDrive)
+        testDrive2.send(actors.pumping, M.DriveConstructed)
         testDrive1.expectMsg(M.BuildDrive)
         testDrive1.send(actors.pumping, M.DriveBuilt)
         testDrive2.expectMsg(M.BuildDrive)
@@ -106,6 +110,11 @@ class PumpingTest extends ActorTestSpec{
       actors.pumpingWithDrives
       //Send BuildPumping
       testController.send(actors.pumping, M.BuildPumping)
+      //Construct drives
+      testDrive1.expectMsg(M.ConstructDrive)
+      testDrive1.send(actors.pumping, M.DriveConstructed)
+      testDrive2.expectMsg(M.ConstructDrive)
+      testDrive2.send(actors.pumping, M.DriveConstructed)
       //Build drives
       testDrive1.expectMsg(M.BuildDrive)
       sleep(1.second) //Imitate some time required to build drive
@@ -122,24 +131,31 @@ class PumpingTest extends ActorTestSpec{
       actors.pumpingWithDrives
       //Send BuildPumping
       testController.send(actors.pumping, M.BuildPumping)
+      //Construct drives
+      testDrive1.expectMsg(M.ConstructDrive)
+      testDrive1.send(actors.pumping, M.DriveConstructed)
+      testDrive2.expectMsg(M.ConstructDrive)
+      testDrive2.send(actors.pumping, M.DriveConstructed)
       //Build of drives, one return error
       testDrive1.expectMsg(M.BuildDrive)
       sleep(1.second) //Imitate some time required to build drive
-      testDrive1.send(actors.pumping, M.DriveBuildingError)
+      ??? //testDrive1.send(actors.pumping, M.DriveBuildingError)
       testDrive2.expectMsg(M.BuildDrive)
       sleep(1.second) //Imitate some time required to build drive
       testDrive2.send(actors.pumping, M.DriveBuilt)
-      testController.expectMsg(M.PumpingBuildingError)
+      //Expect PumpingBuildingError
+      ??? //testController.expectMsg(M.PumpingBuildingError)
       val logError = testUserLogging.expectMsgType[M.LogError]
       println("[PumpingTest] logError: " + logError)
       //Terminating of drives
       testDrive1.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive1.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive1.send(actors.pumping, M.DriveTerminated)
       testDrive2.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive2.send(actors.pumping, M.DriveTerminated)
-      testController.expectMsg(M.PumpingTerminated)}
+      ??? //testDrive2.send(actors.pumping, M.DriveTerminated)
+      ??? //testController.expectMsg(M.PumpingTerminated)
+    }
     "by M.StartPumping, build and start all drives, response M.PumpingStarted" in new TestCase {
       //Preparing
       actors.builtPumping
@@ -160,7 +176,7 @@ class PumpingTest extends ActorTestSpec{
       actors.startedPumpingWithDrives
       testController.watch(actors.startedPumpingWithDrives)
       //Stop pumping
-      testController.send(actors.pumping, M.StopAndTerminatePumping)
+      ??? //testController.send(actors.pumping, M.StopAndTerminatePumping)
       //Stopping drives
       testDrive1.expectMsg(M.StopDrive)
       sleep(1.second) //Imitate some time required to stop drive
@@ -171,12 +187,12 @@ class PumpingTest extends ActorTestSpec{
       //Terminating drives
       testDrive1.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive1.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive1.send(actors.pumping, M.DriveTerminated)
       testDrive2.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive2.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive2.send(actors.pumping, M.DriveTerminated)
       //Built
-      testController.expectMsg(M.PumpingTerminated)
+      ??? //testController.expectMsg(M.PumpingTerminated)
       //Terminate
       testController.expectTerminated(actors.startedPumpingWithDrives)}
     "by M.StopAndTerminatePumping at building, terminate all drives  at the end of building" in new TestCase {
@@ -185,29 +201,34 @@ class PumpingTest extends ActorTestSpec{
       testController.watch(actors.pumping)
       //Build
       testController.send(actors.pumping, M.BuildPumping)
+      //Construct drives
+      testDrive1.expectMsg(M.ConstructDrive)
+      testDrive1.send(actors.pumping, M.DriveConstructed)
+      testDrive2.expectMsg(M.ConstructDrive)
+      testDrive2.send(actors.pumping, M.DriveConstructed)
       //Build 1 drives
       testDrive1.expectMsg(M.BuildDrive)
       sleep(1.second) //Imitate some time required to build drive
       testDrive1.send(actors.pumping, M.DriveBuilt)
       //Stop pumping
-      testController.send(actors.pumping, M.StopAndTerminatePumping)
-      //Build 1 drives
+      ??? //testController.send(actors.pumping, M.StopAndTerminatePumping)
+      //Build 2 drives
       testDrive2.expectMsg(M.BuildDrive)
       sleep(1.second) //Imitate some time required to build drive
       testDrive2.send(actors.pumping, M.DriveBuilt)
       //Abort
-      testController.expectMsg(M.PumpingBuildingAbort)
+      ??? //testController.expectMsg(M.PumpingBuildingAbort)
       val logInfo = testUserLogging.expectMsgType[M.LogInfo]
       println("[PumpingTest] logInfo: " + logInfo)
       //Terminating drives
       testDrive1.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive1.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive1.send(actors.pumping, M.DriveTerminated)
       testDrive2.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive2.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive2.send(actors.pumping, M.DriveTerminated)
       //Built
-      testController.expectMsg(M.PumpingTerminated)
+      ??? //testController.expectMsg(M.PumpingTerminated)
       //Terminate
       testController.expectTerminated(actors.pumping)}
     "by M.StopAndTerminatePumping at starting, stop and terminate all drives at the end of starting" in new TestCase {
@@ -221,13 +242,13 @@ class PumpingTest extends ActorTestSpec{
       sleep(1.second) //Imitate some time required to start drive
       testDrive1.send(actors.pumping, M.DriveStarted)
       //Stop pumping
-      testController.send(actors.pumping, M.StopAndTerminatePumping)
+      ??? //testController.send(actors.pumping, M.StopAndTerminatePumping)
       //Start 2 drives
       testDrive2.expectMsg(M.StartDrive)
       sleep(1.second) //Imitate some time required to start drive
       testDrive2.send(actors.pumping, M.DriveStarted)
       //Abort
-      testController.expectMsg(M.PumpingStartingAbort)
+      ??? //testController.expectMsg(M.PumpingStartingAbort)
       val logInfo = testUserLogging.expectMsgType[M.LogInfo]
       println("[PumpingTest] logInfo: " + logInfo)
       //Stopping drives
@@ -240,12 +261,12 @@ class PumpingTest extends ActorTestSpec{
       //Terminating drives
       testDrive1.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive1.send(actors.pumping, M.DriveTerminated)
-      testDrive2.expectMsg(M.TerminateDrive)
+      ??? //testDrive1.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive2.expectMsg(M.TerminateDrive)
       sleep(1.second) //Imitate some time required to termination drive
-      testDrive2.send(actors.pumping, M.DriveTerminated)
+      ??? //testDrive2.send(actors.pumping, M.DriveTerminated)
       //Built
-      testController.expectMsg(M.PumpingTerminated)
+      ??? //testController.expectMsg(M.PumpingTerminated)
       //Terminate
       testController.expectTerminated(actors.pumping)}
     "by M.SkipAllTimeoutTask, send SkipTimeoutTask to all drives" in new TestCase {

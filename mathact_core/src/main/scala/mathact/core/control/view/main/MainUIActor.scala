@@ -71,5 +71,6 @@ extends ActorBase with JFXInteraction {
     //Terminate UI
     case M.TerminateMainUI ⇒
       runAndWait(window.close())
-      mainController ! M.MainUITerminated
+      ???
+//      mainController ! M.MainUITerminated
       self ! PoisonPill}}

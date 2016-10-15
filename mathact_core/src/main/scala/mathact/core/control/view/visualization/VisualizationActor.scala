@@ -35,13 +35,13 @@ extends ActorBase with JFXInteraction { import Visualization._
   val buildingLayoutType = LayoutType.OrganicLayout
   val buildingLayoutMorphingSteps = 10
   val buildingLayoutMorphingDelay = 5 //Im milli seconds
-  val finaleLayoutMorphingSteps = 30
+  val finaleLayoutMorphingSteps = 40
   val finaleLayoutMorphingDelay = 50 //Im milli seconds
   val doLayoutMorphingSteps = 30
   val doLayoutMorphingDelay = 40 //Im milli seconds
   //Variables
   private var isShow = false
-  private var allToolBuilt = false
+  private var isFinalGraphBuilt = false
   private var builtTools = List[(ToolBuiltInfo, Option[ToolImageData])]()
   private var currentLayoutType = buildingLayoutType
   //Construction
@@ -78,15 +78,22 @@ extends ActorBase with JFXInteraction { import Visualization._
             None}}}
     //Return
     GraphData(tools, connections)}
-  private def buildAndUpdateGraph(builtTools: List[(ToolBuiltInfo, Option[ToolImageData])], doUpdate: Boolean): Unit = {
+  private def buildAndUpdateGraph(
+    builtTools: List[(ToolBuiltInfo, Option[ToolImageData])],
+    doUpdate: Boolean,
+    morphingSteps: Int,
+    morphingDelay: Int)
+  :Unit = {
     doUpdate match {
       case true ⇒
         val graphData = buildGraphView(builtTools)
-        log.debug("[VisualizationActor.buildAndUpdateGraph] Built graph data: " + graphData)
+        log.debug(
+          s"[VisualizationActor.buildAndUpdateGraph] morphingSteps: $morphingSteps, morphingDelay: $morphingDelay, " +
+          s"built graph data: $graphData")
         //Update view
         runAndWait{
           window.drawGraph(graphData)
-          window.doLayout(buildingLayoutType, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)}
+          window.doLayout(buildingLayoutType, morphingSteps, morphingDelay)}
       case false ⇒
         log.debug("[VisualizationActor.buildAndUpdateGraph] UI not show or allToolBuilt, skip building of graph data.")}}
   private def verifyGraphStructure(builtTools: List[ToolBuiltInfo]): Unit = {
@@ -128,31 +135,31 @@ extends ActorBase with JFXInteraction { import Visualization._
           errors.mkString("\n    "))}}
   //Messages handling with logging
   def reaction: PartialFunction[Any, Unit]  = {
-    //Close button hit
-    case DoClose ⇒
-      isShow = false
-      runAndWait(window.hide())
-      workbenchController ! M.VisualizationUIChanged(isShow)
     //Show UI
     case M.ShowVisualizationUI ⇒
-      isShow = true
-      buildAndUpdateGraph(builtTools, ! allToolBuilt)
       runAndWait{window.show()}
+      isShow = true
+      buildAndUpdateGraph(builtTools, ! isFinalGraphBuilt, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      isFinalGraphBuilt = true
+      workbenchController ! M.VisualizationUIChanged(isShow)
+    //Close button hit
+    case DoClose ⇒
+      runAndWait(window.hide())
+      isShow = false
       workbenchController ! M.VisualizationUIChanged(isShow)
     //Tool built info, sends each time some tool done building
     case M.ToolBuilt(builtInfo) ⇒
       //Add toll info
       builtTools +:= prepareToolInfo(builtInfo)
       //Build view if visible
-      buildAndUpdateGraph(builtTools, isShow)
+      buildAndUpdateGraph(builtTools, isShow, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
     //AllToolBuilt, validate graph structure
     case M.AllToolBuilt ⇒
-      //Set flag
-      allToolBuilt = true
       //Validate graph structure
       verifyGraphStructure(builtTools.map(_._1))
-      //Finale layout
-      runAndWait{window.doLayout(buildingLayoutType, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)}
+      //Finale build and layout
+      buildAndUpdateGraph(builtTools, isShow, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      isFinalGraphBuilt = isShow
     //Change layout
     case LayoutTypeChanced(layoutType) ⇒
       currentLayoutType = layoutType
@@ -161,11 +168,12 @@ extends ActorBase with JFXInteraction { import Visualization._
       runAndWait{window.doLayout(currentLayoutType, doLayoutMorphingSteps, doLayoutMorphingDelay)}
     //Hide UI
     case M.HideVisualizationUI ⇒
-      isShow = false
       runAndWait(window.hide())
+      isShow = false
       workbenchController ! M.VisualizationUIChanged(isShow)
     //Terminate UI
     case M.TerminateVisualization ⇒
       runAndWait(window.close())
-      workbenchController ! M.VisualizationTerminated
+      ???
+//      workbenchController ! M.VisualizationTerminated
       self ! PoisonPill}}

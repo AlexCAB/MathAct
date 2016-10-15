@@ -14,12 +14,14 @@
 
 package mathact.core.app
 
+import java.util.concurrent.ExecutionException
+
 import akka.actor.{ActorRef, ActorSystem, PoisonPill, Props}
 import akka.event.Logging
 import akka.pattern.ask
 import akka.util.Timeout
 import mathact.core.bricks.{SketchContext, WorkbenchLike}
-import mathact.core.control.infrastructure.{MainController, SketchController}
+import mathact.core.control.infrastructure.{MainController, SketchControllerActor}
 import mathact.core.control.view.logging.UserLoggingActor
 import mathact.core.control.view.main.MainUIActor
 import mathact.core.control.view.sketch.SketchUIActor
@@ -81,7 +83,7 @@ private [mathact] object Application{
             context.watch(mainUi)
             def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
               context.actorOf(Props(
-                new SketchController(config, sketchData, self){
+                new SketchControllerActor(config, sketchData, self){
                   val sketchUi = context.actorOf(Props(
                     new SketchUIActor(config.sketchUI, self)),
                     "SketchUIActor_" + sketchData.className)
@@ -105,7 +107,7 @@ private [mathact] object Application{
     catch { case e: Throwable ⇒
       log.error(s"[Application.start] Error on start: $e, terminate ActorSystem.")
       doTerminate()
-      throw e}
+      throw new ExecutionException(e)}
   /** Get of SketchContext for new Workbench
     * @param workbench - Workbench
     * @return - MainController ActorRef or thrown exception */
@@ -129,7 +131,7 @@ private [mathact] object Application{
             .fold(
               e ⇒ {
                 log.debug(s"[Application.getSketchContext] Error on ask for ${workbench.getClass.getName}, err: $e.")
-                throw e},
+                throw new ExecutionException(e)},
               wc ⇒ {
                 log.debug(s"[Application.getSketchContext] SketchContext created for ${workbench.getClass.getName}.")
                 wc})

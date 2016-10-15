@@ -46,7 +46,6 @@ package object enums {
     val Created = Value
     val Building = Value
     val Built = Value
-    val BuildingFailed = Value
     val Starting = Value
     val Started = Value
     val Working = Value
@@ -55,7 +54,9 @@ package object enums {
     val Destructing = Value
     val Destructed = Value
     val Terminating = Value
-    val Terminated = Value}
+    val Terminated = Value
+    val Shutdown = Value  //Force stop state
+    val Fail = Value}     //Fatal error state
   type ActorState = ActorState.Value
   //SketchUIElement
   object SketchUIElement extends Enumeration {

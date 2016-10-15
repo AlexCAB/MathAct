@@ -25,11 +25,11 @@ import scala.concurrent.Future
 import scalafx.scene.paint.Color
 
 
-/** SketchController sketch building
+/** SketchControllerActor sketch building
   * Created by CAB on 04.09.2016.
   */
 
-private [mathact] trait SketchControllerLife { _: SketchController ⇒
+private [mathact] trait SketchControllerLife { _: SketchControllerActor ⇒
   import SketchUiElemState._, SketchUIElement._
   //Variables
   private var isSketchContextBuilt = false
@@ -173,7 +173,8 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
   /** Try to stop PumpingActor, send StopAndTerminatePumping */
   def stopPumping(): Unit = {
     log.debug(s"[SketchControllerLife.stopPumping] Try to stop PumpingActor.")
-    pumping ! M.StopAndTerminatePumping
+//    pumping ! M.StopAndTerminatePumping
+    ???
     sketchUi ! M.SetSketchUIStatusString("Stopping of pumping...", Color.Black)}
   /** PumpingActor stopped, log to user logger */
   def pumpingStopped(): Unit = {
@@ -207,5 +208,6 @@ private [mathact] trait SketchControllerLife { _: SketchController ⇒
   /** Terminate self */
   def terminateSelf(): Unit = {
     log.debug(s"[SketchControllerLife.terminateSelf] Send SketchControllerTerminated and terminate.")
-    mainController ! M.SketchControllerTerminated(sketchData.className)
+//    mainController ! M.SketchControllerTerminated(sketchData.className)
+    ???
     self ! PoisonPill}}

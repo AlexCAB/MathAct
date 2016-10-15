@@ -17,11 +17,11 @@ package mathact.core.control.infrastructure
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
-/** SketchController UI actions processing
+/** SketchControllerActor UI actions processing
   * Created by CAB on 07.09.2016.
   */
 
-private [mathact] trait SketchControllerUIActions { _: SketchController ⇒
+private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
   import SketchUiElemState._, SketchUIElement._
   //Methods
   /** Hit run button */

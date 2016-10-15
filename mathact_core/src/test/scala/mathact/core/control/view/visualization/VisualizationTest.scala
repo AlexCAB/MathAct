@@ -118,12 +118,10 @@ class VisualizationTest extends UIActorTestSpec {
       sleep(1.second)
       sketchController.send(visualization, M.AllToolBuilt)
       //Test close button
-      println("[VisualizationTest] Click close button (X).")
-      sleep(2.second)
-      sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
+      println("[VisualizationTest] CLICK CLOSE BUTTON (X).")
+      sketchController.expectMsgType[M.VisualizationUIChanged](30.second).isShow shouldEqual false
       sketchController.send(visualization, M.ShowVisualizationUI)
       sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
-      sleep(2.second)
       //Time for playing
       sleep(30.second)
       //Hide UI
@@ -132,7 +130,7 @@ class VisualizationTest extends UIActorTestSpec {
       sleep(2.second)
       //Terminate UI
       sketchController.send(visualization, M.TerminateVisualization)
-      sketchController.expectMsg(M.VisualizationTerminated)
+      ??? //sketchController.expectMsg(M.VisualizationTerminated)
       sketchController.expectTerminated(visualization)}
   }
 }

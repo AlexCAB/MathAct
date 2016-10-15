@@ -24,7 +24,7 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveMessaging { _: DriveActor ⇒
+private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
   //Functions
   private def buildTask(inlet: InletState, value: Any): M.RunTask[Unit] = M.RunTask(
     kind = TaskKind.Massage,

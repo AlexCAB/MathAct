@@ -111,7 +111,7 @@ class SketchUITest extends UIActorTestSpec {
       sleep(2.second)
       //Terminate UI
       workbenchController.send(ui, M.TerminateSketchUI)
-      workbenchController.expectMsg(M.SketchUITerminated)
+      ??? //workbenchController.expectMsg(M.SketchUITerminated)
       workbenchController.expectTerminated(ui)}
   }
 }

@@ -14,7 +14,7 @@
 
 package mathact.core
 
-import akka.actor.Actor
+import akka.actor.{Terminated, ActorRef, Actor}
 import akka.event.{Logging, LoggingAdapter}
 import mathact.core.model.enums.ActorState
 import mathact.core.model.messages.{StateMsg, Msg}
@@ -43,13 +43,15 @@ abstract class StateActorBase(initState: ActorState) extends Actor{
   def reaction: PartialFunction[(Msg, ActorState), Unit]
   /** Actor reaction on messages */
   def postHandling: PartialFunction[(Msg, ActorState), Unit]
+  /** Handling of actor termination*/
+  def terminationHandling: PartialFunction[(ActorRef, ActorState), Unit]
   //Receive
   def receive: PartialFunction[Any, Unit] = {
     case message: StateMsg ⇒
       log.debug(s"STATE MESSAGE: $message, FROM: $sender, CURRENT STATE: $currentState")
       onStateMsg.applyOrElse[(StateMsg, ActorState), Unit](
         (message, currentState),
-        _ ⇒ log.error(s"LAST STATE MESSAGE NOT HANDLED: $message"))
+        _ ⇒ log.error(s"LAST STATE MESSAGE NOT HANDLED: $message, STATE: $currentState"))
       postHandling.applyOrElse[(Msg, ActorState), Unit](
         (message, currentState),
         _ ⇒ Unit)
@@ -61,6 +63,11 @@ abstract class StateActorBase(initState: ActorState) extends Actor{
       postHandling.applyOrElse[(Msg, ActorState), Unit](
         (message, currentState),
         _ ⇒ Unit)
+    case message: Terminated ⇒
+      log.debug(s"TERMINATED MESSAGE: $message, FROM: $sender, CURRENT STATE: $currentState")
+      terminationHandling.applyOrElse[(ActorRef, ActorState), Unit](
+        (message.actor, currentState),
+        _ ⇒ log.error(s"LAST TERMINATED MESSAGE NOT HANDLED: $message, STATE: $currentState"))
     case message: Any ⇒
       log.error(s"Receive not a Msg type: $message")}
 

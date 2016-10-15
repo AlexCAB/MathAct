@@ -80,8 +80,8 @@ extends ActorBase{
     case M.NewSketchContext(workbench, sketchClassName) ⇒ forCurrentSketch(sketchClassName){ case (actor, sketch) ⇒
       actor ! M.GetSketchContext(sender)}
     //Sketch built, hide UI
-    case M.SketchBuilt(className, workbench) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
-      if(! sketch.autorun) mainUi ! M.HideMainUI}
+//    case M.SketchBuilt(className, workbench) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
+//      if(! sketch.autorun) mainUi ! M.HideMainUI}
     //Sketch done
     case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       setSketchSate(className, SketchStatus.Ended)}
@@ -90,18 +90,18 @@ extends ActorBase{
       log.error(error, "[MainController @ SketchError] Sketch failed.")
       setSketchSate(className, SketchStatus.Failed)}
     //Sketch controller terminated, show UI
-    case M.SketchControllerTerminated(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
-      context.unwatch(sender)
-      setAndShowUISketchTable()
-      currentSketch = None
-      if(isFatalError) self ! PoisonPill}
-    //Main close hit, terminate UI
-    case M.MainCloseBtnHit if currentSketch.isEmpty ⇒
-      mainUi ! M.TerminateMainUI
-    //Main close hit, call do stop and terminate self
-    case M.MainUITerminated ⇒
-      context.unwatch(mainUi)
-      self ! PoisonPill
+//    case M.SketchControllerTerminated(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
+//      context.unwatch(sender)
+//      setAndShowUISketchTable()
+//      currentSketch = None
+//      if(isFatalError) self ! PoisonPill}
+//    //Main close hit, terminate UI
+//    case M.MainCloseBtnHit if currentSketch.isEmpty ⇒
+//      mainUi ! M.TerminateMainUI
+//    //Main close hit, call do stop and terminate self
+//    case M.MainUITerminated ⇒
+//      context.unwatch(mainUi)
+//      self ! PoisonPill
     //Termination of actor
     case Terminated(actor) ⇒ actor match{
       case a if a == mainUi ⇒

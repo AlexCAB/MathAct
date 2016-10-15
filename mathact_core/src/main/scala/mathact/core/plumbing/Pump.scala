@@ -14,6 +14,8 @@
 
 package mathact.core.plumbing
 
+import java.util.concurrent.ExecutionException
+
 import akka.actor.ActorRef
 import akka.event.Logging
 import akka.pattern.ask
@@ -21,7 +23,6 @@ import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
 import mathact.core.bricks.{SketchContext, OnStart, OnStop}
 import scala.concurrent.Await
-import scalafx.scene.image.Image
 
 
 /** Process of tools communications
@@ -46,7 +47,7 @@ extends PumpLike{
   private[mathact] val drive: ActorRef = Await
     .result(ask(context.pumping, M.NewDrive(this))(context.pumpConfig.askTimeout)
       .mapTo[Either[Throwable,ActorRef]], context.pumpConfig.askTimeout.duration)
-    .fold(t ⇒ throw t, d ⇒ d)
+    .fold(t ⇒ throw new ExecutionException(t), d ⇒ d)
   //Functions
   private def addPipe(msg: Any): (Int, Int) = Await //Return: (tool ID, pipe ID)
     .result(
@@ -55,7 +56,7 @@ extends PumpLike{
     .fold(
       t ⇒ {
         akkaLog.error(s"[Pump.addPipe] Error on adding of pipe, msg: $msg, error: $t")
-        throw t},
+        throw new ExecutionException(t)},
       d ⇒ {
         akkaLog.debug(s"[Pump.addPipe] Pipe added, pipeId: $d")
         d})
@@ -71,7 +72,7 @@ extends PumpLike{
     .fold(
       t ⇒ {
         akkaLog.error(s"[Pump.connect] Error on connecting of pipes: $t")
-        throw t},
+        throw new ExecutionException(t)},
       d ⇒ {
         akkaLog.debug(s"[Pump.connect] Pipe added, pipeId: $d")
         d})
@@ -88,7 +89,7 @@ extends PumpLike{
     .fold(
       error ⇒ {
         akkaLog.error(s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, error: $error")
-        throw error},
+        throw new ExecutionException(error)},
       timeout ⇒ {
         akkaLog.debug(s"[Pump.pushUserMessage] Message pushed, msg: $msg, timeout, $timeout")
         timeout.foreach{ d ⇒

@@ -71,6 +71,7 @@ extends ActorBase with JFXInteraction { import SketchUIElement._, SketchUiElemSt
     //Terminate UI
     case M.TerminateSketchUI ⇒
       runAndWait(window.close())
-      workbenchController ! M.SketchUITerminated
+      ???
+//      workbenchController ! M.SketchUITerminated
       self ! PoisonPill}}
 

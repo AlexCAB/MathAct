@@ -103,11 +103,11 @@ extends StateActorBase(ActorState.Init) with IdGenerator{ import ActorState._
     visualization ! M.AllToolBuilt}
   def driveBuildingAborted(): Unit = {
     log.debug(s"[PumpingActor.driveBuildingAborted] Report to controller and userLogging.")
-    controller ! M.PumpingBuildingAbort
+//    controller ! M.PumpingBuildingAbort
     userLogging ! M.LogInfo(None, "Pumping", s"Building aborted.")}
   def driveBuildingFiled(): Unit = {
     log.debug(s"[PumpingActor.driveBuildingFiled] Report to controller and userLogging.")
-    controller ! M.PumpingBuildingError
+//    controller ! M.PumpingBuildingError
     userLogging ! M.LogError(None, "Pumping", None, s"On or more tools fail building.")}
   def allDrivesStarted(): Unit = {
     log.debug(s"[PumpingActor.allDrivesStarted] All drives started, send M.PumpingStarted, drives: ${drives.values}.")
@@ -116,24 +116,41 @@ extends StateActorBase(ActorState.Init) with IdGenerator{ import ActorState._
     userLogging ! M.LogInfo(None, "Pumping", s"All tools started, working!")}
   def driveStartingAborted(): Unit = {
     log.debug(s"[PumpingActor.driveStartingAborted] Drives: ${drives.values}.")
-    controller ! M.PumpingStartingAbort
+//    controller ! M.PumpingStartingAbort
     setAndSendToDrives(Stopping,  M.StopDrive)
     userLogging ! M.LogInfo(None, "Pumping", s"Starting aborted, run stopping of all tools.")}
   def allDrivesTerminated(): Unit = {
     log.debug(s"[PumpingActor.allDrivesTerminated] All drives started, send M.PumpingStarted, drives: ${drives.values}.")
     drives.foreach{case (key, driveData) ⇒ drives += key → driveData.copy(driveState = Terminated)}
-    controller ! M.PumpingTerminated
+//    controller ! M.PumpingTerminated
+    ???
     self ! PoisonPill}
   //Receives
   /** Reaction on StateMsg'es */
   def onStateMsg: PartialFunction[(StateMsg, ActorState), Unit] = {
-    //Build all to all drives
+    //Build all to all drives, on done response with ConstructDrive
     case (M.BuildPumping, Init) ⇒
-      state = Building
-      setAndSendToDrives(Building,  M.BuildDrive)
+      state = Creating
+      setAndSendToDrives(Creating,  M.ConstructDrive)
 
 
 
+
+
+
+
+
+      //TODO 1.Перенести верификацию структуры из визуализации сюда и проверять по завершении постройки.
+      //TODO 2.Добавить льгинг придупереждения в лог пользователя на на попытке добавить инлет или
+      //TODO   оутлет или сыполнить соединение после старта приложения.
+      //TODO 3.Добавить сообщение
+      //TODO
+      //TODO
+      //TODO
+      //TODO
+      //TODO
+      //TODO
+      //TODO ---
       //TODO 0.Постройка должна выполнятся сразу на старте, и только если оно успешно кнопка "старт", должна активироватся.
       //TODO 1.Далее: По BuildPumping должен построить все драйвы, если какой то драйв вернул DriveBuildingError,
       //TODO   то isDoStopping = true, что по завершении приведёт к разрушению остальных построеных драйвов,
@@ -157,31 +174,58 @@ extends StateActorBase(ActorState.Init) with IdGenerator{ import ActorState._
 
 
 
-    //Switch to Starting, send BuildDrive to all drives
+    //Switch to Starting, send BuildDrive to all drives, on done response with PumpingStarted
     case (M.StartPumping, Built) ⇒
       state = Starting
       setAndSendToDrives(Starting,  M.StartDrive)
+    //Stopping of all drives, on done response with PumpingStopped
+    case (M.StopDrive, Working) ⇒
+
+      ???
+
+    //Terminate of all drives, on done response with PumpingTerminated
+    case (M.TerminateDrive, Stopped) ⇒
+
+      ???
+
+    //Shutdown of all drives at any stare, on done response with PumpingShutdown
+    case (M.ShutdownPumping, _) ⇒
+
+      ???
+
+
+
+
     //Switch to Stopping, send StopDrive to all drives
-    case (M.StopAndTerminatePumping, st) ⇒ st match{
-      case Working ⇒
-        state = Stopping
-        setAndSendToDrives(Stopping,  M.StopDrive)
-      case _ ⇒
-        isDoStopping = true}}
+//    case (M.StopAndTerminatePumping, st) ⇒ st match{
+//      case Working ⇒
+//        state = Stopping
+//        setAndSendToDrives(Stopping,  M.StopDrive)
+//      case _ ⇒
+//        isDoStopping = true}
+
+
+
+
+  }
   /** Handling after reaction executed */
   def postHandling: PartialFunction[(Msg, ActorState), Unit] = {
+    //Drive constructed, if all ready switch to building
+    case (M.DriveConstructed, Creating) ⇒ callIfAllDrivesInState(Created){
+      state = Building
+      setAndSendToDrives(Building,  M.BuildDrive)}
     //Check if all drive built, if so switch to Built and send PumpingBuilt to controller
-    case (M.DriveBuilt | M.DriveBuildingError, Building) ⇒ callIfAllDrivesInState(Built){
-      isDoStopping match{
-        case false ⇒
-          state = Built
-          allDrivesBuilt()
-        case true ⇒
-          state = Terminating
-          isBuildFiled match{
-            case false ⇒ driveBuildingAborted()
-            case true ⇒ driveBuildingFiled()}
-          setAndSendToDrives(Stopped,  M.TerminateDrive)}}
+//    case (M.DriveBuilt | M.DriveBuildingError, Building) ⇒ callIfAllDrivesInState(Built){
+//      isDoStopping match{
+//        case false ⇒
+//          state = Built
+//          allDrivesBuilt()
+//        case true ⇒
+//          state = Terminating
+//          isBuildFiled match{
+//            case false ⇒ driveBuildingAborted()
+//            case true ⇒ driveBuildingFiled()}
+//          setAndSendToDrives(Stopped,  M.TerminateDrive)}}
     //Check if all drive started, if so switch to Working and send PumpingStarted
     case (M.StartPumping | M.DriveStarted, Starting) ⇒ callIfAllDrivesInState(Started){
       isDoStopping match{
@@ -196,20 +240,34 @@ extends StateActorBase(ActorState.Init) with IdGenerator{ import ActorState._
       state = Terminating
       setAndSendToDrives(Stopped,  M.TerminateDrive)}
     //Check if all drive terminate, if so switch to Terminating, send PumpingTerminated and terminating
-    case (M.StopAndTerminatePumping | M.DriveTerminated, Terminating) ⇒ callIfAllDrivesInState(Terminated){
-      state = Terminated
-      allDrivesTerminated()}}
+//    case (M.StopAndTerminatePumping | M.DriveTerminated, Terminating) ⇒ callIfAllDrivesInState(Terminated){
+//      state = Terminated
+//      allDrivesTerminated()}
+  }
   /** Actor reaction on messages */
   def reaction: PartialFunction[(Msg, ActorState), Unit] = {
     //Creating of new drive for tool (ask request)
     case (M.NewDrive(toolPump), state) ⇒ newDrive(toolPump, state, createDriveActor)
     //Updates of driveState
+    case (M.DriveConstructed, Creating) ⇒ setSenderDriveState(Created)
     case (M.DriveBuilt, Building) ⇒ setSenderDriveState(Built)
-    case (M.DriveBuildingError, Building) ⇒ driveBuildingError()
+//    case (M.DriveBuildingError, Building) ⇒ driveBuildingError()
     case (M.DriveStarted, Starting) ⇒ setSenderDriveState(Started)
     case (M.DriveStopped, Stopping) ⇒ setSenderDriveState(Stopped)
-    case (M.DriveTerminated, Terminating) ⇒ setSenderDriveState(Terminated)
+//    case (M.DriveTerminated, Terminating) ⇒ setSenderDriveState(Terminated)
     //Re send SkipAllTimeoutTask to all drives
     case (M.SkipAllTimeoutTask, _) ⇒ drives.values.foreach(_.drive ! M.SkipTimeoutTask)
     case (M.ShowAllToolUi, _) ⇒ drives.values.foreach(_.drive ! M.ShowToolUi)
-    case (M.HideAllToolUi, _) ⇒ drives.values.foreach(_.drive ! M.HideToolUi)}}
+    case (M.HideAllToolUi, _) ⇒ drives.values.foreach(_.drive ! M.HideToolUi)}
+
+  /** Handling of actor termination*/
+  def terminationHandling: PartialFunction[(ActorRef, ActorState), Unit] = {
+
+    case m  ⇒ ???
+
+  }
+
+
+
+
+}

@@ -76,7 +76,7 @@ class MainControllerTest extends ActorTestSpec {
       //Stop app
       testMainUi.send(mainController, M.MainCloseBtnHit)
       testMainUi.expectMsg(M.TerminateMainUI)
-      testMainUi.send(mainController, M.MainUITerminated)
+      ??? //testMainUi.send(mainController, M.MainUITerminated)
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(0)}
     "by MainControllerStart with auto-run, run sketch with autorun = true" in new TestCase {
@@ -88,14 +88,14 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       //Send SketchDone
       testSketchController.send(mainController, M.SketchDone(sketchData.className))
-      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
+      ??? //testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
       val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
       sketches1.head.className shouldEqual sketchData.className
       sketches1.head.lastRunStatus shouldEqual SketchStatus.Ended
       //Stop app
       testMainUi.send(mainController, M.MainCloseBtnHit)
       testMainUi.expectMsg(M.TerminateMainUI)
-      testMainUi.send(mainController, M.MainUITerminated)
+      ??? //testMainUi.send(mainController, M.MainUITerminated)
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(0)}
     "by RunSketch, run selected sketch" in new TestCase {
@@ -111,14 +111,14 @@ class MainControllerTest extends ActorTestSpec {
       testMainUi.expectMsg(M.HideMainUI)
       //Send SketchError
       testSketchController.send(mainController, M.SketchError(sketchData.className, new Exception("Oops!!!")))
-      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
+      ??? //testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
       val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
       sketches1.head.className shouldEqual sketchData.className
       sketches1.head.lastRunStatus shouldEqual SketchStatus.Failed
       //Stop app
       testMainUi.send(mainController, M.MainCloseBtnHit)
       testMainUi.expectMsg(M.TerminateMainUI)
-      testMainUi.send(mainController, M.MainUITerminated)
+      ??? //testMainUi.send(mainController, M.MainUITerminated)
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(0)}
     "if sketch controller terminated, mark it Failed and show main UI" in new TestCase {
@@ -132,7 +132,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
       testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
       testMainUi.expectMsg(M.HideMainUI)
-      //Send Terminated(SketchController)
+      //Send Terminated(SketchControllerActor)
       testSketchController.testActor ! PoisonPill
       val sketches1 = testMainUi.expectMsgType[M.SetSketchList].sketches
       sketches1.head.className shouldEqual sketchData.className
@@ -140,7 +140,7 @@ class MainControllerTest extends ActorTestSpec {
       //Stop app
       testMainUi.send(mainController, M.MainCloseBtnHit)
       testMainUi.expectMsg(M.TerminateMainUI)
-      testMainUi.send(mainController, M.MainUITerminated)
+      ??? //testMainUi.send(mainController, M.MainUITerminated)
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(0)}
     "if main UI terminated, stop application" in new TestCase {
@@ -165,7 +165,7 @@ class MainControllerTest extends ActorTestSpec {
       //Send Terminated(MainUI)
       testMainUi.testActor ! PoisonPill
       testSketchController.expectMsg(M.ShutdownSketchController)
-      testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
+      ??? //testSketchController.send(mainController, M.SketchControllerTerminated(sketchData.className))
       testApplication.expectTerminated(mainController)
       getExitCode shouldEqual Some(-1)}
   }

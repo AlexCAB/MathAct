@@ -154,5 +154,6 @@ extends ActorBase with JFXInteraction { import UserLogging._
     //Terminate user logging
     case M.TerminateUserLogging ⇒
       runAndWait(window.close())
-      workbenchController ! M.UserLoggingTerminated
+      ???
+//      workbenchController ! M.UserLoggingTerminated
       self ! PoisonPill}}

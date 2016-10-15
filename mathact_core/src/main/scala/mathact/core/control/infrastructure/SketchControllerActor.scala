@@ -27,7 +27,7 @@ import mathact.core.StateActorBase
   * Created by CAB on 21.05.2016.
   */
 
-private [mathact] abstract class SketchController(
+private [mathact] abstract class SketchControllerActor(
   val config: MainConfigLike,
   val sketchData: SketchData,
   val mainController: ActorRef)
@@ -64,9 +64,9 @@ with SketchControllerLife with SketchControllerUIActions
         case Built ⇒
           state = Destructing
           destructSketch()
-        case BuildingFailed ⇒
-          state = Terminating
-          terminateAllUi()
+//        case BuildingFailed ⇒
+//          state = Terminating
+//          terminateAllUi()
         case Working ⇒
           state = Stopping
           stopPumping()
@@ -107,42 +107,50 @@ with SketchControllerLife with SketchControllerUIActions
         state = Destructing
         destructSketch()}
     //If receive SketchBuiltError or SketchBuiltTimeout in Building state, switch state to BuildingFailed
-    case (_: SketchBuiltError | SketchBuiltTimeout | M.PumpingBuildingError, Building) ⇒
-      state = BuildingFailed
-    //If RunBtn hit switch to Starting state
-    case (M.SketchUIActionTriggered(RunBtn, _), Built) ⇒
-      startPumping()
-      state = Starting
-    //If plumbing started set state Working
-    case (M.PumpingStarted, Starting) ⇒ isShutdown match{
-      case false ⇒
-        log.debug(s"[Starting] Sketch started.")
-        state = Working
-      case true ⇒
-        log.debug(s"[Starting] Sketch started, but isShutdown == true, stopping sketch")
-        state = Stopping
-        stopPumping()}
+//    case (_: SketchBuiltError | SketchBuiltTimeout | M.PumpingBuildingError, Building) ⇒
+//      state = BuildingFailed
+//    //If RunBtn hit switch to Starting state
+//    case (M.SketchUIActionTriggered(RunBtn, _), Built) ⇒
+//      startPumping()
+//      state = Starting
+//    //If plumbing started set state Working
+//    case (M.PumpingStarted, Starting) ⇒ isShutdown match{
+//      case false ⇒
+//        log.debug(s"[Starting] Sketch started.")
+//        state = Working
+//      case true ⇒
+//        log.debug(s"[Starting] Sketch started, but isShutdown == true, stopping sketch")
+//        state = Stopping
+//        stopPumping()}
     //If StopSketchBtn hit, switch to Stopping
     case (M.SketchUIActionTriggered(StopSketchBtn, _), Working) ⇒
       state = Stopping
     //If pumping stopped, deconstruct sketch
-    case (M.PumpingTerminated, Stopping) ⇒
-      isShutdown match{
-        case true ⇒
-          log.debug(s"[PumpingTerminated] isShutdown == true, continue shutdown.")
-          state = Destructing
-          destructSketch()
-        case false ⇒
-          log.debug(s"[PumpingTerminated] isShutdown == false, switch to Stopped.")
-          state = Stopped}
-    //If All UI terminated, response with SketchControllerTerminated t main controller and  stop a self.
-    case (M.SketchUITerminated | M.UserLoggingTerminated | M.VisualizationTerminated, Terminating) ⇒
-      isAllUiTerminated match{
-        case true ⇒
-          log.debug(s"[Terminating] All UI terminated, stop a self.")
-          terminateSelf()
-        case false ⇒
-          log.debug(s"[Terminating] Not all UI terminated yet.")}}
+//    case (M.PumpingTerminated, Stopping) ⇒
+//      isShutdown match{
+//        case true ⇒
+//          log.debug(s"[PumpingTerminated] isShutdown == true, continue shutdown.")
+//          state = Destructing
+//          destructSketch()
+//        case false ⇒
+//          log.debug(s"[PumpingTerminated] isShutdown == false, switch to Stopped.")
+//          state = Stopped}
+//    //If All UI terminated, response with SketchControllerTerminated t main controller and  stop a self.
+//    case (M.SketchUITerminated | M.UserLoggingTerminated | M.VisualizationTerminated, Terminating) ⇒
+//      isAllUiTerminated match{
+//        case true ⇒
+//          log.debug(s"[Terminating] All UI terminated, stop a self.")
+//          terminateSelf()
+//        case false ⇒
+//          log.debug(s"[Terminating] Not all UI terminated yet.")}
+//
+  }
+  /** Handling of actor termination*/
+  def terminationHandling: PartialFunction[(ActorRef, ActorState), Unit] = {
+
+    case m  ⇒ ???
+
+  }
   /** Actor reaction on messages (not change the 'state' variable) */
   def reaction: PartialFunction[(Msg, ActorState), Unit] = {
     //From objects asks
@@ -155,14 +163,14 @@ with SketchControllerLife with SketchControllerUIActions
     case (SketchBuilt(sketchInstance), Building) ⇒ sketchBuilt(sketchInstance)
     case (M.PumpingBuilt, Building) ⇒ pumpingBuilt()
     case (SketchBuiltError(error), Building) ⇒ sketchBuiltError(error)
-    case (M.PumpingBuildingError, Building) ⇒ pumpingBuildingError()
-    case (SketchBuilt(sketchInstance), BuildingFailed) ⇒ lateBuiltMessage()
-    case (M.PumpingBuilt, BuildingFailed) ⇒ lateBuiltMessage()
-    case (M.PumpingBuildingAbort, Building) ⇒ pumpingBuildingAbort()
+//    case (M.PumpingBuildingError, Building) ⇒ pumpingBuildingError()
+//    case (SketchBuilt(sketchInstance), BuildingFailed) ⇒ lateBuiltMessage()
+//    case (M.PumpingBuilt, BuildingFailed) ⇒ lateBuiltMessage()
+//    case (M.PumpingBuildingAbort, Building) ⇒ pumpingBuildingAbort()
     case (SketchBuiltTimeout, state) ⇒ sketchBuiltTimeout(state)
     case (M.PumpingStarted, Starting) ⇒ pumpingStarted()
-    case (M.PumpingStartingAbort, Starting) ⇒ pumpingStartingAbort()
-    case (M.PumpingTerminated, Stopping) ⇒ pumpingStopped()
+//    case (M.PumpingStartingAbort, Starting) ⇒ pumpingStartingAbort()
+//    case (M.PumpingTerminated, Stopping) ⇒ pumpingStopped()
     //UI actions
     case (M.SketchUIActionTriggered(RunBtn, _), Built) ⇒ hitRunBtn()
     case (M.SketchUIActionTriggered(ShowAllToolsUiBtn, _), Working) ⇒ showAllToolsUiBtnHit()
@@ -173,6 +181,11 @@ with SketchControllerLife with SketchControllerUIActions
     case (M.SketchUIActionTriggered(StopSketchBtn, _), Working) ⇒ stopPumping()
     case (M.SketchUIActionTriggered(CloseBtn, _), s) if s != Init ⇒ closeBtnHit()
     //UI terminated
-    case (M.SketchUITerminated, _) ⇒ sketchUITerminated()
-    case (M.UserLoggingTerminated, _) ⇒ userLoggingTerminated()
-    case (M.VisualizationTerminated, _) ⇒ visualizationTerminated()}}
+//    case (M.SketchUITerminated, _) ⇒ sketchUITerminated()
+//    case (M.UserLoggingTerminated, _) ⇒ userLoggingTerminated()
+//    case (M.VisualizationTerminated, _) ⇒ visualizationTerminated()
+
+  }
+
+
+}

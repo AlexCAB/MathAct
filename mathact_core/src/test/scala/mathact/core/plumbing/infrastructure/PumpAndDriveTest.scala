@@ -28,6 +28,7 @@ import mathact.core.plumbing.{Pump, Fitting}
 import mathact.core.bricks.{UIControl, OnStart, OnStop, SketchContext}
 import org.scalatest.Suite
 import scala.concurrent.duration._
+import scala.util.Try
 
 
 /** Testing of Pump with DriveActor actor
@@ -141,6 +142,8 @@ class PumpAndDriveTest extends ActorTestSpec{
         lazy val outlet = Outlet(testIncut, "otherOutlet")
         lazy val inlet = Inlet(testIncut, "otherInlet")}
       lazy val builtTool = {
+        testPumping.send(tools.testDrive, M.ConstructDrive)
+        testPumping.expectMsg(M.DriveConstructed)
         testPumping.send(testTool.pump.drive, M.BuildDrive)
         testPumping.expectMsg(M.DriveBuilt)
         testUserLogging.expectMsgType[M.LogInfo]
@@ -148,6 +151,8 @@ class PumpAndDriveTest extends ActorTestSpec{
         testTool.isOnStartCalled shouldEqual false
         testTool}
       lazy val startedTool = {
+        testPumping.send(tools.testDrive, M.ConstructDrive)
+        testPumping.expectMsg(M.DriveConstructed)
         testPumping.send(testTool.pump.drive, M.BuildDrive)
         testPumping.expectMsg(M.DriveBuilt)
         testUserLogging.expectMsgType[M.LogInfo]
@@ -165,6 +170,9 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Connecting
         testTool.inlet.plug(otherTool.outlet)
         testTool.outlet.attach(otherTool.inlet)
+        //Send ConstructDrive
+        testPumping.send(tools.testDrive, M.ConstructDrive)
+        testPumping.expectMsg(M.DriveConstructed)
         //Process for other tool
         testPumping.send(testDrive, M.BuildDrive)
         val conMsg =  otherDrive.expectNMsg(2)
@@ -205,11 +213,41 @@ class PumpAndDriveTest extends ActorTestSpec{
       val otherOutlet1 = tools.otherTool.outlet
       val otherInlet1 =tools.otherTool.inlet
       //Connecting and disconnecting
-      tools.testTool.outlet.attach(otherInlet1)
-      tools.testTool.inlet.plug(otherOutlet1)
+      testOutlet1.attach(otherInlet1)
+      testInlet1.plug(otherOutlet1)
       //Testing
       val pendingCon = tools.testDrive.askForState[DriveState].pendingConnections
       pendingCon should have size 2}
+    "Not accept new inlets/outlets after ConstructDrive message" in new TestCase {
+      //Preparing
+      tools.testTool
+      //Send ConstructDrive
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
+      //Try to create inlet
+      Try{tools.testTool.inlet}.toOption shouldBe empty
+      val logWarning1 = testUserLogging.expectMsgType[M.LogWarning]
+      println("[PumpAndDriveTest] logWarning1: " + logWarning1)
+      //Try to create outlet
+      Try{tools.testTool.outlet}.toOption shouldBe empty
+      val logWarning2 = testUserLogging.expectMsgType[M.LogWarning]
+      println("[PumpAndDriveTest] logWarning2: " + logWarning2)}
+    "Not accept new connection after ConstructDrive message" in new TestCase {
+      //Preparing
+      val testOutlet1 = tools.testTool.outlet
+      val testInlet1 = tools.testTool.inlet
+      val otherOutlet1 = tools.otherTool.outlet
+      val otherInlet1 = tools.otherTool.inlet
+      //Send ConstructDrive
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
+      //Connecting and disconnecting
+      Try{testOutlet1.attach(otherInlet1)}.toOption shouldBe empty
+      val logWarning1 = testUserLogging.expectMsgType[M.LogWarning]
+      println("[PumpAndDriveTest] logWarning1: " + logWarning1)
+        Try{testInlet1.plug(otherOutlet1)}.toOption shouldBe empty
+      val logWarning2 = testUserLogging.expectMsgType[M.LogWarning]
+      println("[PumpAndDriveTest] logWarning2: " + logWarning2)}
     "by BuildDrive, create connections from pending list and reply with DriveBuilt (for 'plug')" in new TestCase {
       //Preparing
       val outlet = tools.otherTool.outlet.asInstanceOf[OutPipe[Double]].pipeData
@@ -217,6 +255,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Connecting (test tool have inlet)
       tools.testTool.inlet.plug(tools.otherTool.outlet)
       tools.testDrive.askForState[DriveState].pendingConnections should have size 1
+      //Send ConstructDrive
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
       //Send BuildDrive
       testPumping.send(tools.testDrive, M.BuildDrive)
       //Test connecting
@@ -252,6 +293,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Connecting (test tool have outlet)
       tools.testTool.outlet.attach(tools.otherTool.inlet)
       tools.testDrive.askForState[DriveState].pendingConnections should have size 1
+      //Send ConstructDrive
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
       //Send BuildDrive
       testPumping.send(tools.testDrive, M.BuildDrive)
       //Test connecting
@@ -334,6 +378,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Connecting (test tool have outlet)
       tools.testTool.outlet.attach(tools.otherTool.inlet)
       tools.testDrive.askForState[DriveState].pendingConnections should have size 1
+      //Send ConstructDrive
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
       //Send BuildDrive
       testPumping.send(tools.testDrive, M.BuildDrive)
       //Test connecting with incorrect outletId in response
@@ -342,7 +389,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         tools.testDrive,
         M.ConnectTo(addConnection.connectionId, addConnection.initiator, 123456789, inlet))
       //Expect termination
-      testPumping.expectMsg(M.DriveBuildingError)
+      ??? //testPumping.expectMsg(M.DriveBuildingError)
       val logError = testUserLogging.expectMsgType[M.LogError]
       println("[PumpAndDriveTest] logError: " + logError)}
   }
@@ -373,6 +420,8 @@ class PumpAndDriveTest extends ActorTestSpec{
       val value2 = randomDouble()
       //Connecting
       tools.testTool.inlet.plug(tools.otherTool.outlet)
+      testPumping.send(tools.testDrive, M.ConstructDrive)
+      testPumping.expectMsg(M.DriveConstructed)
       testPumping.send(tools.testDrive, M.BuildDrive)
       val conTo = tools.otherDrive.expectMsgType[M.ConnectTo]
       tools.otherDrive.send(conTo.initiator, M.PipesConnected(conTo.connectionId, conTo.inlet.pipeId, conTo.outletId))
@@ -572,7 +621,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Termination
       sleep(2.second) //Wait for second slow message will processed
       testPumping.expectMsg(M.DriveStopped)
-      testPumping.expectMsg(M.DriveTerminated)
+      ??? //testPumping.expectMsg(M.DriveTerminated)
       testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
     "by TerminateDrive, do terminating if in Building state" in new TestCase {
       //Preparing
@@ -582,7 +631,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPumping.send(tools.testDrive, M.TerminateDrive)
       sleep(1.second) //Wait for TerminateDrive processed
       //Termination
-      testPumping.expectMsg(M.DriveTerminated)
+      ??? //testPumping.expectMsg(M.DriveTerminated)
       testPumping.expectMsgType[Terminated].actor shouldEqual tools.testDrive}
     "by SkipTimeoutTask, not skip task if no timeout, and skip if it is" in new TestCase {
       //Preparing
