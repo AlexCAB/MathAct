@@ -37,7 +37,7 @@ class Pump(
 extends PumpLike{
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)
-  akkaLog.info(s"[Pump.<init>] Creating of tool: $tool, name: $toolName")
+  akkaLog.info(s"[Pump.<init>] DriveCreating of tool: $tool, name: $toolName")
   private[mathact] object log {
     def debug(msg: String): Unit = akkaLog.debug(s"[$toolName] $msg")
     def info(msg: String): Unit = akkaLog.info(s"[$toolName] $msg")

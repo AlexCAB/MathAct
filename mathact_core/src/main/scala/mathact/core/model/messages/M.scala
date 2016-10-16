@@ -27,7 +27,7 @@ import scala.concurrent.duration.FiniteDuration
 import scalafx.scene.paint.Color
 
 
-/** Set of actor messages
+/** Global messages, to communicate between actors.
   * Created by CAB on 23.05.2016.
   */
 
@@ -72,17 +72,15 @@ private [mathact] object M {
   case object TerminateVisualization extends Msg
 //  case object VisualizationTerminated extends Msg
   //SketchControllerActor - PumpingActor  (life cycle)
-  case object BuildPumping extends StateMsg
+  case object BuildPumping extends StateMsg    //Run tool connectivity on sketch start
   case object PumpingBuilt extends Msg
-  case object StartPumping extends StateMsg
+  case object StartPumping extends StateMsg    //Run user start functions on hit UI "START" of by auto-run
   case object PumpingStarted extends Msg
-  case object StopPumping extends StateMsg
+  case object StopPumping extends StateMsg     //Run user stop functions on hit UI "STOP"
   case object PumpingStopped extends Msg
-  case object TerminatePumping extends StateMsg
-//  case object PumpingTerminated extends Msg
-  case object ShutdownPumping extends StateMsg    //Force stop of plumping at any state.
-  case object PumpingShutdown extends Msg
-  case class PumpingError(error: Option[Throwable]) extends Msg //Sends by at any state, this means plumping terminated by
+  case object ShutdownPumping extends StateMsg //Force stop of plumping at any state on  .
+  case object PumpingShutdown extends Msg  //Normal stop, sends by Pumping before Terminated
+  case class PumpingError(errors: Seq[Throwable]) extends Msg //Error stop, sends by Pumping before Terminated, this means plumping terminated by some internal error
   //SketchControllerActor - PumpingActor  (management)
   case object SkipAllTimeoutTask extends Msg
   case object ShowAllToolUi extends Msg
@@ -97,17 +95,14 @@ private [mathact] object M {
   //PumpingActor - DriveActor (life cycle)
   case object ConstructDrive extends StateMsg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg
-  case object BuildDrive extends StateMsg //Creating of connections from pending list
+  case object BuildDrive extends StateMsg //DriveCreating of connections from pending list
   case object DriveBuilt extends Msg
   case object StartDrive extends StateMsg //Run init user code
   case object DriveStarted extends Msg
   case object StopDrive extends StateMsg  //Run sopping user code
   case object DriveStopped extends Msg
   case object TerminateDrive extends StateMsg //Disconnect all connection and terminate
-//  case object DriveTerminated extends Msg
-  case object ShutdownDrive extends StateMsg    //Force stop of drive at any state.
-  case object DriveShutdown extends Msg
-  case class DriveError(error: Option[Throwable]) extends Msg //Sends by at any state, this means drive terminated
+  case class DriveError(error: Throwable) extends StateMsg //Sends by drive at any state, this means drive terminated
   //DriveActor - DriveActor
   case class AddConnection(connectionId: Int, initiator: ActorRef, inletId: Int, outlet: OutletData) extends Msg
   case class ConnectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData) extends Msg

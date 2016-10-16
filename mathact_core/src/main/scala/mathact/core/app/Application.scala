@@ -20,12 +20,13 @@ import akka.actor.{ActorRef, ActorSystem, PoisonPill, Props}
 import akka.event.Logging
 import akka.pattern.ask
 import akka.util.Timeout
+import mathact.core.app.infrastructure.MainController
+import mathact.core.app.view.MainUIActor
 import mathact.core.bricks.{SketchContext, WorkbenchLike}
-import mathact.core.control.infrastructure.{MainController, SketchControllerActor}
-import mathact.core.control.view.logging.UserLoggingActor
-import mathact.core.control.view.main.MainUIActor
-import mathact.core.control.view.sketch.SketchUIActor
-import mathact.core.control.view.visualization.VisualizationActor
+import mathact.core.sketch.infrastructure.SketchControllerActor
+import mathact.core.sketch.view.logging.UserLoggingActor
+import mathact.core.sketch.view.sketch.SketchUIActor
+import mathact.core.sketch.view.visualization.VisualizationActor
 import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData

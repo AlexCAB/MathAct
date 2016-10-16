@@ -14,7 +14,8 @@
 
 package mathact.core.model
 
-/** Contains common enums
+
+/** Contains common (global) enums
   * Created by CAB on 24.06.2016.
   */
 
@@ -39,25 +40,6 @@ package object enums {
   object VisualisationLaval extends Enumeration {
     val None, Basic, Load, Full = Value}
   type VisualisationLaval = VisualisationLaval.Value
-  //ActorState
-  object ActorState extends Enumeration {
-    val Init = Value
-    val Creating = Value
-    val Created = Value
-    val Building = Value
-    val Built = Value
-    val Starting = Value
-    val Started = Value
-    val Working = Value
-    val Stopping = Value
-    val Stopped = Value
-    val Destructing = Value
-    val Destructed = Value
-    val Terminating = Value
-    val Terminated = Value
-    val Shutdown = Value  //Force stop state
-    val Fail = Value}     //Fatal error state
-  type ActorState = ActorState.Value
   //SketchUIElement
   object SketchUIElement extends Enumeration {
     val LogBtn = Value

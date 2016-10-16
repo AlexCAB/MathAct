@@ -12,20 +12,24 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
-
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
-
-import scala.concurrent.duration._
+package mathact.core.sketch.view.logging
 
 
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** User logging object
+  * Created by CAB on 28.09.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+private [mathact] object UserLogging {
+  //Enums
+  object LogType extends Enumeration {
+    val Info = Value
+    val Warn = Value
+    val Error = Value}
+  type LogType = LogType.Value
+  //Data
+  case class LogRow(msgType: LogType, toolName: String, message: String)
+  //Messages
+  case class DoSearch(text: String)
+  case class SetLogLevel(level: LogType)
+  case class SetLogAmount(amount: Int)
+  case object DoClean}

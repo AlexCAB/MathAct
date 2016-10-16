@@ -12,20 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
+package mathact.core.plumbing.infrastructure.impeller
 
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
+import scala.concurrent.duration.FiniteDuration
 
-import scala.concurrent.duration._
-
-
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** Impeller
+  * Created by CAB on 16.10.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+private [mathact] object Impeller {
+  //Local messages
+  case class TaskTimeout(taskNumber: Long, timeout: FiniteDuration)
+  case class TaskSuccess(taskNumber: Long, res: Any)
+  case class TaskFailure(taskNumber: Long, err: Throwable)}

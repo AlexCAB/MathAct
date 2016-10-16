@@ -23,5 +23,5 @@ import mathact.core.bricks.{WorkbenchLike, SketchContext}
 
 class TestSketchWithError extends WorkbenchLike{
   protected implicit val context: SketchContext = null
-  println(s"[TestSketchWithError] Creating and throw error.")
+  println(s"[TestSketchWithError] DriveCreating and throw error.")
   throw new Exception("Oops!!")}

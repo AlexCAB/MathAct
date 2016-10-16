@@ -12,20 +12,40 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
-
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
-
-import scala.concurrent.duration._
+package mathact.core.sketch.view.visualization
 
 
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** Visualization object
+  * Created by CAB on 28.09.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+private [mathact] object Visualization {
+  //Enums
+  object LayoutType extends Enumeration {
+    val OrganicLayout = Value
+    val CircleLayout = Value
+    val TreeLayout = Value
+    val ParallelEdgeLayout = Value
+    val StackLayout = Value}
+  type LayoutType = LayoutType.Value
+  //Data
+  case class ToolImageData(
+    path: String,
+    width: Int,
+    height: Int)
+  case class ToolData(
+    toolId: Int,
+    toolName: String,
+    toolImage: Option[ToolImageData],
+    inlets: Map[Int, Option[String]],
+    outlets: Map[Int, Option[String]])
+  case class ConnectionData(
+    inletToolId: Int,
+    inletId: Int,
+    outletToolId: Int,
+    outletId: Int)
+  case class GraphData(tools: List[ToolData], connections: List[ConnectionData])
+  //Messages
+  case object DoClose
+  case class LayoutTypeChanced(layoutType: LayoutType)
+  case object DoLayoutBtnHit}

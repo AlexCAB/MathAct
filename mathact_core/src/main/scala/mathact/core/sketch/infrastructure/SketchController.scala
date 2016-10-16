@@ -12,20 +12,29 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
-
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
-
-import scala.concurrent.duration._
+package mathact.core.sketch.infrastructure
 
 
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** Sketch controller
+  * Created by CAB on 16.10.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+object SketchController {
+  //Enums
+  object State extends Enumeration {
+    val Init = Value
+    val Creating = Value
+    val Building = Value
+    val Built = Value
+    val Starting = Value
+    val Working = Value
+    val Stopping = Value
+    val Destructing = Value
+    val Terminating = Value}
+  type State = State.Value
+
+
+
+
+
+}

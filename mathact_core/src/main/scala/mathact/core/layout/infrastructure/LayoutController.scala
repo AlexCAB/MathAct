@@ -12,20 +12,35 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
+package mathact.core.layout.infrastructure
 
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
+import akka.actor.ActorRef
+import mathact.core.ActorBase
+import mathact.core.gui.JFXInteraction
+import mathact.core.model.config.UserLoggingConfigLike
 
-import scala.concurrent.duration._
 
-
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** Control of tool UI layout
+  * Created by CAB on 28.09.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+private [mathact] class LayoutController(
+  config: UserLoggingConfigLike,
+  workbenchController: ActorRef)
+extends ActorBase with JFXInteraction {
+
+
+
+
+
+
+  //Messages handling with logging
+  def reaction: PartialFunction[Any, Unit]  = {
+
+
+    case m ⇒ println("[LayoutController] message: " + m)
+
+  }
+
+
+}

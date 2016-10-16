@@ -26,5 +26,5 @@ import scala.concurrent.duration._
 class TestSketchWithSmallTimeout extends WorkbenchLike{
   protected implicit val context: SketchContext = null
   val timeout = 2.second
-  println(s"[TestSketchWithTimeout] Creating, timeout: $timeout.")
+  println(s"[TestSketchWithTimeout] DriveCreating, timeout: $timeout.")
   Thread.sleep(timeout.toMillis)}

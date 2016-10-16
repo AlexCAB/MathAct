@@ -12,20 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.dummies
+package mathact.core.sketch.view.logging
 
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
+import akka.actor.ActorRef
+import mathact.core.sketch.view.logging.UserLogging.LogRow
 
-import scala.concurrent.duration._
-
-
-
-/** Test sketch with big timeout
-  * Created by CAB on 06.09.2016.
+/** UserLogUIController interface
+  * Created by CAB on 07.10.2016.
   */
 
-class TestSketchWithBigTimeout extends WorkbenchLike{
-  protected implicit val context: SketchContext = null
-  val timeout = 6.second
-  println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")
-  Thread.sleep(timeout.toMillis)}
+private [mathact] trait UserLogUIControllerLike {
+  def setActor(actor: ActorRef): Unit
+  def setRows(rows: List[LogRow]): Unit}
