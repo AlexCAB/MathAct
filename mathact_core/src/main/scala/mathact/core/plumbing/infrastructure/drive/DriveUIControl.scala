@@ -46,7 +46,7 @@ private [mathact] trait DriveUIControl { _: DriveActor ⇒
     * @param error - Throwable */
   def showToolUiTaskFailed(execTime: FiniteDuration, error: Throwable): Unit = {
     log.error(s"[DriveStartStop.showToolUiTaskFailed] execTime: $execTime, error: $error.")
-    userLogging ! M.LogError(Some(toolId), pump.toolName, Some(error), s"Show tool UI function failed on $execTime.")}
+    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Show tool UI function failed on $execTime.")}
   /** Hide tool UI */
   def hideToolUi(): Unit = pump.tool match{
     case task: UIControl ⇒
@@ -68,7 +68,7 @@ private [mathact] trait DriveUIControl { _: DriveActor ⇒
     * @param error - Throwable */
   def hideToolUiTaskFailed(execTime: FiniteDuration, error: Throwable): Unit = {
     log.error(s"[DriveStartStop.hideToolUiTaskFailed] execTime: $execTime, error: $error.")
-    userLogging ! M.LogError(Some(toolId),pump.toolName, Some(error), s"Hide tool UI function failed on $execTime.")}
+    userLogging ! M.LogError(Some(toolId),pump.toolName, Seq(error), s"Hide tool UI function failed on $execTime.")}
 
   //TODO Add more
 

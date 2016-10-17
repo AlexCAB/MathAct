@@ -161,7 +161,7 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
   def startingTaskFailed(execTime: Duration, error: Throwable): Unit = {
     log.error(s"[DriveLifeCycle.startingTaskTimeout] execTime: $execTime, error: $error.")
     started = true
-    userLogging ! M.LogError(Some(toolId), pump.toolName, Some(error), s"Starting function failed on $execTime.")}
+    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Starting function failed on $execTime.")}
   /** Starting success, logging to user log, report to pumping */
   def startingSuccess(): Unit = {
     log.debug("[DriveLifeCycle.startingSuccess] Drive successful started.")
@@ -194,7 +194,7 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
   def stoppingTaskFailed(execTime: Duration, error: Throwable): Unit = {
     log.error(s"[DriveLifeCycle.stoppingTaskFailed] execTime: $execTime, error: $error.")
     stopped = true
-    userLogging ! M.LogError(Some(toolId), pump.toolName, Some(error), s"Stopping function failed on $execTime.")}
+    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Stopping function failed on $execTime.")}
   /** Stopping success, logging to user log, report to pumping */
   def stoppingSuccess(): Unit = {
     log.debug("[DriveLifeCycle.stoppingSuccess] Drive successful stopped.")
@@ -211,6 +211,6 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
   def driveError(message: String, error: Option[Throwable]): Unit = {
     log.error(s"[DriveLifeCycle.driveError] Log to user logging and report to pumping, error: $error")
     //Log to user logger
-    userLogging ! M.LogError(Some(toolId), pump.toolName, error, message)
+    userLogging ! M.LogError(Some(toolId), pump.toolName, error.toSeq, message)
     //Report to pumping
     pumping ! M.DriveError(error.getOrElse(new Exception("[DriveLifeCycle.driveError] " + message)))}}

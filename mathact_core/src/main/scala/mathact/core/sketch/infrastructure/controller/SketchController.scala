@@ -12,27 +12,37 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure
+package mathact.core.sketch.infrastructure.controller
+
+import mathact.core.bricks.WorkbenchLike
+import mathact.core.model.messages.Msg
 
 
 /** Sketch controller
   * Created by CAB on 16.10.2016.
   */
 
-object SketchController {
+private [mathact] object SketchController {
   //Enums
   object State extends Enumeration {
     val Init = Value
-    val Creating = Value
-    val Building = Value
-    val Built = Value
-    val Starting = Value
-    val Working = Value
-    val Stopping = Value
-    val Destructing = Value
-    val Terminating = Value}
+    val Creating = Value          //Build UI
+    val Constructing = Value      //Build sketch instance
+    val Building = Value          //Build plumping
+    val Built = Value             //Wait fro start
+    val Starting = Value          //Starting of plumping
+    val Working = Value           //Working (wait for stop)
+    val Stopping = Value          //Stopping of plumping
+    val ConstructingFail = Value  //File on creating of sketch instance (UI will not hide)
+    val PumpingFail = Value       //Pumping error (may happen anytime, UI will not hide)
+    val Shutdown = Value}         //Sketch close button hit (may happen anytime, UI will hide if no errors)
   type State = State.Value
 
+
+
+
+
+//  case object SketchDestructed extends Msg
 
 
 

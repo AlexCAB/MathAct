@@ -28,12 +28,14 @@ import scala.concurrent.duration._
 private [mathact] class AppConfig extends MainConfigLike{
   //Load commonConfig
   val config = ConfigFactory.load()
-  //Main config
-  val sketchBuildingTimeout = config.getInt("main.sketch.building.timeout").millis
+  //Sketch instance
+  val sketchInstance = new SketchInstanceConfigLike{
+    val commonConfig = config
+    val sketchBuildingTimeout = config.getInt("main.sketch.building.timeout").millis
+    val pumpConfig = new PumpConfigLike{
+      val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}}
   //Parse pumping config
   val pumping = new PumpingConfigLike{
-    val pump = new PumpConfigLike{
-      val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}
     val drive = new DriveConfigLike{
       val pushTimeoutCoefficient = config.getInt("plumbing.drive.push.timeout.coefficient")
       val startFunctionTimeout = config.getInt("plumbing.drive.start.function.timeout").millis

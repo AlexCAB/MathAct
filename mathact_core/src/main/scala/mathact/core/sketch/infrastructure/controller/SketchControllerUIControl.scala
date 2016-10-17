@@ -12,7 +12,7 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure
+package mathact.core.sketch.infrastructure.controller
 
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
@@ -23,7 +23,8 @@ import mathact.core.model.messages.M
   */
 
 private [mathact] trait SketchControllerUIControl { _: SketchControllerActor ⇒
-  import SketchUiElemState._, SketchUIElement._
+  import SketchUIElement._
+  import SketchUiElemState._
   //Variables
   private var isSketchUiShowed = false
   private var isUserLogShowed = false

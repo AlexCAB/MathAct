@@ -26,6 +26,7 @@ import mathact.core.model.config.PumpConfigLike
 class SketchContext(
   val system: ActorSystem,
   val controller: ActorRef,
+  val userLogging: ActorRef,
   val pumping: ActorRef,
   val pumpConfig: PumpConfigLike,
   val commonConfig: Config)

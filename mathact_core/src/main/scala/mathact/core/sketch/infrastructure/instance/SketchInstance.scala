@@ -12,16 +12,18 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.config
+package mathact.core.sketch.infrastructure.instance
+
+import mathact.core.bricks.WorkbenchLike
+import mathact.core.model.messages.Msg
 
 
-/** PumpingActor configuration
-  * Created by CAB on 03.09.2016.
+/** Sketch instance
+  * Created by CAB on 17.10.2016.
   */
 
-private [mathact] trait PumpingConfigLike {
-  val drive: DriveConfigLike
-
-  //TODO Add more
-
-}
+private [mathact] object SketchInstance {
+  //Local messages
+  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
+  case class SketchInstanceBuiltError(error: Throwable) extends Msg
+  case object SketchInstanceBuildTimeout extends Msg}

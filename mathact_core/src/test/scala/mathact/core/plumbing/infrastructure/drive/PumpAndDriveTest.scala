@@ -81,9 +81,14 @@ class PumpAndDriveTest extends ActorTestSpec{
         println(s"[PumpAndDriveTest.testPumping.NewDrive] Created of drive for tool: ${toolPump.toolName}, drive: $drive")
         drive}}})
     //Test workbench context
-    lazy val testSketchContext =
-      new SketchContext(system, testController.ref, testPumping.ref, testPumpConfig, ConfigFactory.load()){
-        override val pumping: ActorRef = testPumping.ref}
+    lazy val testSketchContext = new SketchContext(
+      system, testController.ref,
+      testUserLogging.ref,
+      testPumping.ref,
+      testPumpConfig,
+      ConfigFactory.load())
+    {
+      override val pumping: ActorRef = testPumping.ref}
     //Test tools
     object tools{
       lazy val testTool = new Fitting with OnStart with OnStop with UIControl{

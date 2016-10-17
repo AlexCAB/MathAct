@@ -42,7 +42,7 @@ extends ActorBase{
     val sketchController = createSketchController(config, sketch)
     context.watch(sketchController)
     //Run actor
-    sketchController ! M.StartSketchController
+    sketchController ! M.LaunchSketch
     //Set current
     currentSketch = Some((sketchController, sketch))}
   def setSketchSate(className: String, newState: SketchStatus): Unit = {
@@ -109,7 +109,7 @@ extends ActorBase{
         //Stop application
         isFatalError = true
         currentSketch match {
-          case Some(sketch) ⇒ sketch._1 ! M.ShutdownSketchController
+          case Some(sketch) ⇒ sketch._1 ! M.ShutdownSketch
           case None ⇒ self ! PoisonPill}
       case a if currentSketch.map(_._1).contains(a) ⇒
         log.error(s"[MainController @ Terminated] Current sketch terminated suddenly, currentSketch: $currentSketch")

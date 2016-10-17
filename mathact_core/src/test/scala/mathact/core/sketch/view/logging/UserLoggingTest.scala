@@ -73,7 +73,7 @@ class UserLoggingTest extends UIActorTestSpec {
       workbenchController.send(userLog, M.LogError(
         toolId = Some(1003),
         toolName = "Tool 3",
-        error = Some(new Exception("Oops!!! But not worries, this is just a test :)")),
+        errors = Seq(new Exception("Oops!!! But not worries, this is just a test :)")),
         message = "!!!Error message.!!!"))
       sleep(2.second)
       //Test close button

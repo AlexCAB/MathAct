@@ -44,15 +44,4 @@ object Pumping {
     val DriveStopped = Value
     val DriveTerminating = Value
     val DriveTerminated = Value}
-  type DriveState = DriveState.Value
-
-
-
-
-
-
-
-
-
-
-}
+  type DriveState = DriveState.Value}

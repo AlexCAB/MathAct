@@ -143,11 +143,12 @@ extends ActorBase with JFXInteraction { import UserLogging._
     case M.LogError(toolId, toolName, error, message) ⇒
       //Build row
       val row = LogRow(LogType.Error, toolName, message + (error match{
-        case Some(e) ⇒
-          "\n" +
-          "Exception message: " + e.getMessage + "\n" +
-          "Stack trace: \n      " + e.getStackTrace.mkString("\n      ")
-        case None ⇒ ""}))
+        case es if es.nonEmpty ⇒ es
+          .map{ e ⇒
+            "\nException message: " + e.getMessage + "\n" +
+            "Stack trace: \n      " + e.getStackTrace.mkString("\n      ")}
+          .mkString("")
+        case _ ⇒ ""}))
       //Add to Log
       logRows +:= row
       refreshUi()

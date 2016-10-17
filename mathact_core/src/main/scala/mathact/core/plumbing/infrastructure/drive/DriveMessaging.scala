@@ -200,7 +200,7 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     userLogging ! M.LogError(
       Some(toolId),
       pump.toolName,
-      Some(error),
+      Seq(error),
       s"Message handling fail for ${inlet.name.getOrElse("")} inlet, on '$execTime'.")}
   /** Check if no messages to process
     * @return - true if so */

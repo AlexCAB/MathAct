@@ -12,7 +12,7 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure
+package mathact.core.sketch.infrastructure.controller
 
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
@@ -22,7 +22,8 @@ import mathact.core.model.messages.M
   */
 
 private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
-  import SketchUiElemState._, SketchUIElement._
+  import SketchUIElement._
+  import SketchUiElemState._
   //Methods
   /** Hit run button */
   def hitRunBtn() = {
@@ -62,4 +63,8 @@ private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
   /** Window close btn hit, for now just send ShutdownSketchController to self */
   def closeBtnHit(): Unit = {
     log.debug(s"[SketchControllerUIActions.closeBtnHit] Send ShutdownSketchController to self")
-    self ! M.ShutdownSketchController}}
+//    self ! M.ShutdownSketchController
+
+
+
+  }}

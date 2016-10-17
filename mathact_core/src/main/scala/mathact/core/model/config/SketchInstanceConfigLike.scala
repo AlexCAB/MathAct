@@ -14,14 +14,16 @@
 
 package mathact.core.model.config
 
+import com.typesafe.config.Config
 
-/** PumpingActor configuration
-  * Created by CAB on 03.09.2016.
+import scala.concurrent.duration.FiniteDuration
+
+
+/** Sketch instance config
+  * Created by CAB on 17.10.2016.
   */
 
-private [mathact] trait PumpingConfigLike {
-  val drive: DriveConfigLike
-
-  //TODO Add more
-
-}
+trait SketchInstanceConfigLike {
+  val commonConfig: Config
+  val sketchBuildingTimeout: FiniteDuration
+  val pumpConfig: PumpConfigLike}

@@ -41,15 +41,13 @@ private [mathact] object M {
   case object HideMainUI extends Msg
   case object MainCloseBtnHit extends Msg
   case object TerminateMainUI extends Msg
-//  case object MainUITerminated extends Msg
   //MainController - SketchControllerActor
-  case object StartSketchController extends StateMsg
-  case class GetSketchContext(sender: ActorRef) extends Msg
-  case object ShutdownSketchController extends StateMsg
+  case object LaunchSketch extends StateMsg                   //Sends by main controller to, initiate sketch
+  case object ShutdownSketch extends StateMsg                 //Sends by main controller stop sketch, initiate sketch
   case class SketchBuilt(className: String) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, error: Throwable) extends Msg
-//  case class SketchControllerTerminated(className: String) extends StateMsg
+  case class GetSketchContext(sender: ActorRef) extends Msg
   //SketchControllerActor - SketchUI
   case object ShowSketchUI extends Msg
   case object HideSketchUI extends Msg
@@ -58,19 +56,22 @@ private [mathact] object M {
   case class SketchUIActionTriggered(element: SketchUIElement, action: Any) extends Msg
   case class SetSketchUIStatusString(message: String, color: Color) extends Msg
   case object TerminateSketchUI extends Msg
-//  case object SketchUITerminated extends Msg
   //SketchControllerActor - UserLogging
   case object ShowUserLoggingUI extends Msg
   case object HideUserLoggingUI extends Msg
   case class UserLoggingUIChanged(isShow: Boolean) extends Msg
   case object TerminateUserLogging extends Msg
-//  case object UserLoggingTerminated extends Msg
   //SketchControllerActor - Visualization
   case object ShowVisualizationUI extends Msg
   case object HideVisualizationUI extends Msg
   case class VisualizationUIChanged(isShow: Boolean) extends Msg
   case object TerminateVisualization extends Msg
-//  case object VisualizationTerminated extends Msg
+  //SketchControllerActor - SketchInstance
+  case object CreateSketchInstance extends Msg
+  case class BuildSketchContextFor(actor: ActorRef) extends Msg
+  case class SketchInstanceReady(instance: WorkbenchLike) extends Msg
+  case class SketchInstanceFail(error: Throwable) extends Msg
+  case object TerminateSketchInstance extends Msg
   //SketchControllerActor - PumpingActor  (life cycle)
   case object BuildPumping extends StateMsg    //Run tool connectivity on sketch start
   case object PumpingBuilt extends Msg
@@ -79,8 +80,8 @@ private [mathact] object M {
   case object StopPumping extends StateMsg     //Run user stop functions on hit UI "STOP"
   case object PumpingStopped extends Msg
   case object ShutdownPumping extends StateMsg //Force stop of plumping at any state on  .
-  case object PumpingShutdown extends Msg  //Normal stop, sends by Pumping before Terminated
-  case class PumpingError(errors: Seq[Throwable]) extends Msg //Error stop, sends by Pumping before Terminated, this means plumping terminated by some internal error
+  case object PumpingShutdown extends StateMsg  //Normal stop, sends by Pumping before Terminated
+  case class PumpingError(errors: Seq[Throwable]) extends StateMsg //Error stop, sends by Pumping before Terminated, this means plumping terminated by some internal error
   //SketchControllerActor - PumpingActor  (management)
   case object SkipAllTimeoutTask extends Msg
   case object ShowAllToolUi extends Msg
@@ -118,7 +119,7 @@ private [mathact] object M {
   //User logging
   case class LogInfo(toolId: Option[Int], toolName: String, message: String) extends Msg
   case class LogWarning(toolId: Option[Int], toolName: String, message: String) extends Msg
-  case class LogError(toolId: Option[Int], toolName: String, error: Option[Throwable], message: String) extends Msg
+  case class LogError(toolId: Option[Int], toolName: String, errors: Seq[Throwable], message: String) extends Msg
   //Visualization - DriveActor
   case class ToolBuilt(builtInfo: ToolBuiltInfo) extends Msg   //Send to Visualization from DriveActor after tool built
   case object AllToolBuilt
