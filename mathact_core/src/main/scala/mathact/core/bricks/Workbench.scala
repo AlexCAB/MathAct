@@ -26,7 +26,7 @@ class Workbench extends WorkbenchLike{ //extends Fitting{
   protected implicit val context = Application.getSketchContext(this)
 
 
-  //!!! Workbench должен зарегистировать себя и получить свой собсвенный controller и pumping
+  //!!! Workbench должен зарегистировать себя и получить свой собсвенный controller и plumbing
 
 
 

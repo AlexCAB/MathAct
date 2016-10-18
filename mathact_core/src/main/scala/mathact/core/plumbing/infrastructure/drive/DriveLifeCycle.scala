@@ -103,13 +103,13 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
     log.debug(
       s"[DriveLifeCycle.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
       s"Current: outlets: $outlets, inlets: $inlets, pendingConnections: $pendingConnections")
-    pumping ! M.DriveConstructed}
+    plumbing ! M.DriveConstructed}
   /** Build ToolBuiltInfo and send to visualization actor */
   def buildingSuccess(): Unit = {
     log.debug(
       s"[DriveLifeCycle.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
-    //Report to pumping
-    pumping ! M.DriveBuilt
+    //Report to plumbing
+    plumbing ! M.DriveBuilt
     //Log to user logger
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful built.")
     //Build
@@ -162,11 +162,11 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
     log.error(s"[DriveLifeCycle.startingTaskTimeout] execTime: $execTime, error: $error.")
     started = true
     userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Starting function failed on $execTime.")}
-  /** Starting success, logging to user log, report to pumping */
+  /** Starting success, logging to user log, report to plumbing */
   def startingSuccess(): Unit = {
     log.debug("[DriveLifeCycle.startingSuccess] Drive successful started.")
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful started.")
-    pumping ! M.DriveStarted}
+    plumbing ! M.DriveStarted}
   /** Check if starting user function is executed
     * @return - true if started */
   def isStarted: Boolean = started
@@ -195,22 +195,22 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
     log.error(s"[DriveLifeCycle.stoppingTaskFailed] execTime: $execTime, error: $error.")
     stopped = true
     userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Stopping function failed on $execTime.")}
-  /** Stopping success, logging to user log, report to pumping */
+  /** Stopping success, logging to user log, report to plumbing */
   def stoppingSuccess(): Unit = {
     log.debug("[DriveLifeCycle.stoppingSuccess] Drive successful stopped.")
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful stopped.")
-    pumping ! M.DriveStopped}
+    plumbing ! M.DriveStopped}
   /** Check if stopping user function is executed
     * @return - true if stopped*/
   def isStopped: Boolean = stopped
   /** Terminating of this drive, currently here only logging */
   def doTerminating(): Unit = {
     log.debug(s"[DriveLifeCycle.doTerminating] Start of terminating of drive.")}
-  /** Drive error, log to user logging and report to pumping
+  /** Drive error, log to user logging and report to plumbing
     * Sends M.DriveBuildingError to plumping, and terminate self */
   def driveError(message: String, error: Option[Throwable]): Unit = {
-    log.error(s"[DriveLifeCycle.driveError] Log to user logging and report to pumping, error: $error")
+    log.error(s"[DriveLifeCycle.driveError] Log to user logging and report to plumbing, error: $error")
     //Log to user logger
     userLogging ! M.LogError(Some(toolId), pump.toolName, error.toSeq, message)
-    //Report to pumping
-    pumping ! M.DriveError(error.getOrElse(new Exception("[DriveLifeCycle.driveError] " + message)))}}
+    //Report to plumbing
+    plumbing ! M.DriveError(error.getOrElse(new Exception("[DriveLifeCycle.driveError] " + message)))}}

@@ -24,7 +24,7 @@ import com.typesafe.config.Config
 private [mathact] trait MainConfigLike {
   val config: Config
   val sketchInstance: SketchInstanceConfigLike
-  val pumping: PumpingConfigLike
+  val plumbing: PlumbingConfigLike
   val sketchUI: SketchUIConfigLike
   val mainUI: MainUIConfigLike
   val userLogging: UserLoggingConfigLike

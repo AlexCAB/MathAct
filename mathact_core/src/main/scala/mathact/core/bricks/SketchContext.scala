@@ -27,6 +27,6 @@ class SketchContext(
   val system: ActorSystem,
   val controller: ActorRef,
   val userLogging: ActorRef,
-  val pumping: ActorRef,
+  val plumbing: ActorRef,
   val pumpConfig: PumpConfigLike,
   val commonConfig: Config)

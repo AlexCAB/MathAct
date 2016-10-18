@@ -35,7 +35,7 @@ private [mathact] class SketchInstanceActor(
   sketchData: SketchData,
   controller: ActorRef,
   userLogging: ActorRef,
-  pumping: ActorRef)
+  plumbing: ActorRef)
 extends ActorBase{ import SketchInstance._
   //Variables
   var isBuildingRan = false
@@ -78,7 +78,7 @@ extends ActorBase{ import SketchInstance._
         context.system,
         controller,
         userLogging,
-        pumping,
+        plumbing,
         config.pumpConfig,
         config.commonConfig)}
       isSketchContextBuilt = true
@@ -107,7 +107,7 @@ extends ActorBase{ import SketchInstance._
         //Log to user logging
         userLogging ! M.LogError(None, "SketchInstance", Seq(), "SketchContext is not built in init of sketch instance.")
         //Send SketchInstanceFail
-        controller ! M.SketchInstanceFail(new IllegalStateException(
+        controller ! M.SketchInstanceError(new IllegalStateException(
           s"[SketchInstanceActor.sketchInstanceBuilt] SketchContext is not built, time: $time."))
       case (_, true) ⇒
         log.error(s"[SketchInstanceActor.sketchInstanceBuilt] Built after timeout, do nothing, time: $time.")
@@ -134,7 +134,7 @@ extends ActorBase{ import SketchInstance._
       case err ⇒ s"Exception on building of sketch instance, building time: $time mills."}
     userLogging ! M.LogError(None, "SketchInstance", Seq(error), msg)
     //Send SketchInstanceFail if no timeout
-    if(! isBuildingTimeout) controller ! M.SketchInstanceFail(error)}
+    if(! isBuildingTimeout) controller ! M.SketchInstanceError(error)}
   /** Sketch instance not build in required time */
   def sketchInstanceBuiltTimeout(): Unit = isBuildingDone match{
     case false ⇒
@@ -150,7 +150,7 @@ extends ActorBase{ import SketchInstance._
         Seq(),
         s"Timeout, sketch instance not built in ${config.sketchBuildingTimeout}.")
       //Send SketchInstanceFail
-      controller ! M.SketchInstanceFail(new TimeoutException(
+      controller ! M.SketchInstanceError(new TimeoutException(
         s"[SketchInstanceActor.sketchInstanceBuiltTimeout] Sketch not built in ${config.sketchBuildingTimeout}"))
     case true ⇒
       log.debug(s"[SketchInstanceActor.sketchInstanceBuiltTimeout] Building done, do nothing.")}

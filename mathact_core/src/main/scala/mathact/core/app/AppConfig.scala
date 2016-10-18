@@ -34,8 +34,8 @@ private [mathact] class AppConfig extends MainConfigLike{
     val sketchBuildingTimeout = config.getInt("main.sketch.building.timeout").millis
     val pumpConfig = new PumpConfigLike{
       val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}}
-  //Parse pumping config
-  val pumping = new PumpingConfigLike{
+  //Parse plumbing config
+  val plumbing = new PlumbingConfigLike{
     val drive = new DriveConfigLike{
       val pushTimeoutCoefficient = config.getInt("plumbing.drive.push.timeout.coefficient")
       val startFunctionTimeout = config.getInt("plumbing.drive.start.function.timeout").millis

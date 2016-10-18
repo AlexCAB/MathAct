@@ -15,11 +15,11 @@
 package mathact.core.model.config
 
 
-/** PumpingActor configuration
+/** PlumbingActor configuration
   * Created by CAB on 03.09.2016.
   */
 
-private [mathact] trait PumpingConfigLike {
+private [mathact] trait PlumbingConfigLike {
   val drive: DriveConfigLike
 
   //TODO Add more

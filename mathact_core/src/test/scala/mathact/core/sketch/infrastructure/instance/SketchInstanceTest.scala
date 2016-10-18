@@ -55,7 +55,7 @@ class SketchInstanceTest extends ActorTestSpec {
     lazy val testActor = TestProbe("testActor_" + randomString())
     lazy val testSketchController = TestProbe("TestSketchController_" + randomString())
     lazy val testUserLogging = TestProbe("TestUserLogging_" + randomString())
-    lazy val testPumping = TestProbe("TestPumping_" + randomString())
+    lazy val testPlumbing = TestProbe("TestPlumbing_" + randomString())
     //Sketch instance actor
     def newSketchInstanceActor(sketchData: SketchData): ActorRef = {
       val controller = system.actorOf(Props(
@@ -64,7 +64,7 @@ class SketchInstanceTest extends ActorTestSpec {
           sketchData,
           testSketchController.ref,
           testUserLogging.ref,
-          testPumping.ref)),
+          testPlumbing.ref)),
         "SketchInstanceActor_" + randomString())
       testSketchController.watch(controller)
       controller}}
@@ -90,7 +90,7 @@ class SketchInstanceTest extends ActorTestSpec {
       testActor.expectNoMsg(1.second)
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
-      testPumping.expectNoMsg(1.second)}
+      testPlumbing.expectNoMsg(1.second)}
     "by CreateSketchInstance, response with SketchInstanceFail context not created" in new TestCase {
       //Preparing
       val controller = newSketchInstanceActor(newTestSketchData(classOf[TestSketchWithError]))
@@ -98,7 +98,7 @@ class SketchInstanceTest extends ActorTestSpec {
       testSketchController.send(controller, M.CreateSketchInstance)
       sleep(1.second) //Some building timeout
       //Expect SketchInstanceReady
-      val fail = testSketchController.expectMsgType[M.SketchInstanceFail]
+      val fail = testSketchController.expectMsgType[M.SketchInstanceError]
       println("[SketchInstanceTest] fail: " + fail)
       //Expect LogInfo
       val logError = testUserLogging.expectMsgType[M.LogError]
@@ -107,7 +107,7 @@ class SketchInstanceTest extends ActorTestSpec {
       testActor.expectNoMsg(1.second)
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
-      testPumping.expectNoMsg(1.second)}
+      testPlumbing.expectNoMsg(1.second)}
     "by CreateSketchInstance, response with SketchInstanceFail if exception on creating" in new TestCase {
       //Preparing
       val controller = newSketchInstanceActor(newTestSketchData(classOf[TestSketchWithError]))
@@ -119,7 +119,7 @@ class SketchInstanceTest extends ActorTestSpec {
       val context = testActor.expectMsgType[Either[Exception, SketchContext]]
       println("[SketchInstanceTest] context: " + context)
       //Expect SketchInstanceReady
-      val fail = testSketchController.expectMsgType[M.SketchInstanceFail]
+      val fail = testSketchController.expectMsgType[M.SketchInstanceError]
       println("[SketchInstanceTest] fail: " + fail)
       //Expect LogInfo
       val logError = testUserLogging.expectMsgType[M.LogError]
@@ -128,7 +128,7 @@ class SketchInstanceTest extends ActorTestSpec {
       testActor.expectNoMsg(1.second)
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
-      testPumping.expectNoMsg(1.second)}
+      testPlumbing.expectNoMsg(1.second)}
     "by CreateSketchInstance, response with SketchInstanceFail if timeout of creating" in new TestCase {
       //Preparing
       val controller = newSketchInstanceActor(newTestSketchData(classOf[TestSketchWithBigTimeout]))
@@ -141,7 +141,7 @@ class SketchInstanceTest extends ActorTestSpec {
       println("[SketchInstanceTest] context: " + context)
       sleep(4.second) //Wait timeout
       //Expect SketchInstanceReady
-      val fail = testSketchController.expectMsgType[M.SketchInstanceFail]
+      val fail = testSketchController.expectMsgType[M.SketchInstanceError]
       println("[SketchInstanceTest] fail: " + fail)
       //Expect LogInfo
       val logError1 = testUserLogging.expectMsgType[M.LogError]
@@ -154,7 +154,7 @@ class SketchInstanceTest extends ActorTestSpec {
       testActor.expectNoMsg(1.second)
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
-      testPumping.expectNoMsg(1.second)}
+      testPlumbing.expectNoMsg(1.second)}
     "by TerminateSketchInstance, terminate SketchInstanceActor" in new TestCase {
       //Preparing
       val controller = newSketchInstanceActor(newTestSketchData())

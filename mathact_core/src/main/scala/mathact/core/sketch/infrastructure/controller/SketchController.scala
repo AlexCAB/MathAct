@@ -33,8 +33,8 @@ private [mathact] object SketchController {
     val Starting = Value          //Starting of plumping
     val Working = Value           //Working (wait for stop)
     val Stopping = Value          //Stopping of plumping
-    val ConstructingFail = Value  //File on creating of sketch instance (UI will not hide)
-    val PumpingFail = Value       //Pumping error (may happen anytime, UI will not hide)
+    val Stopped = Value           //Plumping stopped (wait for close command)
+    val SketchFailed = Value      //Waiting for shutdown (fro close command) after error
     val Shutdown = Value}         //Sketch close button hit (may happen anytime, UI will hide if no errors)
   type State = State.Value
 

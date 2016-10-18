@@ -24,6 +24,7 @@ import mathact.core.app.infrastructure.MainController
 import mathact.core.app.view.MainUIActor
 import mathact.core.bricks.{SketchContext, WorkbenchLike}
 import mathact.core.sketch.infrastructure.controller.SketchControllerActor
+import mathact.core.sketch.infrastructure.instance.SketchInstanceActor
 import mathact.core.sketch.view.logging.UserLoggingActor
 import mathact.core.sketch.view.sketch.SketchUIActor
 import mathact.core.sketch.view.visualization.VisualizationActor
@@ -31,7 +32,7 @@ import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
-import mathact.core.plumbing.infrastructure.PumpingActor
+import mathact.core.plumbing.infrastructure.PlumbingActor
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -94,9 +95,12 @@ private [mathact] object Application{
                   val visualization = context.actorOf(Props(
                     new VisualizationActor(config.visualization, self)),
                     "VisualizationActor_" + sketchData.className)
-                  val pumping = context.actorOf(Props(
-                    new PumpingActor(config.pumping, self, sketchName, userLogging, visualization)),
-                    "PumpingActor_" + sketchData.className)}),
+                  val plumbing = context.actorOf(Props(
+                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization)),
+                    "PlumbingActor_" + sketchData.className)
+                  val sketchInstance = context.actorOf(Props(
+                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing)),
+                    "SketchInstanceActor_" + sketchData.className)}),
                 "SketchControllerActor_" + sketchData.className)}}),
           "MainControllerActor")
           //Start main controller

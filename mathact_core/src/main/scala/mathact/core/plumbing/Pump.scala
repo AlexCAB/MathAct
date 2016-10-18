@@ -45,7 +45,7 @@ extends PumpLike{
     def error(msg: String): Unit = akkaLog.error(s"[$toolName] $msg")  }
   //Actors
   private[mathact] val drive: ActorRef = Await
-    .result(ask(context.pumping, M.NewDrive(this))(context.pumpConfig.askTimeout)
+    .result(ask(context.plumbing, M.NewDrive(this))(context.pumpConfig.askTimeout)
       .mapTo[Either[Throwable,ActorRef]], context.pumpConfig.askTimeout.duration)
     .fold(t ⇒ throw new ExecutionException(t), d ⇒ d)
   //Functions

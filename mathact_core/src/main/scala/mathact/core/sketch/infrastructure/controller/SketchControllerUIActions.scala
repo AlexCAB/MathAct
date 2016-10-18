@@ -33,15 +33,15 @@ private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
   /** Show all tools UI btn hit */
   def showAllToolsUiBtnHit(): Unit = {
     log.debug(s"[SketchControllerUIActions.showAllToolsUiBtn] Send ShowAllToolUi.")
-    pumping ! M.ShowAllToolUi}
+    plumbing ! M.ShowAllToolUi}
   /** Hide all tools UI btn hit */
   def hideAllToolsUiBtnHit(): Unit = {
     log.debug(s"[SketchControllerUIActions.hideAllToolsUiBtn] Send HideAllToolUi.")
-    pumping ! M.HideAllToolUi}
+    plumbing ! M.HideAllToolUi}
   /** Skip all timeout task btn hit */
   def skipAllTimeoutTaskBtnHit(): Unit = {
     log.debug(s"[SketchControllerUIActions.skipAllTimeoutTaskBtn] Send SkipAllTimeoutTask.")
-    pumping ! M.SkipAllTimeoutTask}
+    plumbing ! M.SkipAllTimeoutTask}
   /** Change user logging state
     * @param act - SketchUiElemState */
   def logBtnHit(act: SketchUiElemState): Unit = {
@@ -59,12 +59,4 @@ private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
       case SketchUiElemState.ElemShow ⇒
         visualization ! M.ShowVisualizationUI
       case SketchUiElemState.ElemHide ⇒
-        visualization ! M.HideVisualizationUI}}
-  /** Window close btn hit, for now just send ShutdownSketchController to self */
-  def closeBtnHit(): Unit = {
-    log.debug(s"[SketchControllerUIActions.closeBtnHit] Send ShutdownSketchController to self")
-//    self ! M.ShutdownSketchController
-
-
-
-  }}
+        visualization ! M.HideVisualizationUI}}}

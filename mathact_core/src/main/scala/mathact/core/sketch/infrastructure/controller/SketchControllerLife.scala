@@ -14,15 +14,11 @@
 
 package mathact.core.sketch.infrastructure.controller
 
-import java.util.concurrent.{ExecutionException, TimeoutException}
-
-import akka.actor.PoisonPill
-import mathact.core.bricks.{SketchContext, WorkbenchLike}
+import akka.actor.{ActorRef, PoisonPill}
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
 import scala.collection.mutable.{ListBuffer => MutList}
-import scala.concurrent.Future
 import scalafx.scene.paint.Color
 
 /** SketchControllerActor sketch building
@@ -34,108 +30,54 @@ private [mathact] trait SketchControllerLife { _: SketchControllerActor ⇒
   import SketchUIElement._
   import SketchUiElemState._
   //Variables
-  private val drivesErrors = MutList[Throwable]()
-  //Functions
-  def sketchError(error: Throwable): Unit = {  //Called only until plumbing run
-    //Build message
-    val msg = error match{
-      case err: NoSuchMethodException ⇒ s"NoSuchMethodException, check if sketch class is not inner."
-      case err ⇒ s"Exception on building of sketch."}
-    //Log to user logging
-    userLogging ! M.LogError(None, "Workbench", Seq(error), msg)
-    //Update UI
-    sketchUi !  M.UpdateSketchUIState(Map(
-      RunBtn → ElemDisabled,
-      ShowAllToolsUiBtn → ElemDisabled,
-      HideAllToolsUiBtn → ElemDisabled,
-      SkipAllTimeoutTaskBtn → ElemDisabled,
-      StopSketchBtn → ElemDisabled))
-    //Inform MainController
-    mainController ! M.SketchError(sketchData.className, error)
-    //Update status string
-    sketchUi ! M.SetSketchUIStatusString("Building error! Check logs.", Color.Red)}
+  private val allErrors = MutList[Throwable]()
   //Methods
   /** Start workbench controller */
   def startSketchController(): Unit = {
-    log.debug(s"[SketchControllerLife.startSketchController] Start creating.")
+    log.debug(s"[SketchControllerLife.startSketchController] Start creating, update status string")
     sketchUi ! M.SetSketchUIStatusString("Launching...", Color.Black)}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //Run plumbing building
+  /** Construct sketch instance */
+  def constructSketchInstance(): Unit = {
+    log.debug(s"[SketchControllerLife.constructSketchInstance] All UI was shown, send CreateSketchInstance")
+    sketchInstance ! M.CreateSketchInstance}
+  /** Run plumbing building */
   def runPlumbingBuilding(): Unit = {
-    log.debug("[SketchControllerLife.runPlumbingBuilding] Send BuildPumping.")
-    pumping ! M.BuildPumping}
-
-
-  //Update status string
-  sketchUi ! M.SetSketchUIStatusString("Building...", Color.Black)
-
-
-
-
-
-  /** Pumping successfully built */
-  def pumpingBuilt(): Unit = {
-    log.debug("[SketchControllerLife.pumpingBuilt] Pumping successfully built.")
-    //User log
-    val autorunMsg = sketchData.autorun match{
-      case false ⇒ ". Auto-run is off, hit 'play' button to start sketch."
-      case true ⇒ "."}
-    userLogging ! M.LogInfo(None, "Workbench", s"Sketch '$sketchName' successfully built$autorunMsg")
-    //Update UI
-    sketchUi !  M.UpdateSketchUIState(Map(RunBtn → (if(sketchData.autorun) ElemDisabled else ElemEnabled)))
-    //Send started to main controller
-    mainController ! M.SketchBuilt(sketchData.className)
+    log.debug("[SketchControllerLife.runPlumbingBuilding] Send BuildPlumbing.")
+    plumbing ! M.BuildPlumbing
     //Update status string
-    sketchUi ! M.SetSketchUIStatusString(
-      s"Sketch built. ${if(sketchData.autorun) "" else "Wait for start."}",
-      if(sketchData.autorun) Color.Black else Color.Green)}
-
-
-
-
-
-
-//  /** Error during pumping building */
-//  def pumpingBuildingError(): Unit = {
-//    log.error(
-//      s"[SketchControllerLife.pumpingBuildingError] Error on building of pumping.")
-//    buildingError(new Exception(
-//      "[SketchControllerLife.pumpingBuildingError] Error on building of pumping."))}
-
-  /** Pumping starting aborted */
-  def pumpingBuildingAbort(): Unit = {
-    log.debug(s"[SketchControllerLife.pumpingBuildingAbort] For now do nothing.")}
-  /** Start pumping */
-  def startPumping(): Unit = {
-    log.debug(s"[SketchControllerLife.startPumping] Send StartPumping")
-    pumping ! M.StartPumping
-    sketchUi ! M.SetSketchUIStatusString("Starting of pumping...", Color.Black)}
-//  /** Pumping starting aborted */
-//  def pumpingStartingAbort(): Unit = {
-//    log.debug(s"[SketchControllerLife.pumpingStartingAbort] For now do nothing.")}
-  /** PumpingActor started, update UI and log to user log */
-  def pumpingStarted(): Unit = {
-    log.debug(s"[SketchControllerLife.pumpingStarted] Started.")
+    sketchUi ! M.SetSketchUIStatusString("Building...", Color.Black)}
+  /** Plumbing successfully built */
+  def plumbingBuilt(): Unit = {
+    log.debug("[SketchControllerLife.plumbingBuilt] Plumbing successfully built.")
+    //User log and status
+    userLogging ! M.LogInfo(
+      None,
+      "Workbench",
+      s"Sketch '$sketchName' successfully built. Auto-run is off, hit 'play' button to start sketch.")
+    sketchUi ! M.SetSketchUIStatusString("Sketch built, wait for start", Color.Black)
+    //Update UI
+    sketchUi !  M.UpdateSketchUIState(Map(RunBtn → ElemEnabled))
+    //Send started to main controller
+    mainController ! M.SketchBuilt(sketchData.className)}
+  /** Auto start plumbing */
+  def autoStartPlumbing(): Unit = {
+    log.debug("[SketchControllerLife.autoStartPlumbing] Plumbing successfully built.")
+    //User log and status
+    userLogging ! M.LogInfo(None, "Workbench", s"Sketch '$sketchName' successfully built.")
+    sketchUi ! M.SetSketchUIStatusString("Sketch built, starting...", Color.Black)
+    //Update UI
+    sketchUi !  M.UpdateSketchUIState(Map(RunBtn → ElemDisabled))
+    //Send started to main controller and start plumbing
+    mainController ! M.SketchBuilt(sketchData.className)
+    plumbing ! M.StartPlumbing}
+  /** Start plumbing */
+  def startPlumbing(): Unit = {
+    log.debug(s"[SketchControllerLife.startPlumbing] Send StartPlumbing")
+    plumbing ! M.StartPlumbing
+    sketchUi ! M.SetSketchUIStatusString("Starting of plumbing...", Color.Black)}
+  /** Plumbing started, update UI and log to user log */
+  def plumbingStarted(): Unit = {
+    log.debug(s"[SketchControllerLife.plumbingStarted] Started, Update UI and log")
     //Update UI
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
@@ -144,20 +86,21 @@ private [mathact] trait SketchControllerLife { _: SketchControllerActor ⇒
       HideAllToolsUiBtn → ElemEnabled,
       SkipAllTimeoutTaskBtn → ElemEnabled))
     //User log
-    userLogging ! M.LogInfo(None, "Workbench", s"PumpingActor started.")
+    userLogging ! M.LogInfo(None, "Workbench", s"Plumbing started.")
     //Update status string
-    sketchUi ! M.SetSketchUIStatusString("PumpingActor started. Working...", Color.Green)}
-  /** Try to stop PumpingActor, send StopAndTerminatePumping */
-  def stopPumping(): Unit = {
-    log.debug(s"[SketchControllerLife.stopPumping] Try to stop PumpingActor.")
-//    pumping ! M.StopAndTerminatePumping
-    ???
-    sketchUi ! M.SetSketchUIStatusString("Stopping of pumping...", Color.Black)}
-  /** PumpingActor stopped, log to user logger */
-  def pumpingStopped(): Unit = {
-    log.debug(s"[SketchControllerLife.pumpingStopped] Stopped.")
+    sketchUi ! M.SetSketchUIStatusString("PlumbingA started. Working...", Color.Green)}
+  /** Try to stop Plumbing, send StopAndTerminatePlumbing */
+  def stopPlumbing(): Unit = {
+    log.debug(s"[SketchControllerLife.stopPlumbing] Try to stop Plumbing.")
+    //Set status
+    sketchUi ! M.SetSketchUIStatusString("Stopping of plumbing...", Color.Black)
+    //Send StopPlumbing
+    plumbing ! M.StopPlumbing}
+  /** Plumbing stopped, log to user logger */
+  def plumbingStopped(): Unit = {
+    log.debug(s"[SketchControllerLife.plumbingStopped] Stopped.")
     //Log to user log
-    userLogging ! M.LogInfo(None, "Workbench", s"Pumping stopped.")
+    userLogging ! M.LogInfo(None, "Workbench", s"Plumbing stopped.")
     //Update UI
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
@@ -166,107 +109,94 @@ private [mathact] trait SketchControllerLife { _: SketchControllerActor ⇒
       SkipAllTimeoutTaskBtn → ElemDisabled,
       StopSketchBtn → ElemDisabled))
     //Update status string
-    sketchUi ! M.SetSketchUIStatusString("PumpingActor stopped.", Color.Black)}
-
-
-  def shutdownPlumbing(): Unit = {
-    log.debug(s"[SketchControllerLife.shutdownPlumbing] Log and send ShutdownPumping")
-    userLogging ! M.LogInfo(None, "Workbench", s"Shutdown plumbing.")
-    pumping ! M.ShutdownPumping}
-
-
-//  /** Sketch built, but SketchBuiltTimeout received earlier */
-//  def lateBuiltMessage(): Unit = {
-//    log.debug(
-//      s"[Building] SketchBuilt receive but state BuildingFailed (probably SketchBuiltTimeout received earlier).")}
-  /** Starting of destruct sketch */
-//  def destructSketch(): Unit = {
-//    log.debug(s"[SketchControllerLife.destructSketch] Starting of destruct sketch.")
-//    mainController ! M.SketchDone(sketchData.className)
-//    self ! SketchDestructed
-//    sketchUi ! M.SetSketchUIStatusString("Destructing...", Color.Black)}
-
-
-  /** Shutdown workbench controller */
-  def shutdownSketch(): Unit = {
-    log.debug(s"[SketchControllerLife.shutdownSketchController] Shutdown, log and sending ShutdownPumping.")
-    userLogging ! M.LogInfo(None, "Workbench", "The Shutdown signal received, sketch will terminated.")
+    sketchUi ! M.SetSketchUIStatusString("Plumbing stopped, wait for shutdown.", Color.Black)}
+  /** Shutdown plumbing */
+  def shutdownSketch(st: SketchController.State): Unit = { import SketchController.State._
+    log.debug(s"[SketchControllerLife.shutdownPlumbing] Update UI and send ShutdownPlumbing")
+    //Log to user log and update status Shutdown sequence initiated...
     sketchUi ! M.SetSketchUIStatusString("Shutdown sequence initiated...", Color.Black)
-    pumping ! M.ShutdownPumping}
-
-
-//  /** Pumping shutdown */
-//  def pumpingShutdown(): Unit = {
-//    log.debug(s"[SketchControllerLife.pumpingShutdown] errors: $errors")
-//    //Save errors
-//    drivesErrors ++= errors
-//    //Log and update status
-//    userLogging ! M.LogError(None, "Workbench", errors, "Fatal pumping error, sketch will terminated.")
-//    sketchUi ! M.SetSketchUIStatusString("Fatal pumping error, shutdown...", Color.Red)}
-
-
-
-
-  /** Pumping error */
-  def pumpingError(errors: Seq[Throwable]): Unit = {
-    log.debug(s"[SketchControllerLife.pumpingError] errors: $errors")
-    //Save errors
-    drivesErrors ++= errors
-    //Log and update status
-    userLogging ! M.LogError(None, "Workbench", errors, "Fatal pumping error.")
-    sketchUi ! M.SetSketchUIStatusString("Fatal pumping error!", Color.Red)}
-
-
-
-//
-//
-//  PumpingShutdown
-
-
-
-//
-//  def shutdownSketchController(state: State): State = state match{
-//    case State.Creating | State.Building  | State.Starting | State.Stopping  ⇒
-//      log.debug(s"[SketchControllerLife.shutdownSketchController] In state $state do nothing, wait for end operation.")
-//      state
-//    case State.Built ⇒
-//
-//
-//
-//    case State.Built ⇒
-//    case State.Built ⇒
-//
-//
-//      case Built ⇒
-//        state = Destructing
-//        destructSketch()
-//      //        case BuildingFailed ⇒
-//      //          state = Terminating
-//      //          terminateAllUi()
-//      case Working ⇒
-//        state = Stopping
-//        stopPumping()
-//      case _ ⇒
-//
-//
-//
-//
-//  }
-//
-
-
-
-
-
-
-
-
-
-
-
-  /** Terminate self */
-  def terminateSelf(): Unit = {
-    log.debug(s"[SketchControllerLife.terminateSelf] Send SketchControllerTerminated and terminate.")
-//    mainController ! M.SketchControllerTerminated(sketchData.className)
-    ???
+    userLogging ! M.LogInfo(None, "Workbench", "The Shutdown signal received, sketch will terminated.")
+    //Update UI
+    sketchUi ! M.UpdateSketchUIState(Map(
+      RunBtn → ElemDisabled,
+      ShowAllToolsUiBtn → ElemDisabled,
+      HideAllToolsUiBtn → ElemDisabled,
+      SkipAllTimeoutTaskBtn → (if(st == Starting || st == Working || st == Stopping) ElemEnabled else ElemDisabled),
+      StopSketchBtn → ElemDisabled))
+    //Send ShutdownPlumbing
+    plumbing ! M.ShutdownPlumbing}
+  /** Plumbing shutdown */
+  def plumbingShutdown(): Unit = {
+    log.debug(s"[SketchControllerLife.plumbingShutdown] Update UI and log")
+    //Log to user log and update status Shutdown sequence initiated...
+    userLogging ! M.LogInfo(None, "Workbench", "Plumbing shutdown.")
+    //Update UI
+    sketchUi ! M.UpdateSketchUIState(Map(
+      SkipAllTimeoutTaskBtn → ElemDisabled))}
+  /** Plumbing terminated */
+  def plumbingTerminated(): Unit = {
+    log.debug(s"[SketchControllerLife.plumbingTerminated] Terminate sketch instance, send TerminateSketchInstance")
+    sketchInstance ! M.TerminateSketchInstance}
+  /** Sketch instance error */
+  def sketchInstanceError(error: Throwable): Unit = {
+    log.error(s"[SketchControllerLife.sketchInstanceError] Update UI, shutdown plumbing, error: $error")
+    //Store errors
+    allErrors += error
+    //Update status string
+    sketchUi ! M.SetSketchUIStatusString("Sketch instance error! Check logs.", Color.Red)
+    //Update UI
+    sketchUi !  M.UpdateSketchUIState(Map(
+      RunBtn → ElemDisabled,
+      ShowAllToolsUiBtn → ElemDisabled,
+      HideAllToolsUiBtn → ElemDisabled,
+      SkipAllTimeoutTaskBtn → ElemDisabled,
+      StopSketchBtn → ElemDisabled))
+    //Shutdown plumbing
+    plumbing ! M.ShutdownPlumbing}
+  /** Plumbing error */
+  def  plumbingError(errors: Seq[Throwable]): Unit = {
+    log.error(s"[SketchControllerLife.sketchInstanceError] Update UI, terminate sketch instance, errors: $errors")
+    //Store errors
+    allErrors ++= errors
+    //Update status string
+    sketchUi ! M.SetSketchUIStatusString("Fatal plumbing error! Check logs.", Color.Red)
+    //Update UI
+    sketchUi !  M.UpdateSketchUIState(Map(
+      RunBtn → ElemDisabled,
+      ShowAllToolsUiBtn → ElemDisabled,
+      HideAllToolsUiBtn → ElemDisabled,
+      SkipAllTimeoutTaskBtn → ElemDisabled,
+      StopSketchBtn → ElemDisabled))
+    //Terminate sketch instance
+    plumbing ! M.ShutdownPlumbing}
+  /** Termination at SketchFailed state */
+  def terminationAtSketchFailed(actor: ActorRef): Unit = {
+    log.error(s"[SketchControllerLife.terminationAtSketchFailed] Terminated actor: $actor")}
+  /** Report to main controller and terminate self */
+  def reportAndTerminateSelf(st: SketchController.State): Unit = {
+    //Response
+    st match{
+      case SketchController.State.Shutdown ⇒
+        log.debug(
+          s"[SketchControllerLife.reportAndTerminateSelf @ Shutdown] Send SketchDone.")
+        mainController ! M.SketchDone(sketchData.className)
+      case SketchController.State.SketchFailed ⇒
+        log.error(
+          s"[SketchControllerLife.reportAndTerminateSelf @ SketchFailed] Send SketchError with errors: $allErrors.")
+        mainController ! M.SketchError(sketchData.className, allErrors.toList)}
+    //Terminate self
+    self ! PoisonPill}
+  /** Unexpected termination */
+  def unexpectedTermination(actor: ActorRef): Unit = {
+    log.error(s"[SketchControllerLife.unexpectedTermination] actor: $actor")
+    //Send error
+    mainController ! M.SketchError(
+      sketchData.className,
+      Seq(new IllegalStateException(s"[SketchControllerLife.unexpectedTermination] actor: $actor")))
+    //Terminate all and self
+    plumbing ! M.ShutdownPlumbing
+    sketchInstance ! M.TerminateSketchInstance
+    visualization ! M.TerminateVisualization
+    userLogging ! M.TerminateUserLogging
+    sketchUi ! M.TerminateSketchUI
     self ! PoisonPill}}

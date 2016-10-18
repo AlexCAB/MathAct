@@ -38,7 +38,7 @@
 //    val testMainConfig = new MainConfigLike{
 //      val config = ConfigFactory.load()
 //      val sketchBuildingTimeout = 5.second
-//      val pumping = null
+//      val plumbing = null
 //      val mainUI = null
 //      val sketchUI = null
 //      val userLogging = null

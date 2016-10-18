@@ -41,7 +41,7 @@ private [mathact] class DriveActor(
   val config: DriveConfigLike,
   val toolId: Int,
   val pump: PumpLike,
-  val pumping: ActorRef,
+  val plumbing: ActorRef,
   val userLogging: ActorRef,
   val visualization: ActorRef)
 extends StateActorBase(Drive.State.Init) with IdGenerator with DriveLifeCycle with DriveConnectivity
@@ -161,7 +161,7 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
     case (M.TaskDone(HideUI, _, time, _), _) ⇒ hideToolUiTaskDone(time)
     case (M.TaskTimeout(HideUI, _, time), _) ⇒ hideToolUiTaskTimeout(time)
     case (M.TaskFailed(HideUI, _, time, error), _) ⇒ hideToolUiTaskFailed(time, error)
-    //Errors, (on error drive only report to pumping actor but not stop working)
+    //Errors, (on error drive only report to plumbing actor but not stop working)
     case (DriveBuildingError(msg, error), _) ⇒ driveError(msg, error)
     case (DriveMessagingError(msg, error), _) ⇒ driveError(msg, error)
 
