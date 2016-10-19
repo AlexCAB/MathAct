@@ -40,10 +40,10 @@ private [mathact] object M {
   case class RunSketch(sketch: SketchInfo) extends Msg     //MainUI sends it and Hide UI
   case object HideMainUI extends Msg
   case object MainCloseBtnHit extends Msg
-  case object TerminateMainUI extends Msg
+//  case object TerminateMainUI extends Msg
   //MainController - SketchControllerActor
-  case object LaunchSketch extends StateMsg                   //Sends by main controller to, initiate sketch
-  case object ShutdownSketch extends StateMsg                 //Sends by main controller stop sketch, initiate sketch
+  case object LaunchSketch extends Msg                   //Sends by main controller to, initiate sketch
+  case object ShutdownSketch extends Msg                 //Sends by main controller stop sketch, initiate sketch
   case class SketchBuilt(className: String) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, errors: Seq[Throwable]) extends Msg
@@ -55,33 +55,33 @@ private [mathact] object M {
   case class UpdateSketchUIState(state: Map[SketchUIElement, SketchUiElemState]) extends Msg
   case class SketchUIActionTriggered(element: SketchUIElement, action: Any) extends Msg
   case class SetSketchUIStatusString(message: String, color: Color) extends Msg
-  case object TerminateSketchUI extends Msg
+//  case object TerminateSketchUI extends Msg
   //SketchControllerActor - UserLogging
   case object ShowUserLoggingUI extends Msg
   case object HideUserLoggingUI extends Msg
   case class UserLoggingUIChanged(isShow: Boolean) extends Msg
-  case object TerminateUserLogging extends Msg
+//  case object TerminateUserLogging extends Msg
   //SketchControllerActor - Visualization
   case object ShowVisualizationUI extends Msg
   case object HideVisualizationUI extends Msg
   case class VisualizationUIChanged(isShow: Boolean) extends Msg
-  case object TerminateVisualization extends Msg
+//  case object TerminateVisualization extends Msg
   //SketchControllerActor - SketchInstance
   case object CreateSketchInstance extends Msg
   case class BuildSketchContextFor(actor: ActorRef) extends Msg
   case class SketchInstanceReady(instance: WorkbenchLike) extends Msg
   case class SketchInstanceError(error: Throwable) extends Msg
-  case object TerminateSketchInstance extends Msg
+//  case object TerminateSketchInstance extends Msg
   //SketchControllerActor - PlumbingActor  (life cycle)
-  case object BuildPlumbing extends StateMsg    //Run tool connectivity on sketch start
+  case object BuildPlumbing extends Msg    //Run tool connectivity on sketch start
   case object PlumbingBuilt extends Msg
-  case object StartPlumbing extends StateMsg    //Run user start functions on hit UI "START" of by auto-run
+  case object StartPlumbing extends Msg    //Run user start functions on hit UI "START" of by auto-run
   case object PlumbingStarted extends Msg
-  case object StopPlumbing extends StateMsg     //Run user stop functions on hit UI "STOP"
+  case object StopPlumbing extends Msg     //Run user stop functions on hit UI "STOP"
   case object PlumbingStopped extends Msg
-  case object ShutdownPlumbing extends StateMsg //Force stop of plumping at any state on  .
-  case object PlumbingShutdown extends StateMsg  //Normal stop, sends by Plumbing before Terminated
-  case class PlumbingError(errors: Seq[Throwable]) extends StateMsg //Error stop, sends by Plumbing before Terminated, this means plumping terminated by some internal error
+//  case object ShutdownPlumbing extends Msg //Force stop of plumping at any state on  .
+//  case object PlumbingShutdown extends Msg  //Normal stop, sends by Plumbing before Terminated
+//  case class PlumbingError(errors: Seq[Throwable]) extends Msg //Error stop, sends by Plumbing before Terminated, this means plumping terminated by some internal error
   //SketchControllerActor - PlumbingActor  (management)
   case object SkipAllTimeoutTask extends Msg
   case object ShowAllToolUi extends Msg
@@ -94,16 +94,24 @@ private [mathact] object M {
   case class ConnectPipes(out: ()⇒Plug[_], in: ()⇒Socket[_]) extends Msg
   case class UserData[T](outletId: Int, value: T) extends Msg
   //PlumbingActor - DriveActor (life cycle)
-  case object ConstructDrive extends StateMsg //Lock creation of new inlets/outlets
+
+
+  case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg
-  case object BuildDrive extends StateMsg //DriveCreating of connections from pending list
-  case object DriveBuilt extends Msg
-  case object StartDrive extends StateMsg //Run init user code
+  case object ConnectingDrive extends Msg //Creating of connections from pending list
+  case object DriveConnected extends Msg
+  case object TurnOnDrive extends Msg //Stater user message processing
+  case object DriveTurnedOn extends Msg
+  case object StartDrive extends Msg //Run user staring  code
   case object DriveStarted extends Msg
-  case object StopDrive extends StateMsg  //Run sopping user code
+  case object StopDrive extends Msg  //Run user sopping  code
   case object DriveStopped extends Msg
-  case object TerminateDrive extends StateMsg //Disconnect all connection and terminate
-  case class DriveError(error: Throwable) extends StateMsg //Sends by drive at any state, this means drive terminated
+  case object TurnOffDrive extends Msg //Stop user message processing, response witt DriveTurnedOff after all message processed
+  case object DriveTurnedOff extends Msg
+
+
+//  case object TerminateDrive extends Msg //Disconnect all connection and terminate
+//  case class DriveError(error: Throwable) extends Msg //Sends by drive at any state, this means drive terminated
   //DriveActor - DriveActor
   case class AddConnection(connectionId: Int, initiator: ActorRef, inletId: Int, outlet: OutletData) extends Msg
   case class ConnectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData) extends Msg

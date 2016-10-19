@@ -15,7 +15,7 @@
 package mathact.core.sketch.view.sketch
 
 import akka.actor.{ActorRef, PoisonPill}
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.SketchUIConfigLike
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
@@ -29,7 +29,7 @@ import mathact.core.model.messages.M
 private [mathact] class SketchUIActor(
   config: SketchUIConfigLike,
   workbenchController: ActorRef)
-extends ActorBase with JFXInteraction { import SketchUIElement._, SketchUiElemState._
+extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemState._
   //Construction
   private val window = runNow{
     val stg = new SketchUIViewAndController(config, workbenchController, log)

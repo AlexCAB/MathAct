@@ -15,7 +15,7 @@
 package mathact.core.app.view
 
 import akka.actor.{ActorRef, PoisonPill}
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.MainUIConfigLike
 import mathact.core.model.messages.M
@@ -28,7 +28,7 @@ import mathact.core.model.messages.M
 private [mathact] class MainUIActor(
   config: MainUIConfigLike,
   mainController: ActorRef)
-extends ActorBase with JFXInteraction {
+extends WorkerBase with JFXInteraction {
   //Construction
   val window = runNow{
     val stg = new MainUIViewAndController(config, self, log)

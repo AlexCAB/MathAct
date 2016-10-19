@@ -12,35 +12,32 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.layout.infrastructure
+package mathact.core
 
-import akka.actor.ActorRef
-import mathact.core.WorkerBase
-import mathact.core.gui.JFXInteraction
-import mathact.core.model.config.UserLoggingConfigLike
+import java.io.{PrintWriter, StringWriter}
+
+import akka.actor.Actor
+import akka.event.{Logging, LoggingAdapter}
+
+import scala.util.Try
 
 
-/** Control of tool UI layout
-  * Created by CAB on 28.09.2016.
+/** Worker actor base (should not have children actors)
+  * Created by CAB on 24.05.2016.
   */
 
-private [mathact] class LayoutController(
-  config: UserLoggingConfigLike,
-  workbenchController: ActorRef)
-extends WorkerBase with JFXInteraction {
-
-
-
-
-
-
+abstract class WorkerBase extends Actor{
+  //Objects
+  val log: LoggingAdapter = Logging.getLogger(context.system, this)
+  implicit val execContext = context.system.dispatcher
   //Messages handling with logging
-  def reaction: PartialFunction[Any, Unit]  = {
+  def reaction: PartialFunction[Any, Unit]
+  //Receive
+  def receive: PartialFunction[Any, Unit] = { case m ⇒
+    log.debug(s"MESSAGE: $m FROM: $sender")
+    reaction.applyOrElse[Any, Unit](m, _ ⇒ log.warning(s"LAST MESSAGE NOT HANDLED: $m"))}
 
-
-    case m ⇒ println("[LayoutController] message: " + m)
-
-  }
+  //TODO Add more
 
 
 }

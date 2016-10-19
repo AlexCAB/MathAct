@@ -23,7 +23,7 @@ import akka.util.Timeout
 import mathact.core.app.infrastructure.MainController
 import mathact.core.app.view.MainUIActor
 import mathact.core.bricks.{SketchContext, WorkbenchLike}
-import mathact.core.sketch.infrastructure.controller.SketchControllerActor
+//import mathact.core.sketch.infrastructure.controller.SketchControllerActor
 import mathact.core.sketch.infrastructure.instance.SketchInstanceActor
 import mathact.core.sketch.view.logging.UserLoggingActor
 import mathact.core.sketch.view.sketch.SketchUIActor
@@ -32,7 +32,7 @@ import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
-import mathact.core.plumbing.infrastructure.PlumbingActor
+//import mathact.core.plumbing.infrastructure.PlumbingActor
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -74,38 +74,38 @@ private [mathact] object Application{
       //Check state
       mainController match{
         case None ⇒
-          //Run Java FX Application
-          JFXApplication.init(args, log)
-          Platform.implicitExit = false
-          log.debug(s"[Application.start] JFXApplication created, starting application.")
-          //Create main controller
-          val controller = system.actorOf(Props(
-          new MainController(config, doStop){
-            val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
-            context.watch(mainUi)
-            def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
-              context.actorOf(Props(
-                new SketchControllerActor(config, sketchData, self){
-                  val sketchUi = context.actorOf(Props(
-                    new SketchUIActor(config.sketchUI, self)),
-                    "SketchUIActor_" + sketchData.className)
-                  val userLogging = context.actorOf(Props(
-                    new UserLoggingActor(config.userLogging, self)),
-                    "UserLoggingActor_" + sketchData.className)
-                  val visualization = context.actorOf(Props(
-                    new VisualizationActor(config.visualization, self)),
-                    "VisualizationActor_" + sketchData.className)
-                  val plumbing = context.actorOf(Props(
-                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization)),
-                    "PlumbingActor_" + sketchData.className)
-                  val sketchInstance = context.actorOf(Props(
-                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing)),
-                    "SketchInstanceActor_" + sketchData.className)}),
-                "SketchControllerActor_" + sketchData.className)}}),
-          "MainControllerActor")
-          //Start main controller
-          mainController = Some(controller)
-          controller ! M.MainControllerStart(sketches)
+//          //Run Java FX Application
+//          JFXApplication.init(args, log)
+//          Platform.implicitExit = false
+//          log.debug(s"[Application.start] JFXApplication created, starting application.")
+//          //Create main controller
+//          val controller = system.actorOf(Props(
+//          new MainController(config, doStop){
+//            val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
+//            context.watch(mainUi)
+//            def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
+//              context.actorOf(Props(
+//                new SketchControllerActor(config, sketchData, self){
+//                  val sketchUi = context.actorOf(Props(
+//                    new SketchUIActor(config.sketchUI, self)),
+//                    "SketchUIActor_" + sketchData.className)
+//                  val userLogging = context.actorOf(Props(
+//                    new UserLoggingActor(config.userLogging, self)),
+//                    "UserLoggingActor_" + sketchData.className)
+//                  val visualization = context.actorOf(Props(
+//                    new VisualizationActor(config.visualization, self)),
+//                    "VisualizationActor_" + sketchData.className)
+//                  val plumbing = context.actorOf(Props(
+//                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization)),
+//                    "PlumbingActor_" + sketchData.className)
+//                  val sketchInstance = context.actorOf(Props(
+//                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing)),
+//                    "SketchInstanceActor_" + sketchData.className)}),
+//                "SketchControllerActor_" + sketchData.className)}}),
+//          "MainControllerActor")
+//          //Start main controller
+//          mainController = Some(controller)
+//          controller ! M.MainControllerStart(sketches)
         case Some(c) ⇒
           throw new IllegalStateException(
             s"[Application.start] This method can be called only on start, mainController: $c")}}

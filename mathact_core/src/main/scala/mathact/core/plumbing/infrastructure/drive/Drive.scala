@@ -30,16 +30,18 @@ object Drive {
   //enums
   object State extends Enumeration {
     val Init = Value
-    val Created = Value
-    val Building = Value
-    val Built = Value
+    val Construct = Value
+    val Connecting = Value
+    val Connected = Value
+    val TurnedOn = Value
     val Starting = Value
-    val Started = Value
     val Working = Value
     val Stopping = Value
     val Stopped = Value
-    val Terminating = Value
-    val Terminated = Value}
+    val TurnOff = Value
+    val TurnedOff = Value
+
+  }
   type State = State.Value
   //Definitions
   case class SubscriberData(

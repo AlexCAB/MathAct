@@ -19,7 +19,7 @@ import javafx.scene.Parent
 import javafx.stage.WindowEvent
 
 import akka.actor.{ActorRef, PoisonPill}
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.UserLoggingConfigLike
 import mathact.core.model.messages.M
@@ -35,7 +35,7 @@ import scalafxml.core.{NoDependencyResolver, FXMLLoader}
   */
 
 private [mathact] class UserLoggingActor(config: UserLoggingConfigLike, workbenchController: ActorRef)
-extends ActorBase with JFXInteraction { import UserLogging._
+extends WorkerBase with JFXInteraction { import UserLogging._
   //Parameters
   val windowTitle = "MathAct - Logger"
   val uiFxmlPath = "mathact/userLog/ui.fxml"

@@ -15,7 +15,7 @@
 package mathact.core.app.infrastructure
 
 import akka.actor._
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums.SketchStatus
@@ -27,7 +27,7 @@ import mathact.core.model.messages.M
   */
 
 private [mathact] abstract class MainController(config: MainConfigLike, doStop: Int⇒Unit)
-extends ActorBase{
+extends WorkerBase{
   //Sub actors (abstract fields defined here to capture this actor context)
   val mainUi: ActorRef
   //Variables
@@ -86,8 +86,9 @@ extends ActorBase{
     case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       setSketchSate(className, SketchStatus.Ended)}
     //Sketch error
-    case M.SketchError(className, error) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
-      log.error(error, "[MainController @ SketchError] Sketch failed.")
+    case M.SketchError(className, errors) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
+      log.error("[MainController @ SketchError] Sketch failed.")
+      errors.foreach(e ⇒ log.error(e, "[MainController @ SketchError] Error."))
       setSketchSate(className, SketchStatus.Failed)}
     //Sketch controller terminated, show UI
 //    case M.SketchControllerTerminated(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒

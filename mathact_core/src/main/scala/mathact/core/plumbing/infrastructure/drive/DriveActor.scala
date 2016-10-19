@@ -18,10 +18,11 @@ import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
 import mathact.core.model.config.DriveConfigLike
 import mathact.core.model.enums._
-import mathact.core.model.messages.{M, Msg, StateMsg}
+import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
+import mathact.core.plumbing.infrastructure.UserActorsRoot
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
-import mathact.core.{IdGenerator, StateActorBase}
+import mathact.core.{IdGenerator, ControllerBase}
 
 import scala.collection.mutable.{Map => MutMap}
 
@@ -44,7 +45,7 @@ private [mathact] class DriveActor(
   val plumbing: ActorRef,
   val userLogging: ActorRef,
   val visualization: ActorRef)
-extends StateActorBase(Drive.State.Init) with IdGenerator with DriveLifeCycle with DriveConnectivity
+extends ControllerBase(Drive.State.Init) with IdGenerator with DriveLife with DriveConnectivity
 with DriveMessaging with DriveUIControl{ import Drive.State._
  import Drive._
  import TaskKind._
@@ -56,23 +57,67 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
   val pendingConnections = MutMap[Int, M.ConnectPipes]()
   var visualisationLaval: VisualisationLaval = VisualisationLaval.None
   //On start
-  val impeller = context.actorOf(Props(new ImpellerActor(self, config.impellerMaxQueueSize)), "ImpellerOf_" + pump.toolName)
-  context.watch(impeller)
-  //Receives
-  /** Reaction on StateMsg'es */
-  def onStateMsg: PartialFunction[(StateMsg, Drive.State), Unit] = {
+  val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + pump.toolName)
+  val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + pump.toolName)
+  //Message handling
+  def reaction: PartialFunction[(Msg, Drive.State), Unit] = {
     //Construct drive, just switch state to Created to disable future adding of inlets, outlets and connections
     case (M.ConstructDrive, Init) ⇒
-      state = Created
       constructDrive()
+      Created
     //Build drive, connect connections from pending list
     case (M.BuildDrive, Created) ⇒
-      state = Building
-      doConnectivity()
+      isAllConnected match{
+        case true ⇒
+          buildingSuccess()
+          Built
+        case false ⇒
+          doConnectivity()
+          Building}
+    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and ToolBuilt
+    case (_: M.PipesConnected, Building) ⇒
+      isAllConnected match{
+        case true ⇒
+          buildingSuccess()
+          startUserMessageProcessing()
+          Built
+        case false ⇒
+          state}
     //Start drive, run user starting function
-    case (M.StartDrive, Built) ⇒
+    case (M.StartDrive, Built) ⇒ doStarting() match{
+      case true ⇒
+        doStarting()
+        Starting
+      case false ⇒
+
+        Working
+    }
+
+
+
       state = Starting
-      doStarting()
+
+
+
+
+
+
+    //Check if user start function executed in Starting state
+    case (M.StartDrive | _: M.TaskDone | _: M.TaskFailed, Starting) ⇒ isStarted match{
+      case true ⇒
+        log.debug(
+          s"[DriveActor.postHandling @ Starting] Started, send M.DriveStarted, " +
+            s"run message processing and switch to Working mode.")
+        state = Working
+        startUserMessageProcessing()
+        startingSuccess()
+      case false ⇒
+        log.debug(s"[DriveActor.postHandling @ Starting] Not started yet.")}
+
+
+
+
+
     //Stop drive, run user stopping function
     case (M.StopDrive, Working) ⇒
       state = Stopping
@@ -80,16 +125,10 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
     //Terminate drive, stop actor clear resources
     case (M.TerminateDrive, Init | Created | Built | Stopped) ⇒
       state = Terminating
-      doTerminating()}
-  /** Handling after reaction executed */
-  def postHandling: PartialFunction[(Msg, Drive.State), Unit] = {
-    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and ToolBuilt
-    case (_: M.PipesConnected | M.BuildDrive, Building) ⇒ isAllConnected match{
-      case true ⇒
-        state = Built
-        buildingSuccess()
-      case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Building] Not all pipes connected.")}
+      doTerminating()
+
+
+
     //Check if user start function executed in Starting state
     case (M.StartDrive | _: M.TaskDone | _: M.TaskFailed, Starting) ⇒ isStarted match{
       case true ⇒
@@ -115,15 +154,12 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
         log.debug(s"[DriveActor.postHandling @ Terminating] Terminate impeller actor")
         impeller ! PoisonPill
       case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Terminating] Not terminated yet.")}}
-  /** Handling of actor termination*/
-  def terminationHandling: PartialFunction[(ActorRef, Drive.State), Unit] = {
-    //If impeller terminated, self termination
-    case (`impeller`, Terminating) ⇒
-      log.debug(s"[DriveActor.terminationHandling] Impeller terminated, self termination.")
-      self ! PoisonPill}
-  /** Actor reaction on messages */
-  def reaction: PartialFunction[(Msg, Drive.State), Unit] = {
+        log.debug(s"[DriveActor.postHandling @ Terminating] Not terminated yet.")}
+
+
+
+
+
     //Construction, adding pipes, ask from object
     case (M.AddOutlet(pipe, name), state) ⇒ sender ! addOutletAsk(pipe, name, state)
     case (M.AddInlet(pipe, name), state) ⇒ sender ! addInletAsk(pipe, name, state)
@@ -165,6 +201,55 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
     case (DriveBuildingError(msg, error), _) ⇒ driveError(msg, error)
     case (DriveMessagingError(msg, error), _) ⇒ driveError(msg, error)
 
+
+
+
+  }
+  //Cleanup
+  def cleanup(): Unit = {
+
+    ???
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+//  //Receives
+//  /** Reaction on StateMsg'es */
+//  def onStateMsg: PartialFunction[(StateMsg, Drive.State), Unit] = {
+//
+//
+//
+//  }
+//
+//
+//
+//
+//  }
+//  /** Handling of actor termination*/
+//  def terminationHandling: PartialFunction[(ActorRef, Drive.State), Unit] = {
+//    //If impeller terminated, self termination
+//    case (`impeller`, Terminating) ⇒
+//      log.debug(s"[DriveActor.terminationHandling] Impeller terminated, self termination.")
+//      self ! PoisonPill
+//
+//  }
+//  /** Actor reaction on messages */
+//
+
     //TODO Add more
 
-  }}
+  }

@@ -17,7 +17,7 @@ package mathact.core.sketch.infrastructure.instance
 import java.util.concurrent.{TimeoutException, ExecutionException}
 
 import akka.actor.{PoisonPill, ActorRef}
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.bricks.{SketchContext, WorkbenchLike}
 import mathact.core.model.config.SketchInstanceConfigLike
 import mathact.core.model.data.sketch.SketchData
@@ -36,7 +36,7 @@ private [mathact] class SketchInstanceActor(
   controller: ActorRef,
   userLogging: ActorRef,
   plumbing: ActorRef)
-extends ActorBase{ import SketchInstance._
+extends WorkerBase{ import SketchInstance._
   //Variables
   var isBuildingRan = false
   var isSketchContextBuilt = false

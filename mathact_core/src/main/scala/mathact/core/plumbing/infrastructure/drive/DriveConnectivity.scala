@@ -116,7 +116,13 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
         log.error(s"[DriveConnectivity.pipesConnected] Unknown connection with connectionId: $connectionId.")}
   /** Check if all connections connected
     * @return - true if all connected */
-  def isAllConnected: Boolean = pendingConnections.isEmpty
+  def isAllConnected: Boolean = pendingConnections.isEmpty match{
+    case true ⇒
+      log.debug(s"[DriveActor.isAllConnected] All pipes connected: $pendingConnections")
+      true
+    case false ⇒
+      log.debug(s"[DriveActor.isAllConnected] Not all pipes connected:  $pendingConnections")
+      false}
   /** Get of pending list, used in test
     * @return -  Map[Int, M.ConnectPipes] */
   def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}

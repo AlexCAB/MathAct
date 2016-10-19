@@ -17,7 +17,7 @@ package mathact.core.sketch.view.visualization
 import javax.imageio.ImageIO
 
 import akka.actor.{PoisonPill, ActorRef}
-import mathact.core.ActorBase
+import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.VisualizationConfigLike
 import mathact.core.model.data.visualisation.ToolBuiltInfo
@@ -30,7 +30,7 @@ import mathact.core.model.messages.M
 
 
 private [mathact] class VisualizationActor(config: VisualizationConfigLike, workbenchController: ActorRef)
-extends ActorBase with JFXInteraction { import Visualization._
+extends WorkerBase with JFXInteraction { import Visualization._
   //Parameters
   val buildingLayoutType = LayoutType.OrganicLayout
   val buildingLayoutMorphingSteps = 10

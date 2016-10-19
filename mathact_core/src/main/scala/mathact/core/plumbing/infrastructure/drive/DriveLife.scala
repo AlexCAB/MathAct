@@ -27,9 +27,9 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
+private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
   //Variables
-  private var started = false
+//  private var started = false
   private var stopped = false
   //Methods
   /** Adding of new outlet, called from object
@@ -45,17 +45,17 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
           //Create and add
           val id = nextIntId
           outlets += (id → OutletState(id, name, pipe))
-          log.debug(s"[DriveLifeCycle.addOutletAsk] Outlet: $pipe, added with ID: $id")
+          log.debug(s"[DriveLife.addOutletAsk] Outlet: $pipe, added with ID: $id")
           Right((toolId, id))
         case o :: _ ⇒
           //Double creating
-          val msg = s"[DriveLifeCycle.addOutletAsk] Outlet: $pipe, is registered more then once"
+          val msg = s"[DriveLife.addOutletAsk] Outlet: $pipe, is registered more then once"
           log.error(msg)
           Left(new IllegalArgumentException(msg))}
     case s ⇒
       //Incorrect state
       val msg =
-        s"[DriveLifeCycle.addOutletAsk | toolName: ${pump.toolName}, pipe: $pipe, name: $name] " +
+        s"[DriveLife.addOutletAsk | toolName: ${pump.toolName}, pipe: $pipe, name: $name] " +
         s"Incorrect state $s, required DriveInit."
       log.error(msg)
       //User logging
@@ -78,17 +78,17 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
           //Create and add
           val id = nextIntId
           inlets += (id → InletState(id, name, pipe))
-          log.debug(s"[DriveLifeCycle.addInletAsk] Inlet: $pipe, added with ID: $id")
+          log.debug(s"[DriveLife.addInletAsk] Inlet: $pipe, added with ID: $id")
           Right((toolId, id))
         case o :: _ ⇒
           //Double creating
-          val msg = s"[DriveLifeCycle.addInletAsk] Inlet: $pipe, is registered more then once"
+          val msg = s"[DriveLife.addInletAsk] Inlet: $pipe, is registered more then once"
           log.error(msg)
           Left(new IllegalArgumentException(msg))}
     case s ⇒
       //Incorrect state
       val msg =
-        s"[DriveLifeCycle.addInletAsk | toolName: ${pump.toolName}, pipe: $pipe, name: $name] " +
+        s"[DriveLife.addInletAsk | toolName: ${pump.toolName}, pipe: $pipe, name: $name] " +
         s"Incorrect state $s, required DriveInit."
       log.error(msg)
       //User logging
@@ -101,13 +101,13 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
   /** Drive constructed */
   def constructDrive(): Unit = {
     log.debug(
-      s"[DriveLifeCycle.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
+      s"[DriveLife.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
       s"Current: outlets: $outlets, inlets: $inlets, pendingConnections: $pendingConnections")
     plumbing ! M.DriveConstructed}
   /** Build ToolBuiltInfo and send to visualization actor */
   def buildingSuccess(): Unit = {
     log.debug(
-      s"[DriveLifeCycle.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
+      s"[DriveLife.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
     //Report to plumbing
     plumbing ! M.DriveBuilt
     //Log to user logger
@@ -138,66 +138,82 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
     //Send
     visualization ! M.ToolBuilt(builtInfo)}
   /** Rus staring task if defined */
-  def doStarting(): Unit = pump.tool match{
+  def doStarting(): Boolean = pump.tool match{
     case task: OnStart ⇒
-      log.debug("[DriveLifeCycle.doStarting] Try to run starting user function.")
+      log.debug("[DriveLife.doStarting] Try to run starting user function.")
       impeller ! M.RunTask[Unit](TaskKind.Start, -1, config.startFunctionTimeout, ()⇒{ task.doStart() })
+      false
     case _ ⇒
-      log.debug("[DriveLifeCycle.doStarting] Starting user function not defined, nothing to do.")
-      started = true}
+      log.debug("[DriveLife.doStarting] Starting user function not defined, nothing to do.")
+      true}
+
+
   /** Starting task done, set of started
     * @param execTime - Duration */
   def startingTaskDone(execTime: Duration): Unit = {
-    log.debug(s"[DriveLifeCycle.startingTaskDone] execTime: $execTime.")
+    log.debug(s"[DriveLife.startingTaskDone] execTime: $execTime.")
     started = true}
   /** Starting task timeout, log to user console
     * @param execTime - Duration */
   def startingTaskTimeout(execTime: Duration): Unit = {
-    log.warning(s"[DriveLifeCycle.startingTaskTimeout]  execTime: $execTime.")
+    log.warning(s"[DriveLife.startingTaskTimeout]  execTime: $execTime.")
     userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Starting function timeout on $execTime, keep waiting.")}
   /** Starting task failed, set of started, log to user console
     * @param execTime - Duration
     * @param error - Throwable */
   def startingTaskFailed(execTime: Duration, error: Throwable): Unit = {
-    log.error(s"[DriveLifeCycle.startingTaskTimeout] execTime: $execTime, error: $error.")
+    log.error(s"[DriveLife.startingTaskTimeout] execTime: $execTime, error: $error.")
     started = true
     userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Starting function failed on $execTime.")}
   /** Starting success, logging to user log, report to plumbing */
   def startingSuccess(): Unit = {
-    log.debug("[DriveLifeCycle.startingSuccess] Drive successful started.")
+    log.debug("[DriveLife.startingSuccess] Drive successful started.")
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful started.")
     plumbing ! M.DriveStarted}
+
+
+
   /** Check if starting user function is executed
     * @return - true if started */
-  def isStarted: Boolean = started
+  def isStarted: Boolean = started match{
+    case true ⇒
+
+      true
+    case false ⇒
+
+      false
+  }
+
+
+
   /** Rus stopping task if defined */
   def doStopping(): Unit = pump.tool match{
     case task: OnStop ⇒
-      log.debug("[DriveLifeCycle.doStopping] Try to run stopping user function.")
+      log.debug("[DriveLife.doStopping] Try to run stopping user function.")
       impeller ! M.RunTask[Unit](TaskKind.Stop, -1, config.stopFunctionTimeout, ()⇒{ task.doStop() })
     case _ ⇒
-      log.debug("[DriveLifeCycle.doStopping] Stopping user function not defined, nothing to do.")
+      log.debug("[DriveLife.doStopping] Stopping user function not defined, nothing to do.")
       stopped = true}
   /** Stopping task done, set of stopped
     * @param execTime - Duration */
   def stoppingTaskDone(execTime: Duration): Unit = {
-    log.debug(s"[DriveLifeCycle.stoppingTaskDone] execTime: $execTime.")
+    log.debug(s"[DriveLife.stoppingTaskDone] execTime: $execTime.")
     stopped = true}
   /** Stopping task timeout, log to user console
     * @param execTime - Duration */
   def stoppingTaskTimeout(execTime: Duration): Unit = {
-    log.warning(s"[DriveLifeCycle.stoppingTaskTimeout]  execTime: $execTime.")
+    log.warning(s"[DriveLife.stoppingTaskTimeout]  execTime: $execTime.")
     userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Stopping function timeout on $execTime, keep waiting.")}
   /** Stopping task failed, set of stopped, log to user console
     * @param execTime - Duration
     * @param error - Throwable */
   def stoppingTaskFailed(execTime: Duration, error: Throwable): Unit = {
-    log.error(s"[DriveLifeCycle.stoppingTaskFailed] execTime: $execTime, error: $error.")
+    log.error(s"[DriveLife.stoppingTaskFailed] execTime: $execTime, error: $error.")
     stopped = true
     userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Stopping function failed on $execTime.")}
   /** Stopping success, logging to user log, report to plumbing */
   def stoppingSuccess(): Unit = {
-    log.debug("[DriveLifeCycle.stoppingSuccess] Drive successful stopped.")
+    log.debug("[DriveLife.stoppingSuccess] Drive successful stopped.")
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful stopped.")
     plumbing ! M.DriveStopped}
   /** Check if stopping user function is executed
@@ -205,12 +221,12 @@ private [mathact] trait DriveLifeCycle { _: DriveActor ⇒ import Drive._
   def isStopped: Boolean = stopped
   /** Terminating of this drive, currently here only logging */
   def doTerminating(): Unit = {
-    log.debug(s"[DriveLifeCycle.doTerminating] Start of terminating of drive.")}
+    log.debug(s"[DriveLife.doTerminating] Start of terminating of drive.")}
   /** Drive error, log to user logging and report to plumbing
     * Sends M.DriveBuildingError to plumping, and terminate self */
   def driveError(message: String, error: Option[Throwable]): Unit = {
-    log.error(s"[DriveLifeCycle.driveError] Log to user logging and report to plumbing, error: $error")
+    log.error(s"[DriveLife.driveError] Log to user logging and report to plumbing, error: $error")
     //Log to user logger
     userLogging ! M.LogError(Some(toolId), pump.toolName, error.toSeq, message)
     //Report to plumbing
-    plumbing ! M.DriveError(error.getOrElse(new Exception("[DriveLifeCycle.driveError] " + message)))}}
+    plumbing ! M.DriveError(error.getOrElse(new Exception("[DriveLife.driveError] " + message)))}}
