@@ -69,8 +69,11 @@ extends WorkerBase with JFXInteraction {
       case true ⇒
         log.debug("[MainUIActor @ MainCloseBtnHit] An sketch selected, do nothing.")}
     //Terminate UI
-    case M.TerminateMainUI ⇒
-      runAndWait(window.close())
-      ???
-//      mainController ! M.MainUITerminated
-      self ! PoisonPill}}
+//    case M.TerminateMainUI ⇒
+//      runAndWait(window.close())
+//      ???
+////      mainController ! M.MainUITerminated
+//      self ! PoisonPill
+  }
+  ???
+}

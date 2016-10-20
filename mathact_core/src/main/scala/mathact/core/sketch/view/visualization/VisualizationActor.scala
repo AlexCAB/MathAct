@@ -171,9 +171,12 @@ extends WorkerBase with JFXInteraction { import Visualization._
       runAndWait(window.hide())
       isShow = false
       workbenchController ! M.VisualizationUIChanged(isShow)
-    //Terminate UI
-    case M.TerminateVisualization ⇒
-      runAndWait(window.close())
-      ???
-//      workbenchController ! M.VisualizationTerminated
-      self ! PoisonPill}}
+//    //Terminate UI
+//    case M.TerminateVisualization ⇒
+//      runAndWait(window.close())
+//      ???
+////      workbenchController ! M.VisualizationTerminated
+//      self ! PoisonPill
+  }
+  ???
+}

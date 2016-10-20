@@ -30,7 +30,7 @@ object Drive {
   //enums
   object State extends Enumeration {
     val Init = Value
-    val Construct = Value
+    val Constructed = Value
     val Connecting = Value
     val Connected = Value
     val TurnedOn = Value
@@ -38,10 +38,8 @@ object Drive {
     val Working = Value
     val Stopping = Value
     val Stopped = Value
-    val TurnOff = Value
-    val TurnedOff = Value
-
-  }
+    val TurningOff = Value
+    val TurnedOff = Value}
   type State = State.Value
   //Definitions
   case class SubscriberData(
@@ -62,8 +60,7 @@ object Drive {
     publishers: MutMap[(ActorRef, Int), OutletData] = MutMap(),  // ((publishers tool drive, outlet ID), SubscriberData)
     var currentTask: Option[M.RunTask[_]] = None)
   //Messages
-  case class DriveBuildingError(message: String, error: Option[Throwable]) extends Msg
-  case class DriveMessagingError(message: String, error: Option[Throwable]) extends Msg
+
 
   //TODO Add more
 

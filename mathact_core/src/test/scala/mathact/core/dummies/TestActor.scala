@@ -14,7 +14,8 @@
 
 package mathact.core.dummies
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.SupervisorStrategy.Stop
+import akka.actor._
 
 import scala.concurrent.duration._
 import scala.reflect._
@@ -24,7 +25,7 @@ import scala.reflect._
   * Created by CAB on 17.08.2016.
   */
 
-class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Option[Any]], system: ActorSystem){
+class TestActor(name: String, customReceive: (ActorRef, ActorContext)⇒PartialFunction[Any, Option[Any]], system: ActorSystem){
   //Parameters
   val expectMsgTimeout: FiniteDuration = 3.seconds
   val waitMsgTimeout: FiniteDuration = 500.millis
@@ -38,13 +39,14 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
   //Actor
   val ref: ActorRef = system.actorOf(
     Props(new Actor{
+      override val supervisorStrategy = OneForOneStrategy(){case _: Throwable ⇒ Stop}
       def receive = {
         case WatchFor(actor) ⇒
           context.watch(actor)
         case SendTo(to, msg) ⇒
           to ! msg
         case msg ⇒
-          customReceive(self).lift(msg) match{
+          customReceive(self, context).lift(msg) match{
             case Some(res) ⇒
               println(s"[TestActor: $name] Processed message: $msg")
               processedMessages :+= msg
@@ -125,13 +127,11 @@ class TestActor(name: String, customReceive: ActorRef⇒PartialFunction[Any, Opt
     * @return - List[Any] */
   def getProcessedMessages: List[Any] = processedMessages
 
-
-
     //TODO Add more
 
 }
 
 object TestActor {
-  def apply(name: String)(receive: ActorRef⇒PartialFunction[Any, Option[Any]])(implicit system: ActorSystem)
+  def apply(name: String)(receive: (ActorRef, ActorContext)⇒PartialFunction[Any, Option[Any]])(implicit system: ActorSystem)
   :TestActor =
     new TestActor(name, receive, system)}

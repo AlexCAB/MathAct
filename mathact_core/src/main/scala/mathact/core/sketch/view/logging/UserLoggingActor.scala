@@ -152,9 +152,12 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       //Add to Log
       logRows +:= row
       refreshUi()
-    //Terminate user logging
-    case M.TerminateUserLogging ⇒
-      runAndWait(window.close())
-      ???
-//      workbenchController ! M.UserLoggingTerminated
-      self ! PoisonPill}}
+//    //Terminate user logging
+//    case M.TerminateUserLogging ⇒
+//      runAndWait(window.close())
+//      ???
+////      workbenchController ! M.UserLoggingTerminated
+//      self ! PoisonPill
+  }
+  ???
+}

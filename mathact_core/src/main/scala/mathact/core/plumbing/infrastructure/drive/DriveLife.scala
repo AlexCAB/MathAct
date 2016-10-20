@@ -28,10 +28,6 @@ import scala.concurrent.duration.Duration
   */
 
 private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
-  //Variables
-//  private var started = false
-  private var stopped = false
-  //Methods
   /** Adding of new outlet, called from object
     * Can be called only from tools constructor on sketch construction.
     * @param pipe - Outlet[_]
@@ -102,14 +98,14 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
   def constructDrive(): Unit = {
     log.debug(
       s"[DriveLife.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
-      s"Current: outlets: $outlets, inlets: $inlets, pendingConnections: $pendingConnections")
+      s"Current: outlets: $outlets, inlets: $inlets")
     plumbing ! M.DriveConstructed}
   /** Build ToolBuiltInfo and send to visualization actor */
-  def buildingSuccess(): Unit = {
+  def connectingSuccess(): Unit = {
     log.debug(
       s"[DriveLife.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
     //Report to plumbing
-    plumbing ! M.DriveBuilt
+    plumbing ! M.DriveConnected
     //Log to user logger
     userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful built.")
     //Build
@@ -137,7 +133,7 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
         .toMap)
     //Send
     visualization ! M.ToolBuilt(builtInfo)}
-  /** Rus staring task if defined */
+  /** Rus staring task if defined, return isStarted */
   def doStarting(): Boolean = pump.tool match{
     case task: OnStart ⇒
       log.debug("[DriveLife.doStarting] Try to run starting user function.")
@@ -145,88 +141,60 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
       false
     case _ ⇒
       log.debug("[DriveLife.doStarting] Starting user function not defined, nothing to do.")
+      userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"No starting function, nothing to do.")
+      plumbing ! M.DriveStarted
       true}
-
-
   /** Starting task done, set of started
     * @param execTime - Duration */
   def startingTaskDone(execTime: Duration): Unit = {
     log.debug(s"[DriveLife.startingTaskDone] execTime: $execTime.")
-    started = true}
-  /** Starting task timeout, log to user console
-    * @param execTime - Duration */
-  def startingTaskTimeout(execTime: Duration): Unit = {
-    log.warning(s"[DriveLife.startingTaskTimeout]  execTime: $execTime.")
-    userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Starting function timeout on $execTime, keep waiting.")}
+    userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful started.")
+    plumbing ! M.DriveStarted}
   /** Starting task failed, set of started, log to user console
     * @param execTime - Duration
     * @param error - Throwable */
   def startingTaskFailed(execTime: Duration, error: Throwable): Unit = {
     log.error(s"[DriveLife.startingTaskTimeout] execTime: $execTime, error: $error.")
-    started = true
-    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Starting function failed on $execTime.")}
-  /** Starting success, logging to user log, report to plumbing */
-  def startingSuccess(): Unit = {
-    log.debug("[DriveLife.startingSuccess] Drive successful started.")
-    userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful started.")
+    userLogging ! M.LogError(
+      Some(toolId),
+      pump.toolName,
+      Seq(error),
+      s"Starting function failed on $execTime, continue work.")
     plumbing ! M.DriveStarted}
-
-
-
-  /** Check if starting user function is executed
-    * @return - true if started */
-  def isStarted: Boolean = started match{
-    case true ⇒
-
-      true
-    case false ⇒
-
-      false
-  }
-
-
-
-  /** Rus stopping task if defined */
-  def doStopping(): Unit = pump.tool match{
+  /** Starting task timeout, log to user console
+    * @param execTime - Duration */
+  def startingTaskTimeout(execTime: Duration): Unit = {
+    log.warning(s"[DriveLife.startingTaskTimeout]  execTime: $execTime.")
+    userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Starting function timeout on $execTime, keep waiting.")}
+  /** Rus stopping task if defined, return isStopped */
+  def doStopping(): Boolean = pump.tool match{
     case task: OnStop ⇒
       log.debug("[DriveLife.doStopping] Try to run stopping user function.")
       impeller ! M.RunTask[Unit](TaskKind.Stop, -1, config.stopFunctionTimeout, ()⇒{ task.doStop() })
+      false
     case _ ⇒
       log.debug("[DriveLife.doStopping] Stopping user function not defined, nothing to do.")
-      stopped = true}
+      userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"No stopping function, nothing to do.")
+      plumbing ! M.DriveStopped
+      true}
   /** Stopping task done, set of stopped
     * @param execTime - Duration */
   def stoppingTaskDone(execTime: Duration): Unit = {
     log.debug(s"[DriveLife.stoppingTaskDone] execTime: $execTime.")
-    stopped = true}
-  /** Stopping task timeout, log to user console
-    * @param execTime - Duration */
-  def stoppingTaskTimeout(execTime: Duration): Unit = {
-    log.warning(s"[DriveLife.stoppingTaskTimeout]  execTime: $execTime.")
-    userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Stopping function timeout on $execTime, keep waiting.")}
+    userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful stopped.")
+    plumbing ! M.DriveStopped}
   /** Stopping task failed, set of stopped, log to user console
     * @param execTime - Duration
     * @param error - Throwable */
   def stoppingTaskFailed(execTime: Duration, error: Throwable): Unit = {
     log.error(s"[DriveLife.stoppingTaskFailed] execTime: $execTime, error: $error.")
-    stopped = true
-    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Stopping function failed on $execTime.")}
-  /** Stopping success, logging to user log, report to plumbing */
-  def stoppingSuccess(): Unit = {
-    log.debug("[DriveLife.stoppingSuccess] Drive successful stopped.")
-    userLogging ! M.LogInfo(Some(toolId), pump.toolName, s"Tool successful stopped.")
+    userLogging ! M.LogError(Some(toolId), pump.toolName, Seq(error), s"Stopping function failed on $execTime.")
     plumbing ! M.DriveStopped}
-  /** Check if stopping user function is executed
-    * @return - true if stopped*/
-  def isStopped: Boolean = stopped
-  /** Terminating of this drive, currently here only logging */
-  def doTerminating(): Unit = {
-    log.debug(s"[DriveLife.doTerminating] Start of terminating of drive.")}
-  /** Drive error, log to user logging and report to plumbing
-    * Sends M.DriveBuildingError to plumping, and terminate self */
-  def driveError(message: String, error: Option[Throwable]): Unit = {
-    log.error(s"[DriveLife.driveError] Log to user logging and report to plumbing, error: $error")
-    //Log to user logger
-    userLogging ! M.LogError(Some(toolId), pump.toolName, error.toSeq, message)
-    //Report to plumbing
-    plumbing ! M.DriveError(error.getOrElse(new Exception("[DriveLife.driveError] " + message)))}}
+  /** Stopping task timeout, log to user console
+    * @param execTime - Duration */
+  def stoppingTaskTimeout(execTime: Duration): Unit = {
+    log.warning(s"[DriveLife.stoppingTaskTimeout]  execTime: $execTime.")
+    userLogging ! M.LogWarning(Some(toolId), pump.toolName, s"Stopping function timeout on $execTime, keep waiting.")}
+  def driveTurnedOff(): Unit = {
+    log.debug(s"[DriveLife.driveTurnedOff] Send DriveTurnedOff")
+    plumbing ! M.DriveTurnedOff}}

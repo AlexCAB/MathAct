@@ -166,5 +166,9 @@ extends WorkerBase{ import SketchInstance._
      case SketchInstanceBuiltError(error) ⇒ sketchInstanceBuiltError(error)
      //Sketch instance built timeout
      case SketchInstanceBuildTimeout ⇒ sketchInstanceBuiltTimeout()
-     //Terminate, for now only self termination
-     case M.TerminateSketchInstance ⇒ self ! PoisonPill}}
+//     //Terminate, for now only self termination
+//     case M.TerminateSketchInstance ⇒ self ! PoisonPill
+  }
+
+  ???
+}

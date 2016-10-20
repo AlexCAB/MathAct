@@ -17,6 +17,7 @@ package mathact.core.plumbing.infrastructure.drive
 import akka.actor.ActorRef
 import mathact.core.model.enums._
 import mathact.core.model.messages.M
+import scala.collection.mutable.{ListBuffer ⇒ MutList}
 
 import scala.concurrent.duration.Duration
 
@@ -25,16 +26,28 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 22.08.2016.
   */
 
+//TODO Для уменьшения количества отправленых DriveLoad, нужно использовать что то вроде ПИ (в calcPushTimeout)
+//TODO регулятора с мёртвой зоной (чтобы DriveLoad рассылалась не по каждому измению размера очереди).
+//TODO Сейчас отправка DriveLoad на каждое измение размера очерели инлета.
 private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
+  //Variables
+  private val pendingUserMessages = MutList[(Int, Any)]()   //(outletId, value)
   //Functions
+  private def calcPushTimeout(queueSize: Int): Option[Long] = {
+    queueSize match{
+      case mqs if mqs > 0 ⇒ Some(mqs * config.pushTimeoutCoefficient)
+      case _ ⇒ None}}
+  def sendUserMessage(outlet: OutletState, value: Any): Unit = {
+    log.debug(
+      s"[DriveMessaging.sendUserMessage] Data: $value, will send to outlet: $outlet")
+    outlet.subscribers.values.foreach{ subscriber ⇒
+      subscriber.inlet.toolDrive ! M.UserMessage(outlet.outletId, subscriber.inlet.pipeId, value)}}
   private def runForInlet(inletId: Int)(proc: InletState⇒Unit): Unit = inlets.get(inletId) match{
     case Some(inlet) ⇒
       proc(inlet)
     case None ⇒
-      self ! DriveMessagingError(
-        "Messaging error at runForInlet().",
-        Some(new IllegalArgumentException(s"Inlet with inletId: $inletId, not exist.")))
-      log.error(s"[DriveMessaging.runForInlet] Inlet with inletId: $inletId, not exist.")}
+      log.error(s"[DriveMessaging.runForInlet] Inlet with inletId: $inletId, not exist.")
+      throw new IllegalArgumentException(s"Inlet with inletId: $inletId, not exist.")}
   private def buildTask(inlet: InletState, value: Any): M.RunTask[Unit] = M.RunTask(
     kind = TaskKind.Massage,
     id = inlet.inletId,
@@ -90,13 +103,8 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
       case Some(_) ⇒
         inlet.currentTask = None
       case None ⇒
-        self ! DriveMessagingError(
-          "Messaging error on call cleanCurrentTask().",
-          Some(new IllegalArgumentException(s"Not set currentTask, inlet: $inlet.")))
-        log.error(s"[DriveMessaging.cleanCurrentTask] Not set currentTask, inlet: $inlet.")}}
-  //TODO Для уменьшения количества отправленых DriveLoad, нужно использовать что то вроде ПИ
-  //TODO регулятора с мёртвой зоной (чтобы DriveLoad рассылалась не по каждому измению размера очереди).
-  //TODO Сейчас отправка DriveLoad на каждое измение размера очерели инлета.
+        log.error(s"[DriveMessaging.cleanCurrentTask] Not set currentTask, inlet: $inlet.")
+        throw new IllegalArgumentException(s"Not set currentTask, inlet: $inlet.")}}
   private def sendLoadMessage(inlet: InletState): Unit = {
     //Send load messages
     inlet.publishers.values.foreach{ publisher ⇒
@@ -108,13 +116,23 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param outletId - Int, source ID
     * @param value -  Any, user message */
   def userDataAsk(outletId: Int, value: Any, state: Drive.State): Either[Throwable, Option[Long]] = state match{
-      case Drive.State.Starting | Drive.State.Working | Drive.State.Stopping | Drive.State.Stopped ⇒
+      case Drive.State.Init | Drive.State.Constructed | Drive.State.Connecting | Drive.State.Connected ⇒
+        //Put message to pending list
+        pendingUserMessages += (outletId → value)
+        //Eval push timeout
+        val pushTimeout = calcPushTimeout(pendingUserMessages.size)
+        //Log
+        log.debug(
+          s"[DriveMessaging.userDataAsk] In state: $state data: $value, for outletId: $outletId " +
+          s"was put in pending list: $pendingUserMessages, pushTimeout: $pushTimeout")
+        //Return
+        Right(pushTimeout)
+      case Drive.State.TurnedOn |Drive.State.Starting | Drive.State.Working | Drive.State.Stopping | Drive.State.Stopped ⇒
         //Get of outlet
         outlets.get(outletId) match{
           case Some(outlet) ⇒
             //Distribution of UserMessage
-            outlet.subscribers.values.foreach{ subscriber ⇒
-              subscriber.inlet.toolDrive ! M.UserMessage(outletId, subscriber.inlet.pipeId, value)}
+            sendUserMessage(outlet, value)
             //Push timeout
             log.debug(
               s"[DriveMessaging.userDataAsk] Data: $value, sent from outletId: $outletId to " +
@@ -125,46 +143,39 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
             //Incorrect outletId
             val msg = s"[DriveMessaging.userDataAsk] Outlet with outletId: $outletId, not exist."
             log.error(msg)
-            self ! DriveMessagingError(
-              "Messaging error on call userDataAsk().",
-              Some(new IllegalArgumentException(s"Outlet with outletId: $outletId, not exist")))
             Left(new IllegalArgumentException(msg))}
       case s ⇒
         //Incorrect state
         val msg =
           s"[DriveMessaging.userDataAsk] User message can be processed only in Starting, Working, " +
-          s"Stopping or Stopping states, current state: $s"
+          s"Stopping states, current state: $s"
         log.error(msg)
-        self ! DriveMessagingError(
-          "Messaging error on call userDataAsk().",
-          Some(new IllegalArgumentException(s"User message can not be processed in $s state.")))
         Left(new IllegalStateException(msg))}
+  /** Send pending messages, called after dive turned on*/
+  def sendPendingMessages(): Unit = {
+    log.debug(s"[DriveMessaging.sendPendingMessages] Pending list: $pendingUserMessages")
+    pendingUserMessages.foreach{ case (outletId, value) ⇒ outlets.get(outletId) match{
+      case Some(outlet) ⇒
+        sendUserMessage(outlet, value)
+      case None ⇒
+        log.error(s"[DriveMessaging.userDataAsk] Outlet with outletId: $outletId, not exist.")
+        throw new IllegalArgumentException(s"Outlet with outletId: $outletId, not exist")}}
+    pendingUserMessages.clear()}
   /** User message from other outlet to self inlet, set to queue
     * @param outletId - Int, source ID
     * @param inletId - Int, drain ID
     * @param value - Any, user message */
-  def userMessage(outletId: Int, inletId: Int, value: Any, state: Drive.State): Unit = runForInlet(inletId){ inlet ⇒
-    //Check state
-    state match{
-      case Drive.State.Built | Drive.State.Starting   ⇒
-        //Add task to the queue and reply with load message
-        enqueueMessageTask(inlet, value)
-        sendLoadMessage(inlet)
-      case Drive.State.Working | Drive.State.Stopping | Drive.State.Stopped ⇒
-        //Put in queue, start processing and reply with DriveLoad
-        enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))
-      case s ⇒
-        //Incorrect state
-        self ! DriveMessagingError(
-          "Messaging error on call userMessage().",
-          Some(new IllegalArgumentException(s"Incorrect state: $s.")))
-        log.error(
-          s"[DriveMessaging.userMessage] Incorrect state: $s, required Built, Starting, Working, Stopping or Stopped")}}
+  def userMessage(outletId: Int, inletId: Int, value: Any): Unit = runForInlet(inletId){ inlet ⇒
+    log.debug(s"[DriveMessaging.userMessage] outletId: $outletId, inlet: $inlet, value: $value")
+    enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))}
   /** Starting of user messages processing */
   def startUserMessageProcessing(): Unit = {
     //Run for firs message
-    log.debug(s"[DriveMessaging.startUserMessageProcessing] Call runMessageTaskLoop().")
-    runMessageTaskLoop().foreach(inlet ⇒ sendLoadMessage(inlet))}
+    log.debug(s"[DriveMessaging.startUserMessageProcessing] Call runMessageTaskLoop(), and send DriveTurnedOn")
+    //Run
+    runMessageTaskLoop().foreach(inlet ⇒ sendLoadMessage(inlet))
+    //Report
+    plumbing ! M.DriveTurnedOn}
   /** Message processing done, run next task
     * @param inletId - Int
     * @param execTime - Duration */
@@ -204,8 +215,14 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
       s"Message handling fail for ${inlet.name.getOrElse("")} inlet, on '$execTime'.")}
   /** Check if no messages to process
     * @return - true if so */
-  def isAllMsgProcessed: Boolean = inlets.values
-    .forall(inlet ⇒ inlet.taskQueue.isEmpty && inlet.currentTask.isEmpty)
+  def isAllMsgProcessed: Boolean = {
+    inlets.values.forall(inlet ⇒ inlet.taskQueue.isEmpty && inlet.currentTask.isEmpty) match{
+      case true ⇒
+        log.debug("[DriveMessaging.isAllMsgProcessed] All user messages processed.")
+        true
+      case false ⇒
+        log.debug(s"[DriveMessaging.isAllMsgProcessed] Not all user messages processed, inlets: $inlets")
+        false}}
   /** Inlet drive load, update back pressure time out for given drive.
     * @param subscriberId - (subscriber ActorRef, inlet ID Int), connected drive-subscriber
     * @param outletId - Int, connected outlet
@@ -220,19 +237,16 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
         subscriber.inletQueueSize = inletQueueSize
         log.debug(s"[DriveMessaging.driveLoad] Subscriber: $subscriber, new inletQueueSize: $inletQueueSize")
         //Re-evaluate of pushTimeout
-        outlet.pushTimeout = outlet.subscribers.values.map(_.inletQueueSize).max match{
-          case mqs if mqs > 0 ⇒ Some(mqs * config.pushTimeoutCoefficient)
-          case _ ⇒ None}
+        outlet.pushTimeout = calcPushTimeout(outlet.subscribers.values.map(_.inletQueueSize).max)
         log.debug(s"[DriveMessaging.driveLoad] Outlet: $outlet, new pushTimeout: ${outlet.pushTimeout}")
       case None ⇒
         //Incorrect subscriberId
-        self ! DriveMessagingError(
-          "Messaging error at driveLoad().",
-          Some(new IllegalArgumentException(s"Subscriber with subscriberId: $subscriberId, not exist.")))
-        log.error(s"[DriveMessaging.driveLoad] Subscriber with subscriberId: $subscriberId, not exist.")}
+        log.error(s"[DriveMessaging.driveLoad] Subscriber with subscriberId: $subscriberId, not exist.")
+        throw new IllegalArgumentException(s"Subscriber with subscriberId: $subscriberId, not exist.")}
     case None ⇒
       //Incorrect outletId
-      self ! DriveMessagingError(
-        "Messaging error at driveLoad().",
-        Some(new IllegalArgumentException(s"Outlet with outletId: $outletId, not exist.")))
-      log.error(s"[DriveMessaging.driveLoad] Outlet with outletId: $outletId, not exist.")}}
+      log.error(s"[DriveMessaging.driveLoad] Outlet with outletId: $outletId, not exist.")
+      throw new IllegalArgumentException(s"Outlet with outletId: $outletId, not exist.")}
+  /** Get of pending list, used in test
+    * @return - List[(Int, Any)] */
+  def getMessagesPendingList: List[(Int, Any)] = pendingUserMessages.toList}

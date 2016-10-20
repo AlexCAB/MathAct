@@ -155,11 +155,11 @@ class SketchInstanceTest extends ActorTestSpec {
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
       testPlumbing.expectNoMsg(1.second)}
-    "by TerminateSketchInstance, terminate SketchInstanceActor" in new TestCase {
-      //Preparing
-      val controller = newSketchInstanceActor(newTestSketchData())
-      //Test
-      testSketchController.send(controller, M.TerminateSketchInstance)
-      testSketchController.expectTerminated(controller)}
+//    "by TerminateSketchInstance, terminate SketchInstanceActor" in new TestCase {
+//      //Preparing
+//      val controller = newSketchInstanceActor(newTestSketchData())
+//      //Test
+//      testSketchController.send(controller, M.TerminateSketchInstance)
+//      testSketchController.expectTerminated(controller)}
   }
 }

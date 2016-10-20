@@ -67,7 +67,7 @@ class MainUITest extends UIActorTestSpec {
       println("[MainUITest] PLEASE HIT CLOSE (X) BUTTON")
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
       //Terminate UI
-      testMainController.send(ui, M.TerminateMainUI)
+//      testMainController.send(ui, M.TerminateMainUI)
       ??? //testMainController.expectMsg(M.MainUITerminated)
       testMainController.expectTerminated(ui)}
     "show sketches list and run one of" in new TestCase {
@@ -98,9 +98,10 @@ class MainUITest extends UIActorTestSpec {
       //Close
       println("[MainUITest] PLEASE HIT CLOSE (X) BUTTON")
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
-      //Terminate UI
-      testMainController.send(ui, M.TerminateMainUI)
-      ??? //testMainController.expectMsg(M.MainUITerminated)
-      testMainController.expectTerminated(ui)}
+//      //Terminate UI
+//      testMainController.send(ui, M.TerminateMainUI)
+//      ??? //testMainController.expectMsg(M.MainUITerminated)
+//      testMainController.expectTerminated(ui)
+    }
   }
 }

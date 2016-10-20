@@ -18,6 +18,7 @@ import akka.actor.ActorRef
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
+import scala.collection.mutable.{Map ⇒ MutMap}
 
 import scala.util.Try
 
@@ -27,6 +28,8 @@ import scala.util.Try
   */
 
 private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
+  //Variables
+  private val pendingConnections = MutMap[Int, M.ConnectPipes]()
   //Methods
   /** Adding of ConnectPipes to pending connections
     * Can be called only from tools constructor on sketch construction.
@@ -60,13 +63,11 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
       case (outlet: OutPipe[_], inlet: InPipe[_]) ⇒
         inlet.pipeData.toolDrive ! M.AddConnection(connectionId, self, inlet.pipeData.pipeId, outlet.pipeData)
       case (o, i) ⇒
-        self ! DriveBuildingError(
-          "Building error on call doConnectivity().",
-          Some(new IllegalArgumentException(
-            s"Plug or Socket is not an instance of Outlet[_] or Inlet[_], out: $o, in: $i.")))
         log.error(
           s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance " +
-          s"of Outlet[_] or Inlet[_], out: $o, in: $i.")}}
+            s"of Outlet[_] or Inlet[_], out: $o, in: $i.")
+         throw new IllegalArgumentException(
+            s"Plug or Socket is not an instance of Outlet[_] or Inlet[_], out: $o, in: $i.")}}
   /** Adding of connection to given inlet (inletId), send  M.ConnectTo to outlet
     * @param connectionId - Int
     * @param initiator - ActorRef
@@ -79,10 +80,8 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
         outlet.toolDrive ! M.ConnectTo(connectionId, initiator, outlet.pipeId, inState.pipe.pipeData)
         log.debug(s"[DriveConnectivity.addConnection] Connection added from $outlet to $inState.")
       case None ⇒
-        self ! DriveBuildingError(
-          "Building error on call addConnection().",
-          Some(new IllegalArgumentException(s"Inlet with ID $outletId, not in inlets list.")))
-        log.error(s"[DriveConnectivity.addConnection] Inlet with ID $outletId, not in inlets list.")}
+        log.error(s"[DriveConnectivity.addConnection] Inlet with ID $outletId, not in inlets list.")
+        throw new IllegalArgumentException(s"Inlet with ID $outletId, not in inlets list.")}
   /** Adding of connection to given outlet (outletId), and send M.PipesConnected
     * @param connectionId - Int
     * @param initiator - ActorRef
@@ -96,10 +95,8 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
         initiator ! M.PipesConnected(connectionId, outletId, inlet.pipeId)
         log.debug(s"[ConnectTo] Connection added, from: $outlet, to: $inlet")
       case None ⇒
-        self ! DriveBuildingError(
-          "Building error on call connectTo().",
-          Some(new IllegalArgumentException(s"Outlet with outletId: $outletId, not in inlets list.")))
-        log.error(s"[DriveConnectivity.connectTo] Outlet with outletId: $outletId, not exist.")}
+        log.error(s"[DriveConnectivity.connectTo] Outlet with outletId: $outletId, not exist.")
+        throw new IllegalArgumentException(s"Outlet with outletId: $outletId, not in inlets list.")}
   /** Remove connected connection from pendingConnections list
     * @param connectionId - Int
     * @param inletId - Int
@@ -110,19 +107,17 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
         log.debug(s"[DriveConnectivity.pipesConnected] Connected, connectionId: $connectionId.")
         pendingConnections -= connectionId
       case false ⇒
-        self ! DriveBuildingError(
-          "Building error on call pipesConnected().",
-          Some(new IllegalArgumentException(s"Unknown connection with connectionId: $connectionId.")))
-        log.error(s"[DriveConnectivity.pipesConnected] Unknown connection with connectionId: $connectionId.")}
+        log.error(s"[DriveConnectivity.pipesConnected] Unknown connection with connectionId: $connectionId.")
+        throw new IllegalArgumentException(s"Unknown connection with connectionId: $connectionId.")}
   /** Check if all connections connected
     * @return - true if all connected */
-  def isAllConnected: Boolean = pendingConnections.isEmpty match{
+  def isPendingConListEmpty: Boolean = pendingConnections.isEmpty match{
     case true ⇒
-      log.debug(s"[DriveActor.isAllConnected] All pipes connected: $pendingConnections")
+      log.debug(s"[DriveActor.isPendingConListEmpty] All pipes connected: $pendingConnections")
       true
     case false ⇒
-      log.debug(s"[DriveActor.isAllConnected] Not all pipes connected:  $pendingConnections")
+      log.debug(s"[DriveActor.isPendingConListEmpty] Not all pipes connected:  $pendingConnections")
       false}
   /** Get of pending list, used in test
     * @return -  Map[Int, M.ConnectPipes] */
-  def getPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}
+  def getConnectionsPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}

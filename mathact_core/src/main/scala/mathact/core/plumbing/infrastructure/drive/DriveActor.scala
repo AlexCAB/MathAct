@@ -24,20 +24,13 @@ import mathact.core.plumbing.infrastructure.UserActorsRoot
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
 import mathact.core.{IdGenerator, ControllerBase}
 
-import scala.collection.mutable.{Map => MutMap}
-
+import scala.collection.mutable.{Map ⇒ MutMap}
 
 /** Manage tool
   * Inlets and outlets never removes
   * Created by CAB on 15.05.2016.
   */
 
-//TODO Добавить трайт UI, для котрого сдесь реализовать:
-//TODO Если инструмент имеет трайт UI то при постройке вызвать метод "показать UI", а при терминировании "закрыть UI".
-//TODO Эти мотоды можно вызывать в контексте потока актора (а ни импелера), та как там не будут кода пользователя,
-//TODO и он только отправить собщение потоку UI но фактически ничего не будет делать.
-//TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
-//TODO Так же не стоит забывать о сообщениях ShowToolUi и HideToolUi
 private [mathact] class DriveActor(
   val config: DriveConfigLike,
   val toolId: Int,
@@ -54,202 +47,172 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
   //Variables
   val outlets = MutMap[Int, OutletState]()  //(Outlet ID, OutletData)
   val inlets = MutMap[Int, InletState]()    //(Inlet ID, OutletData)
-  val pendingConnections = MutMap[Int, M.ConnectPipes]()
-  var visualisationLaval: VisualisationLaval = VisualisationLaval.None
+  var visualisationLaval = VisualisationLaval.None
   //On start
   val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + pump.toolName)
   val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + pump.toolName)
   //Message handling
-  def reaction: PartialFunction[(Msg, Drive.State), Unit] = {
+  def reaction: PartialFunction[(Msg, Drive.State), Drive.State] = {
+    //Construction, adding outlet, ask from object
+    case (M.AddOutlet(pipe, name), state) ⇒
+      sender ! addOutletAsk(pipe, name, state)
+      state
+    //Construction, adding inlet, ask from object
+    case (M.AddInlet(pipe, name), state) ⇒
+      sender ! addInletAsk(pipe, name, state)
+      state
     //Construct drive, just switch state to Created to disable future adding of inlets, outlets and connections
     case (M.ConstructDrive, Init) ⇒
       constructDrive()
-      Created
+      Constructed
     //Build drive, connect connections from pending list
-    case (M.BuildDrive, Created) ⇒
-      isAllConnected match{
+    case (M.ConnectingDrive, Constructed) ⇒
+      isPendingConListEmpty match{
         case true ⇒
-          buildingSuccess()
-          Built
+          connectingSuccess()
+          Connected
         case false ⇒
           doConnectivity()
-          Building}
+          Connecting}
+    //Connectivity, ask from object
+    case (message: M.ConnectPipes, state) ⇒
+      sender ! connectPipesAsk(message, state)
+      state
+    //Connectivity, add connection
+    case (M.AddConnection(id, initiator, inletId, outlet), Connecting | Connected) ⇒
+      addConnection(id, initiator, inletId, outlet)
+      state
+    //Connectivity, connect to
+    case (M.ConnectTo(id, initiator, outletId, inlet), Connecting | Connected) ⇒
+      connectTo(id, initiator, outletId, inlet)
+      state
     //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and ToolBuilt
-    case (_: M.PipesConnected, Building) ⇒
-      isAllConnected match{
+    case (M.PipesConnected(id, inletId, outletId), Connecting) ⇒
+      pipesConnected(id, inletId, outletId)
+      isPendingConListEmpty match{
         case true ⇒
-          buildingSuccess()
-          startUserMessageProcessing()
-          Built
+          connectingSuccess()
+          Connected
         case false ⇒
           state}
+    //Stating of user messages handling
+    case (M.TurnOnDrive, Connected) ⇒
+      startUserMessageProcessing()
+      sendPendingMessages()
+      TurnedOn
     //Start drive, run user starting function
-    case (M.StartDrive, Built) ⇒ doStarting() match{
+    case (M.StartDrive, TurnedOn) ⇒ doStarting() match{
       case true ⇒
-        doStarting()
-        Starting
-      case false ⇒
-
         Working
-    }
-
-
-
-      state = Starting
-
-
-
-
-
-
-    //Check if user start function executed in Starting state
-    case (M.StartDrive | _: M.TaskDone | _: M.TaskFailed, Starting) ⇒ isStarted match{
-      case true ⇒
-        log.debug(
-          s"[DriveActor.postHandling @ Starting] Started, send M.DriveStarted, " +
-            s"run message processing and switch to Working mode.")
-        state = Working
-        startUserMessageProcessing()
-        startingSuccess()
       case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Starting] Not started yet.")}
-
-
-
-
-
+        Starting}
+    //Started
+    case (M.TaskDone(Start, _, time, _), Starting) ⇒
+      startingTaskDone(time)
+      Working
+    //Starting failed, only log to user logger and keep working
+    case (M.TaskFailed(Start, _, time, error), Starting) ⇒
+      startingTaskFailed(time, error)
+      Working
+    //Starting timeout, only log to user logger and keep waiting
+    case (M.TaskTimeout(Start, _, time), Starting) ⇒
+      startingTaskTimeout(time)
+      state
     //Stop drive, run user stopping function
-    case (M.StopDrive, Working) ⇒
-      state = Stopping
-      doStopping()
-    //Terminate drive, stop actor clear resources
-    case (M.TerminateDrive, Init | Created | Built | Stopped) ⇒
-      state = Terminating
-      doTerminating()
-
-
-
-    //Check if user start function executed in Starting state
-    case (M.StartDrive | _: M.TaskDone | _: M.TaskFailed, Starting) ⇒ isStarted match{
+    case (M.StopDrive, Working) ⇒ doStopping() match{
       case true ⇒
-        log.debug(
-          s"[DriveActor.postHandling @ Starting] Started, send M.DriveStarted, " +
-            s"run message processing and switch to Working mode.")
-        state = Working
-        startUserMessageProcessing()
-        startingSuccess()
+        Stopped
       case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Starting] Not started yet.")}
-    //Check if user stop function executed in Stopping state
-    case (M.StopDrive | _: M.TaskDone | _: M.TaskFailed, Stopping) ⇒ isStopped match{
+        Stopping}
+    //Stopped
+    case (M.TaskDone(Stop, _, time, _), Stopping) ⇒
+      stoppingTaskDone(time)
+      Stopped
+    //Stopping failed, only log to user logger and keep working
+    case (M.TaskFailed(Stop, _, time, error), Stopping) ⇒
+      stoppingTaskFailed(time, error)
+      Stopped
+    //Stopping timeout, only log to user logger and keep waiting
+    case (M.TaskTimeout(Stop, _, time), Stopping) ⇒
+      stoppingTaskTimeout(time)
+      state
+    //Stop of user messaging processing
+    case (M.TurnOffDrive, Stopped) ⇒ isAllMsgProcessed match{
       case true ⇒
-        log.debug(s"[DriveActor.postHandling @ Stopping] Stopped, send M.DriveStopped")
-        state = Stopped
-        stoppingSuccess()
+        driveTurnedOff()
+        TurnedOff
       case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Stopping] Not stopped yet.")}
+        TurningOff}
     //Check if all message queues is empty in Terminating, and if so do terminating
-    case (M.TerminateDrive | _: M.TaskDone | _: M.TaskFailed, Terminating) ⇒ isAllMsgProcessed match{
+    case (_: M.TaskDone | _: M.TaskFailed, TurningOff) ⇒ isAllMsgProcessed match{
       case true ⇒
-        log.debug(s"[DriveActor.postHandling @ Terminating] Terminate impeller actor")
-        impeller ! PoisonPill
+        driveTurnedOff()
+        TurnedOff
       case false ⇒
-        log.debug(s"[DriveActor.postHandling @ Terminating] Not terminated yet.")}
-
-
-
-
-
-    //Construction, adding pipes, ask from object
-    case (M.AddOutlet(pipe, name), state) ⇒ sender ! addOutletAsk(pipe, name, state)
-    case (M.AddInlet(pipe, name), state) ⇒ sender ! addInletAsk(pipe, name, state)
-    //Connectivity, ask from object
-    case (message: M.ConnectPipes, state) ⇒ sender ! connectPipesAsk(message, state)
-    //Connectivity, internal
-    case (M.AddConnection(id, initiator, inletId, outlet), Building | Built) ⇒ addConnection(id, initiator, inletId, outlet)
-    case (M.ConnectTo(id, initiator, outletId, inlet), Building | Built) ⇒ connectTo(id, initiator, outletId, inlet)
-    case (M.PipesConnected(id, inletId, outletId), Building | Built) ⇒ pipesConnected(id, inletId, outletId)
-    //Starting
-    case (M.TaskDone(Start, _, time, _), Starting) ⇒ startingTaskDone(time)
-    case (M.TaskTimeout(Start, _, time), Starting) ⇒ startingTaskTimeout(time)
-    case (M.TaskFailed(Start, _, time, error), Starting) ⇒ startingTaskFailed(time, error)
+        state}
     //Messaging, ask from object
-    case (M.UserData(outletId, value), state) ⇒ sender ! userDataAsk(outletId, value, state)
-    //Messaging
-    case (M.UserMessage(outletId, inletId, value), state) ⇒ userMessage(outletId, inletId, value, state)
-    case (M.DriveLoad(sub, outId, queueSize), Starting | Working | Stopping) ⇒ driveLoad(sub, outId, queueSize)
-    case (M.TaskDone(Massage, inletId, time, _), Working | Stopping | Terminating) ⇒ messageTaskDone(inletId, time)
-    case (M.TaskTimeout(Massage, inId, time), Working | Stopping | Terminating) ⇒ messageTaskTimeout(inId, time)
-    case (M.TaskFailed(Massage, inId, t, err), Working | Stopping | Terminating) ⇒ messageTaskFailed(inId, t, err)
-    //Stopping
-    case (M.TaskDone(Stop, _, time, _), Stopping) ⇒ stoppingTaskDone(time)
-    case (M.TaskTimeout(Stop, _, time), Stopping) ⇒ stoppingTaskTimeout(time)
-    case (M.TaskFailed(Stop, _, time, error), Stopping) ⇒ stoppingTaskFailed(time, error)
-    //Managing
-    case (M.SkipTimeoutTask, _) ⇒ impeller ! M.SkipAllTimeoutTask
-    case (M.SetVisualisationLaval(laval), _) ⇒ visualisationLaval = laval
+    case (M.UserData(outletId, value), state) ⇒
+      sender ! userDataAsk(outletId, value, state)
+      state
+    //Messaging, user message
+    case (M.UserMessage(outletId, inletId, value), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
+      userMessage(outletId, inletId, value)
+      state
+    //Messaging, drive load
+    case (M.DriveLoad(sub, outId, queueSize), st) if st != Init && st != Constructed && st != Connecting ⇒
+      driveLoad(sub, outId, queueSize)
+      state
+    //Messaging, task done
+    case (M.TaskDone(Massage, inletId, time, _), st) if st != Init && st != Constructed && st != Connecting ⇒
+      messageTaskDone(inletId, time)
+      state
+    //Messaging, task timeout
+    case (M.TaskTimeout(Massage, inId, time), st) if st != Init && st != Constructed && st != Connecting ⇒
+      messageTaskTimeout(inId, time)
+      state
+    //Messaging, task failed
+    case (M.TaskFailed(Massage, inId, t, err), st) if st != Init && st != Constructed && st != Connecting ⇒
+      messageTaskFailed(inId, t, err)
+      state
+    //Managing, skip timeout task
+    case (M.SkipTimeoutTask, _) ⇒
+      impeller ! M.SkipAllTimeoutTask
+      state
+    //Managing, set visualisation laval
+    case (M.SetVisualisationLaval(laval), _) ⇒
+      visualisationLaval = laval
+      state
     //UI control
-    case (M.ShowToolUi, Built | Starting | Working | Stopping) ⇒ showToolUi()
-    case (M.TaskDone(ShowUI, _, time, _), _) ⇒ showToolUiTaskDone(time)
-    case (M.TaskTimeout(ShowUI, _, time), _) ⇒ showToolUiTaskTimeout(time)
-    case (M.TaskFailed(ShowUI, _, time, error), _) ⇒ showToolUiTaskFailed(time, error)
-    case (M.HideToolUi, Built | Starting | Working | Stopping) ⇒ hideToolUi()
-    case (M.TaskDone(HideUI, _, time, _), _) ⇒ hideToolUiTaskDone(time)
-    case (M.TaskTimeout(HideUI, _, time), _) ⇒ hideToolUiTaskTimeout(time)
-    case (M.TaskFailed(HideUI, _, time, error), _) ⇒ hideToolUiTaskFailed(time, error)
-    //Errors, (on error drive only report to plumbing actor but not stop working)
-    case (DriveBuildingError(msg, error), _) ⇒ driveError(msg, error)
-    case (DriveMessagingError(msg, error), _) ⇒ driveError(msg, error)
-
-
-
+    case (M.ShowToolUi, st) if st != Init ⇒
+      showToolUi()
+      state
+//    //UI control
+//    case (M.TaskDone(ShowUI, _, time, _), _) ⇒
+//      showToolUiTaskDone(time)
+//    //UI control
+//    case (M.TaskTimeout(ShowUI, _, time), _) ⇒
+//      showToolUiTaskTimeout(time)
+//    case (M.TaskFailed(ShowUI, _, time, error), _) ⇒
+//      showToolUiTaskFailed(time, error)
+    //UI control
+    case (M.HideToolUi, st)  if st != Init ⇒
+      hideToolUi()
+      state
+//    case (M.TaskDone(HideUI, _, time, _), _) ⇒
+//      hideToolUiTaskDone(time)
+//    case (M.TaskTimeout(HideUI, _, time), _) ⇒
+//      hideToolUiTaskTimeout(time)
+//    case (M.TaskFailed(HideUI, _, time, error), _) ⇒
+//      hideToolUiTaskFailed(time, error)
 
   }
   //Cleanup
   def cleanup(): Unit = {
 
-    ???
+    println("[DriveActor.cleanup] TODO")  //TODO Очистка ресурсов, в частности UI
 
   }
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//  //Receives
-//  /** Reaction on StateMsg'es */
-//  def onStateMsg: PartialFunction[(StateMsg, Drive.State), Unit] = {
-//
-//
-//
-//  }
-//
-//
-//
-//
-//  }
-//  /** Handling of actor termination*/
-//  def terminationHandling: PartialFunction[(ActorRef, Drive.State), Unit] = {
-//    //If impeller terminated, self termination
-//    case (`impeller`, Terminating) ⇒
-//      log.debug(s"[DriveActor.terminationHandling] Impeller terminated, self termination.")
-//      self ! PoisonPill
-//
-//  }
-//  /** Actor reaction on messages */
-//
 
     //TODO Add more
 
-  }
+}

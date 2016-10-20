@@ -68,10 +68,13 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
     case M.HideSketchUI ⇒
       runAndWait(window.hide())
       workbenchController ! M.SketchUIChanged(isShow = false)
-    //Terminate UI
-    case M.TerminateSketchUI ⇒
-      runAndWait(window.close())
-      ???
-//      workbenchController ! M.SketchUITerminated
-      self ! PoisonPill}}
+//    //Terminate UI
+//    case M.TerminateSketchUI ⇒
+//      runAndWait(window.close())
+//      ???
+////      workbenchController ! M.SketchUITerminated
+//      self ! PoisonPill
+  }
+  ???
+}
 
