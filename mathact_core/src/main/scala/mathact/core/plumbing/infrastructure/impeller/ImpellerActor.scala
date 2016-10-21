@@ -103,7 +103,9 @@ private [mathact] class ImpellerActor(drive: ActorRef, maxQueueSize: Int) extend
         drive ! M.TaskTimeout(kind, id, (System.currentTimeMillis - startTime).millis)
         context.system.scheduler.scheduleOnce(timeout, self, TaskTimeout(taskNumber, timeout))
       case _ ⇒
-        log.debug("[ImpellerActor.TaskTimeout] Task done or skip, stop timer.")}
+        log.debug(
+          s"[ImpellerActor.TaskTimeout] Task done or skip, stop timer, taskNumber: $taskNumber, " +
+          s"timeout: $timeout, currentTask: $currentTask")}
     //Task done, send report to driver
     case TaskSuccess(taskNumber, res) ⇒ currentTask match{
       case Some((curNum, kind, id, startTime, isTimeout)) ⇒

@@ -116,7 +116,7 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param outletId - Int, source ID
     * @param value -  Any, user message */
   def userDataAsk(outletId: Int, value: Any, state: Drive.State): Either[Throwable, Option[Long]] = state match{
-      case Drive.State.Init | Drive.State.Constructed | Drive.State.Connecting | Drive.State.Connected ⇒
+      case State.Init | State.Constructed | State.Connecting | State.Connected ⇒
         //Put message to pending list
         pendingUserMessages += (outletId → value)
         //Eval push timeout
@@ -127,7 +127,7 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
           s"was put in pending list: $pendingUserMessages, pushTimeout: $pushTimeout")
         //Return
         Right(pushTimeout)
-      case Drive.State.TurnedOn |Drive.State.Starting | Drive.State.Working | Drive.State.Stopping | Drive.State.Stopped ⇒
+      case State.TurnedOn |State.Starting | State.Working | State.Stopping | State.Stopped ⇒
         //Get of outlet
         outlets.get(outletId) match{
           case Some(outlet) ⇒
@@ -165,9 +165,25 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param outletId - Int, source ID
     * @param inletId - Int, drain ID
     * @param value - Any, user message */
-  def userMessage(outletId: Int, inletId: Int, value: Any): Unit = runForInlet(inletId){ inlet ⇒
-    log.debug(s"[DriveMessaging.userMessage] outletId: $outletId, inlet: $inlet, value: $value")
-    enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))}
+  def userMessage(outletId: Int, inletId: Int, value: Any, state: State): Unit = state match{
+    case State.Connected | State.TurnedOn | State.Starting | State.Working | State.Stopping | State.Stopped ⇒
+      //Process message
+      runForInlet(inletId){ inlet ⇒
+        log.debug(s"[DriveMessaging.userMessage] outletId: $outletId, inlet: $inlet, value: $value")
+        enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))}
+    case _ ⇒
+      //Incorrect state
+      log.error(
+        s"[DriveMessaging.userMessage] Incorrect state $state, outletId: $outletId, inlet: $inletId, value: $value.")
+      val outletName =  inlets
+        .get(inletId).flatMap(_.publishers.find(_._2.pipeId == outletId).flatMap(_._2.pipeName)).getOrElse(s"№$outletId")
+      val inletName = inlets
+        .get(inletId).flatMap(_.name).getOrElse(s"№$inletId")
+      userLogging ! M.LogError(
+        Some(toolId),
+        pump.toolName,
+        Seq(),
+        s"Message $value from $outletName to $inletName not processed in state $state")}
   /** Starting of user messages processing */
   def startUserMessageProcessing(): Unit = {
     //Run for firs message

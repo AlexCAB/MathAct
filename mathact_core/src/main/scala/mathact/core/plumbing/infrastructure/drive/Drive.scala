@@ -16,7 +16,7 @@ package mathact.core.plumbing.infrastructure.drive
 
 import akka.actor.ActorRef
 import mathact.core.model.data.pipes.{InletData, OutletData}
-import mathact.core.model.messages.{M, Msg}
+import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting.{InPipe, OutPipe}
 
 import scala.collection.mutable.{Map => MutMap, Queue => MutQueue}

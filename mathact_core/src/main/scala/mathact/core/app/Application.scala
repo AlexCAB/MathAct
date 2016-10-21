@@ -32,7 +32,7 @@ import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
-//import mathact.core.plumbing.infrastructure.PlumbingActor
+//import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}

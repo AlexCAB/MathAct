@@ -103,7 +103,7 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
   /** Build ToolBuiltInfo and send to visualization actor */
   def connectingSuccess(): Unit = {
     log.debug(
-      s"[DriveLife.postHandling @ Building] All pipes connected, send M.DriveBuilt, and switch to Working mode.")
+      s"[DriveLife.connectingSuccess] All pipes connected, send M.DriveConnected, LogInfo, ToolBuiltInfo")
     //Report to plumbing
     plumbing ! M.DriveConnected
     //Log to user logger

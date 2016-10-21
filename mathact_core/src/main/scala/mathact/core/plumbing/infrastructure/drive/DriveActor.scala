@@ -20,8 +20,8 @@ import mathact.core.model.config.DriveConfigLike
 import mathact.core.model.enums._
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
-import mathact.core.plumbing.infrastructure.UserActorsRoot
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
+import mathact.core.plumbing.infrastructure.user.actors.UserActorsRoot
 import mathact.core.{IdGenerator, ControllerBase}
 
 import scala.collection.mutable.{Map ⇒ MutMap}
@@ -136,42 +136,59 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
     case (M.TaskTimeout(Stop, _, time), Stopping) ⇒
       stoppingTaskTimeout(time)
       state
-    //Stop of user messaging processing
+    ///Turning off, done if no messages to process
     case (M.TurnOffDrive, Stopped) ⇒ isAllMsgProcessed match{
       case true ⇒
         driveTurnedOff()
         TurnedOff
       case false ⇒
         TurningOff}
-    //Check if all message queues is empty in Terminating, and if so do terminating
-    case (_: M.TaskDone | _: M.TaskFailed, TurningOff) ⇒ isAllMsgProcessed match{
+    //Turning off, if no more messages after TaskDone
+    case (M.TaskDone(Massage, inletId, time, _), TurningOff) ⇒ isAllMsgProcessed match{
       case true ⇒
         driveTurnedOff()
         TurnedOff
       case false ⇒
+        messageTaskDone(inletId, time)
+        state}
+    //Turning off, if no more messages after TaskTimeout
+    case (M.TaskTimeout(Massage, inId, time), TurningOff) ⇒ isAllMsgProcessed match{
+      case true ⇒
+        driveTurnedOff()
+        TurnedOff
+      case false ⇒
+        messageTaskTimeout(inId, time)
+        state}
+    //Turning off, if no more messages after TaskFailed
+    case (M.TaskFailed(Massage, inId, t, err), TurningOff) ⇒ isAllMsgProcessed match{
+      case true ⇒
+        driveTurnedOff()
+        TurnedOff
+      case false ⇒
+        messageTaskFailed(inId, t, err)
         state}
     //Messaging, ask from object
     case (M.UserData(outletId, value), state) ⇒
       sender ! userDataAsk(outletId, value, state)
       state
     //Messaging, user message
-    case (M.UserMessage(outletId, inletId, value), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
-      userMessage(outletId, inletId, value)
+    case (M.UserMessage(outletId, inletId, value), st) ⇒
+      userMessage(outletId, inletId, value, st)
       state
     //Messaging, drive load
     case (M.DriveLoad(sub, outId, queueSize), st) if st != Init && st != Constructed && st != Connecting ⇒
       driveLoad(sub, outId, queueSize)
       state
     //Messaging, task done
-    case (M.TaskDone(Massage, inletId, time, _), st) if st != Init && st != Constructed && st != Connecting ⇒
+    case (M.TaskDone(Massage, inletId, time, _), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskDone(inletId, time)
       state
     //Messaging, task timeout
-    case (M.TaskTimeout(Massage, inId, time), st) if st != Init && st != Constructed && st != Connecting ⇒
+    case (M.TaskTimeout(Massage, inId, time), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskTimeout(inId, time)
       state
     //Messaging, task failed
-    case (M.TaskFailed(Massage, inId, t, err), st) if st != Init && st != Constructed && st != Connecting ⇒
+    case (M.TaskFailed(Massage, inId, t, err), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskFailed(inId, t, err)
       state
     //Managing, skip timeout task

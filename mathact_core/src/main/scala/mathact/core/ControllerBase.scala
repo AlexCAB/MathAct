@@ -76,8 +76,8 @@ abstract class ControllerBase[S](initState: S) extends Actor{
       if(newState != currentState) log.debug(s"STATE CHANGED: $currentState ===> $newState")
       currentState = newState
     //Termination processing
-    case Terminated(actor) ⇒
-      log.debug(s"TERMINATION OF ACTOR: $actor, CURRENT STATE: $currentState")
+    case Terminated(actor) ⇒  //Not sends if child died on normal stopping (controller ! PoisonPill)
+      log.error(s"[ControllerBase @ Terminated] Controller crashed on child actor termination, actor: $actor")
       self ! PoisonPill
     //Unknown message
     case message: Any ⇒

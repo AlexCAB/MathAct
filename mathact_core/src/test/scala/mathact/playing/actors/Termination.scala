@@ -97,13 +97,13 @@ object Termination extends App{
 //  println("a ! Terminate")
 //  a ! Terminate
   //
-  Thread.sleep(2000)
-  println("a ! Throw")
-  a ! Throw
-  //
 //  Thread.sleep(2000)
-//  println("a ! PoisonPill")
-//  a ! PoisonPill
+//  println("a ! Throw")
+//  a ! Throw
+  //
+  Thread.sleep(2000)
+  println("a ! PoisonPill")
+  a ! PoisonPill
   //
   //Stop
   Thread.sleep(5000)
