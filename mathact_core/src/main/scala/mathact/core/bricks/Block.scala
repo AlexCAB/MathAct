@@ -12,15 +12,28 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.gui.frame
+package mathact.core.bricks
 
-import mathact.core.bricks.Block
+import mathact.core.plumbing.{Fitting, Pump}
 
-
-/** Contain DSL for frame configuration.
-  * Created by CAB on 21.05.2016.
+/** Base class for sketch block.
+  * Created by CAB on 22.10.2016.
   */
 
-trait FrameConfig { _: Block ⇒
+abstract class Block (context: SketchContext, name: String) extends Fitting{
+
+
+
+  //  this match{
+  //
+  //
+  //
+  //    case s: PotBoard ⇒ println("PotBoard")
+  //    case _ ⇒ println("Any")
+  //  }
+
+
+  private[mathact] val pump: Pump = new Pump(context, this, name, None)
+
 
 }

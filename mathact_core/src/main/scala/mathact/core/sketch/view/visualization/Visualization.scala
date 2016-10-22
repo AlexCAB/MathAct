@@ -29,22 +29,22 @@ private [mathact] object Visualization {
     val StackLayout = Value}
   type LayoutType = LayoutType.Value
   //Data
-  case class ToolImageData(
+  case class BlockImageData(
     path: String,
     width: Int,
     height: Int)
-  case class ToolData(
-    toolId: Int,
-    toolName: String,
-    toolImage: Option[ToolImageData],
+  case class BlockData(
+    blockId: Int,
+    blockName: String,
+    blockImage: Option[BlockImageData],
     inlets: Map[Int, Option[String]],
     outlets: Map[Int, Option[String]])
   case class ConnectionData(
-    inletToolId: Int,
+    inletBlockId: Int,
     inletId: Int,
-    outletToolId: Int,
+    outletBlockId: Int,
     outletId: Int)
-  case class GraphData(tools: List[ToolData], connections: List[ConnectionData])
+  case class GraphData(blocks: List[BlockData], connections: List[ConnectionData])
   //Messages
   case object DoClose
   case class LayoutTypeChanced(layoutType: LayoutType)

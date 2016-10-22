@@ -66,8 +66,8 @@ extends Stage { import Visualization._
     "Parallel Edge Layout",
     "Stack Layout")
   val defaultLayoutChoice = 0 //0 to 4
-  val toolNodeSize = 26
-  val toolNodeSimpleStyle = Map[String, Any](
+  val blockNodeSize = 26
+  val blockNodeSimpleStyle = Map[String, Any](
     STYLE_SHAPE                   → SHAPE_ELLIPSE,
     STYLE_FILLCOLOR               → "#ffffff",
     STYLE_STROKECOLOR             → "#000000",
@@ -75,7 +75,7 @@ extends Stage { import Visualization._
     STYLE_VERTICAL_LABEL_POSITION → ALIGN_BOTTOM,
     STYLE_ALIGN                   → ALIGN_CENTER,
     STYLE_EDITABLE                → 0)
-  val toolNodeImageStyle = Map[String, Any](
+  val blockNodeImageStyle = Map[String, Any](
     STYLE_SHAPE                   → SHAPE_IMAGE,
     STYLE_VERTICAL_LABEL_POSITION → ALIGN_BOTTOM,
     STYLE_ALIGN                   → ALIGN_CENTER,
@@ -133,7 +133,7 @@ extends Stage { import Visualization._
       case Some(c: mxCell) if c.isEdge ⇒ false
       case _ ⇒ super.isCellSelectable(cell)}}
   private val parent = graph.getDefaultParent
-  graph.getStylesheet.putCellStyle("TOOL", buildStyle(toolNodeSimpleStyle))
+  graph.getStylesheet.putCellStyle("TOOL", buildStyle(blockNodeSimpleStyle))
   graph.getStylesheet.putCellStyle("INLET", buildStyle(inletNodeStyle))
   graph.getStylesheet.putCellStyle("OUTLET", buildStyle(outletNodeStyle))
   graph.getStylesheet.putCellStyle("PIPE", buildStyle(pipeEdgeStyle))
@@ -187,46 +187,46 @@ extends Stage { import Visualization._
     try {
       //Clean up
       graph.removeCells(graph.getChildVertices(graph.getDefaultParent))
-      //Build tools
-      val toolVertices = data.tools.zipWithIndex
-        .map{ case (tool, toolIndex) ⇒
+      //Build blocks
+      val blockVertices = data.blocks.zipWithIndex
+        .map{ case (block, blockIndex) ⇒
           //Preparing
-          val toolX = (toolIndex + 1) * toolNodeSize * 3.5
-          val toolY = (toolIndex + 1) * toolNodeSize * 1.5
-          val (toolStyle, verWidth, verHeight) = tool.toolImage
+          val blockX = (blockIndex + 1) * blockNodeSize * 3.5
+          val blockY = (blockIndex + 1) * blockNodeSize * 1.5
+          val (blockStyle, verWidth, verHeight) = block.blockImage
             .map{ image ⇒
-              val styleName = "TOOL_" + tool.toolId
-              val style = toolNodeImageStyle + (STYLE_IMAGE → image.path)
+              val styleName = "TOOL_" + block.blockId
+              val style = blockNodeImageStyle + (STYLE_IMAGE → image.path)
               graph.getStylesheet.putCellStyle(styleName, buildStyle(style))
               (styleName, image.width.toDouble, image.height.toDouble)}
-            .getOrElse(("TOOL", toolNodeSize.toDouble, toolNodeSize.toDouble))
-          //Add tool vertex
-          val toolVertex = graph.insertVertex(parent, null, tool.toolName, toolX, toolY, verWidth, verHeight, toolStyle)
+            .getOrElse(("TOOL", blockNodeSize.toDouble, blockNodeSize.toDouble))
+          //Add block vertex
+          val blockVertex = graph.insertVertex(parent, null, block.blockName, blockX, blockY, verWidth, verHeight, blockStyle)
           //Add pipes
           def addPipes(pipes: Map[Int, Option[String]], style: String, size: Int, shift: Double): Map[Int, AnyRef] = pipes
             .zipWithIndex
             .map{ case ((pipeId, pipeName), pipeIndex) ⇒
               //Preparing
-              val pipeX = toolX + toolNodeSize * shift
-              val pipeY = (toolY - (pipes.size - 1) * size) + size * 0.22 + pipeIndex * size * 2
+              val pipeX = blockX + blockNodeSize * shift
+              val pipeY = (blockY - (pipes.size - 1) * size) + size * 0.22 + pipeIndex * size * 2
               //Adding vertex
               val pipeVertex = graph.insertVertex(parent, null, pipeName.orNull, pipeX, pipeY, size, size, style)
               //Adding edge
-              graph.insertEdge(parent, null, null, toolVertex, pipeVertex, "PIPE")
+              graph.insertEdge(parent, null, null, blockVertex, pipeVertex, "PIPE")
               //Return
               (pipeId, pipeVertex)}
-          val inletVertices = addPipes(tool.inlets, "INLET", inletNodeSize, -0.8)
-          val outletVertices = addPipes(tool.outlets, "OUTLET", outletNodeSize, 1.15)
+          val inletVertices = addPipes(block.inlets, "INLET", inletNodeSize, -0.8)
+          val outletVertices = addPipes(block.outlets, "OUTLET", outletNodeSize, 1.15)
           //Return
-          (tool.toolId, (inletVertices, outletVertices))}
+          (block.blockId, (inletVertices, outletVertices))}
         .toMap
       //Build connections
       data.connections.foreach{ con ⇒ graph.insertEdge(
         parent,
         null,
         null,
-        toolVertices(con.outletToolId)._2(con.outletId),
-        toolVertices(con.inletToolId)._1(con.inletId),
+        blockVertices(con.outletBlockId)._2(con.outletId),
+        blockVertices(con.inletBlockId)._1(con.inletId),
         "CONNECTION")}}
     finally {
       graph.getModel.endUpdate()}}

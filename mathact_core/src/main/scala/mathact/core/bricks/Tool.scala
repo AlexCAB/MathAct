@@ -21,21 +21,8 @@ import mathact.core.plumbing.{Fitting, Pump}
   * Created by CAB on 07.05.2016.
   */
 
-abstract class Tool(context: SketchContext, name: String) extends Fitting{
+abstract class Tool(context: SketchContext, name: String) extends Block(context, name){
 
-
-
-//  this match{
-//
-//
-//
-//    case s: PotBoard ⇒ println("PotBoard")
-//    case _ ⇒ println("Any")
-//  }
-
-
- private[mathact] val pump: Pump = new Pump(context, this, name, None)
-
-
+  //TODO Специфические для инструментов оьявления
 
 }

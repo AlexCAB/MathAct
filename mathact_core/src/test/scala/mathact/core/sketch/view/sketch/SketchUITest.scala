@@ -77,16 +77,16 @@ class SketchUITest extends UIActorTestSpec {
       val runBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       runBtn.element shouldEqual RunBtn
       runBtn.action shouldEqual ElemEnabled
-      //Buttons test: ShowAllToolsUiBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(ShowAllToolsUiBtn → ElemEnabled)))
-      val showAllToolsUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
-      showAllToolsUiBtn.element shouldEqual ShowAllToolsUiBtn
-      showAllToolsUiBtn.action shouldEqual ElemEnabled
-      //Buttons test: HideAllToolsUiBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(HideAllToolsUiBtn → ElemEnabled)))
-      val hideAllToolsUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
-      hideAllToolsUiBtn.element shouldEqual HideAllToolsUiBtn
-      hideAllToolsUiBtn.action shouldEqual ElemEnabled
+      //Buttons test: ShowAllBlocksUiBtn
+      workbenchController.send(ui, M.UpdateSketchUIState(Map(ShowAllBlocksUiBtn → ElemEnabled)))
+      val showAllBlocksUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      showAllBlocksUiBtn.element shouldEqual ShowAllBlocksUiBtn
+      showAllBlocksUiBtn.action shouldEqual ElemEnabled
+      //Buttons test: HideAllBlocksUiBtn
+      workbenchController.send(ui, M.UpdateSketchUIState(Map(HideAllBlocksUiBtn → ElemEnabled)))
+      val hideAllBlocksUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      hideAllBlocksUiBtn.element shouldEqual HideAllBlocksUiBtn
+      hideAllBlocksUiBtn.action shouldEqual ElemEnabled
       //Buttons test: SkipAllTimeoutTaskBtn
       workbenchController.send(ui, M.UpdateSketchUIState(Map(SkipAllTimeoutTaskBtn → ElemEnabled)))
       val skipAllTimeoutTaskBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)

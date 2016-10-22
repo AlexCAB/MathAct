@@ -50,10 +50,10 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
         window.visualisationBtn.setState(s)}
       case (RunBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
         window.runBtn.setState(s)}
-      case (ShowAllToolsUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
-        window.showAllToolsUiBtn.setState(s)}
-      case (HideAllToolsUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
-        window.hideAllToolsUiBtn.setState(s)}
+      case (ShowAllBlocksUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
+        window.showAllBlocksUiBtn.setState(s)}
+      case (HideAllBlocksUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
+        window.hideAllBlocksUiBtn.setState(s)}
       case (SkipAllTimeoutTaskBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
         window.skipAllTimeoutTaskBtn.setState(s)}
       case (StopSketchBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒runAndWait{
@@ -70,7 +70,7 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
       workbenchController ! M.SketchUIChanged(isShow = false)
 //    //Terminate UI
 //    case M.TerminateSketchUI ⇒
-//      runAndWait(window.close())
+//      runAndWait(window.close())  //TODO Не ждать или с таймаутом
 //      ???
 ////      workbenchController ! M.SketchUITerminated
 //      self ! PoisonPill

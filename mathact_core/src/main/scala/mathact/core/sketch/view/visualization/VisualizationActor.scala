@@ -20,7 +20,7 @@ import akka.actor.{PoisonPill, ActorRef}
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.VisualizationConfigLike
-import mathact.core.model.data.visualisation.ToolBuiltInfo
+import mathact.core.model.data.visualisation.BlockBuiltInfo
 import mathact.core.model.messages.M
 
 
@@ -42,51 +42,51 @@ extends WorkerBase with JFXInteraction { import Visualization._
   //Variables
   private var isShow = false
   private var isFinalGraphBuilt = false
-  private var builtTools = List[(ToolBuiltInfo, Option[ToolImageData])]()
+  private var builtBlocks = List[(BlockBuiltInfo, Option[BlockImageData])]()
   private var currentLayoutType = buildingLayoutType
   //Construction
   private val window = runNow{ new VisualizationViewAndController(config, self, log) }
   //Functions
-  private def prepareToolInfo(builtInfo: ToolBuiltInfo): (ToolBuiltInfo, Option[ToolImageData]) = {
+  private def prepareBlockInfo(builtInfo: BlockBuiltInfo): (BlockBuiltInfo, Option[BlockImageData]) = {
     //Check image
-    val imageData = builtInfo.toolImagePath.flatMap{ path ⇒
+    val imageData = builtInfo.blockImagePath.flatMap{ path ⇒
       try{
         val img = ImageIO.read(getClass.getClassLoader.getResource(path))
-        Some(ToolImageData("/" + path, img.getWidth, img.getHeight))}
+        Some(BlockImageData("/" + path, img.getWidth, img.getHeight))}
       catch{ case err: Throwable ⇒
         log.error(
           err,
-          s"[VisualizationActor.prepareToolInfo] Can't load custom tool image for path: $path, default will used.")
+          s"[VisualizationActor.prepareBlockInfo] Can't load custom block image for path: $path, default will used.")
         None}}
     //Return
     (builtInfo, imageData)}
-  private def buildGraphView(builtTools: List[(ToolBuiltInfo, Option[ToolImageData])]): GraphData = {
-    //Build tools
-    val tools = builtTools.map{ case (builtInfo, imageData) ⇒ ToolData(
-      builtInfo.toolId,
-      builtInfo.toolName,
+  private def buildGraphView(builtBlocks: List[(BlockBuiltInfo, Option[BlockImageData])]): GraphData = {
+    //Build blocks
+    val blocks = builtBlocks.map{ case (builtInfo, imageData) ⇒ BlockData(
+      builtInfo.blockId,
+      builtInfo.blockName,
       imageData,
       builtInfo.inlets.map{ case (id, d) ⇒ (id, d.inletName) },
       builtInfo.outlets.map{ case (id, d) ⇒ (id, d.outletName) })}
     //Build connections
-    val connections = builtTools.flatMap{ case (builtInfo, _) ⇒
+    val connections = builtBlocks.flatMap{ case (builtInfo, _) ⇒
       builtInfo.outlets.flatMap{ case (outletId, data) ⇒
         data.subscribers.flatMap{
-          case subscriber if tools.exists(_.toolId == subscriber.toolId) ⇒
-            Some(ConnectionData(subscriber.toolId, subscriber.inletId, builtInfo.toolId, outletId))
+          case subscriber if blocks.exists(_.blockId == subscriber.blockId) ⇒
+            Some(ConnectionData(subscriber.blockId, subscriber.inletId, builtInfo.blockId, outletId))
           case _ ⇒
             None}}}
     //Return
-    GraphData(tools, connections)}
+    GraphData(blocks, connections)}
   private def buildAndUpdateGraph(
-    builtTools: List[(ToolBuiltInfo, Option[ToolImageData])],
+    builtBlocks: List[(BlockBuiltInfo, Option[BlockImageData])],
     doUpdate: Boolean,
     morphingSteps: Int,
     morphingDelay: Int)
   :Unit = {
     doUpdate match {
       case true ⇒
-        val graphData = buildGraphView(builtTools)
+        val graphData = buildGraphView(builtBlocks)
         log.debug(
           s"[VisualizationActor.buildAndUpdateGraph] morphingSteps: $morphingSteps, morphingDelay: $morphingDelay, " +
           s"built graph data: $graphData")
@@ -95,35 +95,35 @@ extends WorkerBase with JFXInteraction { import Visualization._
           window.drawGraph(graphData)
           window.doLayout(buildingLayoutType, morphingSteps, morphingDelay)}
       case false ⇒
-        log.debug("[VisualizationActor.buildAndUpdateGraph] UI not show or allToolBuilt, skip building of graph data.")}}
-  private def verifyGraphStructure(builtTools: List[ToolBuiltInfo]): Unit = {
+        log.debug("[VisualizationActor.buildAndUpdateGraph] UI not show or allBlockBuilt, skip building of graph data.")}}
+  private def verifyGraphStructure(builtBlocks: List[BlockBuiltInfo]): Unit = {
     //Preparing
-    val tools: Map[Int, (Set[Int], Set[Int])] = builtTools
-      .map(t ⇒ t.toolId → Tuple2(t.inlets.keys.toSet,  t.outlets.keys.toSet))
+    val blocks: Map[Int, (Set[Int], Set[Int])] = builtBlocks
+      .map(t ⇒ t.blockId → Tuple2(t.inlets.keys.toSet,  t.outlets.keys.toSet))
       .toMap
     //Test
-    val testRes = builtTools.flatMap{ tool ⇒
-      tool.inlets.flatMap{ case (_, inlet) ⇒
+    val testRes = builtBlocks.flatMap{ block ⇒
+      block.inlets.flatMap{ case (_, inlet) ⇒
         inlet.publishers.flatMap{ publisher ⇒
-          tools.exists{ case (toolId, (_, outletIds)) ⇒
-            publisher.toolId == toolId && outletIds.contains(publisher.outletId)}
+          blocks.exists{ case (blockId, (_, outletIds)) ⇒
+            publisher.blockId == blockId && outletIds.contains(publisher.outletId)}
           match{
             case true ⇒
               None
             case false ⇒
-              val msg = s"Not found outlet with toolId = ${publisher.toolId} and outletId = ${publisher.outletId}, " +
-                s"which should be a publishers for inlet with toolId = ${tool.toolId} and inletId = ${inlet.inletId}"
+              val msg = s"Not found outlet with blockId = ${publisher.blockId} and outletId = ${publisher.outletId}, " +
+                s"which should be a publishers for inlet with blockId = ${block.blockId} and inletId = ${inlet.inletId}"
               Some(msg)}}} ++
-      tool.outlets.flatMap{ case (_, outlet) ⇒
+      block.outlets.flatMap{ case (_, outlet) ⇒
         outlet.subscribers.flatMap{ subscriber ⇒
-          tools.exists{ case (toolId, (inletIds, _)) ⇒
-            subscriber.toolId == toolId && inletIds.contains(subscriber.inletId)}
+          blocks.exists{ case (blockId, (inletIds, _)) ⇒
+            subscriber.blockId == blockId && inletIds.contains(subscriber.inletId)}
           match{
             case true ⇒
               None
             case false ⇒
-              val msg = s"Not found inlet with toolId = ${subscriber.toolId} and inletId = ${subscriber.inletId}, " +
-                s"which should be a subscriber for outlet with toolId = ${tool.toolId} and outletId = ${outlet.outletId}"
+              val msg = s"Not found inlet with blockId = ${subscriber.blockId} and inletId = ${subscriber.inletId}, " +
+                s"which should be a subscriber for outlet with blockId = ${block.blockId} and outletId = ${outlet.outletId}"
                 Some(msg)}}}}
     //Log result
     testRes match{
@@ -139,7 +139,7 @@ extends WorkerBase with JFXInteraction { import Visualization._
     case M.ShowVisualizationUI ⇒
       runAndWait{window.show()}
       isShow = true
-      buildAndUpdateGraph(builtTools, ! isFinalGraphBuilt, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      buildAndUpdateGraph(builtBlocks, ! isFinalGraphBuilt, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
       isFinalGraphBuilt = true
       workbenchController ! M.VisualizationUIChanged(isShow)
     //Close button hit
@@ -147,18 +147,18 @@ extends WorkerBase with JFXInteraction { import Visualization._
       runAndWait(window.hide())
       isShow = false
       workbenchController ! M.VisualizationUIChanged(isShow)
-    //Tool built info, sends each time some tool done building
-    case M.ToolBuilt(builtInfo) ⇒
+    //Block built info, sends each time some block done building
+    case M.BlockBuilt(builtInfo) ⇒
       //Add toll info
-      builtTools +:= prepareToolInfo(builtInfo)
+      builtBlocks +:= prepareBlockInfo(builtInfo)
       //Build view if visible
-      buildAndUpdateGraph(builtTools, isShow, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
-    //AllToolBuilt, validate graph structure
-    case M.AllToolBuilt ⇒
+      buildAndUpdateGraph(builtBlocks, isShow, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
+    //AllBlockBuilt, validate graph structure
+    case M.AllBlockBuilt ⇒
       //Validate graph structure
-      verifyGraphStructure(builtTools.map(_._1))
+      verifyGraphStructure(builtBlocks.map(_._1))
       //Finale build and layout
-      buildAndUpdateGraph(builtTools, isShow, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      buildAndUpdateGraph(builtBlocks, isShow, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
       isFinalGraphBuilt = isShow
     //Change layout
     case LayoutTypeChanced(layoutType) ⇒
@@ -173,7 +173,7 @@ extends WorkerBase with JFXInteraction { import Visualization._
       workbenchController ! M.VisualizationUIChanged(isShow)
 //    //Terminate UI
 //    case M.TerminateVisualization ⇒
-//      runAndWait(window.close())
+//      runAndWait(window.close())  //TODO Не ждать или с таймаутом
 //      ???
 ////      workbenchController ! M.VisualizationTerminated
 //      self ! PoisonPill

@@ -50,14 +50,14 @@ object Drive {
     outletId: Int,
     name: Option[String],
     pipe: OutPipe[_],
-    subscribers: MutMap[(ActorRef, Int), SubscriberData] = MutMap(),  //((subscribe tool drive, inlet ID), SubscriberData)
+    subscribers: MutMap[(ActorRef, Int), SubscriberData] = MutMap(),  //((subscribe block drive, inlet ID), SubscriberData)
     var pushTimeout: Option[Long] = None)
   case class InletState(
     inletId: Int,
     name: Option[String],
     pipe: InPipe[_],
     taskQueue: MutQueue[M.RunTask[_]] = MutQueue(),
-    publishers: MutMap[(ActorRef, Int), OutletData] = MutMap(),  // ((publishers tool drive, outlet ID), SubscriberData)
+    publishers: MutMap[(ActorRef, Int), OutletData] = MutMap(),  // ((publishers block drive, outlet ID), SubscriberData)
     var currentTask: Option[M.RunTask[_]] = None)
   //Messages
 

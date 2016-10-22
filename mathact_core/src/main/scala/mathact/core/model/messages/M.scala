@@ -18,7 +18,7 @@ import akka.actor.ActorRef
 import mathact.core.bricks.WorkbenchLike
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.{SketchInfo, SketchData}
-import mathact.core.model.data.visualisation.ToolBuiltInfo
+import mathact.core.model.data.visualisation.BlockBuiltInfo
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.fitting.{Plug, Socket, InPipe, OutPipe}
@@ -42,7 +42,6 @@ private [mathact] object M {
   case object MainCloseBtnHit extends Msg
   //MainController - SketchControllerActor
   case object LaunchSketch extends Msg                   //Sends by main controller to, initiate sketch
-  case object ShutdownSketch extends Msg                 //Sends by main controller stop sketch, initiate sketch
   case class SketchBuilt(className: String) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, errors: Seq[Throwable]) extends Msg
@@ -68,7 +67,7 @@ private [mathact] object M {
   case class SketchInstanceReady(instance: WorkbenchLike) extends Msg
   case class SketchInstanceError(error: Throwable) extends Msg
   //SketchControllerActor - PlumbingActor  (life cycle)
-  case object BuildPlumbing extends Msg    //Run tool constructing, connectivity and turning on, on sketch start
+  case object BuildPlumbing extends Msg    //Run block constructing, connectivity and turning on, on sketch start
   case object PlumbingBuilt extends Msg
   case object StartPlumbing extends Msg    //Run user start functions on hit UI "START" of by auto-run
   case object PlumbingStarted extends Msg
@@ -76,10 +75,10 @@ private [mathact] object M {
   case object PlumbingStopped extends Msg
   //SketchControllerActor - PlumbingActor  (management)
   case object SkipAllTimeoutTask extends Msg
-  case object ShowAllToolUi extends Msg
-  case object HideAllToolUi extends Msg
+  case object ShowAllBlockUi extends Msg
+  case object HideAllBlockUi extends Msg
   //Object Pump - PlumbingActor (ask)
-  case class NewDrive(toolPump: PumpLike) extends Msg     //Name and image for display in UI
+  case class NewDrive(blockPump: PumpLike) extends Msg     //Name and image for display in UI
   //Object Pump - DriveActor (ask)
   case class AddOutlet(pipe: OutPipe[_], name: Option[String]) extends Msg
   case class AddInlet(pipe: InPipe[_], name: Option[String]) extends Msg
@@ -111,16 +110,16 @@ private [mathact] object M {
   case class TaskTimeout(kind: TaskKind, id: Int, timeFromStart: FiniteDuration) extends Msg
   case class TaskFailed(kind: TaskKind, id: Int, execTime: FiniteDuration, error: Throwable) extends Msg
   //User logging
-  case class LogInfo(toolId: Option[Int], toolName: String, message: String) extends Msg
-  case class LogWarning(toolId: Option[Int], toolName: String, message: String) extends Msg
-  case class LogError(toolId: Option[Int], toolName: String, errors: Seq[Throwable], message: String) extends Msg
+  case class LogInfo(blockId: Option[Int], blockName: String, message: String) extends Msg
+  case class LogWarning(blockId: Option[Int], blockName: String, message: String) extends Msg
+  case class LogError(blockId: Option[Int], blockName: String, errors: Seq[Throwable], message: String) extends Msg
   //Visualization - DriveActor
-  case class ToolBuilt(builtInfo: ToolBuiltInfo) extends Msg   //Send to Visualization from DriveActor after tool built
-  case object AllToolBuilt
+  case class BlockBuilt(builtInfo: BlockBuiltInfo) extends Msg   //Send to Visualization from DriveActor after block built
+  case object AllBlockBuilt
   case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to DriveActor from Visualization
   case object SkipTimeoutTask extends Msg
-  case object ShowToolUi extends Msg  //Send to DriveActor from Visualization to show it's UI
-  case object HideToolUi extends Msg  //Send to DriveActor from Visualization to hide it's UI
+  case object ShowBlockUi extends Msg  //Send to DriveActor from Visualization to show it's UI
+  case object HideBlockUi extends Msg  //Send to DriveActor from Visualization to hide it's UI
 
   //TODO Add more
 

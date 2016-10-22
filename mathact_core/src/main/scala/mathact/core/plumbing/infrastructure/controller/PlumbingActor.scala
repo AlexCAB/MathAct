@@ -16,16 +16,12 @@ package mathact.core.plumbing.infrastructure.controller
 
 import java.util.UUID
 
-import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
 import mathact.core.model.config.PlumbingConfigLike
-import mathact.core.model.data.visualisation.ToolBuiltInfo
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.drive.DriveActor
-import mathact.core.{ControllerBase, IdGenerator}
-
-import scala.collection.mutable.{ListBuffer => MutList, Map => MutMap}
+import mathact.core.ControllerBase
 
 
 /** Supervisor for all Pumps
@@ -61,7 +57,7 @@ import scala.collection.mutable.{ListBuffer => MutList, Map => MutMap}
 //TODO 7.Проверить чтобы чтобы подвисшые пользовательские функции корректно логировались, и
 //TODO   завершались в ручьную (автоматически они не должны завершаются).
 //TODO 8.Подумать о жазненом цикле UI, его нужно конструировать и разрушать, возможно сделать для этого спец методы
-//TODO   в ToolUI трайте.
+//TODO   в BlockUI трайте.
 //TODO ---
 //TODO 1.Реализовать форсированое завершение по Shutdown и Fail
 //TODO 2.Исправить и добавить тесты (для Shutdown и Fail)
@@ -74,7 +70,7 @@ import scala.collection.mutable.{ListBuffer => MutList, Map => MutMap}
 //TODO Эти мотоды можно вызывать в контексте потока актора (а ни импелера), та как там не будут кода пользователя,
 //TODO и он только отправить собщение потоку UI но фактически ничего не будет делать.
 //TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
-//TODO Так же не стоит забывать о сообщениях ShowToolUi и HideToolUi
+//TODO Так же не стоит забывать о сообщениях ShowBlockUi и HideBlockUi
 //TODO
 private [mathact] class PlumbingActor(
   val config: PlumbingConfigLike,
@@ -85,143 +81,81 @@ private [mathact] class PlumbingActor(
 extends ControllerBase(Plumbing.State.Init)
 with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
   //Creators functions
-  def createDriveActor(toolId: Int, toolPump: PumpLike): ActorRef = newWorker(
-    new DriveActor(config.drive, toolId, toolPump, self, userLogging, visualization),
-    "DriveOf_" + toolPump.toolName + "_" + UUID.randomUUID)
+  def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef = newController(
+    new DriveActor(config.drive, blockId, blockPump, self, userLogging, visualization),
+    "DriveOf_" + blockPump.blockName + "_" + UUID.randomUUID)
   //Message handling
   def reaction: PartialFunction[(Msg, State), State] = {
-    //Creating of drive for new tool instance
-    case (M.NewDrive(toolPump), _) ⇒
-      newDrive(toolPump, state, createDriveActor)
+    //Creating of drive for new block instance
+    case (M.NewDrive(blockPump), _) ⇒
+      newDrive(blockPump, state, createDriveActor)
       state
-
-
-
-
-      
-
-
-    //Run tool constructing, connectivity and turning on, on sketch start
+    //Run block constructing, connectivity and turning on, on sketch start
     case (M.BuildPlumbing, Init) ⇒
-
+      sendToEachDrive(M.ConstructDrive)
       Constructing
-
-
+    //Check if all drives constructed, and run connecting if so
+    case (M.DriveConstructed, Constructing) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConstructed) match{
+      case true ⇒
+        sendToEachDrive(M.ConnectingDrive)
+        Connecting
+      case false ⇒
+        state}
+    //Check if all drives connected, and turning on if so
+    case (M.DriveConnected, Connecting) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConnected) match{
+      case true ⇒
+        sendToEachDrive(M.TurnOnDrive)
+        TurningOn
+      case false ⇒
+        state}
+    //Check if all drives turned on, and if so switch to TurnedOn and wait for start command
+    case (M.DriveTurnedOn, TurningOn) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveTurnedOn) match{
+      case true ⇒
+        allDrivesBuilt()
+        TurnedOn
+      case false ⇒
+        state}
     //Run user start functions on hit UI "START" of by auto-run
     case (M.StartPlumbing, TurnedOn) ⇒
-
+      sendToEachDrive(M.StartDrive)
       Starting
-
+    //Check if all drives started, and if so switch to Working
+    case (M.DriveStarted, Starting) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveWorking) match{
+      case true ⇒
+        allDrivesStarted()
+        Working
+      case false ⇒
+        state}
     //Run user stop functions and turning off, on hit UI "STOP"
-    case (M.StopPlumbing, Working)  ⇒
-
-
+    case (M.StopPlumbing, Working) ⇒
+      sendToEachDrive(M.StopDrive)
       Stopping
-
-
-
-
-
-
-
-  }
+    //Check if all drives stopped and run turning off if so
+    case (M.DriveStopped, Stopping) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveStopped) match{
+      case true ⇒
+        sendToEachDrive(M.TurnOffDrive)
+        TurningOff
+      case false ⇒
+        state}
+    //Check if all drives turned off and if so switch to TurnedOff and wait for termination
+    case (M.DriveTurnedOff, TurningOff) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveTurnedOff) match{
+      case true ⇒
+        allDrivesStopped()
+        TurnedOff
+      case false ⇒
+        state}
+    //Skip timeout task for all drives
+    case (M.SkipAllTimeoutTask, _) ⇒
+      sendToEachDrive(M.SkipTimeoutTask)
+      state
+    //Show block UI for all drives
+    case (M.ShowAllBlockUi, _) ⇒
+      sendToEachDrive(M.ShowBlockUi)
+      state
+    //Hide block UI for all drives
+    case (M.HideAllBlockUi, _) ⇒
+      sendToEachDrive(M.HideBlockUi)
+      state}
   //Cleanup
-  def cleanup(): Unit = {
-
-    println("[DriveActor.cleanup] TODO")  //TODO Очистка ресурсов, (пока вероятно зедсь ничего не будет, но проверить)
-
-  }
-
-
-
-
-
-
-//  //Receives
-//  /** Reaction on StateMsg'es */
-//  def onStateMsg: PartialFunction[(StateMsg, Plumbing.State), Unit] = {
-//    //Build all to all drives, on done response with ConstructDrive
-//    case (M.BuildPlumbing, Init) ⇒
-//      state = Creating
-//      setAndSendToDrives(DriveCreating,  M.ConstructDrive)
-//    //Switch to Starting, send BuildDrive to all drives, on done response with PlumbingStarted
-//    case (M.StartPlumbing, Built) ⇒
-//      state = Starting
-//      setAndSendToDrives(DriveStarting,  M.StartDrive)
-//    //Stopping of all drives, on done response with PlumbingStopped
-//    case (M.StopPlumbing, Working) ⇒
-//      state = Stopping
-//      setAndSendToDrives(DriveStopping,  M.StopDrive)
-//    //Shutdown of all drives at any stare, on done response with PlumbingShutdown
-//    case (M.ShutdownPlumbing, st) ⇒
-//      isShutdown = true
-//      state = doShutdown(st)
-//    //Terminate of all drives, on done response with PlumbingTerminated
-//    case (M.DriveError(error), st) ⇒
-//      isShutdown = true
-//      drivesErrors += error
-//      state = doShutdown(st)}
-//  /** Handling after reaction executed */
-//  def postHandling: PartialFunction[(Msg, Plumbing.State), Unit] = {
-//    //Drive constructed, if all ready switch to building or to termination if isShutdown = true
-//    case (M.DriveConstructed, Creating) ⇒ callIfAllDrivesInState(DriveCreated){ isShutdown match {
-//      case false ⇒
-//        state = Building
-//        setAndSendToDrives(DriveBuilding,  M.BuildDrive)
-//      case true ⇒
-//        state = Terminating
-//        setAndSendToDrives(DriveTerminating,  M.TerminateDrive)}}
-//    //Check if all drive built, if so switch to Built and send PlumbingBuilt to controller
-//    case (M.DriveBuilt, Building) ⇒ callIfAllDrivesInState(DriveBuilt){ isShutdown match {
-//      case false ⇒
-//        state = Built
-//        allDrivesBuilt()
-//      case true ⇒
-//        state = Terminating
-//        setAndSendToDrives(DriveTerminating,  M.TerminateDrive)}}
-//    //Check if all drive started, if so switch to Working and send PlumbingStarted
-//    case (M.StartPlumbing | M.DriveStarted, Starting) ⇒ callIfAllDrivesInState(DriveStarted){ isShutdown match {
-//      case false ⇒
-//        state = Working
-//        allDrivesStarted()
-//      case true ⇒
-//        state = Stopping
-//        setAndSendToDrives(DriveStopping,  M.StopDrive)}}
-//    //Check if all drive stopped, if so send TerminateDrive to all drives
-//    case (M.DriveStopped, Stopping) ⇒ callIfAllDrivesInState(DriveStopped){ isShutdown match {
-//      case false ⇒
-//        state = Stopped
-//        allDrivesStopped()
-//      case true ⇒
-//        state = Terminating
-//        setAndSendToDrives(DriveStopped,  M.TerminateDrive)}}}
-//  /** Handling of actor termination*/
-//  def terminationHandling: PartialFunction[(ActorRef, Plumbing.State), Unit] = {
-//    case (actor, Terminating) ⇒
-//      setDriveState(actor, DriveTerminated)
-//      callIfAllDrivesInState(DriveTerminated){
-//        drivesErrors.isEmpty match{
-//          case true ⇒ controller ! M.PlumbingShutdown
-//          case false ⇒ controller ! M.PlumbingError(drivesErrors.toList)}
-//        self ! PoisonPill }}
-//  /** Actor reaction on messages */
-//  def oldReaction: PartialFunction[(Msg, Plumbing.State), Unit] = {
-//    //DriveCreating of new drive for tool (ask request)
-//    case (M.NewDrive(toolPump), state) ⇒ newDrive(toolPump, state, createDriveActor)
-//    //Updates of driveState
-//    case (M.DriveConstructed, Creating) ⇒ setDriveState(sender, DriveCreated)
-//    case (M.DriveBuilt, Building) ⇒ setDriveState(sender, DriveBuilt)
-//    case (M.DriveStarted, Starting) ⇒ setDriveState(sender, DriveStarted)
-//    case (M.DriveStopped, Stopping) ⇒ setDriveState(sender, DriveStopped)
-//    //Re send SkipAllTimeoutTask to all drives
-//    case (M.SkipAllTimeoutTask, _) ⇒ drives.values.foreach(_.drive ! M.SkipTimeoutTask)
-//    case (M.ShowAllToolUi, _) ⇒ drives.values.foreach(_.drive ! M.ShowToolUi)
-//    case (M.HideAllToolUi, _) ⇒ drives.values.foreach(_.drive ! M.HideToolUi)}
-
-
-
-
-
-
-
-}
+  //TODO Очистка ресурсов, (пока вероятно зедсь ничего не будет, но проверить)
+  def cleanup(): Unit = {}}

@@ -53,26 +53,26 @@ class UserLoggingTest extends UIActorTestSpec {
       sleep(2.second)
       //Log events
       workbenchController.send(userLog, M.LogInfo(
-        toolId = Some(1001),
-        toolName = "Tool 1",
+        blockId = Some(1001),
+        blockName = "Block 1",
         message = "Info message."))
       sleep(2.second)
       workbenchController.send(userLog, M.LogInfo(
-        toolId = Some(1001),
-        toolName = "Tool 1",
+        blockId = Some(1001),
+        blockName = "Block 1",
         message = "Long info message: \n" +
           "A dream written down with a date becomes a Goal. \n" +
           "A goal broken down into steps becomes a plan. \n" +
           "A plan backed by action makes your dreams come true. \n"))
       sleep(2.second)
       workbenchController.send(userLog, M.LogWarning(
-        toolId = Some(1002),
-        toolName = "Tool 2",
+        blockId = Some(1002),
+        blockName = "Block 2",
         message = "Warning message."))
       sleep(2.second)
       workbenchController.send(userLog, M.LogError(
-        toolId = Some(1003),
-        toolName = "Tool 3",
+        blockId = Some(1003),
+        blockName = "Block 3",
         errors = Seq(new Exception("Oops!!! But not worries, this is just a test :)")),
         message = "!!!Error message.!!!"))
       sleep(2.second)

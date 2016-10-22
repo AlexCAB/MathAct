@@ -39,7 +39,7 @@ private [mathact] trait Pipe[H]{
   //
   //Abstract params
   protected val pump: Pump
-  protected val toolId: Int
+  protected val blockId: Int
   protected val pipeId: Int
   protected val pipeName: Option[String]
   //Logging methods
@@ -57,7 +57,7 @@ private [mathact] trait Pipe[H]{
 
 
 //    (pump, pipeId) match{  //Return: (drive, pipe ID)
-//    case (Some(p), Some(i)) ⇒ PipeData(p.drive, p.toolName, i, pipeName.getOrElse(this.toString))
+//    case (Some(p), Some(i)) ⇒ PipeData(p.drive, p.blockName, i, pipeName.getOrElse(this.toString))
 //    case s ⇒ throw new IllegalStateException(s"[Pipe.getPump] Pump not injected, state: $s.")}
 
 //

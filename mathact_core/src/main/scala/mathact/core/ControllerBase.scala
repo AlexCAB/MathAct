@@ -59,7 +59,7 @@ abstract class ControllerBase[S](initState: S) extends Actor{
     * @param name - name for new worker should be unique
     * @tparam T - < ControllerBase
     * @return - new ActorRef */
-  def newController[T <: ControllerBase[S]: ClassTag](creator: ⇒ T, name: String): ActorRef = {
+  def newController[T <: ControllerBase[_]: ClassTag](creator: ⇒ T, name: String): ActorRef = {
     val actor = context.actorOf(Props(creator), name)
     context.watch(actor)
     actor}

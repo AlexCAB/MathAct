@@ -17,17 +17,17 @@ package mathact.core.model.data.visualisation
 import scalafx.scene.image.Image
 
 
-/** Tool built info
+/** Block built info
   * Created by CAB on 15.05.2016.
   */
 
-case class ToolBuiltInfo(
-  toolId: Int,
-  toolName: String,
-  toolImagePath: Option[String],
+case class BlockBuiltInfo(
+  blockId: Int,
+  blockName: String,
+  blockImagePath: Option[String],
   inlets: Map[Int, InletConnectionsInfo],
   outlets: Map[Int, OutletConnectionsInfo])
 {
   override def toString =
-    s"InletConnectionsInfo(toolId: $toolId, toolName: $toolName, toolImagePath: $toolImagePath, " +
+    s"InletConnectionsInfo(blockId: $blockId, blockName: $blockName, blockImagePath: $blockImagePath, " +
     s"inlets: $inlets, outlets: $outlets)"}

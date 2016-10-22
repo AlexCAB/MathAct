@@ -22,6 +22,6 @@ import scalafx.scene.image.Image
   */
 
 trait PumpLike {
-  val tool: Fitting
-  val toolName: String
-  val toolImagePath: Option[String]}
+  val block: Fitting
+  val blockName: String
+  val blockImagePath: Option[String]}

@@ -50,10 +50,10 @@ extends Stage {
   val buttonsImageSize = 30
   val runBtnDPath             = "mathact/sketchIU/run_btn_d.png"
   val runBtnEPath             = "mathact/sketchIU/run_btn_e.png"
-  val showAllToolsUiDPath     = "mathact/sketchIU/show_all_tools_ui_d.png"
-  val showAllToolsUiEPath     = "mathact/sketchIU/show_all_tools_ui_e.png"
-  val hideAllToolsUiBtnDPath  = "mathact/sketchIU/hide_all_tools_ui_btn_d.png"
-  val hideAllToolsUiBtnEPath  = "mathact/sketchIU/hide_all_tools_ui_btn_e.png"
+  val showAllBlocksUiDPath     = "mathact/sketchIU/show_all_blocks_ui_d.png"
+  val showAllBlocksUiEPath     = "mathact/sketchIU/show_all_blocks_ui_e.png"
+  val hideAllBlocksUiBtnDPath  = "mathact/sketchIU/hide_all_blocks_ui_btn_d.png"
+  val hideAllBlocksUiBtnEPath  = "mathact/sketchIU/hide_all_blocks_ui_btn_e.png"
   val skipAllTimeoutTaskDPath = "mathact/sketchIU/skip_all_timeout_task_d.png"
   val skipAllTimeoutTaskEPath = "mathact/sketchIU/skip_all_timeout_task_e.png"
   val stopSketchBtnDPath      = "mathact/sketchIU/stop_sketch_btn_d.png"
@@ -118,13 +118,13 @@ extends Stage {
     RunBtn,
     List(ElemDisabled → runBtnDPath, ElemEnabled → runBtnEPath),
     actionTriggered)
-  val showAllToolsUiBtn = new MWButton[SketchUiElemState](
-    ShowAllToolsUiBtn,
-    List(ElemDisabled → showAllToolsUiDPath, ElemEnabled → showAllToolsUiEPath),
+  val showAllBlocksUiBtn = new MWButton[SketchUiElemState](
+    ShowAllBlocksUiBtn,
+    List(ElemDisabled → showAllBlocksUiDPath, ElemEnabled → showAllBlocksUiEPath),
     actionTriggered)
-  val hideAllToolsUiBtn = new MWButton[SketchUiElemState](
-    HideAllToolsUiBtn,
-    List(ElemDisabled → hideAllToolsUiBtnDPath, ElemEnabled → hideAllToolsUiBtnEPath),
+  val hideAllBlocksUiBtn = new MWButton[SketchUiElemState](
+    HideAllBlocksUiBtn,
+    List(ElemDisabled → hideAllBlocksUiBtnDPath, ElemEnabled → hideAllBlocksUiBtnEPath),
     actionTriggered)
   val skipAllTimeoutTaskBtn = new MWButton[SketchUiElemState](
     SkipAllTimeoutTaskBtn,
@@ -147,7 +147,7 @@ extends Stage {
         children = Seq(
           new ButtonBox(2, Seq(logBtn,visualisationBtn)),
           new ButtonBox(0, Seq(runBtn)),
-          new ButtonBox(2, Seq(showAllToolsUiBtn,hideAllToolsUiBtn)),
+          new ButtonBox(2, Seq(showAllBlocksUiBtn,hideAllBlocksUiBtn)),
           new ButtonBox(2, Seq(skipAllTimeoutTaskBtn,stopSketchBtn)))}
       bottom = new HBox {
         style = "-fx-border-color: #808080; -fx-border-width: 1px; -fx-border-radius: 3.0; " +

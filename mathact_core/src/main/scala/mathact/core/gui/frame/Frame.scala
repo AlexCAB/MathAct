@@ -17,7 +17,7 @@ package mathact.core.gui.frame
 import mathact.core.plumbing.Pump
 import scalafx.stage.Stage
 
-/** Root (window) GIU component, for using with tools.
+/** Root (window) GIU component, for using with blocks.
   * Created by CAB on 21.05.2016.
   */
 

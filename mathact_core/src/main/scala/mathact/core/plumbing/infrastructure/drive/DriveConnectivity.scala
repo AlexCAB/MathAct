@@ -32,7 +32,7 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   private val pendingConnections = MutMap[Int, M.ConnectPipes]()
   //Methods
   /** Adding of ConnectPipes to pending connections
-    * Can be called only from tools constructor on sketch construction.
+    * Can be called only from blocks constructor on sketch construction.
     * @param message = ConnectPipes */
   def connectPipesAsk(message: M.ConnectPipes, state: Drive.State): Either[Throwable,Int] = state match{
     case Drive.State.Init ⇒
@@ -44,7 +44,7 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
     case s ⇒
       //Incorrect state
       val msg =
-        s"[DriveConnectivity.connectPipes | toolName: ${pump.toolName}, message: $message] " +
+        s"[DriveConnectivity.connectPipes | blockName: ${pump.blockName}, message: $message] " +
         s"Incorrect state $s, required DriveInit"
       log.error(msg)
       //User logging
@@ -52,8 +52,8 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
       val inPipe = Try{message.in()}.toOption
       val userMsg =
         s"Pipes ${outPipe.getOrElse("---")} and ${inPipe.getOrElse("---")} can be connected only " +
-        s"on tool construction, current state $s"
-      userLogging ! M.LogWarning(Some(toolId), pump.toolName, userMsg)
+        s"on block construction, current state $s"
+      userLogging ! M.LogWarning(Some(blockId), pump.blockName, userMsg)
       //Return error
       Left(new IllegalStateException(msg))}
   /** Connecting of pipes on build of drive
@@ -61,7 +61,7 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   def doConnectivity(): Unit = pendingConnections.foreach{
     case (connectionId, M.ConnectPipes(out, in)) ⇒ (out(),in()) match{
       case (outlet: OutPipe[_], inlet: InPipe[_]) ⇒
-        inlet.pipeData.toolDrive ! M.AddConnection(connectionId, self, inlet.pipeData.pipeId, outlet.pipeData)
+        inlet.pipeData.blockDrive ! M.AddConnection(connectionId, self, inlet.pipeData.pipeId, outlet.pipeData)
       case (o, i) ⇒
         log.error(
           s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance " +
@@ -76,8 +76,8 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   def addConnection(connectionId: Int, initiator: ActorRef, outletId: Int, outlet: OutletData): Unit = inlets
     .get(outletId) match{
       case Some(inState) ⇒
-        inState.publishers += ((outlet.toolDrive, outlet.pipeId) → outlet)
-        outlet.toolDrive ! M.ConnectTo(connectionId, initiator, outlet.pipeId, inState.pipe.pipeData)
+        inState.publishers += ((outlet.blockDrive, outlet.pipeId) → outlet)
+        outlet.blockDrive ! M.ConnectTo(connectionId, initiator, outlet.pipeId, inState.pipe.pipeData)
         log.debug(s"[DriveConnectivity.addConnection] Connection added from $outlet to $inState.")
       case None ⇒
         log.error(s"[DriveConnectivity.addConnection] Inlet with ID $outletId, not in inlets list.")
@@ -90,7 +90,7 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   def connectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData): Unit = outlets
     .get(outletId) match{
       case Some(outlet) ⇒
-        val inDrive = inlet.toolDrive
+        val inDrive = inlet.blockDrive
         outlet.subscribers += ((inDrive, inlet.pipeId) → SubscriberData((inDrive, inlet.pipeId), inlet))
         initiator ! M.PipesConnected(connectionId, outletId, inlet.pipeId)
         log.debug(s"[ConnectTo] Connection added, from: $outlet, to: $inlet")

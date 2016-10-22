@@ -45,8 +45,8 @@ package object enums {
     val LogBtn = Value
     val VisualisationBtn = Value
     val RunBtn = Value
-    val ShowAllToolsUiBtn = Value
-    val HideAllToolsUiBtn = Value
+    val ShowAllBlocksUiBtn = Value
+    val HideAllBlocksUiBtn = Value
     val SkipAllTimeoutTaskBtn = Value
     val StopSketchBtn = Value
     val CloseBtn = Value}

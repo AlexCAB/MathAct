@@ -110,7 +110,9 @@ extends WorkerBase{
         //Stop application
         isFatalError = true
         currentSketch match {
-          case Some(sketch) ⇒ sketch._1 ! M.ShutdownSketch
+          case Some(sketch) ⇒
+
+            ??? //sketch._1 ! M.ShutdownSketch
           case None ⇒ self ! PoisonPill}
       case a if currentSketch.map(_._1).contains(a) ⇒
         log.error(s"[MainController @ Terminated] Current sketch terminated suddenly, currentSketch: $currentSketch")

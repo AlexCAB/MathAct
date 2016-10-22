@@ -20,6 +20,6 @@ package mathact.core.model.data.visualisation
   */
 
 case class SubscriberInfo(
-  toolId: Int,
+  blockId: Int,
   inletId: Int) {
-    override def toString = s"PublisherInfo(toolId: $toolId, inletId: $inletId)"}
+    override def toString = s"PublisherInfo(blockId: $blockId, inletId: $inletId)"}

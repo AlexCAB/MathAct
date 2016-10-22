@@ -1,7 +1,7 @@
 package mathact.core.plumbing.infrastructure.controller
 
 import akka.actor.ActorRef
-import mathact.core.model.data.visualisation.ToolBuiltInfo
+import mathact.core.model.data.visualisation.BlockBuiltInfo
 
 
 /** Plumbing
@@ -29,11 +29,11 @@ object Plumbing {
     val DriveTurnedOn = Value
     val DriveWorking = Value
     val DriveStopped = Value
-    val TurnedOff = Value}
+    val DriveTurnedOff = Value}
   type DriveState = DriveState.Value
   //Definitions
   case class DriveData(
     drive: ActorRef,
-    toolId: Int,
-    builtInfo: Option[ToolBuiltInfo],
+    blockId: Int,
+    builtInfo: Option[BlockBuiltInfo],
     driveState: DriveState)}

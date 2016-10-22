@@ -41,7 +41,7 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     log.debug(
       s"[DriveMessaging.sendUserMessage] Data: $value, will send to outlet: $outlet")
     outlet.subscribers.values.foreach{ subscriber ⇒
-      subscriber.inlet.toolDrive ! M.UserMessage(outlet.outletId, subscriber.inlet.pipeId, value)}}
+      subscriber.inlet.blockDrive ! M.UserMessage(outlet.outletId, subscriber.inlet.pipeId, value)}}
   private def runForInlet(inletId: Int)(proc: InletState⇒Unit): Unit = inlets.get(inletId) match{
     case Some(inlet) ⇒
       proc(inlet)
@@ -110,7 +110,7 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     inlet.publishers.values.foreach{ publisher ⇒
       val load = inlet.taskQueue.size
       log.debug(s"[DriveMessaging.sendLoadMessage] Send DriveLoad($load), to publisher: $publisher.")
-      publisher.toolDrive ! M.DriveLoad((self, inlet.inletId), publisher.pipeId, load)}}
+      publisher.blockDrive ! M.DriveLoad((self, inlet.inletId), publisher.pipeId, load)}}
   //Methods
   /** User message from self outlet, send to all outlet subscribers
     * @param outletId - Int, source ID
@@ -180,8 +180,8 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
       val inletName = inlets
         .get(inletId).flatMap(_.name).getOrElse(s"№$inletId")
       userLogging ! M.LogError(
-        Some(toolId),
-        pump.toolName,
+        Some(blockId),
+        pump.blockName,
         Seq(),
         s"Message $value from $outletName to $inletName not processed in state $state")}
   /** Starting of user messages processing */
@@ -209,8 +209,8 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     //Send log message
     log.warning(s"[DriveMessaging.messageTaskTimeout] inlet: $inlet, execTime: $execTime.")
     userLogging ! M.LogWarning(
-      Some(toolId),
-      pump.toolName,
+      Some(blockId),
+      pump.blockName,
       s"Message handling timeout for ${inlet.name.getOrElse("")} inlet, on '$execTime', keep waiting.")}
   /** Message processing end with error, send error to user logger
     * @param inletId - Int
@@ -225,8 +225,8 @@ private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     runNextMsgTask().foreach(inlet ⇒ sendLoadMessage(inlet))
     //Send log message
     userLogging ! M.LogError(
-      Some(toolId),
-      pump.toolName,
+      Some(blockId),
+      pump.blockName,
       Seq(error),
       s"Message handling fail for ${inlet.name.getOrElse("")} inlet, on '$execTime'.")}
   /** Check if no messages to process

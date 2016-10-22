@@ -41,82 +41,82 @@ class VisualizationTest extends UIActorTestSpec {
     sketchController.watch(visualization)}
   //Testing
   "Visualization" should{
-    "visualise tools" in new TestCase {
+    "visualise blocks" in new TestCase {
       //Show UI
       sketchController.send(visualization, M.ShowVisualizationUI)
       sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
       sleep(2.second)
       //Fill graph
-      sketchController.send(visualization, M.ToolBuilt(ToolBuiltInfo(
-        toolId = 1,
-        toolName = "A",
-        toolImagePath = None,
+      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+        blockId = 1,
+        blockName = "A",
+        blockImagePath = None,
         inlets = Map(),
         outlets = Map(
           1 → OutletConnectionsInfo(
-            toolId = 1,
+            blockId = 1,
             outletId = 1,
             outletName = None,
             subscribers = List(
-              SubscriberInfo(toolId = 2, inletId = 1)))))))
+              SubscriberInfo(blockId = 2, inletId = 1)))))))
       sleep(1.second)
-      sketchController.send(visualization, M.ToolBuilt(ToolBuiltInfo(
-        toolId = 2,
-        toolName = "B",
-        toolImagePath = None,
+      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+        blockId = 2,
+        blockName = "B",
+        blockImagePath = None,
         inlets = Map(
           1 → InletConnectionsInfo(
-            toolId = 2,
+            blockId = 2,
             inletId = 1,
             inletName = Some("i_1"),
             publishers = List(
-              PublisherInfo(toolId = 1, outletId = 1),
-              PublisherInfo(toolId = 2, outletId = 3))),
+              PublisherInfo(blockId = 1, outletId = 1),
+              PublisherInfo(blockId = 2, outletId = 3))),
           2 → InletConnectionsInfo(
-            toolId = 2,
+            blockId = 2,
             inletId = 2,
             inletName = Some("i_2"),
             publishers = List())),
         outlets = Map(
           3 → OutletConnectionsInfo(
-            toolId = 2,
+            blockId = 2,
             outletId = 3,
             outletName = Some("o_1"),
             subscribers = List(
-              SubscriberInfo(toolId = 2, inletId = 1),
-              SubscriberInfo(toolId = 3, inletId = 1))),
+              SubscriberInfo(blockId = 2, inletId = 1),
+              SubscriberInfo(blockId = 3, inletId = 1))),
           4 → OutletConnectionsInfo(
-            toolId = 2,
+            blockId = 2,
             outletId = 4,
             outletName = Some("o_2"),
             subscribers = List(
-              SubscriberInfo(toolId = 3, inletId = 2)))))))
+              SubscriberInfo(blockId = 3, inletId = 2)))))))
       sleep(1.second)
-      sketchController.send(visualization, M.ToolBuilt(ToolBuiltInfo(
-        toolId = 3,
-        toolName = "C",
-        toolImagePath = Some("mathact/userLog/info_img.png"),
+      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+        blockId = 3,
+        blockName = "C",
+        blockImagePath = Some("mathact/userLog/info_img.png"),
         inlets = Map(
           1 → InletConnectionsInfo(
-            toolId = 3,
+            blockId = 3,
             inletId = 1,
             inletName = Some("i_1"),
             publishers = List(
-              PublisherInfo(toolId = 2, outletId = 3))),
+              PublisherInfo(blockId = 2, outletId = 3))),
           2 → InletConnectionsInfo(
-            toolId = 3,
+            blockId = 3,
             inletId = 2,
             inletName = Some("i_2"),
             publishers = List(
-              PublisherInfo(toolId = 2, outletId = 4)))),
+              PublisherInfo(blockId = 2, outletId = 4)))),
         outlets = Map(
           3 → OutletConnectionsInfo(
-            toolId = 3,
+            blockId = 3,
             outletId = 3,
             outletName = Some("o_1"),
             subscribers = List())))))
       sleep(1.second)
-      sketchController.send(visualization, M.AllToolBuilt)
+      sketchController.send(visualization, M.AllBlockBuilt)
       //Test close button
       println("[VisualizationTest] CLICK CLOSE BUTTON (X).")
       sketchController.expectMsgType[M.VisualizationUIChanged](30.second).isShow shouldEqual false

@@ -92,7 +92,7 @@ extends WorkerBase with JFXInteraction { import UserLogging._
         case LogType.Error ⇒ clippedLog.filter(r ⇒ r.msgType == LogType.Error)}
       val searchedLog = searchText match{
         case "" ⇒ filteredLog
-        case ss ⇒ filteredLog.filter(r ⇒ r.toolName.contains(ss) || r.message.contains(ss))}
+        case ss ⇒ filteredLog.filter(r ⇒ r.blockName.contains(ss) || r.message.contains(ss))}
       val resultLog = searchedLog.reverse
       //Show rows
       runAndWait(controller.setRows(resultLog))
@@ -130,19 +130,19 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       runAndWait(window.hide())
       workbenchController ! M.UserLoggingUIChanged(isShown)
     //Log info
-    case M.LogInfo(toolId, toolName, message) ⇒
+    case M.LogInfo(blockId, blockName, message) ⇒
       //Build row
-      logRows +:= LogRow(LogType.Info, toolName, message)
+      logRows +:= LogRow(LogType.Info, blockName, message)
       refreshUi()
     //Log warning
-    case M.LogWarning(toolId, toolName, message) ⇒
+    case M.LogWarning(blockId, blockName, message) ⇒
       //Build row
-      logRows +:= LogRow(LogType.Warn, toolName, message)
+      logRows +:= LogRow(LogType.Warn, blockName, message)
       refreshUi()
     //Log error
-    case M.LogError(toolId, toolName, error, message) ⇒
+    case M.LogError(blockId, blockName, error, message) ⇒
       //Build row
-      val row = LogRow(LogType.Error, toolName, message + (error match{
+      val row = LogRow(LogType.Error, blockName, message + (error match{
         case es if es.nonEmpty ⇒ es
           .map{ e ⇒
             "\nException message: " + e.getMessage + "\n" +
@@ -154,7 +154,7 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       refreshUi()
 //    //Terminate user logging
 //    case M.TerminateUserLogging ⇒
-//      runAndWait(window.close())
+//      runAndWait(window.close()) //TODO Не ждать или с таймаутом
 //      ???
 ////      workbenchController ! M.UserLoggingTerminated
 //      self ! PoisonPill

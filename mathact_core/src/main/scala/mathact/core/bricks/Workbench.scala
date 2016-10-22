@@ -17,7 +17,7 @@ package mathact.core.bricks
 import mathact.core.app.Application
 
 
-/** Box class for placing of tools
+/** Box class for placing of blocks
   * Created by CAB on 09.05.2016.
   */
 

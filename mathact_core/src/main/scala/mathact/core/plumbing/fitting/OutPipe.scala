@@ -28,10 +28,10 @@ private [mathact] class OutPipe[H](
   protected val pump: Pump)
 extends Pipe[H] with Plug[H]{
   //Construction
-  protected val (toolId, pipeId) = pump.addOutlet(this, pipeName)
+  protected val (blockId, pipeId) = pump.addOutlet(this, pipeName)
   out.injectOutPipe(this)
   //Fields
-  lazy val pipeData = OutletData(toolId, pump.drive, pump.toolName, pipeId, pipeName)
+  lazy val pipeData = OutletData(blockId, pump.drive, pump.blockName, pipeId, pipeName)
   //Methods
   override def toString: String = s"OutPipe(in: $out, pipeName: $pipeName, pump: $pump)"
 

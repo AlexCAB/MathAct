@@ -26,31 +26,27 @@ import mathact.core.{IdGenerator, ControllerBase}
 
 import scala.collection.mutable.{Map ⇒ MutMap}
 
-/** Manage tool
+/** Manage block
   * Inlets and outlets never removes
   * Created by CAB on 15.05.2016.
   */
 
 private [mathact] class DriveActor(
   val config: DriveConfigLike,
-  val toolId: Int,
+  val blockId: Int,
   val pump: PumpLike,
   val plumbing: ActorRef,
   val userLogging: ActorRef,
   val visualization: ActorRef)
 extends ControllerBase(Drive.State.Init) with IdGenerator with DriveLife with DriveConnectivity
-with DriveMessaging with DriveUIControl{ import Drive.State._
- import Drive._
- import TaskKind._
-  //Supervisor strategy
-  override val supervisorStrategy = OneForOneStrategy(){ case _: Throwable ⇒ Resume }
+with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind._
   //Variables
   val outlets = MutMap[Int, OutletState]()  //(Outlet ID, OutletData)
   val inlets = MutMap[Int, InletState]()    //(Inlet ID, OutletData)
   var visualisationLaval = VisualisationLaval.None
   //On start
-  val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + pump.toolName)
-  val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + pump.toolName)
+  val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + pump.blockName)
+  val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + pump.blockName)
   //Message handling
   def reaction: PartialFunction[(Msg, Drive.State), Drive.State] = {
     //Construction, adding outlet, ask from object
@@ -86,7 +82,7 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
     case (M.ConnectTo(id, initiator, outletId, inlet), Connecting | Connected) ⇒
       connectTo(id, initiator, outletId, inlet)
       state
-    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and ToolBuilt
+    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and BlockBuilt
     case (M.PipesConnected(id, inletId, outletId), Connecting) ⇒
       pipesConnected(id, inletId, outletId)
       isPendingConListEmpty match{
@@ -200,27 +196,27 @@ with DriveMessaging with DriveUIControl{ import Drive.State._
       visualisationLaval = laval
       state
     //UI control
-    case (M.ShowToolUi, st) if st != Init ⇒
-      showToolUi()
+    case (M.ShowBlockUi, st) if st != Init ⇒
+      showBlockUi()
       state
 //    //UI control
 //    case (M.TaskDone(ShowUI, _, time, _), _) ⇒
-//      showToolUiTaskDone(time)
+//      showBlockUiTaskDone(time)
 //    //UI control
 //    case (M.TaskTimeout(ShowUI, _, time), _) ⇒
-//      showToolUiTaskTimeout(time)
+//      showBlockUiTaskTimeout(time)
 //    case (M.TaskFailed(ShowUI, _, time, error), _) ⇒
-//      showToolUiTaskFailed(time, error)
+//      showBlockUiTaskFailed(time, error)
     //UI control
-    case (M.HideToolUi, st)  if st != Init ⇒
-      hideToolUi()
+    case (M.HideBlockUi, st)  if st != Init ⇒
+      hideBlockUi()
       state
 //    case (M.TaskDone(HideUI, _, time, _), _) ⇒
-//      hideToolUiTaskDone(time)
+//      hideBlockUiTaskDone(time)
 //    case (M.TaskTimeout(HideUI, _, time), _) ⇒
-//      hideToolUiTaskTimeout(time)
+//      hideBlockUiTaskTimeout(time)
 //    case (M.TaskFailed(HideUI, _, time, error), _) ⇒
-//      hideToolUiTaskFailed(time, error)
+//      hideBlockUiTaskFailed(time, error)
 
   }
   //Cleanup

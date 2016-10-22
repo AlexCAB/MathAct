@@ -28,9 +28,9 @@ private [mathact] class InPipe[H] (
   protected val pump: Pump)
 extends Pipe[H] with Socket[H]{
   //Construction
-  protected val (toolId, pipeId) = pump.addInlet(this, pipeName)
+  protected val (blockId, pipeId) = pump.addInlet(this, pipeName)
   //Fields
-  lazy val pipeData = InletData(toolId, pump.drive, pump.toolName, pipeId, pipeName)
+  lazy val pipeData = InletData(blockId, pump.drive, pump.blockName, pipeId, pipeName)
   //Methods
   override def toString: String = s"InPipe(in: $in, pipeName: $pipeName, pump: $pump)"
   def processValue(value: Any): Unit = in.processValue(value)

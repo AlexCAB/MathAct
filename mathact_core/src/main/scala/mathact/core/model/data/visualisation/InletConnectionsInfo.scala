@@ -20,9 +20,9 @@ package mathact.core.model.data.visualisation
   */
 
 case class InletConnectionsInfo(
-  toolId: Int,
+  blockId: Int,
   inletId: Int,
   inletName: Option[String],
   publishers: List[PublisherInfo]) {
     override def toString =
-      s"InletConnectionsInfo(toolId: $toolId, inletId: $inletId, inletName: $inletName, publishers: $publishers)"}
+      s"InletConnectionsInfo(blockId: $blockId, inletId: $inletId, inletName: $inletName, publishers: $publishers)"}

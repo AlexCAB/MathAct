@@ -27,7 +27,7 @@ private [mathact] object UserLogging {
     val Error = Value}
   type LogType = LogType.Value
   //Data
-  case class LogRow(msgType: LogType, toolName: String, message: String)
+  case class LogRow(msgType: LogType, blockName: String, message: String)
   //Messages
   case class DoSearch(text: String)
   case class SetLogLevel(level: LogType)
