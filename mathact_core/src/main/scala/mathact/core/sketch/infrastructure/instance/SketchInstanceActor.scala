@@ -165,10 +165,10 @@ extends WorkerBase{ import SketchInstance._
      //Sketch instance built error
      case SketchInstanceBuiltError(error) ⇒ sketchInstanceBuiltError(error)
      //Sketch instance built timeout
-     case SketchInstanceBuildTimeout ⇒ sketchInstanceBuiltTimeout()
-//     //Terminate, for now only self termination
-//     case M.TerminateSketchInstance ⇒ self ! PoisonPill
-  }
+     case SketchInstanceBuildTimeout ⇒ sketchInstanceBuiltTimeout()}
+  //Cleanup
+  def cleanup(): Unit = {
 
-  ???
-}
+    //TODO
+
+  }}

@@ -14,7 +14,7 @@
 
 package mathact.core.app.view
 
-import akka.actor.{ActorRef, PoisonPill}
+import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.MainUIConfigLike
@@ -67,13 +67,8 @@ extends WorkerBase with JFXInteraction {
         mainController ! M.MainCloseBtnHit
         isShow = false
       case true ⇒
-        log.debug("[MainUIActor @ MainCloseBtnHit] An sketch selected, do nothing.")}
-    //Terminate UI
-//    case M.TerminateMainUI ⇒
-//      runAndWait(window.close())
-//      ???
-////      mainController ! M.MainUITerminated
-//      self ! PoisonPill
-  }
-  ???
-}
+        log.debug("[MainUIActor @ MainCloseBtnHit] An sketch selected, do nothing.")}}
+  //Cleanup
+  def cleanup(): Unit = {
+    log.debug(s"[MainUIActor.cleanup] Actor stopped, close UI.")
+    runLater(window.close())}}

@@ -12,14 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.data.visualisation
+package mathact.core.model.data.verification
+
+import mathact.core.model.data.pipes.OutletData
 
 
-/** Subscriber info
-  * Created by CAB on 03.09.2016.
+/** Inlet verification info
+  * Created by CAB on 23.10.2016.
   */
 
-case class SubscriberInfo(
-  blockId: Int,
-  inletId: Int) {
-    override def toString = s"PublisherInfo(blockId: $blockId, inletId: $inletId)"}
+case class InletVerificationData(
+  inletId: Int,
+  publishers: Seq[OutletData])

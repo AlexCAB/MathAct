@@ -15,7 +15,7 @@
 package mathact.core.app.infrastructure
 
 import akka.actor._
-import mathact.core.WorkerBase
+import akka.event.{Logging, LoggingAdapter}
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums.SketchStatus
@@ -27,16 +27,25 @@ import mathact.core.model.messages.M
   */
 
 private [mathact] abstract class MainController(config: MainConfigLike, doStop: Int⇒Unit)
-extends WorkerBase{
+extends Actor{
+  //Objects
+  val log: LoggingAdapter = Logging.getLogger(context.system, this)
   //Sub actors (abstract fields defined here to capture this actor context)
   val mainUi: ActorRef
   //Variables
   var sketchList = List[(SketchData, SketchStatus)]()
   var currentSketch: Option[(ActorRef,SketchData)] = None
-  var isFatalError = false
+  var lastError: Option[Throwable] = None
   //Abstract methods
   def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef
   //Functions
+  def stopAppByNormal(): Unit = {
+    log.debug(s"[MainController.stopApp] Normal stop, application will terminated.")
+    self ! PoisonPill}
+  def stopAppByError(error: Throwable): Unit = {
+    log.error(error, s"[MainController.fatalError] Stop by fatal error, application will terminated.")
+    lastError = Some(error)
+    self ! PoisonPill}
   def runSketch(sketch: SketchData): Unit = {
     //Create actor
     val sketchController = createSketchController(config, sketch)
@@ -53,14 +62,18 @@ extends WorkerBase{
     case Some((sketch, _)) if sketch.className == className ⇒
       proc(sketch)
     case _ ⇒
-      log.error(s"[MainController.forSketch] Not found sketch for className: $className , sketchList: $sketchList")}
+      val msg = s"[MainController.forSketch] Not found sketch for className: $className , sketchList: $sketchList"
+      log.error(msg)
+      stopAppByError(new IllegalArgumentException(msg))}
   def forCurrentSketch(className: String)(proc: (ActorRef, SketchData) ⇒ Unit): Unit = currentSketch match{
-    case Some((actor, sketch)) if sketch.className == className ⇒ proc(actor, sketch)
-    case cs ⇒ log.error("[MainController.forCurrentSketch] No or wrong current sketch, currentSketch: " + cs)}
+    case Some((actor, sketch)) if sketch.className == className ⇒
+      proc(actor, sketch)
+    case cs ⇒
+      log.error(s"[MainController.forCurrentSketch] No or wrong current sketch, currentSketch: $cs")}
   def setAndShowUISketchTable(): Unit =
     mainUi ! M.SetSketchList(sketchList.map{ case (d,s) ⇒ d.toSketchInfo(s)})
   //Actor reaction on messages
-  def reaction: PartialFunction[Any, Unit] = {
+  def receive: PartialFunction[Any, Unit] = {
     //Main controller start
     case M.MainControllerStart(sketches) ⇒
       //Set sketch list
@@ -72,7 +85,7 @@ extends WorkerBase{
           runSketch(sketch)
         case None ⇒
           log.debug("[MainController @ MainControllerStart] No sketch to auto-run found, show UI.")
-          mainUi ! M.SetSketchList(sketchList.map{ case (d,s) ⇒ d.toSketchInfo(s)})}
+          mainUi ! M.SetSketchList(sketchList.map{ case (d,s) ⇒ d.toSketchInfo(s) })}
     //Run selected sketch
     case M.RunSketch(sketchInfo) if currentSketch.isEmpty ⇒ forSketch(sketchInfo.className){ sketch ⇒
       runSketch(sketch)}
@@ -80,49 +93,42 @@ extends WorkerBase{
     case M.NewSketchContext(workbench, sketchClassName) ⇒ forCurrentSketch(sketchClassName){ case (actor, sketch) ⇒
       actor ! M.GetSketchContext(sender)}
     //Sketch built, hide UI
-//    case M.SketchBuilt(className, workbench) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
-//      if(! sketch.autorun) mainUi ! M.HideMainUI}
+    case M.SketchBuilt(className) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
+      mainUi ! M.HideMainUI}
     //Sketch done
     case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
-      setSketchSate(className, SketchStatus.Ended)}
+      setSketchSate(className, SketchStatus.Ended)
+      context.unwatch(sender)
+      setAndShowUISketchTable()
+      currentSketch = None}
     //Sketch error
     case M.SketchError(className, errors) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       log.error("[MainController @ SketchError] Sketch failed.")
       errors.foreach(e ⇒ log.error(e, "[MainController @ SketchError] Error."))
-      setSketchSate(className, SketchStatus.Failed)}
-    //Sketch controller terminated, show UI
-//    case M.SketchControllerTerminated(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
-//      context.unwatch(sender)
-//      setAndShowUISketchTable()
-//      currentSketch = None
-//      if(isFatalError) self ! PoisonPill}
-//    //Main close hit, terminate UI
-//    case M.MainCloseBtnHit if currentSketch.isEmpty ⇒
-//      mainUi ! M.TerminateMainUI
-//    //Main close hit, call do stop and terminate self
-//    case M.MainUITerminated ⇒
-//      context.unwatch(mainUi)
-//      self ! PoisonPill
+      setSketchSate(className, SketchStatus.Failed)
+      context.unwatch(sender)
+      setAndShowUISketchTable()
+      currentSketch = None}
+    //Main close hit, terminate if to sketch ran
+    case M.MainCloseBtnHit if currentSketch.isEmpty ⇒
+      stopAppByNormal()
     //Termination of actor
     case Terminated(actor) ⇒ actor match{
       case a if a == mainUi ⇒
-        log.error(s"[MainController @ Terminated] Main UI terminated suddenly, currentSketch: $currentSketch" )
-        //Stop application
-        isFatalError = true
-        currentSketch match {
-          case Some(sketch) ⇒
-
-            ??? //sketch._1 ! M.ShutdownSketch
-          case None ⇒ self ! PoisonPill}
+        val msg = s"[MainController @ Terminated] Main UI terminated suddenly, currentSketch: $currentSketch"
+        log.error(msg)
+        stopAppByError(new Exception(msg))
       case a if currentSketch.map(_._1).contains(a) ⇒
         log.error(s"[MainController @ Terminated] Current sketch terminated suddenly, currentSketch: $currentSketch")
         setSketchSate(currentSketch.get._2.className, SketchStatus.Failed)
         setAndShowUISketchTable()
         currentSketch = None
       case a ⇒
-        log.error("[MainController @ Terminated] Unknown actor: " + a)}}
+        log.error("[MainController @ Terminated] Unknown actor: " + a)}
+    //Unknown message
+    case m ⇒
+      log.error(s"[MainController @ ?] Unknown message: $m")}
   //Do stop on termination
   override def postStop(): Unit =  {
-    super.postStop()
     log.debug("[MainController.postStop] Call doStop.")
-    doStop(if(isFatalError) -1 else 0)}}
+    doStop(if(lastError.nonEmpty) -1 else 0)}}

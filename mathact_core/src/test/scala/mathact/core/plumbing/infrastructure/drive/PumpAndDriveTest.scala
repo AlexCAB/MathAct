@@ -48,6 +48,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       visualisationLaval: VisualisationLaval)
     //Helpers values
     val testBlockId = randomInt()
+    val testBlockName = "TestBlockName" + randomString(10)
     val testDriveConfig = new DriveConfigLike{
       val pushTimeoutCoefficient = 10
       val startFunctionTimeout = 4.second
@@ -102,7 +103,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         @volatile private var procTimeout: Option[Duration] = None
         @volatile private var procError: Option[Throwable] = None
         //Pump
-        val pump: Pump = new Pump(testSketchContext, this, "TestBlock", None){}
+        val pump: Pump = new Pump(testSketchContext, this, testBlockName, None){}
         //Pipes
         val testPipe = new TestIncut[Double]
         lazy val outlet = Outlet(testPipe, "testOutlet")
@@ -156,8 +157,9 @@ class PumpAndDriveTest extends ActorTestSpec{
         testPlumbing.expectMsg(M.DriveConstructed)
         testPlumbing.send(testBlock.pump.drive, M.ConnectingDrive)
         testPlumbing.expectMsg(M.DriveConnected)
+        testPlumbing.expectMsgType[M.DriveVerification]
         testUserLogging.expectMsgType[M.LogInfo]
-        testVisualization.expectMsgType[M.BlockBuilt]
+        testVisualization.expectMsgType[M.BlockConstructedInfo]
         testPlumbing.send(testBlock.pump.drive, M.TurnOnDrive)
         testPlumbing.expectMsg(M.DriveTurnedOn)
         testBlock.isOnStartCalled shouldEqual false
@@ -174,16 +176,17 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Send ConstructDrive
         testPlumbing.send(blocks.testDrive, M.ConstructDrive)
         testPlumbing.expectMsg(M.DriveConstructed)
-        //Process for other block
+        //Process connections
         testPlumbing.send(testDrive, M.ConnectingDrive)
         val conMsg =  otherDrive.expectNMsg(2)
         val addCon = conMsg.getOneWithType[M.AddConnection]
         val conTo = conMsg.getOneWithType[M.ConnectTo]
         otherDrive.send(testDrive, M.ConnectTo(addCon.connectionId, addCon.initiator, addCon.outlet.pipeId, otherInlet))
-        otherDrive.send(conTo.initiator, M.PipesConnected(conTo.connectionId, conTo.inlet.pipeId, conTo.outletId))
+        otherDrive.send(conTo.initiator, M.PipesConnected(conTo.connectionId, testOutlet, conTo.inlet))
         testPlumbing.expectMsg(M.DriveConnected)
+        testPlumbing.expectMsgType[M.DriveVerification]
         testUserLogging.expectMsgType[M.LogInfo]
-        testVisualization.expectMsgType[M.BlockBuilt]
+        testVisualization.expectMsgType[M.BlockConstructedInfo]
         //Turning on
         testPlumbing.send(blocks.testDrive, M.TurnOnDrive)
         testPlumbing.expectMsg(M.DriveTurnedOn)
@@ -268,21 +271,29 @@ class PumpAndDriveTest extends ActorTestSpec{
       connectTo.outletId     shouldEqual outlet.pipeId
       connectTo.inlet.pipeId shouldEqual inlet.pipeId
       //Send M.PipesConnected and expect M.DriveConnected
-      blocks.otherDrive.send(connectTo.initiator, M.PipesConnected(connectTo.connectionId, inlet.pipeId, outlet.pipeId))
+      blocks.otherDrive.send(connectTo.initiator, M.PipesConnected(connectTo.connectionId, outlet, inlet))
       testPlumbing.expectMsg(M.DriveConnected)
-      //Check BlockBuiltInfo
-      val builtInfo = testVisualization.expectMsgType[M.BlockBuilt].builtInfo
+      //Verification data
+      val verData = testPlumbing.expectMsgType[M.DriveVerification].verificationData
+      println(s"[PumpAndDriveTest] verData: $verData")
+      verData.blockId    shouldEqual testBlockId
+      verData.inlets    should have size 1
+      verData.inlets.head.inletId    shouldEqual inlet.pipeId
+      verData.inlets.head.publishers should have size 1
+      verData.inlets.head.publishers.head.blockId   shouldEqual outlet.blockId
+      verData.inlets.head.publishers.head.pipeId shouldEqual outlet.pipeId
+      verData.outlets shouldBe empty
+      //Check BlockInfo
+      val builtInfo = testVisualization.expectMsgType[M.BlockConstructedInfo].builtInfo
       println(s"[PumpAndDriveTest] builtInfo: $builtInfo")
       builtInfo.blockId    shouldEqual testBlockId
-      builtInfo.blockName  shouldEqual "TestBlock"
+      builtInfo.blockName  shouldEqual testBlockName
       builtInfo.blockImagePath shouldEqual None
       builtInfo.inlets    should have size 1
-      builtInfo.inlets.values.head.blockId     shouldEqual testBlockId
-      builtInfo.inlets.values.head.inletId    shouldEqual inlet.pipeId
-      builtInfo.inlets.values.head.inletName  shouldEqual inlet.pipeName
-      builtInfo.inlets.values.head.publishers should have size 1
-      builtInfo.inlets.values.head.publishers.head.blockId   shouldEqual outlet.blockId
-      builtInfo.inlets.values.head.publishers.head.outletId shouldEqual outlet.pipeId
+      builtInfo.inlets.head.blockId     shouldEqual testBlockId
+      builtInfo.inlets.head.blockName   shouldEqual Some(testBlockName)
+      builtInfo.inlets.head.inletId    shouldEqual inlet.pipeId
+      builtInfo.inlets.head.inletName  shouldEqual inlet.pipeName
       builtInfo.outlets shouldBe empty
       //Check pending list
       sleep(500.millis) //Wait for processing of PipesConnected by testBlock
@@ -309,20 +320,28 @@ class PumpAndDriveTest extends ActorTestSpec{
         M.ConnectTo(addConnection.connectionId, addConnection.initiator, outlet.pipeId, inlet))
       //Expect DriveConnected
       testPlumbing.expectMsg(M.DriveConnected)
-      //Check BlockBuiltInfo
-      val builtInfo = testVisualization.expectMsgType[M.BlockBuilt].builtInfo
+      //Verification data
+      val verData = testPlumbing.expectMsgType[M.DriveVerification].verificationData
+      println(s"[PumpAndDriveTest] verData: $verData")
+      verData.blockId     shouldEqual testBlockId
+      verData.inlets      shouldBe empty
+      verData.outlets     should have size 1
+      verData.outlets.head.outletId    shouldEqual outlet.pipeId
+      verData.outlets.head.subscribers should have size 1
+      verData.outlets.head.subscribers.head.blockId shouldEqual inlet.blockId
+      verData.outlets.head.subscribers.head.pipeId  shouldEqual inlet.pipeId
+      //Check BlockConstructedInfo
+      val builtInfo = testVisualization.expectMsgType[M.BlockConstructedInfo].builtInfo
       println(s"[PumpAndDriveTest] builtInfo: $builtInfo")
       builtInfo.blockId    shouldEqual testBlockId
-      builtInfo.blockName  shouldEqual "TestBlock"
+      builtInfo.blockName  shouldEqual testBlockName
       builtInfo.blockImagePath shouldEqual None
       builtInfo.inlets    shouldBe empty
       builtInfo.outlets should have size 1
-      builtInfo.outlets.values.head.blockId      shouldEqual testBlockId
-      builtInfo.outlets.values.head.outletId    shouldEqual outlet.pipeId
-      builtInfo.outlets.values.head.outletName  shouldEqual outlet.pipeName
-      builtInfo.outlets.values.head.subscribers should have size 1
-      builtInfo.outlets.values.head.subscribers.head.blockId   shouldEqual inlet.blockId
-      builtInfo.outlets.values.head.subscribers.head.inletId shouldEqual inlet.pipeId
+      builtInfo.outlets.head.blockId     shouldEqual testBlockId
+      builtInfo.outlets.head.blockName   shouldEqual Some(testBlockName)
+      builtInfo.outlets.head.outletId    shouldEqual outlet.pipeId
+      builtInfo.outlets.head.outletName  shouldEqual outlet.pipeName
       //Check pendingConnections
       sleep(500.millis) //Wait for processing of PipesConnected by testBlock
       blocks.testDrive.askForState[DriveState].pendingConnections should have size 0}
@@ -348,6 +367,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Connected
       blocks.otherDrive.send(blocks.testDrive, M.ConnectTo(addCon.connectionId, addCon.initiator, outlet.pipeId, inlet))
       testPlumbing.expectMsg(M.DriveConnected)
+      testPlumbing.expectMsgType[M.DriveVerification]
       //Send in Connected
       blocks.testBlock.testPipe.sendValue(v4)
       //Check pending list
@@ -372,6 +392,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       val addCon = blocks.otherDrive.expectMsgType[M.AddConnection]
       blocks.otherDrive.send(blocks.testDrive, M.ConnectTo(addCon.connectionId, addCon.initiator, outlet.pipeId, inlet))
       testPlumbing.expectMsg(M.DriveConnected)
+      testPlumbing.expectMsgType[M.DriveVerification]
       //Send to pending list
       blocks.testBlock.testPipe.sendValue(v1)
       blocks.testBlock.testPipe.sendValue(v2)
@@ -481,8 +502,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       connectTo.initiator    shouldEqual blocks.testDrive
       connectTo.outletId     shouldEqual outlet.pipeId
       connectTo.inlet.pipeId shouldEqual inlet.pipeId
-      blocks.otherDrive.send(connectTo.initiator, M.PipesConnected(connectTo.connectionId, inlet.pipeId, outlet.pipeId))
+      blocks.otherDrive.send(connectTo.initiator, M.PipesConnected(connectTo.connectionId, outlet, inlet))
       testPlumbing.expectMsg(M.DriveConnected)
+      testPlumbing.expectMsgType[M.DriveVerification]
       //Helpers
       def testMsgProcessing(): Unit = {
         //Preparing

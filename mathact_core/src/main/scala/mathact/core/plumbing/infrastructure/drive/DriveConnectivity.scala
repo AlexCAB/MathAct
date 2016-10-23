@@ -16,6 +16,7 @@ package mathact.core.plumbing.infrastructure.drive
 
 import akka.actor.ActorRef
 import mathact.core.model.data.pipes.{InletData, OutletData}
+import mathact.core.model.data.visualisation.{InletInfo, OutletInfo}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
 import scala.collection.mutable.{Map ⇒ MutMap}
@@ -92,20 +93,33 @@ private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
       case Some(outlet) ⇒
         val inDrive = inlet.blockDrive
         outlet.subscribers += ((inDrive, inlet.pipeId) → SubscriberData((inDrive, inlet.pipeId), inlet))
-        initiator ! M.PipesConnected(connectionId, outletId, inlet.pipeId)
+        initiator ! M.PipesConnected(connectionId, outlet.pipe.pipeData, inlet)
         log.debug(s"[ConnectTo] Connection added, from: $outlet, to: $inlet")
       case None ⇒
         log.error(s"[DriveConnectivity.connectTo] Outlet with outletId: $outletId, not exist.")
         throw new IllegalArgumentException(s"Outlet with outletId: $outletId, not in inlets list.")}
   /** Remove connected connection from pendingConnections list
     * @param connectionId - Int
-    * @param inletId - Int
-    * @param outletId - Int */
-  def pipesConnected(connectionId: Int, inletId: Int, outletId: Int): Unit = pendingConnections
+    * @param outlet - Int
+    * @param inlet - Int */
+  def pipesConnected(connectionId: Int, outlet: OutletData, inlet: InletData): Unit = pendingConnections
     .contains(connectionId) match{
       case true ⇒
         log.debug(s"[DriveConnectivity.pipesConnected] Connected, connectionId: $connectionId.")
+        //Remove from list
         pendingConnections -= connectionId
+        //Send BlocksConnectedInfo
+        visualization ! M.BlocksConnectedInfo(
+          outletInfo = OutletInfo(
+            outlet.blockId,
+            Some(outlet.blockName),
+            outlet.pipeId,
+            outlet.pipeName),
+          inletInfo = InletInfo(
+            inlet.blockId,
+            Some(inlet.blockName),
+            inlet.pipeId,
+            inlet.pipeName))
       case false ⇒
         log.error(s"[DriveConnectivity.pipesConnected] Unknown connection with connectionId: $connectionId.")
         throw new IllegalArgumentException(s"Unknown connection with connectionId: $connectionId.")}

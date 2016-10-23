@@ -133,4 +133,6 @@ private [mathact] class ImpellerActor(drive: ActorRef, maxQueueSize: Int) extend
       case None ⇒
         log.warning(
           s"[ImpellerActor.TaskFailure] Failed not a current task (probably current been skipped), " +
-          s"taskNumber: $taskNumber.")}}}
+          s"taskNumber: $taskNumber.")}}
+  //Cleanup
+  def cleanup(): Unit = {}}

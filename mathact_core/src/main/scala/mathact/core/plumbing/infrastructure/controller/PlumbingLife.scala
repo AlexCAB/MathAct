@@ -16,11 +16,12 @@ package mathact.core.plumbing.infrastructure.controller
 
 import akka.actor.ActorRef
 import mathact.core.IdGenerator
+import mathact.core.model.data.verification.BlockVerificationData
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.controller.Plumbing.DriveState._
 import mathact.core.plumbing.infrastructure.controller.Plumbing.State._
-import scala.collection.mutable.{Map => MutMap}
+import scala.collection.mutable.{Map ⇒ MutMap, ListBuffer ⇒ MutList}
 
 
 /** Plumbing life cycle
@@ -30,6 +31,7 @@ import scala.collection.mutable.{Map => MutMap}
 private [mathact] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ import Plumbing._
   //Variables
   private val drives = MutMap[ActorRef, DriveData]()
+  private val blocksVerificationData = MutList[BlockVerificationData]()
   //Functions
   private def forDriveDo(driveActor: ActorRef)(proc: DriveData⇒Unit): Unit = drives.get(driveActor) match{
     case Some(driveData) ⇒
@@ -93,6 +95,48 @@ private [mathact] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ 
   def setDriveStateAndCheckIfAllIn(actor: ActorRef, newState: DriveState): Boolean = {
     setDriveState(actor, newState)
     isAllDrivesIn(newState)}
+  def driveVerification(verificationData: BlockVerificationData): Unit = {
+    log.debug(s"[PlumbingLife.blockConstructedInfo] Add to verification list: $verificationData")
+    blocksVerificationData += verificationData}
+  /** Verify blocks and they connections structure */
+  def verifyGraphStructure(): Unit = {
+    //Preparing
+    val blocks: Map[Int, (Set[Int], Set[Int])] = blocksVerificationData
+      .map(t ⇒ t.blockId → Tuple2(t.inlets.map(_.inletId).toSet,  t.outlets.map(_.outletId).toSet))
+      .toMap
+    //Test
+    val testRes = blocksVerificationData.flatMap{ block ⇒
+      block.inlets.flatMap{ inlet ⇒
+        inlet.publishers.flatMap{ publisher ⇒
+          blocks.exists{ case (blockId, (_, outletIds)) ⇒
+            publisher.blockId == blockId && outletIds.contains(publisher.pipeId)}
+          match{
+            case true ⇒
+              None
+            case false ⇒
+              val msg = s"Not found outlet with blockId = ${publisher.blockId} and outletId = ${publisher.pipeId}, " +
+                s"which should be a publishers for inlet with blockId = ${block.blockId} and inletId = ${inlet.inletId}"
+              Some(msg)}}} ++
+        block.outlets.flatMap{ outlet ⇒
+          outlet.subscribers.flatMap{ subscriber ⇒
+            blocks.exists{ case (blockId, (inletIds, _)) ⇒
+              subscriber.blockId == blockId && inletIds.contains(subscriber.pipeId)}
+            match{
+              case true ⇒
+                None
+              case false ⇒
+                val msg = s"Not found inlet with blockId = ${subscriber.blockId} and inletId = ${subscriber.pipeId}, " +
+                  s"which should be a subscriber for outlet with blockId = ${block.blockId} and outletId = ${outlet.outletId}"
+                Some(msg)}}}}
+    //Log result
+    testRes match{
+      case es if es.isEmpty ⇒
+        log.debug("[PlumbingLife.verifyGraphStructure] Structure is valid.")
+      case errors ⇒
+        val msg =
+          s"[PlumbingLife.verifyGraphStructure] Structure invalid, next errors found: \n    ${errors.mkString("\n    ")}"
+        log.error(msg)
+        throw new IllegalStateException(msg)}}
   /** All drives built */
   def allDrivesBuilt(): Unit = {
     log.debug(s"[PlumbingLife.allDrivesBuilt] Report to controller, userLogging and visualization.")

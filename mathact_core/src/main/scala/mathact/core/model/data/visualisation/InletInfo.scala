@@ -15,14 +15,14 @@
 package mathact.core.model.data.visualisation
 
 
-/** Outlet connections info
+/** Subscriber info
   * Created by CAB on 03.09.2016.
   */
 
-case class OutletConnectionsInfo(
+case class InletInfo(
   blockId: Int,
-  outletId: Int,
-  outletName: Option[String],
-  subscribers: List[SubscriberInfo]) {
+  blockName: Option[String],
+  inletId: Int,
+  inletName: Option[String]) {
     override def toString =
-      s"InletConnectionsInfo(blockId: $blockId, outletId: $outletId, outletName: $outletName, subscribers: $subscribers)"}
+      s"InletInfo(blockId: $blockId, blockName: $blockName, inletId: $inletId, inletName: $inletName)"}

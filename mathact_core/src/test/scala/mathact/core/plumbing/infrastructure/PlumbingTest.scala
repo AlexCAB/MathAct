@@ -19,6 +19,8 @@ import akka.testkit.TestProbe
 import akka.util.Timeout
 import mathact.core.ActorTestSpec
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
+import mathact.core.model.data.pipes.OutletData
+import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 import mathact.core.plumbing.{Fitting, PumpLike}
@@ -58,7 +60,7 @@ class PlumbingTest extends ActorTestSpec{
         val uiOperationTimeout = 1.second}}
     //PlumbingActor
     object actors{
-      lazy val plumbing = system.actorOf(Props(
+      lazy val plumbing = newRootChildActorOf(Props(
         new PlumbingActor(testPlumbingConfig, testController.ref,  "TestSketch", testUserLogging.ref, testVisualization.ref){
           override def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef  = {
             val actor = List(testDrive1.ref, testDrive2.ref)(blockPump.asInstanceOf[TestPump].index)
@@ -143,6 +145,45 @@ class PlumbingTest extends ActorTestSpec{
       testController.expectMsg(M.PlumbingBuilt)
       val logInfo = testUserLogging.expectMsgType[M.LogInfo]
       println("[PlumbingTest] logInfo: " + logInfo)}
+    "verify graph structure after all drive constructed, and terminate if this wrong" in new TestCase {
+      //Preparing
+      actors.plumbingWithDrives
+      val incorrectVerificationData1 = BlockVerificationData(
+        blockId = 1,
+        inlets = Seq(InletVerificationData(
+          inletId = 1,
+          publishers = Seq(OutletData(
+            blockId = 2,
+            blockDrive = null,
+            blockName = "",
+            pipeId = 12345,   //Not exist outlet
+            pipeName = None)))),
+        outlets = Seq())
+      val verificationData2 = BlockVerificationData(
+        blockId = 2,
+        inlets = Seq(),
+        outlets = Seq())
+      //Send BuildPlumbing
+      testController.send(actors.plumbing, M.BuildPlumbing)
+      testController.watch(actors.plumbing)
+      //Construct drives
+      testDrive1.expectMsg(M.ConstructDrive)
+      sleep(1.second)
+      testDrive1.send(actors.plumbing, M.DriveConstructed)
+      testDrive2.expectMsg(M.ConstructDrive)
+      sleep(1.second)
+      testDrive2.send(actors.plumbing, M.DriveConstructed)
+      //Connecting drives
+      testDrive1.expectMsg(M.ConnectingDrive)
+      sleep(1.second)
+      testDrive1.send(actors.plumbing, M.DriveConnected)
+      testDrive1.send(actors.plumbing, M.DriveVerification(incorrectVerificationData1))
+      testDrive2.expectMsg(M.ConnectingDrive)
+      sleep(1.second)
+      testDrive2.send(actors.plumbing, M.DriveConnected)
+      testDrive2.send(actors.plumbing, M.DriveVerification(verificationData2))
+      //Expect termination
+      testController.expectTerminated(actors.plumbing)}
     "by M.StartPlumbing, build and start all drives, response M.PlumbingStarted" in new TestCase {
       //Preparing
       actors.builtPlumbing

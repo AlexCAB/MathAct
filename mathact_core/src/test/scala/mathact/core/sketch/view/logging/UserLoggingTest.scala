@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.view.logging
 
-import akka.actor.Props
+import akka.actor.{PoisonPill, Props}
 import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
 import mathact.core.model.config.UserLoggingConfigLike
@@ -78,17 +78,15 @@ class UserLoggingTest extends UIActorTestSpec {
       sleep(2.second)
       //Test close button
       workbenchController.send(userLog, M.LogInfo(None, "TESTING", "Click close button (X)."))
-      sleep(2.second)
-      workbenchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual false
+      workbenchController.expectMsgType[M.UserLoggingUIChanged](30.second).isShow shouldEqual false
       workbenchController.send(userLog, M.ShowUserLoggingUI)
       workbenchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual true
       //Test done
       workbenchController.send(userLog, M.LogInfo(None, "TESTING", "Test done, you can play with UI next 30 second"))
       sleep(30.second)  //Time for playing with UI
-//      //Terminate UI
-//      workbenchController.send(userLog, M.TerminateUserLogging)
-//      ??? //workbenchController.expectMsg(M.UserLoggingTerminated)
-//      workbenchController.expectTerminated(userLog)
+      //Terminate UI
+      userLog ! PoisonPill
+      workbenchController.expectTerminated(userLog)
     }
   }
 }

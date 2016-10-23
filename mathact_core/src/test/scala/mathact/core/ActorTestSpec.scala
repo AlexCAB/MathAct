@@ -15,7 +15,8 @@
 
 package mathact.core
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.SupervisorStrategy.Stop
+import akka.actor._
 import akka.testkit.TestKit
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import akka.util.Timeout
@@ -38,10 +39,20 @@ with WordSpecLike with Matchers with BeforeAndAfterAll with FutureHelpers with R
   override def afterAll = {TestKit.shutdownActorSystem(system)}
   //Helpers definitions
   case object GetDriveState
+  case object GetChildActor
+  abstract class RootActor extends Actor{
+    override val supervisorStrategy = OneForOneStrategy(){case _: Throwable ⇒ Stop}
+    val childActor: ActorRef
+    def receive = {
+      case GetChildActor ⇒ sender ! childActor
+      case m ⇒ println("[RootActor] m: " + m)}}
   //Actor helpers
   implicit class ActorRefEx(actor: ActorRef){
     def askFor[R : ClassTag](msg: AnyRef): R = Await.result(ask(actor, msg).mapTo[R], askTimeout.duration)
     def askForState[R : ClassTag]: R = askFor(GetDriveState)}
+  def newRootChildActorOf(actorInstance: Props, name: String): ActorRef = system
+    .actorOf(Props(new RootActor{ val childActor = context.actorOf(actorInstance, name) }))
+    .askFor[ActorRef](GetChildActor)
   //Test helpers
   implicit class AnySeqEx(seq: Seq[Any]){
     def getOneWithType[T : ClassTag]: T = {

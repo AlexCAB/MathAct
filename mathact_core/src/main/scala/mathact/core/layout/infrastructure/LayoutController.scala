@@ -42,5 +42,7 @@ extends WorkerBase with JFXInteraction {
 
   }
 
+  //Cleanup
+  def cleanup(): Unit = {  }
 
 }

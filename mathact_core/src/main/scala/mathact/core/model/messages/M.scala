@@ -18,7 +18,8 @@ import akka.actor.ActorRef
 import mathact.core.bricks.WorkbenchLike
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.{SketchInfo, SketchData}
-import mathact.core.model.data.visualisation.BlockBuiltInfo
+import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData, OutletVerificationData}
+import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.fitting.{Plug, Socket, InPipe, OutPipe}
@@ -97,10 +98,15 @@ private [mathact] object M {
   case object DriveStopped extends Msg
   case object TurnOffDrive extends Msg //Stop user message processing, response witt DriveTurnedOff after all message processed
   case object DriveTurnedOff extends Msg
+  case class DriveVerification(verificationData: BlockVerificationData) extends Msg
+  //PlumbingActor - DriveActor (UI control)
+  case object SkipTimeoutTask extends Msg
+  case object ShowBlockUi extends Msg
+  case object HideBlockUi extends Msg
   //DriveActor - DriveActor
   case class AddConnection(connectionId: Int, initiator: ActorRef, inletId: Int, outlet: OutletData) extends Msg
   case class ConnectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData) extends Msg
-  case class PipesConnected(connectionId: Int, outletId: Int, inletId: Int) extends Msg
+  case class PipesConnected(connectionId: Int, outlet: OutletData, inlet: InletData) extends Msg
   case class UserMessage[T](outletId: Int, inletId: Int, value: T) extends Msg
   case class DriveLoad(subscriberId: (ActorRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
   //DriveActor - ImpellerActor
@@ -113,13 +119,11 @@ private [mathact] object M {
   case class LogInfo(blockId: Option[Int], blockName: String, message: String) extends Msg
   case class LogWarning(blockId: Option[Int], blockName: String, message: String) extends Msg
   case class LogError(blockId: Option[Int], blockName: String, errors: Seq[Throwable], message: String) extends Msg
-  //Visualization - DriveActor
-  case class BlockBuilt(builtInfo: BlockBuiltInfo) extends Msg   //Send to Visualization from DriveActor after block built
+  //PlumbingActor - Visualization
+  case class BlockConstructedInfo(builtInfo: BlockInfo) extends Msg   //Send to Visualization from DriveActor after block built
+  case class BlocksConnectedInfo(outletInfo: OutletInfo, inletInfo: InletInfo) extends Msg   //Send to Visualization from DriveActor after pipes connected
   case object AllBlockBuilt
   case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to DriveActor from Visualization
-  case object SkipTimeoutTask extends Msg
-  case object ShowBlockUi extends Msg  //Send to DriveActor from Visualization to show it's UI
-  case object HideBlockUi extends Msg  //Send to DriveActor from Visualization to hide it's UI
 
   //TODO Add more
 

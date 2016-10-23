@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.view.main
 
-import akka.actor.Props
+import akka.actor.{PoisonPill, Props}
 import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
 import mathact.core.app.view.MainUIActor
@@ -67,8 +67,7 @@ class MainUITest extends UIActorTestSpec {
       println("[MainUITest] PLEASE HIT CLOSE (X) BUTTON")
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
       //Terminate UI
-//      testMainController.send(ui, M.TerminateMainUI)
-      ??? //testMainController.expectMsg(M.MainUITerminated)
+      ui ! PoisonPill
       testMainController.expectTerminated(ui)}
     "show sketches list and run one of" in new TestCase {
       //Set empty list of sketch
@@ -98,10 +97,9 @@ class MainUITest extends UIActorTestSpec {
       //Close
       println("[MainUITest] PLEASE HIT CLOSE (X) BUTTON")
       testMainController.expectMsg(30.seconds, M.MainCloseBtnHit)
-//      //Terminate UI
-//      testMainController.send(ui, M.TerminateMainUI)
-//      ??? //testMainController.expectMsg(M.MainUITerminated)
-//      testMainController.expectTerminated(ui)
+      //Terminate UI
+      ui ! PoisonPill
+      testMainController.expectTerminated(ui)
     }
   }
 }

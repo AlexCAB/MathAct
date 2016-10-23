@@ -101,9 +101,10 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
         Connecting
       case false ⇒
         state}
-    //Check if all drives connected, and turning on if so
+    //Check if all drives connected, verify, and turning on if so
     case (M.DriveConnected, Connecting) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConnected) match{
       case true ⇒
+        verifyGraphStructure()
         sendToEachDrive(M.TurnOnDrive)
         TurningOn
       case false ⇒
@@ -144,6 +145,10 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
         TurnedOff
       case false ⇒
         state}
+    //DriveVerification
+    case (M.DriveVerification(verificationData), _) ⇒
+      driveVerification(verificationData)
+      state
     //Skip timeout task for all drives
     case (M.SkipAllTimeoutTask, _) ⇒
       sendToEachDrive(M.SkipTimeoutTask)

@@ -18,7 +18,7 @@ import javafx.event.EventHandler
 import javafx.scene.Parent
 import javafx.stage.WindowEvent
 
-import akka.actor.{ActorRef, PoisonPill}
+import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.UserLoggingConfigLike
@@ -151,13 +151,9 @@ extends WorkerBase with JFXInteraction { import UserLogging._
         case _ ⇒ ""}))
       //Add to Log
       logRows +:= row
-      refreshUi()
-//    //Terminate user logging
-//    case M.TerminateUserLogging ⇒
-//      runAndWait(window.close()) //TODO Не ждать или с таймаутом
-//      ???
-////      workbenchController ! M.UserLoggingTerminated
-//      self ! PoisonPill
-  }
-  ???
-}
+      refreshUi()}
+  //Cleanup
+  def cleanup(): Unit = {
+    log.debug(s"[UserLoggingActor.cleanup] Actor stopped, close UI.")
+    runLater(window.close())}}
+

@@ -74,7 +74,7 @@ extends PumpLike{
         akkaLog.error(s"[Pump.connect] Error on connecting of pipes: $t")
         throw new ExecutionException(t)},
       d ⇒ {
-        akkaLog.debug(s"[Pump.connect] Pipe added, pipeId: $d")
+        akkaLog.debug(s"[Pump.connect] Pipes connected: $d")
         d})
   private[mathact] def blockStart(): Unit = block match{
     case os: OnStart ⇒ os.doStart()

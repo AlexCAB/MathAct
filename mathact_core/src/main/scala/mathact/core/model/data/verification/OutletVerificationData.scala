@@ -12,30 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.plumbing.infrastructure.user.actors
+package mathact.core.model.data.verification
 
-import akka.actor.ActorRef
-import mathact.core.WorkerBase
+import mathact.core.model.data.pipes.InletData
 
 
-/** Root for user actors
-  * Created by CAB on 19.10.2016.
+/** Outlet verification info
+  * Created by CAB on 23.10.2016.
   */
 
-private [mathact] class UserActorsRoot(drive: ActorRef) extends WorkerBase {
+case class OutletVerificationData(
+  outletId: Int,
+  subscribers: Seq[InletData])
 
-  //TODO Здесь создание и обслужывание акторов пользователя.
-
-  //Messages handling
-  def reaction = {
-
-    case m ⇒ println("[UserActorsRoot | TODO] m: " + m)
-
-  }
-
-  //Cleanup
-  def cleanup(): Unit = {
-
-    //TODO
-  }
-}

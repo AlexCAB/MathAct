@@ -21,12 +21,12 @@ import scalafx.scene.image.Image
   * Created by CAB on 15.05.2016.
   */
 
-case class BlockBuiltInfo(
+case class BlockInfo(
   blockId: Int,
   blockName: String,
   blockImagePath: Option[String],
-  inlets: Map[Int, InletConnectionsInfo],
-  outlets: Map[Int, OutletConnectionsInfo])
+  inlets: Seq[InletInfo],
+  outlets: Seq[OutletInfo])
 {
   override def toString =
     s"InletConnectionsInfo(blockId: $blockId, blockName: $blockName, blockImagePath: $blockImagePath, " +

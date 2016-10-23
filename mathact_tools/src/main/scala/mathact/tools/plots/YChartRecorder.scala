@@ -14,14 +14,17 @@
 
 package mathact.tools.plots
 
-import mathact.core.bricks.{SketchContext, Tool}
+import mathact.core.bricks.{OnStart, SketchContext, Tool}
+
+import scala.concurrent.Future
 
 
 /** Chart recorder by Y tool
   * Created by CAB on 08.05.2016.
   */
 
-abstract class YChartRecorder(implicit context: SketchContext) extends Tool(context, "YChartRecorder"){
+abstract class YChartRecorder(implicit context: SketchContext) extends Tool(context, "YChartRecorder") {
+
 
 
 
@@ -30,7 +33,7 @@ abstract class YChartRecorder(implicit context: SketchContext) extends Tool(cont
 
     protected def drain(v: Double): Unit = {
 
-      println("##### Handle: " + v)
+      println("$$$$$$$$$$$$$$$$$$$$$ Handle: " + v)
 
     }
 
@@ -42,6 +45,8 @@ abstract class YChartRecorder(implicit context: SketchContext) extends Tool(cont
       val in = Inlet(this)
 
 
+
+      println("RRRRRRRRRRRRRRRRRRRRRRR")
 
 
       in.plug(out)

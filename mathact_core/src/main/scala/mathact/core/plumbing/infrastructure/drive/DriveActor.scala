@@ -82,9 +82,9 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
     case (M.ConnectTo(id, initiator, outletId, inlet), Connecting | Connected) ⇒
       connectTo(id, initiator, outletId, inlet)
       state
-    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and BlockBuilt
-    case (M.PipesConnected(id, inletId, outletId), Connecting) ⇒
-      pipesConnected(id, inletId, outletId)
+    //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and BlockConstructedInfo
+    case (M.PipesConnected(id, outlet, inlet), Connecting) ⇒
+      pipesConnected(id, outlet, inlet)
       isPendingConListEmpty match{
         case true ⇒
           connectingSuccess()

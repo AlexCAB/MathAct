@@ -15,6 +15,7 @@
 package mathact.core.plumbing.infrastructure.drive
 
 import mathact.core.bricks.{OnStart, OnStop}
+import mathact.core.model.data.verification.{BlockVerificationData, OutletVerificationData, InletVerificationData}
 import mathact.core.model.data.visualisation._
 import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M
@@ -99,40 +100,43 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
     log.debug(
       s"[DriveLife.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
       s"Current: outlets: $outlets, inlets: $inlets")
-    plumbing ! M.DriveConstructed}
-  /** Build BlockBuiltInfo and send to visualization actor */
-  def connectingSuccess(): Unit = {
-    log.debug(
-      s"[DriveLife.connectingSuccess] All pipes connected, send M.DriveConnected, LogInfo, BlockBuiltInfo")
     //Report to plumbing
-    plumbing ! M.DriveConnected
-    //Log to user logger
-    userLogging ! M.LogInfo(Some(blockId), pump.blockName, s"Block successful built.")
-    //Build
-    val builtInfo = BlockBuiltInfo(
+    plumbing ! M.DriveConstructed
+    //Build and send BlockConstructedInfo
+    visualization ! M.BlockConstructedInfo(BlockInfo(
       blockId,
       pump.blockName,
       pump.blockImagePath,
       inlets = inlets
-        .map{ case (inletId, inletData) ⇒ (inletId, InletConnectionsInfo(
+        .map{ case (inletId, inletData) ⇒ InletInfo(
           blockId,
+          blockName = Some(pump.blockName),
           inletId,
-          inletName = inletData.name,
-          publishers = inletData.publishers
-            .map{ case (_, pubData) ⇒ PublisherInfo(pubData.blockId,pubData.pipeId)}
-            .toList))}
-        .toMap,
+          inletName = inletData.name)}
+        .toSeq,
       outlets = outlets
-        .map{ case (outletId, outletData) ⇒ (outletId, OutletConnectionsInfo(
+        .map{ case (outletId, outletData) ⇒ OutletInfo(
           blockId,
+          blockName = Some(pump.blockName),
           outletId,
-          outletName = outletData.name,
-          subscribers = outletData.subscribers
-            .map{ case (_, subData) ⇒ SubscriberInfo(subData.inlet.blockId, subData.inlet.pipeId)}
-            .toList))}
-        .toMap)
-    //Send
-    visualization ! M.BlockBuilt(builtInfo)}
+          outletName = outletData.name)}
+        .toSeq))}
+  /** Build BlockInfo and send to visualization actor */
+  def connectingSuccess(): Unit = {
+    log.debug(
+      s"[DriveLife.connectingSuccess] All pipes connected, send M.DriveConnected, LogInfo, BlockInfo")
+    //Report to plumbing
+    plumbing ! M.DriveConnected
+    plumbing ! M.DriveVerification( BlockVerificationData(
+      blockId,
+      inlets.values.toSeq.map{ inlet ⇒InletVerificationData(
+        inlet.inletId,
+        inlet.publishers.values.toSeq)},
+      outlets.values.toSeq.map{ outlet ⇒ OutletVerificationData(
+        outlet.outletId,
+        outlet.subscribers.map(_._2.inlet).toSeq)}))
+    //Log to user logger
+    userLogging ! M.LogInfo(Some(blockId), pump.blockName, s"Block successful built.")}
   /** Rus staring task if defined, return isStarted */
   def doStarting(): Boolean = pump.block match{
     case task: OnStart ⇒

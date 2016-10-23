@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.view.sketch
 
-import akka.actor.{ActorRef, PoisonPill}
+import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.SketchUIConfigLike
@@ -59,7 +59,7 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
       case (StopSketchBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒runAndWait{
         window.stopSketchBtn.setState(s)}
       case (element, state) ⇒
-        log.error(s"[SketchUI] Unknown combination of element: $element and state: $state")}
+        log.error(s"[SketchUI @ UpdateSketchUIState] Unknown combination of element: $element and state: $state")}
     //Update status string
     case M.SetSketchUIStatusString(message, color) ⇒ runAndWait{
       window.stateString.text = message
@@ -67,14 +67,9 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
     //Hide UI
     case M.HideSketchUI ⇒
       runAndWait(window.hide())
-      workbenchController ! M.SketchUIChanged(isShow = false)
-//    //Terminate UI
-//    case M.TerminateSketchUI ⇒
-//      runAndWait(window.close())  //TODO Не ждать или с таймаутом
-//      ???
-////      workbenchController ! M.SketchUITerminated
-//      self ! PoisonPill
-  }
-  ???
-}
+      workbenchController ! M.SketchUIChanged(isShow = false)}
+  //Cleanup
+  def cleanup(): Unit = {
+    log.debug(s"[SketchUIActor.cleanup] Actor stopped, close UI.")
+    runLater(window.close())}}
 

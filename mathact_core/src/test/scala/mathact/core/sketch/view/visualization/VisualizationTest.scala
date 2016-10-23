@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.view.visualization
 
-import akka.actor.Props
+import akka.actor.{PoisonPill, Props}
 import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
 import mathact.core.model.config.VisualizationConfigLike
@@ -47,74 +47,74 @@ class VisualizationTest extends UIActorTestSpec {
       sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual true
       sleep(2.second)
       //Fill graph
-      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+      val blockAOutlet1 = OutletInfo(
+        blockId = 1,
+        blockName = Some("A"),
+        outletId = 1,
+        outletName = None)
+      sketchController.send(visualization, M.BlockConstructedInfo(BlockInfo(
         blockId = 1,
         blockName = "A",
         blockImagePath = None,
-        inlets = Map(),
-        outlets = Map(
-          1 → OutletConnectionsInfo(
-            blockId = 1,
-            outletId = 1,
-            outletName = None,
-            subscribers = List(
-              SubscriberInfo(blockId = 2, inletId = 1)))))))
+        inlets = Seq(),
+        outlets = Seq(blockAOutlet1))))
       sleep(1.second)
-      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+      val blockBInlet1 = InletInfo(
+        blockId = 2,
+        blockName = Some("B"),
+        inletId = 1,
+        inletName = Some("i_1"))
+      val blockBInlet2 = InletInfo(
+        blockId = 2,
+        blockName = Some("B"),
+        inletId = 2,
+        inletName = Some("i_2"))
+      val blockBOutlet1 = OutletInfo(
+        blockId = 2,
+        blockName = Some("B"),
+        outletId = 3,
+        outletName = Some("o_1"))
+      val blockBOutlet2 = OutletInfo(
+        blockId = 2,
+        blockName = Some("B"),
+        outletId = 4,
+        outletName = Some("o_2"))
+      sketchController.send(visualization, M.BlockConstructedInfo(BlockInfo(
         blockId = 2,
         blockName = "B",
         blockImagePath = None,
-        inlets = Map(
-          1 → InletConnectionsInfo(
-            blockId = 2,
-            inletId = 1,
-            inletName = Some("i_1"),
-            publishers = List(
-              PublisherInfo(blockId = 1, outletId = 1),
-              PublisherInfo(blockId = 2, outletId = 3))),
-          2 → InletConnectionsInfo(
-            blockId = 2,
-            inletId = 2,
-            inletName = Some("i_2"),
-            publishers = List())),
-        outlets = Map(
-          3 → OutletConnectionsInfo(
-            blockId = 2,
-            outletId = 3,
-            outletName = Some("o_1"),
-            subscribers = List(
-              SubscriberInfo(blockId = 2, inletId = 1),
-              SubscriberInfo(blockId = 3, inletId = 1))),
-          4 → OutletConnectionsInfo(
-            blockId = 2,
-            outletId = 4,
-            outletName = Some("o_2"),
-            subscribers = List(
-              SubscriberInfo(blockId = 3, inletId = 2)))))))
+        inlets = Seq(blockBInlet1, blockBInlet2),
+        outlets = Seq(blockBOutlet1, blockBOutlet2))))
       sleep(1.second)
-      sketchController.send(visualization, M.BlockBuilt(BlockBuiltInfo(
+      sketchController.send(visualization, M.BlocksConnectedInfo(blockAOutlet1, blockBInlet1))
+      sleep(1.second)
+      sketchController.send(visualization, M.BlocksConnectedInfo(blockBOutlet1, blockBInlet1))
+      sleep(1.second)
+      val blockCInlet1 = InletInfo(
+        blockId = 3,
+        blockName = Some("C"),
+        inletId = 1,
+        inletName = Some("i_1"))
+      val blockCInlet2 = InletInfo(
+        blockId = 3,
+        blockName = Some("C"),
+        inletId = 2,
+        inletName = Some("i_2"))
+      val blockCOutlet1 = OutletInfo(
+        blockId = 3,
+        blockName = Some("C"),
+        outletId = 3,
+        outletName = Some("o_1"))
+      sketchController.send(visualization, M.BlockConstructedInfo(BlockInfo(
         blockId = 3,
         blockName = "C",
         blockImagePath = Some("mathact/userLog/info_img.png"),
-        inlets = Map(
-          1 → InletConnectionsInfo(
-            blockId = 3,
-            inletId = 1,
-            inletName = Some("i_1"),
-            publishers = List(
-              PublisherInfo(blockId = 2, outletId = 3))),
-          2 → InletConnectionsInfo(
-            blockId = 3,
-            inletId = 2,
-            inletName = Some("i_2"),
-            publishers = List(
-              PublisherInfo(blockId = 2, outletId = 4)))),
-        outlets = Map(
-          3 → OutletConnectionsInfo(
-            blockId = 3,
-            outletId = 3,
-            outletName = Some("o_1"),
-            subscribers = List())))))
+        inlets = Seq(blockCInlet1, blockCInlet2),
+        outlets = Seq(blockCOutlet1))))
+      sleep(1.second)
+      sketchController.send(visualization, M.BlocksConnectedInfo(blockAOutlet1, blockCInlet1))
+      sleep(1.second)
+      sketchController.send(visualization, M.BlocksConnectedInfo(blockCOutlet1, blockBInlet2))
       sleep(1.second)
       sketchController.send(visualization, M.AllBlockBuilt)
       //Test close button
@@ -128,10 +128,9 @@ class VisualizationTest extends UIActorTestSpec {
       sketchController.send(visualization, M.HideVisualizationUI)
       sketchController.expectMsgType[M.VisualizationUIChanged].isShow shouldEqual false
       sleep(2.second)
-//      //Terminate UI
-//      sketchController.send(visualization, M.TerminateVisualization)
-//      ??? //sketchController.expectMsg(M.VisualizationTerminated)
-//      sketchController.expectTerminated(visualization)
+      //Terminate UI
+      visualization ! PoisonPill
+      sketchController.expectTerminated(visualization)
     }
   }
 }
