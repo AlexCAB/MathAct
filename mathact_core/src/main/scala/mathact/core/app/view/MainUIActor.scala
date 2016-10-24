@@ -25,7 +25,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 11.10.2016.
   */
 
-private [mathact] class MainUIActor(
+private[core] class MainUIActor(
   config: MainUIConfigLike,
   mainController: ActorRef)
 extends WorkerBase with JFXInteraction {

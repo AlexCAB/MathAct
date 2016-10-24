@@ -14,14 +14,12 @@
 
 package mathact.core.model.data.verification
 
-import mathact.core.model.data.pipes.{InletData, OutletData}
-import mathact.core.model.data.visualisation.{OutletInfo, InletInfo}
 
-/**
+/** Block verification data
   * Created by CAB on 23.10.2016.
   */
 
-case class BlockVerificationData(
+private[core] case class BlockVerificationData(
   blockId: Int,
   inlets: Seq[InletVerificationData],
   outlets:Seq[OutletVerificationData])

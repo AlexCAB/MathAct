@@ -26,7 +26,7 @@ import scala.collection.mutable.{Map => MutMap, Queue => MutQueue}
   * Created by CAB on 15.10.2016.
   */
 
-object Drive {
+private[core] object Drive {
   //enums
   object State extends Enumeration {
     val Init = Value

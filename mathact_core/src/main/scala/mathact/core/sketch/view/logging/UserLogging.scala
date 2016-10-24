@@ -19,7 +19,7 @@ package mathact.core.sketch.view.logging
   * Created by CAB on 28.09.2016.
   */
 
-private [mathact] object UserLogging {
+private[core] object UserLogging {
   //Enums
   object LogType extends Enumeration {
     val Info = Value

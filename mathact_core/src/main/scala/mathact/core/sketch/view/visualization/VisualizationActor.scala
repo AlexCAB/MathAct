@@ -29,7 +29,7 @@ import mathact.core.model.messages.M
   */
 
 
-private [mathact] class VisualizationActor(config: VisualizationConfigLike, workbenchController: ActorRef)
+private[core] class VisualizationActor(config: VisualizationConfigLike, workbenchController: ActorRef)
 extends WorkerBase with JFXInteraction { import Visualization._
   //Parameters
   val buildingLayoutType = LayoutType.OrganicLayout

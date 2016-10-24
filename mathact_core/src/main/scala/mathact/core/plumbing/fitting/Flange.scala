@@ -18,7 +18,7 @@ package mathact.core.plumbing.fitting
   * Created by CAB on 13.05.2016.
   */
 
-trait Flange[H]{
+private[core] trait Flange[H]{
 //  //Variables
 //  private var pipe: Option[Pipe[H]] = None
 //  //Internal methods

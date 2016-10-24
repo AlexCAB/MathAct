@@ -25,10 +25,8 @@ import scalafx.scene.paint.Color
   * Created by CAB on 04.09.2016.
   */
 
-private [mathact] trait SketchControllerLife { _: SketchControllerActor ⇒
-  import SketchController._
-  import SketchUIElement._
-  import SketchUiElemState._
+private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
+  import SketchController._, SketchUIElement._, SketchUiElemState._
   //Variables
   private val allErrors = MutList[Throwable]()
   //Methods

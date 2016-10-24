@@ -15,8 +15,8 @@
 package mathact.tools
 
 import mathact.core.app.Application
-import mathact.core.bricks.WorkbenchLike
-import mathact.core.model.data.sketch.SketchData
+import mathact.core.bricks.blocks.WorkbenchLike
+import mathact.core.bricks.data.SketchData
 
 import scala.reflect._
 
@@ -30,7 +30,7 @@ class Sketches extends Application{
   //Variables
   private val rawSketchList = MutList[SketchDsl]()
   //DSL
-  class SketchDsl(
+  protected class SketchDsl(
     clazz: Class[_],
     sName: Option[String],
     sDesc: Option[String],
@@ -54,10 +54,10 @@ class Sketches extends Application{
     //Convert
     private[mathact] def toSketchData =
       SketchData(clazz, clazz.getCanonicalName, sName, sDesc, isAutorun, showLogging, showVisualisation)}
-  def sketchOf[T <: WorkbenchLike : ClassTag]: SketchDsl =
+  protected def sketchOf[T <: WorkbenchLike : ClassTag]: SketchDsl =
     new SketchDsl(classTag[T].runtimeClass,None,None,false,false,false)
   //Methods
-  def sketchList: List[SketchData] = rawSketchList
+  private[mathact] def sketchList: List[SketchData] = rawSketchList
     .toList
     .map(_.toSketchData)
     .foldRight(List[SketchData]()){

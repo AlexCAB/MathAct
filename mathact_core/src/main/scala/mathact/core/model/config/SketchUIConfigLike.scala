@@ -22,4 +22,4 @@ import scalafx.scene.image.Image
   * Created by CAB on 21.09.2016.
   */
 
-private [mathact] trait SketchUIConfigLike
+private [core] trait SketchUIConfigLike

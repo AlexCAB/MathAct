@@ -29,7 +29,7 @@ import scala.concurrent.duration.Duration
 //TODO Для уменьшения количества отправленых DriveLoad, нужно использовать что то вроде ПИ (в calcPushTimeout)
 //TODO регулятора с мёртвой зоной (чтобы DriveLoad рассылалась не по каждому измению размера очереди).
 //TODO Сейчас отправка DriveLoad на каждое измение размера очерели инлета.
-private [mathact] trait DriveMessaging { _: DriveActor ⇒ import Drive._
+private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
   //Variables
   private val pendingUserMessages = MutList[(Int, Any)]()   //(outletId, value)
   //Functions

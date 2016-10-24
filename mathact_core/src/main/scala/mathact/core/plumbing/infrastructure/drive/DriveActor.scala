@@ -14,7 +14,6 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import akka.actor.SupervisorStrategy.Resume
 import akka.actor._
 import mathact.core.model.config.DriveConfigLike
 import mathact.core.model.enums._
@@ -31,7 +30,7 @@ import scala.collection.mutable.{Map ⇒ MutMap}
   * Created by CAB on 15.05.2016.
   */
 
-private [mathact] class DriveActor(
+private[core] class DriveActor(
   val config: DriveConfigLike,
   val blockId: Int,
   val pump: PumpLike,
@@ -75,11 +74,11 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
       sender ! connectPipesAsk(message, state)
       state
     //Connectivity, add connection
-    case (M.AddConnection(id, initiator, inletId, outlet), Connecting | Connected) ⇒
+    case (M.AddConnection(id, initiator, inletId, outlet), Constructed | Connecting | Connected) ⇒
       addConnection(id, initiator, inletId, outlet)
       state
     //Connectivity, connect to
-    case (M.ConnectTo(id, initiator, outletId, inlet), Connecting | Connected) ⇒
+    case (M.ConnectTo(id, initiator, outletId, inlet), Constructed | Connecting | Connected) ⇒
       connectTo(id, initiator, outletId, inlet)
       state
     //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and BlockConstructedInfo

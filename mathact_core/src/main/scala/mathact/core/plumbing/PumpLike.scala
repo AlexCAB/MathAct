@@ -14,14 +14,14 @@
 
 package mathact.core.plumbing
 
-import scalafx.scene.image.Image
+import mathact.core.bricks.blocks.BlockLike
 
 
 /** Pump interface
   * Created by CAB on 31.08.2016.
   */
 
-trait PumpLike {
-  val block: Fitting
+private[core] trait PumpLike {
+  val block: BlockLike
   val blockName: String
   val blockImagePath: Option[String]}

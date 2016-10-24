@@ -19,7 +19,7 @@ package mathact.core.model.data.visualisation
   * Created by CAB on 30.08.2016.
   */
 
-case class OutletInfo(
+private[core] case class OutletInfo(
   blockId: Int,
   blockName: Option[String],
   outletId: Int,

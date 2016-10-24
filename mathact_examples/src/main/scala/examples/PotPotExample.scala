@@ -14,14 +14,14 @@
 
 package examples
 
-import mathact.core.bricks.Workbench
+import mathact.tools.workbenches.SimpleWorkbench
 
 
 /** Pot to pot connection example
   * Created by CAB on 18.06.2016.
   */
 
-class PotPotExample extends Workbench{
+class PotPotExample extends SimpleWorkbench{
 
 
 }

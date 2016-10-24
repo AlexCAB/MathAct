@@ -21,7 +21,7 @@ import mathact.core.model.data.pipes.InletData
   * Created by CAB on 23.10.2016.
   */
 
-case class OutletVerificationData(
+private[core] case class OutletVerificationData(
   outletId: Int,
   subscribers: Seq[InletData])
 

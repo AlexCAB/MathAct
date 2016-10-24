@@ -16,8 +16,8 @@ package mathact.core.sketch.infrastructure.controller
 
 import akka.actor.ActorRef
 import mathact.core.ControllerBase
+import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.MainConfigLike
-import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums._
 import mathact.core.model.messages.{M, Msg}
 
@@ -26,7 +26,7 @@ import mathact.core.model.messages.{M, Msg}
   * Created by CAB on 21.05.2016.
   */
 
-private [mathact] abstract class SketchControllerActor(
+private[core] abstract class SketchControllerActor(
   val config: MainConfigLike,
   val sketchData: SketchData,
   val mainController: ActorRef)

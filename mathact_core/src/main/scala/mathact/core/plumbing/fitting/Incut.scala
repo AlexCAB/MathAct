@@ -19,6 +19,6 @@ package mathact.core.plumbing.fitting
   * Created by CAB on 24.08.2016.
   */
 
-trait Incut {
+private[core] trait Incut[T] {
 
 }

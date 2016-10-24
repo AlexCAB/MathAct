@@ -20,7 +20,7 @@ import scala.concurrent.duration.FiniteDuration
   * Created by CAB on 16.10.2016.
   */
 
-private [mathact] object Impeller {
+private[core] object Impeller {
   //Local messages
   case class TaskTimeout(taskNumber: Long, timeout: FiniteDuration)
   case class TaskSuccess(taskNumber: Long, res: Any)

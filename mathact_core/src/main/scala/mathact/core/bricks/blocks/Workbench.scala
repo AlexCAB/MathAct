@@ -12,7 +12,7 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks
+package mathact.core.bricks.blocks
 
 import mathact.core.app.Application
 
@@ -21,7 +21,7 @@ import mathact.core.app.Application
   * Created by CAB on 09.05.2016.
   */
 
-class Workbench extends WorkbenchLike{ //extends Fitting{
+private[mathact] class Workbench extends WorkbenchLike{ //extends ObjFitting{
   //Get of SketchContext
   protected implicit val context = Application.getSketchContext(this)
 
@@ -41,7 +41,7 @@ class Workbench extends WorkbenchLike{ //extends Fitting{
 
 
 //
-//  extends Fitting{
+//  extends ObjFitting{
 //
 //
 //  //Environment должен констрироватся до того как будетсоздан хоть один инструмент (т.е. самый первый при старте программы),
@@ -49,7 +49,7 @@ class Workbench extends WorkbenchLike{ //extends Fitting{
 //
 ////  protected implicit val environment = new Environment
 ////
-////  private[mathact] val pump: Pump = new Pump(environment, this, "WorkbenchPump")
+////  private[core] val pump: Pump = new Pump(environment, this, "WorkbenchPump")
 ////
 ////
 ////

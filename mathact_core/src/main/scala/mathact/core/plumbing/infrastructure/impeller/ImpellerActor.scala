@@ -29,7 +29,7 @@ import scala.util.{Failure, Success}
   * Created by CAB on 15.05.2016.
   */
 
-private [mathact] class ImpellerActor(drive: ActorRef, maxQueueSize: Int) extends WorkerBase{ import Impeller._
+private[core] class ImpellerActor(drive: ActorRef, maxQueueSize: Int) extends WorkerBase{ import Impeller._
   //Variables
   var taskCounter = 0L
   val taskQueue = mutable.Queue[M.RunTask[Any]]()

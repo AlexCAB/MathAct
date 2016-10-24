@@ -21,7 +21,7 @@ import com.typesafe.config.Config
   * Created by CAB on 03.09.2016.
   */
 
-private [mathact] trait MainConfigLike {
+private [core] trait MainConfigLike {
   val config: Config
   val sketchInstance: SketchInstanceConfigLike
   val plumbing: PlumbingConfigLike

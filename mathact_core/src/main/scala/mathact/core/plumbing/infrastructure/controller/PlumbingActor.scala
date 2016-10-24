@@ -72,7 +72,7 @@ import mathact.core.ControllerBase
 //TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
 //TODO Так же не стоит забывать о сообщениях ShowBlockUi и HideBlockUi
 //TODO
-private [mathact] class PlumbingActor(
+private [core] class PlumbingActor(
   val config: PlumbingConfigLike,
   val controller: ActorRef,
   val sketchName: String,

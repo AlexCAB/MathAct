@@ -22,7 +22,7 @@ import scalafx.application.Platform
   * Created by CAB on 22.05.2016.
   */
 
-trait JFXInteraction {
+private[core] trait JFXInteraction {
   //Parameters
   val runBlockTimeout: Int = 10000  //In milliseconds
   //Methods

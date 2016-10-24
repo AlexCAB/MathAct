@@ -12,28 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks
+package mathact.tools
 
-import mathact.core.plumbing.{Fitting, Pump}
+import mathact.core.bricks.blocks.{Block, SketchContext}
 
-/** Base class for sketch block.
-  * Created by CAB on 22.10.2016.
+/** Base class for tall tools.
+  * Created by CAB on 07.05.2016.
   */
 
-abstract class Block (context: SketchContext, name: String) extends Fitting{
+private[mathact] abstract class Tool(name: String)(implicit context: SketchContext) extends Block(context, name){
 
-
-
-  //  this match{
-  //
-  //
-  //
-  //    case s: PotBoard ⇒ println("PotBoard")
-  //    case _ ⇒ println("Any")
-  //  }
-
-
-  private[mathact] val pump: Pump = new Pump(context, this, name, None)
-
+  //TODO Специфические для инструментов оьявления
 
 }

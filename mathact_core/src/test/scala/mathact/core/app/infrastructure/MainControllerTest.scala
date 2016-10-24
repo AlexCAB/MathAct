@@ -17,7 +17,7 @@ package mathact.core.app.infrastructure
 import akka.actor.{PoisonPill, ActorRef, Props}
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
-import mathact.core.model.data.sketch.SketchData
+import mathact.core.bricks.data.SketchData
 import mathact.core.model.enums.SketchStatus
 import mathact.core.ActorTestSpec
 import mathact.core.model.config.MainConfigLike

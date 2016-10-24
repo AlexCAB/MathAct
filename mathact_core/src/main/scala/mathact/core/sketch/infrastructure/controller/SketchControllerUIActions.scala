@@ -21,7 +21,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 07.09.2016.
   */
 
-private [mathact] trait SketchControllerUIActions { _: SketchControllerActor ⇒
+private[core] trait SketchControllerUIActions { _: SketchControllerActor ⇒
   //Methods
   /** Show all blocks UI btn hit */
   def showAllBlocksUiBtnHit(): Unit = {

@@ -16,11 +16,11 @@ package mathact.core.sketch.infrastructure.instance
 
 import java.util.concurrent.{TimeoutException, ExecutionException}
 
-import akka.actor.{PoisonPill, ActorRef}
+import akka.actor.ActorRef
 import mathact.core.WorkerBase
-import mathact.core.bricks.{SketchContext, WorkbenchLike}
+import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.SketchInstanceConfigLike
-import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
 
 import scala.concurrent.Future
@@ -30,7 +30,7 @@ import scala.concurrent.Future
   * Created by CAB on 17.10.2016.
   */
 
-private [mathact] class SketchInstanceActor(
+private[core] class SketchInstanceActor(
   config: SketchInstanceConfigLike,
   sketchData: SketchData,
   controller: ActorRef,

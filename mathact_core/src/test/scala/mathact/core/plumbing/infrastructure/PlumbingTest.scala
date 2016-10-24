@@ -18,12 +18,13 @@ import akka.actor.{PoisonPill, ActorRef, Props}
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import mathact.core.ActorTestSpec
+import mathact.core.bricks.blocks.BlockLike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
 import mathact.core.model.data.pipes.OutletData
 import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
-import mathact.core.plumbing.{Fitting, PumpLike}
+import mathact.core.plumbing.PumpLike
 import org.scalatest.Suite
 
 import scala.concurrent.duration._
@@ -45,7 +46,7 @@ class PlumbingTest extends ActorTestSpec{
     lazy val testDrive2 = TestProbe("TestDrive2_" + randomString())
     //Test objects
     case class TestPump(index: Int) extends PumpLike {
-      val block: Fitting = null
+      val block: BlockLike = null
       val blockName = "TestBlock" + index
       val blockImagePath = None}
     val testPlumbingConfig = new PlumbingConfigLike{

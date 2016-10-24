@@ -12,17 +12,24 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks
+package mathact.core.bricks.data
 
-import mathact.core.plumbing.{Fitting, Pump}
+import mathact.core.model.data.sketch.SketchInfo
+import mathact.core.model.enums.SketchStatus
 
 
-/** Base class for tall tools.
-  * Created by CAB on 07.05.2016.
+/** SketchData model
+  * Created by CAB on 19.06.2016.
   */
 
-abstract class Tool(context: SketchContext, name: String) extends Block(context, name){
-
-  //TODO Специфические для инструментов оьявления
-
-}
+private[mathact] case class SketchData(
+  clazz: Class[_],
+  className: String,
+  sketchName: Option[String],
+  sketchDescription: Option[String],
+  autorun: Boolean, //false - manual run
+  showUserLogUiAtStart: Boolean,
+  showVisualisationUiAtStart: Boolean)
+{
+  //Converters
+  def toSketchInfo(status: SketchStatus) = SketchInfo(className, sketchName, sketchDescription, status)}

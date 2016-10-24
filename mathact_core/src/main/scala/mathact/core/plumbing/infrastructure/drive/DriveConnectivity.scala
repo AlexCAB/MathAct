@@ -28,7 +28,7 @@ import scala.util.Try
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
+private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   //Variables
   private val pendingConnections = MutMap[Int, M.ConnectPipes]()
   //Methods

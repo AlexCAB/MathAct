@@ -28,7 +28,7 @@ import javafx.stage.Stage
   */
 
 
-private [mathact] object JFXApplication{
+private[core] object JFXApplication{
   //Parameters
   val appRunTimeout: Int = 5000  //In milliseconds
   //Variables
@@ -53,6 +53,6 @@ private [mathact] object JFXApplication{
       case false ⇒ log.info("[JFXApplication.init] Java FX started.")}}}
 
 
-private [mathact] class JFXApplication extends Application{
+private[core] class JFXApplication extends Application{
   //Methods
   def start(stage: Stage) = { JFXApplication.primaryStage = Some(stage) }}

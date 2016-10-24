@@ -19,7 +19,7 @@ package mathact.core.model.data.visualisation
   * Created by CAB on 03.09.2016.
   */
 
-case class InletInfo(
+private[core] case class InletInfo(
   blockId: Int,
   blockName: Option[String],
   inletId: Int,

@@ -34,7 +34,7 @@ import scalafxml.core.{NoDependencyResolver, FXMLLoader}
   * Created by CAB on 26.08.2016.
   */
 
-private [mathact] class UserLoggingActor(config: UserLoggingConfigLike, workbenchController: ActorRef)
+private[core] class UserLoggingActor(config: UserLoggingConfigLike, workbenchController: ActorRef)
 extends WorkerBase with JFXInteraction { import UserLogging._
   //Parameters
   val windowTitle = "MathAct - Logger"

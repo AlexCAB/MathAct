@@ -14,19 +14,15 @@
 
 package mathact.core
 
-import java.io.{PrintWriter, StringWriter}
-
 import akka.actor.Actor
 import akka.event.{Logging, LoggingAdapter}
-
-import scala.util.Try
 
 
 /** Worker actor base (should not have children actors)
   * Created by CAB on 24.05.2016.
   */
 
-abstract class WorkerBase extends Actor{
+private[core] abstract class WorkerBase extends Actor{
   //Objects
   val log: LoggingAdapter = Logging.getLogger(context.system, this)
   implicit val execContext = context.system.dispatcher

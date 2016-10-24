@@ -14,7 +14,7 @@
 
 package mathact.core.dummies
 
-import mathact.core.bricks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
 
 import scala.concurrent.duration._
 

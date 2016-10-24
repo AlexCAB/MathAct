@@ -12,33 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core
+package mathact.core.bricks.plumbing.fitting
 
-import mathact.core.plumbing.fitting.{Inlet, Outlet}
-
-import scala.concurrent.duration.Duration
+import mathact.core.plumbing.fitting.{OutPipe, Incut}
 
 
-/** Pipe used in tests
-  * Created by CAB on 19.08.2016.
+/** Outlet interface
+  * Created by CAB on 24.10.2016.
   */
 
-class TestIncut[T] extends Outlet[T] with Inlet[T]{
-  //Variables
-  private var receivedValues = List[T]()
-  private var procTimeout: Option[Duration] = None
-  private var procError: Option[Throwable] = None
-  //Receive user message
-  protected def drain(value: T): Unit = synchronized{
-    println(
-      s"[TestIncut] do drain, value: $value, procTimeout: $procTimeout, " +
-      s"procError: $procError, receivedValues: $receivedValues")
-    receivedValues :+= value
-    procTimeout.foreach(d ⇒ Thread.sleep(d.toMillis))
-    procError.foreach(e ⇒ throw e)}
-  //Test methods
-  override def toString = s"TestIncut(receivedValues.size: ${receivedValues.size})"
-  def setProcTimeout(d: Duration): Unit = synchronized{ procTimeout = Some(d) }
-  def setProcError(err: Option[Throwable]): Unit = synchronized{ procError = err }
-  def getReceivedValues: List[T] = synchronized{ receivedValues }
-  def sendValue(value: T): Unit = pour(value)}
+private[core] trait OutletLike[T] extends Incut[T]{
+  private[core] def injectOutPipe(pipe: OutPipe[T]): Unit
+  protected def pour(value: T): Unit}

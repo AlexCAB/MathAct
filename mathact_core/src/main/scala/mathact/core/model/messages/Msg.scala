@@ -19,4 +19,4 @@ package mathact.core.model.messages
   * Created by CAB on 03.09.2016.
   */
 
-private[mathact] trait Msg
+private[core] trait Msg

@@ -22,7 +22,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import mathact.core.app.infrastructure.MainController
 import mathact.core.app.view.MainUIActor
-import mathact.core.bricks.{SketchContext, WorkbenchLike}
+import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.data.SketchData
 import mathact.core.sketch.infrastructure.controller.SketchControllerActor
 import mathact.core.sketch.infrastructure.instance.SketchInstanceActor
 import mathact.core.sketch.view.logging.UserLoggingActor
@@ -30,7 +31,6 @@ import mathact.core.sketch.view.sketch.SketchUIActor
 import mathact.core.sketch.view.visualization.VisualizationActor
 import mathact.core.gui.JFXApplication
 import mathact.core.model.config.MainConfigLike
-import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 
@@ -43,7 +43,7 @@ import scalafx.application.Platform
   * Created by CAB on 17.06.2016.
   */
 
-private [mathact] object Application{
+private [core] object Application{
   //Parameters
   private val beforeTerminateTimeout = 1.seconds
   private val creatingSketchContextTimeout = 5.seconds
@@ -86,20 +86,20 @@ private [mathact] object Application{
             def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
               context.actorOf(Props(
                 new SketchControllerActor(config, sketchData, self){
-                  val sketchUi = context.actorOf(Props(
-                    new SketchUIActor(config.sketchUI, self)),
+                  val sketchUi = newWorker(
+                    new SketchUIActor(config.sketchUI, self),
                     "SketchUIActor_" + sketchData.className)
-                  val userLogging = context.actorOf(Props(
-                    new UserLoggingActor(config.userLogging, self)),
+                  val userLogging = newWorker(
+                    new UserLoggingActor(config.userLogging, self),
                     "UserLoggingActor_" + sketchData.className)
-                  val visualization = context.actorOf(Props(
-                    new VisualizationActor(config.visualization, self)),
+                  val visualization = newWorker(
+                    new VisualizationActor(config.visualization, self),
                     "VisualizationActor_" + sketchData.className)
-                  val plumbing = context.actorOf(Props(
-                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization)),
+                  val plumbing = newController(
+                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization),
                     "PlumbingActor_" + sketchData.className)
-                  val sketchInstance = context.actorOf(Props(
-                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing)),
+                  val sketchInstance = newWorker(
+                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing),
                     "SketchInstanceActor_" + sketchData.className)}),
                 "SketchControllerActor_" + sketchData.className)}}),
           "MainControllerActor")
@@ -150,6 +150,6 @@ private [mathact] object Application{
 
 private [mathact] abstract class Application {
   //Sketch list
-  def sketchList: List[SketchData]
+  private[mathact] def sketchList: List[SketchData]
   //Main
   def main(arg: Array[String]):Unit = Application.start(sketchList, arg)}

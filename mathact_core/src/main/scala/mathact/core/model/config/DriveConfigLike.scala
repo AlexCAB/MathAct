@@ -21,7 +21,7 @@ import scala.concurrent.duration.FiniteDuration
   * Created by CAB on 03.09.2016.
   */
 
-private [mathact] trait DriveConfigLike {
+private [core] trait DriveConfigLike {
   val pushTimeoutCoefficient: Int
   val startFunctionTimeout: FiniteDuration
   val messageProcessingTimeout: FiniteDuration

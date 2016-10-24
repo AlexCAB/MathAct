@@ -19,7 +19,7 @@ package mathact.core.sketch.infrastructure.controller
   * Created by CAB on 16.10.2016.
   */
 
-private [mathact] object SketchController {
+private[core] object SketchController {
   //Enums
   object State extends Enumeration {
     val Init = Value

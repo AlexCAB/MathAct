@@ -48,7 +48,7 @@ import scalafx.stage.Stage
   */
 
 //TODO Write some custom layouts.
-private [mathact] class VisualizationViewAndController(
+private[core] class VisualizationViewAndController(
   config: VisualizationConfigLike,
   visualizationActor: ActorRef,
   log: LoggingAdapter)

@@ -14,14 +14,12 @@
 
 package mathact.core.model.data.visualisation
 
-import scalafx.scene.image.Image
-
 
 /** Block built info
   * Created by CAB on 15.05.2016.
   */
 
-case class BlockInfo(
+private[core] case class BlockInfo(
   blockId: Int,
   blockName: String,
   blockImagePath: Option[String],

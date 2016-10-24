@@ -14,6 +14,7 @@
 
 package mathact.core.plumbing.fitting
 
+import mathact.core.bricks.plumbing.fitting.{InletLike, Socket}
 import mathact.core.model.data.pipes.InletData
 import mathact.core.plumbing.Pump
 
@@ -22,8 +23,8 @@ import mathact.core.plumbing.Pump
   * Created by CAB on 24.08.2016.
   */
 
-private [mathact] class InPipe[H] (
-  in: Inlet[H],
+private[core] class InPipe[H] (
+  in: InletLike[H],
   protected val pipeName: Option[String],
   protected val pump: Pump)
 extends Pipe[H] with Socket[H]{

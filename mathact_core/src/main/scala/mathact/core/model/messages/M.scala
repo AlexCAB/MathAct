@@ -15,14 +15,16 @@
 package mathact.core.model.messages
 
 import akka.actor.ActorRef
-import mathact.core.bricks.WorkbenchLike
+import mathact.core.bricks.blocks.WorkbenchLike
+import mathact.core.bricks.data.SketchData
+import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.model.data.pipes.{InletData, OutletData}
-import mathact.core.model.data.sketch.{SketchInfo, SketchData}
+import mathact.core.model.data.sketch.SketchInfo
 import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData, OutletVerificationData}
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
-import mathact.core.plumbing.fitting.{Plug, Socket, InPipe, OutPipe}
+import mathact.core.plumbing.fitting.{InPipe, OutPipe}
 
 import scala.concurrent.duration.FiniteDuration
 import scalafx.scene.paint.Color
@@ -32,7 +34,7 @@ import scalafx.scene.paint.Color
   * Created by CAB on 23.05.2016.
   */
 
-private [mathact] object M {
+private[core] object M {
   //Application - MainController
   case class MainControllerStart(sketches: List[SketchData]) extends Msg
   case class NewSketchContext(workbench: WorkbenchLike, sketchClassName: String) extends Msg

@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.infrastructure.instance
 
-import mathact.core.bricks.WorkbenchLike
+import mathact.core.bricks.blocks.WorkbenchLike
 import mathact.core.model.messages.Msg
 
 
@@ -22,7 +22,7 @@ import mathact.core.model.messages.Msg
   * Created by CAB on 17.10.2016.
   */
 
-private [mathact] object SketchInstance {
+private[core] object SketchInstance {
   //Local messages
   case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
   case class SketchInstanceBuiltError(error: Throwable) extends Msg

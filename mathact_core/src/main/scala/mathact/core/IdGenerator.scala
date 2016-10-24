@@ -19,7 +19,7 @@ package mathact.core
   * Created by CAB on 26.08.2016.
   */
 
-trait IdGenerator {
+private[core] trait IdGenerator {
   //Variables
   private var intIdCounter = 0
   private var longIdCounter = 0L

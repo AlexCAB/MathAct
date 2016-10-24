@@ -24,7 +24,7 @@ import scala.concurrent.duration.FiniteDuration
   * Created by CAB on 31.08.2016.
   */
 
-private [mathact] trait DriveUIControl { _: DriveActor ⇒
+private[core] trait DriveUIControl { _: DriveActor ⇒
   /** Show block UI */
   def showBlockUi(): Unit = {
 

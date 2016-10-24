@@ -28,7 +28,7 @@ import scala.reflect.ClassTag
   * Created by CAB on 26.08.2016.
   */
 
-abstract class ControllerBase[S](initState: S) extends Actor{
+private[core] abstract class ControllerBase[S](initState: S) extends Actor{
   //Strategy
   override val supervisorStrategy = OneForOneStrategy(){case _: Throwable ⇒ Stop}
   //Objects

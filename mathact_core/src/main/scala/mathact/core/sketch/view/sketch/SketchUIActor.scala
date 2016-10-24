@@ -26,7 +26,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 23.05.2016.
   */
 
-private [mathact] class SketchUIActor(
+private[core] class SketchUIActor(
   config: SketchUIConfigLike,
   workbenchController: ActorRef)
 extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemState._

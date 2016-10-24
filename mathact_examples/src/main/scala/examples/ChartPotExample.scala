@@ -14,17 +14,19 @@
 
 package examples
 
-import mathact.core.app.Application
-import mathact.core.bricks.Workbench
+import jdk.nashorn.internal.ir.Block
+import mathact.core.bricks.plumbing.ObjFitting
+import mathact.tools.EmptyBlock
 import mathact.tools.plots.YChartRecorder
 import mathact.tools.pots.PotBoard
+import mathact.tools.workbenches.SimpleWorkbench
 
 
 /** Chart end pot example
   * Created by CAB on 08.05.2016.
   */
 
-class ChartPotExample extends Workbench{
+class ChartPotExample extends SimpleWorkbench{
 
 
 
@@ -72,19 +74,28 @@ class ChartPotExample extends Workbench{
 //
   val pots = new PotBoard{      //Создание компонента с выходвми
 
-//    val pot1 = Outlet(new Pot(1,2, None))    //Регистрация выхода
-
-    val pot2 = pot(2,3)               //егистрация выхода, вариант с DSL
-
-//  pot2.testVal
-
-
-//    pot(chart.out1)                  //Рекурсивное связание
+////    val pot1 = Outlet(new Pot(1,2, None))    //Регистрация выхода
+//
+//    val pot2 = pot(2,3)               //егистрация выхода, вариант с DSL
+//
+////  pot2.testVal
+//
+//
+////    pot(chart.out1)                  //Рекурсивное связание
 
 
 
 
   }
+
+
+
+
+
+
+
+
+
 //
 //
 //
@@ -93,7 +104,7 @@ class ChartPotExample extends Workbench{
 //
 //
 //
-    line("line1").of(pots.pot2)    //Регистрация вход c DSL
+//    line("line1").of(pots.pot2)    //Регистрация вход c DSL
 //
 //
 //
@@ -112,4 +123,43 @@ class ChartPotExample extends Workbench{
 //
 //
   }
+
+
+  val myBlock = new EmptyBlock("My") with ObjFitting{
+    private val handler = new Outlet[Double] with Inlet[Double]{
+
+      protected def drain(value: Double): Unit = {???}
+
+      def test(): Unit = ???
+
+    }
+
+    val in = Inlet(handler, "in")
+
+
+
+    val out = Outlet(handler, "out")
+
+  }
+
+
+
+
+
+
+
+//  pots.handler1.test()
+//
+//  pots.handler2.test()
+
+
+
+  pots.in.plug(chart.out)
+
+  chart.in.plug(pots.out)
+//
+  myBlock.out.attach(pots.in)
+
+  myBlock.in.plug(chart.out)
+
 }

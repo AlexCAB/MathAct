@@ -16,8 +16,8 @@ package mathact.core.app.infrastructure
 
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
+import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.MainConfigLike
-import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.enums.SketchStatus
 import mathact.core.model.messages.M
 
@@ -26,7 +26,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 20.06.2016.
   */
 
-private [mathact] abstract class MainController(config: MainConfigLike, doStop: Int⇒Unit)
+private[core] abstract class MainController(config: MainConfigLike, doStop: Int⇒Unit)
 extends Actor{
   //Objects
   val log: LoggingAdapter = Logging.getLogger(context.system, this)

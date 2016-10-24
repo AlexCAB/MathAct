@@ -22,7 +22,7 @@ import mathact.core.model.messages.M
   * Created by CAB on 04.09.2016.
   */
 
-private [mathact] trait SketchControllerUIControl { _: SketchControllerActor ⇒
+private[core] trait SketchControllerUIControl { _: SketchControllerActor ⇒
   import SketchUIElement._
   import SketchUiElemState._
   //Variables

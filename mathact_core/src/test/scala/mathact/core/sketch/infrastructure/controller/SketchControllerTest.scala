@@ -17,12 +17,12 @@ package mathact.core.sketch.infrastructure.controller
 import akka.actor.{Actor, ActorRef, Props}
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
+import mathact.core.bricks.data.SketchData
 import mathact.core.dummies.{TestSketchWithError, TestSketchWithSmallTimeout}
 import mathact.core.model.enums.SketchUIElement._
 import mathact.core.model.enums.SketchUiElemState._
 import mathact.core.ActorTestSpec
 import mathact.core.model.config._
-import mathact.core.model.data.sketch.SketchData
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 import akka.util.Timeout
@@ -36,7 +36,7 @@ import scala.concurrent.duration._
 
 class SketchControllerTest extends ActorTestSpec {
   //Test model
-  trait TestCase extends Suite{
+  protected trait TestCase extends Suite{
     //Test config
     val testMainConfig = new MainConfigLike{
       val config = ConfigFactory.load()

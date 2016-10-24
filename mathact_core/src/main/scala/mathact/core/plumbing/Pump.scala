@@ -19,9 +19,11 @@ import java.util.concurrent.ExecutionException
 import akka.actor.ActorRef
 import akka.event.Logging
 import akka.pattern.ask
+import mathact.core.bricks.blocks.{BlockLike, SketchContext}
+import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
+import mathact.core.bricks.plumbing.{OnStop, OnStart}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
-import mathact.core.bricks.{SketchContext, OnStart, OnStop}
 import scala.concurrent.Await
 
 
@@ -29,22 +31,22 @@ import scala.concurrent.Await
   * Created by CAB on 09.05.2016.
   */
 
-class Pump(
+private[core] class Pump(
   context: SketchContext,
-  val block: Fitting,
+  val block: BlockLike,
   val blockName: String,
   val blockImagePath: Option[String])
 extends PumpLike{
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)
   akkaLog.info(s"[Pump.<init>] DriveCreating of block: $block, name: $blockName")
-  private[mathact] object log {
+  private[core] object log {
     def debug(msg: String): Unit = akkaLog.debug(s"[$blockName] $msg")
     def info(msg: String): Unit = akkaLog.info(s"[$blockName] $msg")
     def warning(msg: String): Unit = akkaLog.warning(s"[$blockName] $msg")
     def error(msg: String): Unit = akkaLog.error(s"[$blockName] $msg")  }
   //Actors
-  private[mathact] val drive: ActorRef = Await
+  private[core] val drive: ActorRef = Await
     .result(ask(context.plumbing, M.NewDrive(this))(context.pumpConfig.askTimeout)
       .mapTo[Either[Throwable,ActorRef]], context.pumpConfig.askTimeout.duration)
     .fold(t ⇒ throw new ExecutionException(t), d ⇒ d)
@@ -63,9 +65,9 @@ extends PumpLike{
   //Overridden methods
   override def toString: String = s"Pump(blockName: $blockName)"
   //Methods
-  private[mathact] def addOutlet(pipe: OutPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddOutlet(pipe, name))
-  private[mathact] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddInlet(pipe, name))
-  private[mathact] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int = Await //Return: connection ID
+  private[core] def addOutlet(pipe: OutPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddOutlet(pipe, name))
+  private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddInlet(pipe, name))
+  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int = Await //Return: connection ID
     .result(
       ask(drive,  M.ConnectPipes(out, in))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,Int]],
       context.pumpConfig.askTimeout.duration)
@@ -76,13 +78,13 @@ extends PumpLike{
       d ⇒ {
         akkaLog.debug(s"[Pump.connect] Pipes connected: $d")
         d})
-  private[mathact] def blockStart(): Unit = block match{
+  private[core] def blockStart(): Unit = block match{
     case os: OnStart ⇒ os.doStart()
     case _ ⇒ akkaLog.debug(s"[Pump.blockStart] Block $blockName not have doStart method.")}
-  private[mathact] def blockStop(): Unit = block match{
+  private[core] def blockStop(): Unit = block match{
     case os: OnStop ⇒  os.doStop()
     case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockName not have doStop method.")}
-  private[mathact] def pushUserMessage(msg: M.UserData[_]): Unit = Await
+  private[core] def pushUserMessage(msg: M.UserData[_]): Unit = Await
     .result(
       ask(drive, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, Option[Long]]],  //Either(error,  Option[sleep timeout])
       context.pumpConfig.askTimeout.duration)

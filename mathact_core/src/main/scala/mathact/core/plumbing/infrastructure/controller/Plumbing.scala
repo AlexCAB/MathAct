@@ -33,7 +33,7 @@ object Plumbing {
   type DriveState = DriveState.Value
   //Definitions
   case class DriveData(
-                        drive: ActorRef,
-                        blockId: Int,
-                        builtInfo: Option[BlockInfo],
-                        driveState: DriveState)}
+    drive: ActorRef,
+    blockId: Int,
+    builtInfo: Option[BlockInfo],
+    driveState: DriveState)}

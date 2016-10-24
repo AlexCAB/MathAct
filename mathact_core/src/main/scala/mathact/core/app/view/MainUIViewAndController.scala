@@ -40,7 +40,7 @@ import scalafx.stage.Stage
   * Created by CAB on 11.10.2016.
   */
 
-private [mathact] class MainUIViewAndController(
+private[core] class MainUIViewAndController(
   config: MainUIConfigLike,
   uiController: ActorRef,
   log: LoggingAdapter)

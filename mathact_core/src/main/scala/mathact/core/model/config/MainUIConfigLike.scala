@@ -19,6 +19,6 @@ package mathact.core.model.config
   * Created by CAB on 11.10.2016.
   */
 
-private [mathact] trait MainUIConfigLike {
+private [core] trait MainUIConfigLike {
 
 }

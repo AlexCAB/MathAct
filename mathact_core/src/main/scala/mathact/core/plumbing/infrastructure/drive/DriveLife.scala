@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import mathact.core.bricks.{OnStart, OnStop}
+import mathact.core.bricks.plumbing.{OnStop, OnStart}
 import mathact.core.model.data.verification.{BlockVerificationData, OutletVerificationData, InletVerificationData}
 import mathact.core.model.data.visualisation._
 import mathact.core.model.enums.TaskKind
@@ -28,7 +28,7 @@ import scala.concurrent.duration.Duration
   * Created by CAB on 22.08.2016.
   */
 
-private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
+private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
   /** Adding of new outlet, called from object
     * Can be called only from blocks constructor on sketch construction.
     * @param pipe - Outlet[_]
@@ -126,7 +126,6 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
     log.debug(
       s"[DriveLife.connectingSuccess] All pipes connected, send M.DriveConnected, LogInfo, BlockInfo")
     //Report to plumbing
-    plumbing ! M.DriveConnected
     plumbing ! M.DriveVerification( BlockVerificationData(
       blockId,
       inlets.values.toSeq.map{ inlet ⇒InletVerificationData(
@@ -135,6 +134,7 @@ private [mathact] trait DriveLife { _: DriveActor ⇒ import Drive._
       outlets.values.toSeq.map{ outlet ⇒ OutletVerificationData(
         outlet.outletId,
         outlet.subscribers.map(_._2.inlet).toSeq)}))
+    plumbing ! M.DriveConnected
     //Log to user logger
     userLogging ! M.LogInfo(Some(blockId), pump.blockName, s"Block successful built.")}
   /** Rus staring task if defined, return isStarted */

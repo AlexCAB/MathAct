@@ -1,27 +1,15 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
- * @                                                                             @ *
- *           #          # #                                 #    (c) 2016 CAB      *
- *          # #      # #                                  #  #                     *
- *         #  #    #  #           # #     # #           #     #              # #   *
- *        #   #  #   #             #       #          #        #              #    *
- *       #     #    #   # # #    # # #    #         #           #   # # #   # # #  *
- *      #          #         #   #       # # #     # # # # # # #  #    #    #      *
- *     #          #   # # # #   #       #      #  #           #  #         #       *
- *  # #          #   #     #   #    #  #      #  #           #  #         #    #   *
- *   #          #     # # # #   # #   #      #  # #         #    # # #     # #     *
- * @                                                                             @ *
-\* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
+package mathact.core.bricks.plumbing.fitting
 
-package mathact.core.plumbing.fitting
-
-import mathact.core.app.Application
-
+import mathact.core.plumbing.fitting.{Flange, InPipe}
 
 /** Event receiver must be implemented by Inlet
   * Created by CAB on 17.05.2016.
   */
 
 trait Socket[H] extends Flange[H] { _: InPipe[H] ⇒
+
+
+
 //  //Get Inlet
 //  private val inlet = this match{
 //    case in: Inlet[T] ⇒ in

@@ -22,7 +22,7 @@ import mathact.core.WorkerBase
   * Created by CAB on 19.10.2016.
   */
 
-private [mathact] class UserActorsRoot(drive: ActorRef) extends WorkerBase {
+private[core] class UserActorsRoot(drive: ActorRef) extends WorkerBase {
 
   //TODO Здесь создание и обслужывание акторов пользователя.
 

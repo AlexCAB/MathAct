@@ -12,23 +12,19 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.data.sketch
+package mathact.tools
 
-import mathact.core.model.enums.SketchStatus
+import mathact.core.bricks.blocks.{Block, SketchContext}
 
 
-/** SketchData model
-  * Created by CAB on 19.06.2016.
+/** Empty block
+  * Created by CAB on 24.10.2016.
   */
 
-case class SketchData(
-  clazz: Class[_],
-  className: String,
-  sketchName: Option[String],
-  sketchDescription: Option[String],
-  autorun: Boolean, //false - manual run
-  showUserLogUiAtStart: Boolean,
-  showVisualisationUiAtStart: Boolean)
-{
-  //Converters
-  def toSketchInfo(status: SketchStatus) = SketchInfo(className, sketchName, sketchDescription, status)}
+class EmptyBlock(name: String)(implicit context: SketchContext) extends Block(context, name){
+
+  //TODO Имя должно задватся как name = "my block" а не через коструктор, и может быть опциональным (например
+  //TODO пользователь хочет только икнку
+
+
+}

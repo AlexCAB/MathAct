@@ -14,6 +14,7 @@
 
 package mathact.core.plumbing.fitting
 
+import mathact.core.bricks.plumbing.fitting.{OutletLike, Plug}
 import mathact.core.model.data.pipes.OutletData
 import mathact.core.plumbing.Pump
 
@@ -22,8 +23,8 @@ import mathact.core.plumbing.Pump
   * Created by CAB on 24.08.2016.
   */
 
-private [mathact] class OutPipe[H](
-  out: Outlet[H],
+private[core] class OutPipe[H](
+  out: OutletLike[H],
   protected val pipeName: Option[String],
   protected val pump: Pump)
 extends Pipe[H] with Plug[H]{

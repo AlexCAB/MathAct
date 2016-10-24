@@ -40,7 +40,7 @@ import scalafx.stage.Stage
   * Created by CAB on 26.09.2016.
   */
 
-private [mathact] class SketchUIViewAndController(
+private[core] class SketchUIViewAndController(
   config: SketchUIConfigLike,
   sketchController: ActorRef,
   log: LoggingAdapter)

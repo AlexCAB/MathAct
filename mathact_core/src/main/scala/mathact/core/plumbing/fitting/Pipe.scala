@@ -14,6 +14,7 @@
 
 package mathact.core.plumbing.fitting
 
+import mathact.core.bricks.plumbing.fitting.{Plug, Socket}
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.Pump
 
@@ -22,7 +23,7 @@ import mathact.core.plumbing.Pump
   * Created by CAB on 09.05.2016.
   */
 
-private [mathact] trait Pipe[H]{
+private[core] trait Pipe[H]{
   //Variables
 //  private var pump: Option[Pump] = None
 //  private var pipeId: Option[Int] = None
@@ -77,7 +78,7 @@ private [mathact] trait Pipe[H]{
 
 
   //  //Messaging methods
-//  private[mathact] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Unit = pump match{
+//  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Unit = pump match{
 //    case Some(p) ⇒
 //
 //    case None ⇒
@@ -87,7 +88,7 @@ private [mathact] trait Pipe[H]{
 //
 //
 //
-//  private[mathact] def disconnect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Unit = pump match{
+//  private[core] def disconnect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Unit = pump match{
 //    case Some(p) ⇒
 //
 //    case None ⇒

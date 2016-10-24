@@ -12,21 +12,18 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks
+package mathact.tools.workbenches
 
-import akka.actor.{ActorRef, ActorSystem}
-import com.typesafe.config.Config
-import mathact.core.model.config.PumpConfigLike
+import mathact.core.bricks.blocks.Workbench
 
 
-/** Provide support and management of Workbench
-  * Created by CAB on 20.06.2016.
+/** Simple workbench
+  * Created by CAB on 24.10.2016.
   */
 
-class SketchContext(
-  val system: ActorSystem,
-  val controller: ActorRef,
-  val userLogging: ActorRef,
-  val plumbing: ActorRef,
-  val pumpConfig: PumpConfigLike,
-  val commonConfig: Config)
+class SimpleWorkbench extends Workbench{
+
+  //TODO Добавить специфические определения
+
+
+}

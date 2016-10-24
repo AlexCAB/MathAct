@@ -25,7 +25,7 @@ import scala.concurrent.duration._
   * Created by CAB on 03.09.2016.
   */
 
-private [mathact] class AppConfig extends MainConfigLike{
+private[core] class AppConfig extends MainConfigLike{
   //Load commonConfig
   val config = ConfigFactory.load()
   //Sketch instance

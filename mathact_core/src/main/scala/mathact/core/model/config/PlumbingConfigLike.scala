@@ -19,7 +19,7 @@ package mathact.core.model.config
   * Created by CAB on 03.09.2016.
   */
 
-private [mathact] trait PlumbingConfigLike {
+private [core] trait PlumbingConfigLike {
   val drive: DriveConfigLike
 
   //TODO Add more

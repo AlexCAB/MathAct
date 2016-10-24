@@ -28,7 +28,7 @@ import scala.collection.mutable.{Map ⇒ MutMap, ListBuffer ⇒ MutList}
   * Created by CAB on 21.10.2016.
   */
 
-private [mathact] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ import Plumbing._
+private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ import Plumbing._
   //Variables
   private val drives = MutMap[ActorRef, DriveData]()
   private val blocksVerificationData = MutList[BlockVerificationData]()
@@ -100,6 +100,7 @@ private [mathact] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ 
     blocksVerificationData += verificationData}
   /** Verify blocks and they connections structure */
   def verifyGraphStructure(): Unit = {
+    log.debug("[PlumbingLife.verifyGraphStructure] Start verification.")
     //Preparing
     val blocks: Map[Int, (Set[Int], Set[Int])] = blocksVerificationData
       .map(t ⇒ t.blockId → Tuple2(t.inlets.map(_.inletId).toSet,  t.outlets.map(_.outletId).toSet))
@@ -133,8 +134,28 @@ private [mathact] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ 
       case es if es.isEmpty ⇒
         log.debug("[PlumbingLife.verifyGraphStructure] Structure is valid.")
       case errors ⇒
+        val verificationData = blocksVerificationData
+          .map{ data ⇒
+            s"\n  Block( blockId: ${data.blockId}" +
+            "\n    inlets:\n       " + data.inlets
+              .map{ in ⇒
+                s"Inlet( inletId: ${in.inletId}\n" +
+                "          publishers:\n            " + in.publishers
+                  .map{ pub ⇒ s"Publisher(blockId: ${pub.blockId}, outletId: ${pub.pipeId})"}
+                  .mkString("\n            ")}
+              .mkString("\n      ") +
+            "\n    outlets:\n       " + data.outlets
+              .map{ out ⇒
+                s"Outlet( outletId: ${out.outletId}\n" +
+                "          subscribers:\n            " + out.subscribers
+                  .map{ sub ⇒ s"Subscriber(blockId: ${sub.blockId}, inletId: ${sub.pipeId})"}
+                  .mkString("\n            ")}
+              .mkString("\n      ")}
+          .mkString("\n  ")
         val msg =
-          s"[PlumbingLife.verifyGraphStructure] Structure invalid, next errors found: \n    ${errors.mkString("\n    ")}"
+          s"[PlumbingLife.verifyGraphStructure] Structure invalid.\n" +
+          s"Next errors found:\n   ${errors.mkString("\n    ")}\n" +
+          s"Blocks verification data: $verificationData"
         log.error(msg)
         throw new IllegalStateException(msg)}}
   /** All drives built */
