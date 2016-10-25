@@ -33,9 +33,7 @@ import scala.concurrent.Await
 
 private[core] class Pump(
   context: SketchContext,
-  val block: BlockLike,
-  val blockName: String,
-  val blockImagePath: Option[String])
+  val block: BlockLike)
 extends PumpLike{
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)
@@ -99,4 +97,26 @@ extends PumpLike{
             Thread.sleep(d)}
           catch {case e: InterruptedException ⇒
             akkaLog.error(s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, error: $e")
-            Thread.currentThread().interrupt()}}})}
+            Thread.currentThread().interrupt()}}})
+
+
+  private[core] def setName(name: Option[String]): Unit = {
+
+
+    ???
+
+
+  }
+
+  private[core] def setImagePath(path: Option[String]): Unit = {
+
+
+    ???
+
+
+  }
+
+
+
+
+}

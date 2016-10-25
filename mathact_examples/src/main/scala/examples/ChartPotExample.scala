@@ -14,7 +14,6 @@
 
 package examples
 
-import jdk.nashorn.internal.ir.Block
 import mathact.core.bricks.plumbing.ObjFitting
 import mathact.tools.EmptyBlock
 import mathact.tools.plots.YChartRecorder
@@ -74,6 +73,13 @@ class ChartPotExample extends SimpleWorkbench{
 //
   val pots = new PotBoard{      //Создание компонента с выходвми
 
+
+
+    title = "MyPotBoard"
+
+
+
+
 ////    val pot1 = Outlet(new Pot(1,2, None))    //Регистрация выхода
 //
 //    val pot2 = pot(2,3)               //егистрация выхода, вариант с DSL
@@ -126,9 +132,17 @@ class ChartPotExample extends SimpleWorkbench{
 
 
   val myBlock = new EmptyBlock("My") with ObjFitting{
-    private val handler = new Outlet[Double] with Inlet[Double]{
 
-      protected def drain(value: Double): Unit = {???}
+
+    title = "MyPotBoard"
+
+    imagePath = "mathact/sketchList/sketch_start_e.png"
+
+
+
+    private val handler = new Outflow[Double] with Inflow[Double]{
+
+      protected def drain(value: Double): Unit = { ??? }
 
       def test(): Unit = ???
 
@@ -157,7 +171,7 @@ class ChartPotExample extends SimpleWorkbench{
   pots.in.plug(chart.out)
 
   chart.in.plug(pots.out)
-//
+
   myBlock.out.attach(pots.in)
 
   myBlock.in.plug(chart.out)

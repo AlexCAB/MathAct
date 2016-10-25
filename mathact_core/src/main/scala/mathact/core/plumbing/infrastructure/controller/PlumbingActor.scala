@@ -72,6 +72,11 @@ import mathact.core.ControllerBase
 //TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
 //TODO Так же не стоит забывать о сообщениях ShowBlockUi и HideBlockUi
 //TODO
+//TODO 1. В ObjFitting пересмотреть закоментированое, дописать не достающее, Написать документацию
+//TODO 2. DSL для имени в трайте EmptyBlock
+//TODO 3. Подключения в функциональном стиле
+//TODO 4. UI
+//TODO
 private [core] class PlumbingActor(
   val config: PlumbingConfigLike,
   val controller: ActorRef,

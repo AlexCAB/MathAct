@@ -20,8 +20,14 @@ import mathact.core.bricks.blocks.{Block, SketchContext}
   * Created by CAB on 07.05.2016.
   */
 
-private[mathact] abstract class Tool(name: String)(implicit context: SketchContext) extends Block(context, name){
+private[mathact] abstract class Tool(implicit context: SketchContext, name: String) extends Block(context){
+  //Variables
+  private var _title: String = name
+  //DSL
+  def title_=(v: String) { _title = v match{case "" ⇒ name; case s ⇒ name + " - " + s} }
+  //Abstract callbacks (will called by system after sketch will constructed)
+  private[mathact] def blockName: Option[String] = Some(_title)
 
-  //TODO Специфические для инструментов оьявления
+  //TODO Add more
 
 }

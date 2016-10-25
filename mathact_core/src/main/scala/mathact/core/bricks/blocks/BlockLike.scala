@@ -22,4 +22,6 @@ import mathact.core.plumbing.Pump
   */
 
 private[mathact] trait BlockLike {
-  private[core] val pump: Pump}
+  private[core] val pump: Pump
+  private[core] def blockName: String
+  private[core] def blockImagePath: String}

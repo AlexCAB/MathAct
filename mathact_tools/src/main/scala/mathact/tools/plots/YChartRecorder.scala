@@ -29,7 +29,7 @@ abstract class YChartRecorder(implicit context: SketchContext) extends Tool("YCh
 
 
 
-  val handler = new Outlet[Double] with Inlet[Double]{
+  val handler = new Outflow[Double] with Inflow[Double]{
 
     protected def drain(value: Double): Unit = {???}
 

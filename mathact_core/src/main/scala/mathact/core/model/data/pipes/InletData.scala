@@ -21,4 +21,9 @@ import akka.actor.ActorRef
   * Created by CAB on 03.09.2016.
   */
 
-private[core] case class InletData(blockId: Int, blockDrive: ActorRef, blockName: String, pipeId: Int, pipeName: Option[String])
+private[core] case class InletData(
+  blockId: Int,
+  blockDrive: ActorRef,
+  blockName: String,
+  pipeId: Int,
+  pipeName: Option[String])

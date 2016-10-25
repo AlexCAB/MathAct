@@ -21,10 +21,17 @@ import mathact.core.bricks.blocks.{Block, SketchContext}
   * Created by CAB on 24.10.2016.
   */
 
-class EmptyBlock(name: String)(implicit context: SketchContext) extends Block(context, name){
+class EmptyBlock(implicit context: SketchContext) extends Block(context){
+  //Variables
+  private var _title: Option[String] = None
+  private var _imagePath: Option[String] = None
+  //DSL
+  def title_=(v: String) { _title = v match{case "" ⇒ None; case s ⇒ Some(s)} }
+  def imagePath_=(v: String) { _imagePath =  v match{case "" ⇒ None; case s ⇒ Some(s)} }
+  //Abstract callbacks (will called by system after sketch will constructed)
+  private[mathact] def blockName: Option[String] = _title
+  private[mathact] def blockImagePath: Option[String] = _imagePath
 
-  //TODO Имя должно задватся как name = "my block" а не через коструктор, и может быть опциональным (например
-  //TODO пользователь хочет только икнку
-
+  //TODO Add more
 
 }

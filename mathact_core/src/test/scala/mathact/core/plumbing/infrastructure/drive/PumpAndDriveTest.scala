@@ -136,7 +136,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Pump
         val pump: Pump = new Pump(testSketchContext, this, testBlockName, None){}
         //Pipes
-        val testPipe = new TestHandler with Outlet[Double] with Inlet[Double]{
+        val testPipe = new TestHandler with Outflow[Double] with Inflow[Double]{
           def testPour(value: Double): Unit = pour(value)
           protected def drain(value: Double): Unit = testDrain(value)}
         lazy val outlet = Outlet(testPipe, "testOutlet")
@@ -182,7 +182,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         val pump: Pump = new Pump(testSketchContext, this, "OtherBlock", None){
           override val drive = otherDrive.ref}
         //Pipes
-        val testIncut = new TestHandler with Outlet[Double] with Inlet[Double]{
+        val testIncut = new TestHandler with Outflow[Double] with Inflow[Double]{
           def testPour(value: Double): Unit = pour(value)
           protected def drain(value: Double): Unit = testDrain(value)}
         lazy val outlet = Outlet(testIncut, "otherOutlet")

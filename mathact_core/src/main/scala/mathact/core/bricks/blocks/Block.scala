@@ -21,20 +21,11 @@ import mathact.core.plumbing.Pump
   * Created by CAB on 22.10.2016.
   */
 
-abstract class Block (context: SketchContext, name: String) extends BlockLike{
+abstract class Block (context: SketchContext) extends BlockLike{
+  //Pump
+  private[core] val pump: Pump = new Pump(context, this)
+  //Methods
 
-
-
-  //  this match{
-  //
-  //
-  //
-  //    case s: PotBoard ⇒ println("PotBoard")
-  //    case _ ⇒ println("Any")
-  //  }
-
-
-  private[core] val pump: Pump = new Pump(context, this, name, None)
-
+  //TODO
 
 }

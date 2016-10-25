@@ -34,9 +34,9 @@ abstract class PotBoard(implicit context: SketchContext) extends Tool("PotBoard"
 
 
 
-   private class C extends Outlet[Double] with Inlet[Double]{
+   private class C extends Outflow[Double] with Inflow[Double]{
 
-    protected def drain(value: Double): Unit = {???}
+    protected def drain(value: Double): Unit = { ??? }
 
     def test(): Unit = ???
 
@@ -46,9 +46,9 @@ abstract class PotBoard(implicit context: SketchContext) extends Tool("PotBoard"
 
   private val handler1 = new C
 
-  private val handler2 = new Outlet[Double] with Inlet[Double]{
+  private val handler2 = new Outflow[Double] with Inflow[Double]{
 
-    protected def drain(value: Double): Unit = {???}
+    protected def drain(value: Double): Unit = { ??? }
 
     def test(): Unit = ???
 

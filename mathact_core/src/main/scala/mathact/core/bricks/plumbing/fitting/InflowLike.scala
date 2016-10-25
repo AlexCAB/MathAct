@@ -14,13 +14,13 @@
 
 package mathact.core.bricks.plumbing.fitting
 
-import mathact.core.plumbing.fitting.Incut
+import mathact.core.plumbing.fitting.FlowLike
 
 
 /**  Inlet interface
   * Created by CAB on 24.10.2016.
   */
 
-private[core] trait InletLike[T] extends Incut[T]{
+private[core] trait InflowLike[T] extends FlowLike[T]{
   private[core] def processValue(value: Any): Unit
   protected def drain(value: T): Unit}

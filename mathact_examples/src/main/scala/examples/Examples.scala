@@ -25,7 +25,15 @@ object Examples extends Sketches{
 
   sketchOf[ChartPotExample] name "Pot to chart" description "Pot and chart connection example"// autorun
 
-  sketchOf[PotPotExample]
+
+  SketchOf[PotPotExample](
+    name = "Pot to chart",
+    description = "Pot and chart connection example",
+    autorun = false,
+    logger = false,
+    visualisation = false)
+
+
 
 
 }

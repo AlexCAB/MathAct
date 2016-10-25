@@ -22,6 +22,4 @@ import mathact.core.bricks.blocks.BlockLike
   */
 
 private[core] trait PumpLike {
-  val block: BlockLike
-  val blockName: String
-  val blockImagePath: Option[String]}
+  val block: BlockLike}

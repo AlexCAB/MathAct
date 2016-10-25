@@ -56,6 +56,21 @@ class Sketches extends Application{
       SketchData(clazz, clazz.getCanonicalName, sName, sDesc, isAutorun, showLogging, showVisualisation)}
   protected def sketchOf[T <: WorkbenchLike : ClassTag]: SketchDsl =
     new SketchDsl(classTag[T].runtimeClass,None,None,false,false,false)
+  object SketchOf{
+    def apply[T <: WorkbenchLike : ClassTag](
+      name: String = "",
+      description: String = "",
+      autorun: Boolean = false,
+      logger:Boolean = false,
+      visualisation: Boolean = false)
+    : Unit = {
+       rawSketchList  += new SketchDsl(
+         clazz = classTag[T].runtimeClass,
+         sName = name match{case "" ⇒ None case _ ⇒ Some(name)},
+         sDesc = description match{case "" ⇒ None case _ ⇒ Some(description)},
+         isAutorun = autorun,
+         showLogging = logger,
+         showVisualisation = visualisation)}}
   //Methods
   private[mathact] def sketchList: List[SketchData] = rawSketchList
     .toList
