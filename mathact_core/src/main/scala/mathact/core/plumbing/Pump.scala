@@ -35,14 +35,16 @@ private[core] class Pump(
   context: SketchContext,
   val block: BlockLike)
 extends PumpLike{
+  //Fields
+  val blockClassName =  block.getClass.getTypeName
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)
-  akkaLog.info(s"[Pump.<init>] DriveCreating of block: $block, name: $blockName")
+  akkaLog.info(s"[Pump.<init>] DriveCreating of block: $blockClassName")
   private[core] object log {
-    def debug(msg: String): Unit = akkaLog.debug(s"[$blockName] $msg")
-    def info(msg: String): Unit = akkaLog.info(s"[$blockName] $msg")
-    def warning(msg: String): Unit = akkaLog.warning(s"[$blockName] $msg")
-    def error(msg: String): Unit = akkaLog.error(s"[$blockName] $msg")  }
+    def debug(msg: String): Unit = akkaLog.debug(s"[$blockClassName] $msg")
+    def info(msg: String): Unit = akkaLog.info(s"[$blockClassName] $msg")
+    def warning(msg: String): Unit = akkaLog.warning(s"[$blockClassName] $msg")
+    def error(msg: String): Unit = akkaLog.error(s"[$blockClassName] $msg")  }
   //Actors
   private[core] val drive: ActorRef = Await
     .result(ask(context.plumbing, M.NewDrive(this))(context.pumpConfig.askTimeout)
@@ -58,10 +60,10 @@ extends PumpLike{
         akkaLog.error(s"[Pump.addPipe] Error on adding of pipe, msg: $msg, error: $t")
         throw new ExecutionException(t)},
       d ⇒ {
-        akkaLog.debug(s"[Pump.addPipe] Pipe added, pipeId: $d")
+        akkaLog.debug(s"[Pump.addPipe] Pipe added, inletId: $d")
         d})
   //Overridden methods
-  override def toString: String = s"Pump(blockName: $blockName)"
+  override def toString: String = s"Pump(context: $context, block: $blockClassName)"
   //Methods
   private[core] def addOutlet(pipe: OutPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddOutlet(pipe, name))
   private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddInlet(pipe, name))
@@ -78,45 +80,23 @@ extends PumpLike{
         d})
   private[core] def blockStart(): Unit = block match{
     case os: OnStart ⇒ os.doStart()
-    case _ ⇒ akkaLog.debug(s"[Pump.blockStart] Block $blockName not have doStart method.")}
+    case _ ⇒ akkaLog.debug(s"[Pump.blockStart] Block $blockClassName not have doStart method.")}
   private[core] def blockStop(): Unit = block match{
     case os: OnStop ⇒  os.doStop()
-    case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockName not have doStop method.")}
+    case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockClassName not have doStop method.")}
   private[core] def pushUserMessage(msg: M.UserData[_]): Unit = Await
     .result(
       ask(drive, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, Option[Long]]],  //Either(error,  Option[sleep timeout])
       context.pumpConfig.askTimeout.duration)
     .fold(
       error ⇒ {
-        akkaLog.error(s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, error: $error")
+        akkaLog.error(s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, error: $error, block $blockClassName")
         throw new ExecutionException(error)},
       timeout ⇒ {
-        akkaLog.debug(s"[Pump.pushUserMessage] Message pushed, msg: $msg, timeout, $timeout")
+        akkaLog.debug(s"[Pump.pushUserMessage] Message pushed, msg: $msg, timeout, $timeout, block $blockClassName")
         timeout.foreach{ d ⇒
           try{
             Thread.sleep(d)}
           catch {case e: InterruptedException ⇒
-            akkaLog.error(s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, error: $e")
-            Thread.currentThread().interrupt()}}})
-
-
-  private[core] def setName(name: Option[String]): Unit = {
-
-
-    ???
-
-
-  }
-
-  private[core] def setImagePath(path: Option[String]): Unit = {
-
-
-    ???
-
-
-  }
-
-
-
-
-}
+            akkaLog.error(s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, error: $e, block $blockClassName")
+            Thread.currentThread().interrupt()}}})}

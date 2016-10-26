@@ -20,8 +20,7 @@ import akka.util.Timeout
 import mathact.core.ActorTestSpec
 import mathact.core.bricks.blocks.BlockLike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
-import mathact.core.model.data.pipes.OutletData
-import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData}
+import mathact.core.model.data.verification.{PublisherVerificationData, BlockVerificationData, InletVerificationData}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 import mathact.core.plumbing.PumpLike
@@ -153,12 +152,9 @@ class PlumbingTest extends ActorTestSpec{
         blockId = 1,
         inlets = Seq(InletVerificationData(
           inletId = 1,
-          publishers = Seq(OutletData(
+          publishers = Seq(PublisherVerificationData(
             blockId = 2,
-            blockDrive = null,
-            blockName = "",
-            pipeId = 12345,   //Not exist outlet
-            pipeName = None)))),
+            outletId = 12345)))), //Not exist outlet
         outlets = Seq())
       val verificationData2 = BlockVerificationData(
         blockId = 2,

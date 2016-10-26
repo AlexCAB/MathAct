@@ -12,16 +12,10 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.blocks
+package mathact.core.model.data.verification
 
-/** Workbench interface
-  * Created by CAB on 07.10.2016.
+/** Publisher verification data
+  * Created by CAB on 26.10.2016.
   */
 
-private[mathact] trait WorkbenchLike {
-  //Context
-  protected implicit val context: SketchContext
-  //Parameters (this methods will be called by SketchController after sketch will constructed)
-  private[mathact] def sketchTitle: Option[String]}
-
-
+case class PublisherVerificationData(blockId: Int, outletId: Int)

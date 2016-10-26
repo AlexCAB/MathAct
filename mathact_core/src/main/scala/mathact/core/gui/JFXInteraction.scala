@@ -49,7 +49,7 @@ private[core] trait JFXInteraction {
       Thread.sleep(1)
       count -= 1}
     //Check of result
-    error.foreach(t ⇒ throw throw new ExecutionException(t))
+    error.foreach(t ⇒ throw new ExecutionException(t))
     isDome match{
       case false ⇒ throw new IllegalStateException(
         s"[JFXInteraction.runAndWait] Block not executed in $runBlockTimeout milliseconds.")

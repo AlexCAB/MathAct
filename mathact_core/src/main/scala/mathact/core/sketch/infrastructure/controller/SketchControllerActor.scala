@@ -74,7 +74,8 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
         case false ⇒
           state}
     //Sketch instance built, run plumbing building
-    case (_: M.SketchInstanceReady, (Constructing, mode)) ⇒
+    case (M.SketchInstanceReady(instance), (Constructing, mode)) ⇒
+      sketchInstanceReady(instance)
       runPlumbingBuilding()
       (Building, mode)
     //Sketch instance error, shutdown plumbing

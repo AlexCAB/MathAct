@@ -39,13 +39,18 @@ private[core] class DriveActor(
   val visualization: ActorRef)
 extends ControllerBase(Drive.State.Init) with IdGenerator with DriveLife with DriveConnectivity
 with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind._
+  //Fields
+  val blockClassName =  pump.block.getClass.getTypeName
   //Variables
   val outlets = MutMap[Int, OutletState]()  //(Outlet ID, OutletData)
   val inlets = MutMap[Int, InletState]()    //(Inlet ID, OutletData)
   var visualisationLaval = VisualisationLaval.None
+  //User parameters, will setup on constructed
+  var blockName: Option[String] = None
+  var blockImagePath: Option[String] = None
   //On start
-  val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + pump.blockName)
-  val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + pump.blockName)
+  val impeller = newWorker(new ImpellerActor(self, config.impellerMaxQueueSize), "Impeller_" + blockClassName)
+  val userActorsRoot  = newWorker(new UserActorsRoot(self), "UserActorsRoot_" + blockClassName)
   //Message handling
   def reaction: PartialFunction[(Msg, Drive.State), Drive.State] = {
     //Construction, adding outlet, ask from object
@@ -58,6 +63,8 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
       state
     //Construct drive, just switch state to Created to disable future adding of inlets, outlets and connections
     case (M.ConstructDrive, Init) ⇒
+      blockName = pump.block.blockName
+      blockImagePath = pump.block.blockImagePath
       constructDrive()
       Constructed
     //Build drive, connect connections from pending list
@@ -74,16 +81,16 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
       sender ! connectPipesAsk(message, state)
       state
     //Connectivity, add connection
-    case (M.AddConnection(id, initiator, inletId, outlet), Constructed | Connecting | Connected) ⇒
-      addConnection(id, initiator, inletId, outlet)
+    case (M.AddConnection(id, initiator, outlet, inlet), Constructed | Connecting | Connected) ⇒
+      addConnection(id, initiator, outlet, inlet)
       state
     //Connectivity, connect to
-    case (M.ConnectTo(id, initiator, outletId, inlet), Constructed | Connecting | Connected) ⇒
-      connectTo(id, initiator, outletId, inlet)
+    case (M.ConnectTo(id, initiator, outlet, inlet), Constructed | Connecting | Connected) ⇒
+      connectTo(id, initiator, outlet, inlet)
       state
     //Check if all pipes connected in Building state, if so switch to Starting, send DriveBuilt and BlockConstructedInfo
-    case (M.PipesConnected(id, outlet, inlet), Connecting) ⇒
-      pipesConnected(id, outlet, inlet)
+    case (M.PipesConnected(connectionId, initiator, outlet, inlet), Connecting) ⇒
+      pipesConnected(connectionId, initiator, outlet, inlet)
       isPendingConListEmpty match{
         case true ⇒
           connectingSuccess()

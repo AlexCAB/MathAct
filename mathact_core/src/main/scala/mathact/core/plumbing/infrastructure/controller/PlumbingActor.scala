@@ -28,55 +28,6 @@ import mathact.core.ControllerBase
   * Created by CAB on 15.05.2016.
   */
 
-//TODO 1.Перенести верификацию структуры из визуализации сюда и проверять по завершении постройки.
-//TODO 2.Добавить льгинг придупереждения в лог пользователя на на попытке добавить инлет или
-//TODO   оутлет или сыполнить соединение после старта приложения.
-//TODO 3.Реализовать актор размещения UI.
-//TODO
-//TODO
-//TODO
-//TODO
-//TODO
-//TODO
-//TODO ---
-//TODO 0.Постройка должна выполнятся сразу на старте, и только если оно успешно кнопка "старт", должна активироватся.
-//TODO 1.Далее: По BuildPlumbing должен построить все драйвы, если какой то драйв вернул DriveBuildingError,
-//TODO   то isDoStopping = true, что по завершении приведёт к разрушению остальных построеных драйвов,
-//TODO   и завершению работы драйва (в этом случае нужно ответить контроллеру PlumbingBuildingError и
-//TODO   затем PlumbingTerminated).
-//TODO 2.Переименовать: StopAndTerminatePlumbing -> StopAndTerminatePlumbing
-//TODO                   PlumbingTerminated-> PlumbingTerminated
-//TODO 3.По PlumbingTerminated контроллер скетча должен перводить UI в неактивное состояние.
-//TODO   Кроме показать/скрыть логинг и визуализацию.
-//TODO 4.Проверить чтобы в случае исключения в конструкторе в пользователском коде (воркбенча и/или) инструментов,
-//TODO   ошибка логировалясь и UI переходило в неактивное состояние.
-//TODO 5.Добавить в лог сообщения об успешной постройке инструмента или ошибке,
-//TODO   и об его успешном запуске или ошибке.
-//TODO   Так же сообщения о постройке всех инструментов (удачной или не удачной).
-//TODO 6.Собственно исправить ошибку с подключением после завершения постройка (на старте).
-//TODO 7.Проверить чтобы чтобы подвисшые пользовательские функции корректно логировались, и
-//TODO   завершались в ручьную (автоматически они не должны завершаются).
-//TODO 8.Подумать о жазненом цикле UI, его нужно конструировать и разрушать, возможно сделать для этого спец методы
-//TODO   в BlockUI трайте.
-//TODO ---
-//TODO 1.Реализовать форсированое завершение по Shutdown и Fail
-//TODO 2.Исправить и добавить тесты (для Shutdown и Fail)
-//TODO 3.Исправить и бобавить далее по ииерархии
-//TODO 4.Добавить terminationHandling в WorkerBase и исправть кода терминации и тесты в остальных акторвх
-//TODO
-//TODO
-//TODO Добавить трайт UI, для котрого сдесь реализовать:
-//TODO Если инструмент имеет трайт UI то при постройке вызвать метод "показать UI", а при терминировании "закрыть UI".
-//TODO Эти мотоды можно вызывать в контексте потока актора (а ни импелера), та как там не будут кода пользователя,
-//TODO и он только отправить собщение потоку UI но фактически ничего не будет делать.
-//TODO В IU трайте должен быть флаг "показать UI" на старте или нет.
-//TODO Так же не стоит забывать о сообщениях ShowBlockUi и HideBlockUi
-//TODO
-//TODO 1. В ObjFitting пересмотреть закоментированое, дописать не достающее, Написать документацию
-//TODO 2. DSL для имени в трайте EmptyBlock
-//TODO 3. Подключения в функциональном стиле
-//TODO 4. UI
-//TODO
 private [core] class PlumbingActor(
   val config: PlumbingConfigLike,
   val controller: ActorRef,
@@ -88,7 +39,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
   //Creators functions
   def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef = newController(
     new DriveActor(config.drive, blockId, blockPump, self, userLogging, visualization),
-    "DriveOf_" + blockPump.blockName + "_" + UUID.randomUUID)
+    "DriveOf_" + blockPump.getClass.getTypeName + "_" + UUID.randomUUID)
   //Message handling
   def reaction: PartialFunction[(Msg, State), State] = {
     //Creating of drive for new block instance

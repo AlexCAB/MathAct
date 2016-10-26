@@ -14,7 +14,7 @@
 
 package mathact.playing.actors
 
-import akka.actor.SupervisorStrategy.{Escalate, Stop}
+import akka.actor.SupervisorStrategy.Stop
 import akka.actor._
 
 
@@ -28,7 +28,7 @@ object Termination extends App{
   abstract class ActorBase extends Actor{
     def reaction: PartialFunction[Any, Unit]
     def receive: PartialFunction[Any, Unit] = { case m ⇒
-      println(s"ACTOR: ${this.getClass.getCanonicalName}, MESSAGE: $m FROM: $sender")
+      println(s"ACTOR: ${this.getClass.getTypeName}, MESSAGE: $m FROM: $sender")
       reaction.applyOrElse[Any, Unit](m, _ ⇒ println(s"NOT HANDLED: $m"))}}
   //Messages
   case object Terminate

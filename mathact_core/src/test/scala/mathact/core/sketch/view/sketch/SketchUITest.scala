@@ -36,10 +36,10 @@ class SketchUITest extends UIActorTestSpec {
     //Test config
     val sketchUIConfig = new SketchUIConfigLike{}
     //Helpers actors
-    val workbenchController = TestProbe("TestSketchController_" + randomString())
+    val sketchController = TestProbe("TestSketchController_" + randomString())
     //UI Actor
-    val ui = system.actorOf(Props(new SketchUIActor(sketchUIConfig, workbenchController.ref)), "SketchUI_" + randomString())
-    workbenchController.watch(ui)}
+    val ui = system.actorOf(Props(new SketchUIActor(sketchUIConfig, sketchController.ref)), "SketchUI_" + randomString())
+    sketchController.watch(ui)}
   //Testing
   "SketchUI" should{
     "change UI view" in new TestCase {
@@ -47,71 +47,74 @@ class SketchUITest extends UIActorTestSpec {
       import SketchUIElement._
       import SketchUiElemState._
       //Show UI
-      workbenchController.send(ui, M.ShowSketchUI)
-      workbenchController.expectMsgType[M.SketchUIChanged].isShow shouldEqual true
+      sketchController.send(ui, M.ShowSketchUI)
+      sketchController.expectMsgType[M.SketchUIChanged].isShow shouldEqual true
+      sleep(2.second)
+      //Update Title
+      sketchController.send(ui, M.UpdateSketchUITitle("Testing..."))
       sleep(2.second)
       //Buttons test
-      workbenchController.send(ui, M.SetSketchUIStatusString("Do hit active button...", Color.Red))
+      sketchController.send(ui, M.SetSketchUIStatusString("Do hit active button...", Color.Red))
       //Buttons test: LogBtn show
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(LogBtn → ElemShow)))
-      val logActS = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(LogBtn → ElemShow)))
+      val logActS = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       logActS.element shouldEqual LogBtn
       logActS.action shouldEqual ElemShow
       //Buttons test: LogBtn hide
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(LogBtn → ElemHide)))
-      val logActH = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(LogBtn → ElemHide)))
+      val logActH = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       logActH.element shouldEqual LogBtn
       logActH.action shouldEqual ElemHide
       //Buttons test: VisualisationBtn show
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(VisualisationBtn → ElemShow)))
-      val visualisationBtnS = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(VisualisationBtn → ElemShow)))
+      val visualisationBtnS = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       visualisationBtnS.element shouldEqual VisualisationBtn
       visualisationBtnS.action shouldEqual ElemShow
       //Buttons test: VisualisationBtn hide
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(VisualisationBtn → ElemHide)))
-      val visualisationBtnH = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(VisualisationBtn → ElemHide)))
+      val visualisationBtnH = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       visualisationBtnH.element shouldEqual VisualisationBtn
       visualisationBtnH.action shouldEqual ElemHide
       //Buttons test: RunBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(RunBtn → ElemEnabled)))
-      val runBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(RunBtn → ElemEnabled)))
+      val runBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       runBtn.element shouldEqual RunBtn
       runBtn.action shouldEqual ElemEnabled
       //Buttons test: ShowAllBlocksUiBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(ShowAllBlocksUiBtn → ElemEnabled)))
-      val showAllBlocksUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(ShowAllBlocksUiBtn → ElemEnabled)))
+      val showAllBlocksUiBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       showAllBlocksUiBtn.element shouldEqual ShowAllBlocksUiBtn
       showAllBlocksUiBtn.action shouldEqual ElemEnabled
       //Buttons test: HideAllBlocksUiBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(HideAllBlocksUiBtn → ElemEnabled)))
-      val hideAllBlocksUiBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(HideAllBlocksUiBtn → ElemEnabled)))
+      val hideAllBlocksUiBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       hideAllBlocksUiBtn.element shouldEqual HideAllBlocksUiBtn
       hideAllBlocksUiBtn.action shouldEqual ElemEnabled
       //Buttons test: SkipAllTimeoutTaskBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(SkipAllTimeoutTaskBtn → ElemEnabled)))
-      val skipAllTimeoutTaskBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(SkipAllTimeoutTaskBtn → ElemEnabled)))
+      val skipAllTimeoutTaskBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       skipAllTimeoutTaskBtn.element shouldEqual SkipAllTimeoutTaskBtn
       skipAllTimeoutTaskBtn.action shouldEqual ElemEnabled
       //Buttons test: StopSketchBtn
-      workbenchController.send(ui, M.UpdateSketchUIState(Map(StopSketchBtn → ElemEnabled)))
-      val stopSketchBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.UpdateSketchUIState(Map(StopSketchBtn → ElemEnabled)))
+      val stopSketchBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       stopSketchBtn.element shouldEqual StopSketchBtn
       stopSketchBtn.action shouldEqual ElemEnabled
       //Close button
-      workbenchController.send(ui, M.SetSketchUIStatusString("Do hit close (X) button...", Color.Red))
-      val closeBtn = workbenchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      sketchController.send(ui, M.SetSketchUIStatusString("Do hit close (X) button...", Color.Red))
+      val closeBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       closeBtn.element shouldEqual CloseBtn
       closeBtn.action shouldEqual Unit
       //Buttons test done
-      workbenchController.send(ui, M.SetSketchUIStatusString("Buttons test done.", Color.Green))
+      sketchController.send(ui, M.SetSketchUIStatusString("Buttons test done.", Color.Green))
       sleep(2.second)
       //Hide UI
-      workbenchController.send(ui, M.HideSketchUI)
-      workbenchController.expectMsgType[M.SketchUIChanged].isShow shouldEqual false
+      sketchController.send(ui, M.HideSketchUI)
+      sketchController.expectMsgType[M.SketchUIChanged].isShow shouldEqual false
       sleep(2.second)
       //Terminate UI
       ui ! PoisonPill
-      workbenchController.expectTerminated(ui)
+      sketchController.expectTerminated(ui)
     }
   }
 }

@@ -25,6 +25,7 @@ import scala.concurrent.duration._
   */
 
 class TestSketchWithBigTimeout extends WorkbenchLike{
+  def sketchTitle = Some("TestSketchWithBigTimeout")
   protected implicit val context: SketchContext = null
   val timeout = 6.second
   println(s"[TestSketchWithBigTimeout] DriveCreating, timeout: $timeout.")

@@ -21,7 +21,7 @@ import mathact.core.app.Application
   * Created by CAB on 09.05.2016.
   */
 
-private[mathact] class Workbench extends WorkbenchLike{ //extends ObjFitting{
+private[mathact] abstract class Workbench extends WorkbenchLike{ //extends ObjFitting{
   //Get of SketchContext
   protected implicit val context = Application.getSketchContext(this)
 

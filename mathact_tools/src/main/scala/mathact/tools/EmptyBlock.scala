@@ -23,13 +23,15 @@ import mathact.core.bricks.blocks.{Block, SketchContext}
 
 class EmptyBlock(implicit context: SketchContext) extends Block(context){
   //Variables
-  private var _title: Option[String] = None
+  private var _name: Option[String] = None
   private var _imagePath: Option[String] = None
   //DSL
-  def title_=(v: String) { _title = v match{case "" ⇒ None; case s ⇒ Some(s)} }
+  def name_=(v: String) { _name = v match{case "" ⇒ None; case s ⇒ Some(s)} }
+  def name = _name
   def imagePath_=(v: String) { _imagePath =  v match{case "" ⇒ None; case s ⇒ Some(s)} }
+  def imagePath = _imagePath
   //Abstract callbacks (will called by system after sketch will constructed)
-  private[mathact] def blockName: Option[String] = _title
+  private[mathact] def blockName: Option[String] = _name
   private[mathact] def blockImagePath: Option[String] = _imagePath
 
   //TODO Add more

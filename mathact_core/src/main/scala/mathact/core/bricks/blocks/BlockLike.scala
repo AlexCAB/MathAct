@@ -22,6 +22,8 @@ import mathact.core.plumbing.Pump
   */
 
 private[mathact] trait BlockLike {
+  //Pump
   private[core] val pump: Pump
-  private[core] def blockName: String
-  private[core] def blockImagePath: String}
+  //Parameters (this methods will be called by Drive after block will constructed)
+  private[core] def blockName: Option[String]
+  private[core] def blockImagePath: Option[String]}

@@ -57,7 +57,7 @@ private [core] object Application{
   log.info(s"[Application] Starting of program...")
   //Stop proc
   private def doStop(exitCode: Int): Unit = Future{
-    log.info(s"[Application.doStop] Stopping of program, before terminate timeout: $beforeTerminateTimeout milliseconds.")
+    log.info(s"[Application.doStop] Stopping of program, before terminate timeout: $beforeTerminateTimeout.")
     Thread.sleep(beforeTerminateTimeout.toMillis)
     Platform.exit()
     system.terminate().onComplete{_ ⇒ System.exit(exitCode)}}
@@ -72,43 +72,41 @@ private [core] object Application{
   def start(sketches: List[SketchData], args: Array[String]): Unit =
     try{
       //Check state
-      mainController match{
-        case None ⇒
-          //Run Java FX Application
-          JFXApplication.init(args, log)
-          Platform.implicitExit = false
-          log.debug(s"[Application.start] JFXApplication created, starting application.")
-          //Create main controller
-          val controller = system.actorOf(Props(
-          new MainController(config, doStop){
-            val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
-            context.watch(mainUi)
-            def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
-              context.actorOf(Props(
-                new SketchControllerActor(config, sketchData, self){
-                  val sketchUi = newWorker(
-                    new SketchUIActor(config.sketchUI, self),
-                    "SketchUIActor_" + sketchData.className)
-                  val userLogging = newWorker(
-                    new UserLoggingActor(config.userLogging, self),
-                    "UserLoggingActor_" + sketchData.className)
-                  val visualization = newWorker(
-                    new VisualizationActor(config.visualization, self),
-                    "VisualizationActor_" + sketchData.className)
-                  val plumbing = newController(
-                    new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization),
-                    "PlumbingActor_" + sketchData.className)
-                  val sketchInstance = newWorker(
-                    new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing),
-                    "SketchInstanceActor_" + sketchData.className)}),
-                "SketchControllerActor_" + sketchData.className)}}),
-          "MainControllerActor")
-          //Start main controller
-          mainController = Some(controller)
-          controller ! M.MainControllerStart(sketches)
-        case Some(c) ⇒
-          throw new IllegalStateException(
-            s"[Application.start] This method can be called only on start, mainController: $c")}}
+      assume(
+        mainController.isEmpty,
+        s"[Application.start] This method can be called only on start, mainController: $mainController")
+      //Run Java FX Application
+      JFXApplication.init(args, log)
+      Platform.implicitExit = false
+      log.debug(s"[Application.start] JFXApplication created, starting application.")
+      //Create main controller
+      val controller = system.actorOf(Props(
+        new MainController(config, doStop){
+          val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
+          context.watch(mainUi)
+          def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
+            context.actorOf(Props(
+              new SketchControllerActor(config, sketchData, self){
+                val sketchUi = newWorker(
+                  new SketchUIActor(config.sketchUI, self),
+                  "SketchUIActor_" + sketchData.className)
+                val userLogging = newWorker(
+                  new UserLoggingActor(config.userLogging, self),
+                  "UserLoggingActor_" + sketchData.className)
+                val visualization = newWorker(
+                  new VisualizationActor(config.visualization, self),
+                  "VisualizationActor_" + sketchData.className)
+                val plumbing = newController(
+                  new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization),
+                  "PlumbingActor_" + sketchData.className)
+                val sketchInstance = newWorker(
+                  new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing),
+                  "SketchInstanceActor_" + sketchData.className)}),
+              "SketchControllerActor_" + sketchData.className)}}),
+        "MainControllerActor")
+      //Start main controller
+      mainController = Some(controller)
+      controller ! M.MainControllerStart(sketches)}
     catch { case e: Throwable ⇒
       log.error(s"[Application.start] Error on start: $e, terminate ActorSystem.")
       doTerminate()
@@ -123,7 +121,6 @@ private [core] object Application{
       log.debug(
         s"[Application.getSketchContext] Try to create SketchContext for workbench $workbench, " +
         s"class name: $opClassName, askTimeout: $askTimeout.")
-      //Check className
       opClassName match{
         case Some(className) ⇒
           //Ask for new context

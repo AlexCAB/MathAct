@@ -21,4 +21,9 @@ import akka.actor.ActorRef
   * Created by CAB on 05.07.2016.
   */
 
-private[core] case class OutletData(blockId: Int, blockDrive: ActorRef, blockName: String, pipeId: Int, pipeName: Option[String])
+private[core] case class OutletData(
+  blockDrive: ActorRef,
+  blockId: Int,
+  blockName: Option[String],
+  outletId: Int,
+  outletName: Option[String])

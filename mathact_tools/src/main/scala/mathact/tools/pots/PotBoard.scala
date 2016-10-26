@@ -26,15 +26,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by CAB on 08.05.2016.
   */
 
-abstract class PotBoard(implicit context: SketchContext) extends Tool("PotBoard")(context) with OnStart with OnStop with ObjFitting{
+abstract class PotBoard(implicit context: SketchContext) extends Tool(context, "PotBoard") with OnStart with OnStop with ObjFitting{
 
   protected def onStart(): Unit = println("PotBoard.onStart")
   protected def onStop(): Unit = println("PotBoard.onStop")
 
 
+  private[mathact] def blockImagePath = None
 
-
-   private class C extends Outflow[Double] with Inflow[Double]{
+  private class C extends Outflow[Double] with Inflow[Double]{
 
     protected def drain(value: Double): Unit = { ??? }
 

@@ -25,4 +25,4 @@ private[core] case class OutletInfo(
   outletId: Int,
   outletName: Option[String]) {
     override def toString =
-        s"OutletInfo(blockId: $blockId, blockName: $blockName, outletId: $outletId, outletName: $outletName)"}
+        s"OutletInfo(blockId: $blockId, blockName: $blockName, inletId: $outletId, outletName: $outletName)"}

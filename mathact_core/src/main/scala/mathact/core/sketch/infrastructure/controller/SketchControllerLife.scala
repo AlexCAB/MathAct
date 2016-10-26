@@ -15,6 +15,7 @@
 package mathact.core.sketch.infrastructure.controller
 
 import akka.actor.PoisonPill
+import mathact.core.bricks.blocks.WorkbenchLike
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
@@ -38,6 +39,11 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
   def constructSketchInstance(): Unit = {
     log.debug(s"[SketchControllerLife.constructSketchInstance] All UI was shown, send CreateSketchInstance")
     sketchInstance ! M.CreateSketchInstance}
+  /** Construct sketch instance */
+  def sketchInstanceReady(instance: WorkbenchLike): Unit = {
+    val newTitle = instance.sketchTitle.getOrElse(sketchName) + " - Mathact v0.2"
+    log.debug(s"[SketchControllerLife.sketchInstanceReady] Update sketch UI title, newTitle: $newTitle")
+    sketchUi ! M.UpdateSketchUITitle(newTitle)}
   /** Run plumbing building */
   def runPlumbingBuilding(): Unit = {
     log.debug("[SketchControllerLife.runPlumbingBuilding] Send BuildPlumbing.")

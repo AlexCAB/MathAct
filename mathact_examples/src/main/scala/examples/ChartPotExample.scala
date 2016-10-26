@@ -27,7 +27,7 @@ import mathact.tools.workbenches.SimpleWorkbench
 
 class ChartPotExample extends SimpleWorkbench{
 
-
+  heading = "My ChartPotExample"
 
 
   //! Workbench это корень приложения, не стоит разрешать чтобы они общялись между собой, но сотоит допустить
@@ -75,7 +75,7 @@ class ChartPotExample extends SimpleWorkbench{
 
 
 
-    title = "MyPotBoard"
+    //title = "MyPotBoard"
 
 
 
@@ -131,10 +131,11 @@ class ChartPotExample extends SimpleWorkbench{
   }
 
 
-  val myBlock = new EmptyBlock("My") with ObjFitting{
+  val myBlock = new EmptyBlock with ObjFitting{
 
 
-    title = "MyPotBoard"
+
+    name = "MyPotBoard"
 
     imagePath = "mathact/sketchList/sketch_start_e.png"
 

@@ -7,12 +7,6 @@ import mathact.core.plumbing.fitting.{Flange, OutPipe}
   */
 
 trait Plug[H] extends Flange[H] { _: OutPipe[H] ⇒
-//  //Get Outlet
-//  private val outlet = this match{
-//    case out: Outlet[T] ⇒ out
-//    case _ ⇒ throw new Exception(
-//      s"[Plug] This trait must be implemented only with mathact.core.plumbing.fitting.Outlet, " +
-//      s"found implementation: ${this.getClass.getName}")}
   //Methods
   /** Connecting of this Plug to given Socket
     * @param socket - Socket[T] */

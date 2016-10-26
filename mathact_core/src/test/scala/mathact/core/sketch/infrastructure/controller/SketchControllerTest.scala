@@ -108,6 +108,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       testSketchInstance.expectMsg(M.CreateSketchInstance)
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
+      testSketchUi.expectMsgType[M.UpdateSketchUITitle]
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testPlumbing.expectMsg(M.BuildPlumbing)
       testPlumbing.send(controller, M.PlumbingBuilt)
@@ -163,6 +164,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchInstance.expectMsgType[M.BuildSketchContextFor].actor shouldEqual testActor.ref
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
       //Update user UI
+      val titleStr = testSketchUi.expectMsgType[M.UpdateSketchUITitle]
+      println("[SketchControllerTest] titleStr " + titleStr)
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
       //Build plumbing
@@ -220,14 +223,16 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchInstance.expectMsgType[M.BuildSketchContextFor].actor shouldEqual testActor.ref
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
       //Update user UI
-      val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr2 " + statusStr2)
+      val titleStr = testSketchUi.expectMsgType[M.UpdateSketchUITitle]
+      println("[SketchControllerTest] titleStr " + titleStr)
+      val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr3 " + statusStr3)
       //Build plumbing
       testPlumbing.expectMsg(M.BuildPlumbing)
       testPlumbing.send(controller, M.PlumbingBuilt)
       //Update user UI
-      val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr3 " + statusStr3)
+      val statusStr4 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr4 " + statusStr4)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(RunBtn → ElemEnabled)
       //Log info
       val info1 = testUserLogging.expectMsgType[M.LogInfo]
@@ -383,6 +388,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       testSketchInstance.expectMsg(M.CreateSketchInstance)
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
+      testSketchUi.expectMsgType[M.UpdateSketchUITitle]
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testPlumbing.expectMsg(M.BuildPlumbing)
       testPlumbing.send(controller, M.PlumbingBuilt)
@@ -422,6 +428,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.send(controller, M.SketchUIActionTriggered(CloseBtn, Unit))      //<---
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
+      testSketchUi.expectMsgType[M.UpdateSketchUITitle]
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testPlumbing.expectMsg(M.BuildPlumbing)
       testPlumbing.send(controller, M.PlumbingBuilt)
@@ -440,6 +447,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
       testSketchInstance.expectMsg(M.CreateSketchInstance)
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
+      testSketchUi.expectMsgType[M.UpdateSketchUITitle]
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testPlumbing.expectMsg(M.BuildPlumbing)
       testSketchUi.send(controller, M.SketchUIActionTriggered(CloseBtn, Unit))      //<---

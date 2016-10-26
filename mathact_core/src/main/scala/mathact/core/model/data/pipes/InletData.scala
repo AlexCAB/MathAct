@@ -22,8 +22,14 @@ import akka.actor.ActorRef
   */
 
 private[core] case class InletData(
-  blockId: Int,
   blockDrive: ActorRef,
-  blockName: String,
-  pipeId: Int,
-  pipeName: Option[String])
+  blockId: Int,
+  blockName: Option[String],
+  inletId: Int,
+  inletName: Option[String])
+
+
+
+
+
+

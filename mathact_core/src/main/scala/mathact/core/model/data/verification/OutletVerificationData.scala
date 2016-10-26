@@ -14,8 +14,6 @@
 
 package mathact.core.model.data.verification
 
-import mathact.core.model.data.pipes.InletData
-
 
 /** Outlet verification info
   * Created by CAB on 23.10.2016.
@@ -23,5 +21,5 @@ import mathact.core.model.data.pipes.InletData
 
 private[core] case class OutletVerificationData(
   outletId: Int,
-  subscribers: Seq[InletData])
+  subscribers: Seq[SubscriberVerificationData])
 

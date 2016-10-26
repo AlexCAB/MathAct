@@ -53,7 +53,7 @@ class Sketches extends Application{
       new SketchDsl(clazz, sName, sDesc, isAutorun, showLogging, true)
     //Convert
     private[mathact] def toSketchData =
-      SketchData(clazz, clazz.getCanonicalName, sName, sDesc, isAutorun, showLogging, showVisualisation)}
+      SketchData(clazz, clazz.getTypeName, sName, sDesc, isAutorun, showLogging, showVisualisation)}
   protected def sketchOf[T <: WorkbenchLike : ClassTag]: SketchDsl =
     new SketchDsl(classTag[T].runtimeClass,None,None,false,false,false)
   object SketchOf{

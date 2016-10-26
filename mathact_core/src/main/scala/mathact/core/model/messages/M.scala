@@ -20,7 +20,7 @@ import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.SketchInfo
-import mathact.core.model.data.verification.{BlockVerificationData, InletVerificationData, OutletVerificationData}
+import mathact.core.model.data.verification.BlockVerificationData
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
@@ -54,6 +54,7 @@ private[core] object M {
   case object HideSketchUI extends Msg
   case class SketchUIChanged(isShow: Boolean) extends Msg
   case class UpdateSketchUIState(state: Map[SketchUIElement, SketchUiElemState]) extends Msg
+  case class UpdateSketchUITitle(title: String) extends Msg
   case class SketchUIActionTriggered(element: SketchUIElement, action: Any) extends Msg
   case class SetSketchUIStatusString(message: String, color: Color) extends Msg
   //SketchControllerActor - UserLogging
@@ -106,9 +107,9 @@ private[core] object M {
   case object ShowBlockUi extends Msg
   case object HideBlockUi extends Msg
   //DriveActor - DriveActor
-  case class AddConnection(connectionId: Int, initiator: ActorRef, inletId: Int, outlet: OutletData) extends Msg
-  case class ConnectTo(connectionId: Int, initiator: ActorRef, outletId: Int, inlet: InletData) extends Msg
-  case class PipesConnected(connectionId: Int, outlet: OutletData, inlet: InletData) extends Msg
+  case class AddConnection(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InPipe[_]) extends Msg
+  case class ConnectTo(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InletData) extends Msg
+  case class PipesConnected(connectionId: Int, initiator: ActorRef, outlet: OutletData, inlet: InletData) extends Msg
   case class UserMessage[T](outletId: Int, inletId: Int, value: T) extends Msg
   case class DriveLoad(subscriberId: (ActorRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
   //DriveActor - ImpellerActor

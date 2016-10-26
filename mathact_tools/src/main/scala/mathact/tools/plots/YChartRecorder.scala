@@ -25,8 +25,11 @@ import scala.concurrent.Future
   * Created by CAB on 08.05.2016.
   */
 
-abstract class YChartRecorder(implicit context: SketchContext) extends Tool("YChartRecorder")(context) with ObjFitting{
+abstract class YChartRecorder(implicit context: SketchContext) extends Tool(context, "YChartRecorder") with ObjFitting{
 
+
+
+  private[mathact] def blockImagePath = None
 
 
   val handler = new Outflow[Double] with Inflow[Double]{

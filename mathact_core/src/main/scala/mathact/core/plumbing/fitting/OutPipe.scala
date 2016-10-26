@@ -15,7 +15,7 @@
 package mathact.core.plumbing.fitting
 
 import mathact.core.bricks.plumbing.fitting.{OutflowLike, Plug}
-import mathact.core.model.data.pipes.OutletData
+import mathact.core.model.messages.M
 import mathact.core.plumbing.Pump
 
 
@@ -24,20 +24,15 @@ import mathact.core.plumbing.Pump
   */
 
 private[core] class OutPipe[H](
-                                out: OutflowLike[H],
-                                protected val pipeName: Option[String],
-                                protected val pump: Pump)
+  private[core] val out: OutflowLike[H],
+  private[core] val outletName: Option[String],
+  private[core] val pump: Pump)
 extends Pipe[H] with Plug[H]{
   //Construction
-  protected val (blockId, pipeId) = pump.addOutlet(this, pipeName)
+  private[core] val (blockId, outletId) = pump.addOutlet(this, outletName)
   out.injectOutPipe(this)
-  //Fields
-  lazy val pipeData = OutletData(blockId, pump.drive, pump.blockName, pipeId, pipeName)
   //Methods
-  override def toString: String = s"OutPipe(in: $out, pipeName: $pipeName, pump: $pump)"
+  private[core] def pushUserData(value: H): Unit = pump.pushUserMessage(M.UserData[H](outletId, value))
+  override def toString: String = s"OutPipe(in: $out, outletName: $outletName, pump: $pump)"}
 
 
-
-
-
-}

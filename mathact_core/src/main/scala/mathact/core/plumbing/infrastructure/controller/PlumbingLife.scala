@@ -33,13 +33,13 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
   private val drives = MutMap[ActorRef, DriveData]()
   private val blocksVerificationData = MutList[BlockVerificationData]()
   //Functions
-  private def forDriveDo(driveActor: ActorRef)(proc: DriveData⇒Unit): Unit = drives.get(driveActor) match{
-    case Some(driveData) ⇒
-      proc(driveData)
-    case None ⇒
-      val msg = s"[PlumbingLife.forDriveDo] Unknown drive $driveActor, registered drives: ${drives.values}."
-      log.error(msg)
-      throw new IllegalStateException(msg)}
+  private def forDriveDo(driveActor: ActorRef)(proc: DriveData⇒Unit): Unit = {
+    //Check data
+    assume(
+      drives.contains(driveActor),
+      s"[PlumbingLife.forDriveDo] Unknown drive $driveActor, registered drives: ${drives.values}")
+    //Run proc
+    proc(drives(driveActor))}
   //Methods
   /** Creating of tew drive
     * @param blockPump - block data received from pump
@@ -51,20 +51,21 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
       //New drive
       val blockId = nextIntId
       val drive = createDriveActor(blockId, blockPump)
-      log.debug(s"[newDrive] New drive created, blockName: ${blockPump.blockName}, drive: $drive")
+      log.debug(s"[newDrive] New drive created, bloc: blockClassName, drive: $drive")
       drives += (drive → DriveData(drive, blockId, None, DriveInit))
       //Response
       sender ! Right(drive)
     case _ ⇒
       //Incorrect state
+      val blockClassName = blockPump.block.getClass.getTypeName
       val msg =
         s"[PlumbingLife.newDrive] Creating of drive not in Building state step, " +
-          s"blockName: ${blockPump.blockName}, state: $state"
+        s"block: $blockClassName, state: $state"
       userLogging ! M.LogError(
         None,
         "Plumbing",
         Seq(),
-        s"Can not create block drive in sate $state, request from: ${blockPump.blockName}")
+        s"Can not create block drive in sate $state, request from: $blockClassName")
       log.error(msg)
       sender ! Left(new Exception(msg))}
   /** Set new state for given drive
@@ -110,24 +111,24 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
       block.inlets.flatMap{ inlet ⇒
         inlet.publishers.flatMap{ publisher ⇒
           blocks.exists{ case (blockId, (_, outletIds)) ⇒
-            publisher.blockId == blockId && outletIds.contains(publisher.pipeId)}
+            publisher.blockId == blockId && outletIds.contains(publisher.outletId)}
           match{
             case true ⇒
               None
             case false ⇒
-              val msg = s"Not found outlet with blockId = ${publisher.blockId} and outletId = ${publisher.pipeId}, " +
+              val msg = s"Not found outlet with blockId = ${publisher.blockId} and inletId = ${publisher.outletId}, " +
                 s"which should be a publishers for inlet with blockId = ${block.blockId} and inletId = ${inlet.inletId}"
               Some(msg)}}} ++
         block.outlets.flatMap{ outlet ⇒
           outlet.subscribers.flatMap{ subscriber ⇒
             blocks.exists{ case (blockId, (inletIds, _)) ⇒
-              subscriber.blockId == blockId && inletIds.contains(subscriber.pipeId)}
+              subscriber.blockId == blockId && inletIds.contains(subscriber.inletId)}
             match{
               case true ⇒
                 None
               case false ⇒
-                val msg = s"Not found inlet with blockId = ${subscriber.blockId} and inletId = ${subscriber.pipeId}, " +
-                  s"which should be a subscriber for outlet with blockId = ${block.blockId} and outletId = ${outlet.outletId}"
+                val msg = s"Not found inlet with blockId = ${subscriber.blockId} and inletId = ${subscriber.inletId}, " +
+                  s"which should be a subscriber for outlet with blockId = ${block.blockId} and inletId = ${outlet.outletId}"
                 Some(msg)}}}}
     //Log result
     testRes match{
@@ -141,14 +142,14 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
               .map{ in ⇒
                 s"Inlet( inletId: ${in.inletId}\n" +
                 "          publishers:\n            " + in.publishers
-                  .map{ pub ⇒ s"Publisher(blockId: ${pub.blockId}, outletId: ${pub.pipeId})"}
+                  .map{ pub ⇒ s"Publisher(blockId: ${pub.blockId}, inletId: ${pub.outletId})"}
                   .mkString("\n            ")}
               .mkString("\n      ") +
             "\n    outlets:\n       " + data.outlets
               .map{ out ⇒
-                s"Outlet( outletId: ${out.outletId}\n" +
+                s"Outlet( inletId: ${out.outletId}\n" +
                 "          subscribers:\n            " + out.subscribers
-                  .map{ sub ⇒ s"Subscriber(blockId: ${sub.blockId}, inletId: ${sub.pipeId})"}
+                  .map{ sub ⇒ s"Subscriber(blockId: ${sub.blockId}, inletId: ${sub.inletId})"}
                   .mkString("\n            ")}
               .mkString("\n      ")}
           .mkString("\n  ")
