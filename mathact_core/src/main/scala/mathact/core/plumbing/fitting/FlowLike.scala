@@ -19,6 +19,4 @@ package mathact.core.plumbing.fitting
   * Created by CAB on 24.08.2016.
   */
 
-private[core] trait FlowLike[T] {
-
-}
+private[core] trait FlowLike[T]

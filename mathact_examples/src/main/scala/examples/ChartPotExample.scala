@@ -14,7 +14,7 @@
 
 package examples
 
-import mathact.core.bricks.plumbing.ObjFitting
+import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
 import mathact.tools.EmptyBlock
 import mathact.tools.plots.YChartRecorder
 import mathact.tools.pots.PotBoard
@@ -131,7 +131,7 @@ class ChartPotExample extends SimpleWorkbench{
   }
 
 
-  val myBlock = new EmptyBlock with ObjFitting{
+  val myBlock = new EmptyBlock with ObjWiring{
 
 
 

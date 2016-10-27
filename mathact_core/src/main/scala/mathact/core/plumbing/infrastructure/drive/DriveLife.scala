@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import mathact.core.bricks.plumbing.{OnStop, OnStart}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop}
 import mathact.core.model.data.verification._
 import mathact.core.model.data.visualisation._
 import mathact.core.model.enums.TaskKind
@@ -139,7 +139,7 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
     userLogging ! M.LogInfo(Some(blockId), blockName.getOrElse(blockClassName), s"Block successful built.")}
   /** Rus staring task if defined, return isStarted */
   def doStarting(): Boolean = pump.block match{
-    case task: OnStart ⇒
+    case task: ObjOnStart ⇒
       log.debug("[DriveLife.doStarting] Try to run starting user function.")
       impeller ! M.RunTask[Unit](TaskKind.Start, -1, config.startFunctionTimeout, ()⇒{ task.doStart() })
       false
@@ -178,7 +178,7 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
       s"Starting function timeout on $execTime, keep waiting.")}
   /** Rus stopping task if defined, return isStopped */
   def doStopping(): Boolean = pump.block match{
-    case task: OnStop ⇒
+    case task: ObjOnStop ⇒
       log.debug("[DriveLife.doStopping] Try to run stopping user function.")
       impeller ! M.RunTask[Unit](TaskKind.Stop, -1, config.stopFunctionTimeout, ()⇒{ task.doStop() })
       false

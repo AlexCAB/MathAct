@@ -47,10 +47,14 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
       newDrive(blockPump, state, createDriveActor)
       state
     //Run block constructing, connectivity and turning on, on sketch start
-    case (M.BuildPlumbing, Init) ⇒
-      sendToEachDrive(M.ConstructDrive)
-      Constructing
-    //Check if all drives constructed, and run connecting if so
+    case (M.BuildPlumbing, Init) ⇒ isDrivesEmpty match{
+      case true ⇒
+        noDrivesOnBuild()
+        TurnedOff
+      case false ⇒
+        sendToEachDrive(M.ConstructDrive)
+        Constructing}
+    //Check if all drives constructed, and run wiring if so
     case (M.DriveConstructed, Constructing) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConstructed) match{
       case true ⇒
         sendToEachDrive(M.ConnectingDrive)

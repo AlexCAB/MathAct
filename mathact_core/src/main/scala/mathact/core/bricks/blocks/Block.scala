@@ -24,6 +24,15 @@ import mathact.core.plumbing.Pump
 abstract class Block (context: SketchContext) extends BlockLike{
   //Pump
   private[core] val pump: Pump = new Pump(context, this)
+  //Helpers
+  implicit val executionContext = context.system.dispatcher
+  //User logger
+  object logger {
+    def info(message: String): Unit = pump.userLogInfo(message)
+    def warn(message: String): Unit = pump.userLogWarn(message)
+    def error(message: String): Unit = pump.userLogError(None, message)
+    def error(error: Throwable): Unit = pump.userLogError(Some(error), "")
+    def error(error: Throwable, message: String): Unit = pump.userLogError(Some(error), message)}
   //Methods
 
   //TODO

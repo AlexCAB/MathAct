@@ -223,6 +223,21 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
 //      hideBlockUiTaskTimeout(time)
 //    case (M.TaskFailed(HideUI, _, time, error), _) ⇒
 //      hideBlockUiTaskFailed(time, error)
+    //User logging info
+    case (M.UserLogInfo(message), st)  if st != Init && st != TurnedOff ⇒
+      userLogInfo(message)
+      state
+    //User logging warn
+    case (M.UserLogWarn(message), st)  if st != Init && st != TurnedOff ⇒
+      userLogWarn(message)
+      state
+    //User logging error
+    case (M.UserLogError(error, message), st)  if st != Init && st != TurnedOff ⇒
+      userLogError(error, message)
+      state
+
+
+
 
   }
   //Cleanup

@@ -20,7 +20,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core._
 import mathact.core.bricks.blocks.{BlockLike, SketchContext}
-import mathact.core.bricks.plumbing.{ObjFitting, OnStop, OnStart}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop, ObjWiring}
 import mathact.core.dummies.TestActor
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}
 import mathact.core.model.data.pipes.{OutletData, InletData}
@@ -81,6 +81,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       val uiOperationTimeout = 4.second}
     val testPumpConfig = new PumpConfigLike{ val askTimeout = Timeout(4.second) }
     //Helpers actors
+    lazy val testActor = TestProbe("TestActor_" + randomString())
     lazy val testController = TestProbe("TestController_" + randomString())
     lazy val testUserLogging = TestProbe("UserLogging_" + randomString())
     lazy val testVisualization = TestProbe("Visualization_" + randomString())
@@ -119,7 +120,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       override val plumbing: ActorRef = testPlumbing.ref}
     //Test blocks
     object blocks{
-      lazy val testBlock = new BlockLike with ObjFitting with OnStart with OnStop{ // with UIControl{
+      lazy val testBlock = new BlockLike with ObjWiring with ObjOnStart with ObjOnStop{ // with UIControl{
         //Parameters
         def blockName = Some(testBlockName)
         def blockImagePath = None
@@ -174,7 +175,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         case M.AddOutlet(pipe, _) ⇒ Some(Right((0, 1)))  // (block ID, pipe ID)
         case M.AddInlet(pipe, _) ⇒  Some(Right((0, 2)))  // (block ID, pipe ID)
         case M.UserData(outletId, _) ⇒  Some(Right(None))})
-      lazy val otherBlock = new BlockLike with ObjFitting{
+      lazy val otherBlock = new BlockLike with ObjWiring{
         //Parameters
         def blockName = Some("OtherBlock")
         def blockImagePath = None
@@ -302,7 +303,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.expectMsg(M.DriveConstructed)
       //Send ConnectingDrive
       testPlumbing.send(blocks.testDrive, M.ConnectingDrive)
-      //Test connecting
+      //Test wiring
       val connectTo = blocks.otherDrive.expectMsgType[M.ConnectTo]
       println(s"[PumpAndDriveTest] connectTo: $connectTo")
       connectTo.initiator        shouldEqual blocks.testDrive
@@ -351,7 +352,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.expectMsg(M.DriveConstructed)
       //Send ConnectingDrive
       testPlumbing.send(blocks.testDrive, M.ConnectingDrive)
-      //Test connecting
+      //Test wiring
       val addConnection = blocks.otherDrive.expectMsgType[M.AddConnection]
       addConnection.initiator       shouldEqual blocks.testDrive
       addConnection.inlet.inletId   shouldEqual inlet.inletId
@@ -509,7 +510,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.expectMsg(M.DriveConstructed)
       //Send ConnectingDrive
       testPlumbing.send(blocks.testDrive, M.ConnectingDrive)
-      //Test connecting with incorrect inletId in response
+      //Test wiring with incorrect inletId in response
       val addCon = blocks.otherDrive.expectMsgType[M.AddConnection]
       val inletData = InletData(inlet.pump.drive, inlet.blockId, None, inlet.inletId, inlet.inletName)
       blocks.otherDrive.send(blocks.testDrive, M.ConnectTo(addCon.connectionId, addCon.initiator, otherOutlet, inletData)) //Incorrect inletId
@@ -867,5 +868,31 @@ class PumpAndDriveTest extends ActorTestSpec{
 //      println("[PumpAndDriveTest] logError: " + logError)
 //      testPlumbing.expectNoMsg(1.second)
 //      blocks.testBlock.isOnHideUICalled shouldEqual true}
+    "Re send user logging to logger actor" in new TestCase {
+      //Preparing
+      blocks.builtBlock
+      val infoMsg = M.UserLogInfo(message = randomString())
+      val warnMsg = M.UserLogWarn(message = randomString())
+      val errorMsg = M.UserLogError(error = Some(new Exception("Oops!!!")), message = randomString())
+      //Test log info
+      testActor.send(blocks.testDrive, infoMsg)
+      val infoMsg1 = testUserLogging.expectMsgType[M.LogInfo]
+      infoMsg1.blockId   shouldEqual Some(testBlockId)
+      infoMsg1.blockName shouldEqual testBlockName
+      infoMsg1.message   shouldEqual infoMsg.message
+      //Test log warn
+      testActor.send(blocks.testDrive, warnMsg)
+      val warnMsg1 = testUserLogging.expectMsgType[M.LogWarning]
+      warnMsg1.blockId   shouldEqual Some(testBlockId)
+      warnMsg1.blockName shouldEqual testBlockName
+      warnMsg1.message   shouldEqual warnMsg.message
+      //Test log error
+      testActor.send(blocks.testDrive, errorMsg)
+      val errMsg1 = testUserLogging.expectMsgType[M.LogError]
+      errMsg1.blockId     shouldEqual Some(testBlockId)
+      errMsg1.blockName   shouldEqual testBlockName
+      errMsg1.message     shouldEqual errorMsg.message
+      errMsg1.message     shouldEqual errorMsg.message
+      errMsg1.errors.head shouldEqual errorMsg.error.get}
   }
 }

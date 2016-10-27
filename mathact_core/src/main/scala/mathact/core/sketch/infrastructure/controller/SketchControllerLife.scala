@@ -79,6 +79,19 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     //Send started to main controller and start plumbing
     mainController ! M.SketchBuilt(sketchData.className)
     plumbing ! M.StartPlumbing}
+  /** Plumbing no drives found */
+  def plumbingNoDrivesFound(): Unit = {
+    log.debug("[SketchControllerLife.plumbingNoDrivesFound] Update status string and UI, send report to controller.")
+    //Update UI
+    sketchUi ! M.SetSketchUIStatusString("No blocks found, halted.", Color.Red)
+    sketchUi ! M.UpdateSketchUIState(Map(
+      RunBtn → ElemDisabled,
+      StopSketchBtn → ElemDisabled,
+      ShowAllBlocksUiBtn → ElemDisabled,
+      HideAllBlocksUiBtn → ElemDisabled,
+      SkipAllTimeoutTaskBtn → ElemDisabled))
+    //Send started to main controller
+    mainController ! M.SketchBuilt(sketchData.className)}
   /** Start plumbing */
   def startPlumbing(): Unit = {
     log.debug(s"[SketchControllerLife.startPlumbing] Send StartPlumbing")

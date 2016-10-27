@@ -15,7 +15,7 @@
 package mathact.tools.pots
 
 import mathact.core.bricks.blocks.SketchContext
-import mathact.core.bricks.plumbing.{OnStart, OnStop, ObjFitting}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjWiring, ObjOnStop}
 import mathact.tools.Tool
 
 import scala.concurrent.Future
@@ -26,7 +26,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by CAB on 08.05.2016.
   */
 
-abstract class PotBoard(implicit context: SketchContext) extends Tool(context, "PotBoard") with OnStart with OnStop with ObjFitting{
+abstract class PotBoard(implicit context: SketchContext) extends Tool(context, "PotBoard") with ObjOnStart with ObjOnStop with ObjWiring{
 
   protected def onStart(): Unit = println("PotBoard.onStart")
   protected def onStop(): Unit = println("PotBoard.onStop")

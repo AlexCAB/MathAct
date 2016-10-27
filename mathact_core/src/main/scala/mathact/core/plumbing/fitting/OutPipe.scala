@@ -14,7 +14,8 @@
 
 package mathact.core.plumbing.fitting
 
-import mathact.core.bricks.plumbing.fitting.{OutflowLike, Plug}
+import mathact.core.bricks.plumbing.fitting.Plug
+import mathact.core.bricks.plumbing.wiring.OutflowLike
 import mathact.core.model.messages.M
 import mathact.core.plumbing.Pump
 

@@ -12,17 +12,13 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.plumbing
-
-import mathact.core.bricks.blocks.BlockLike
+package mathact.core.bricks.plumbing.wiring.fun
 
 
-/** Contains definition for creating of inlets/outlets in functional style
-  * Created by CAB on 24.10.2016.
+/** Execution on stop
+  * Created by CAB on 27.10.2016.
   */
 
-trait FunFitting { _: BlockLike ⇒
-
-  //TODO
+trait FunOnStop { _: FunWiring ⇒
 
 }

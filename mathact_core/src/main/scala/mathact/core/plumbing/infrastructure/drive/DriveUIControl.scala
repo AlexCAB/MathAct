@@ -85,6 +85,27 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
 //    log.error(s"[DriveStartStop.hideBlockUiTaskFailed] execTime: $execTime, error: $error.")
 //    userLogging ! M.LogError(Some(blockId),pump.blockName, Seq(error), s"Hide block UI function failed on $execTime.")}
 
+
+  /** User log info
+    * @param message - String, user text */
+  def userLogInfo(message: String): Unit = {
+    log.debug("[DriveUIControl.userLogInfo] Re send info message to user log actor.")
+    userLogging ! M.LogInfo(Some(blockId), blockName.getOrElse(blockClassName), message)}
+  /** User log warn
+    * @param message - String, user text */
+  def userLogWarn(message: String): Unit = {
+    log.debug("[DriveUIControl.userLogWarn]  Re send warn message to user log actor.")
+    userLogging ! M.LogWarning(Some(blockId), blockName.getOrElse(blockClassName), message)}
+  /** User log error
+    * @param error - Option[Throwable], user exception
+    * @param message - String, user text */
+  def userLogError(error: Option[Throwable], message: String): Unit = {
+    log.debug("[DriveUIControl.userLogError] Re send error message to user log actor.")
+    userLogging ! M.LogError(Some(blockId), blockName.getOrElse(blockClassName), error.toSeq, message)}
+
+
+
+
   //TODO Add more
 
 }

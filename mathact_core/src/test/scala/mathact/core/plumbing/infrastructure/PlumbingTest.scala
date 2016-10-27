@@ -115,6 +115,15 @@ class PlumbingTest extends ActorTestSpec{
       val drive2 = testController.expectMsgType[Either[Throwable, ActorRef]]
       drive2.isRight shouldEqual true
       drive2.right.get shouldEqual testDrive2.ref}
+    "by BuildPlumbing, if no drives found report with PlumbingNoDrivesFound" in new TestCase {
+      //Preparing
+      actors.plumbing
+      //Send BuildPlumbing
+      testController.send(actors.plumbing, M.BuildPlumbing)
+      //Expect PlumbingNoDrivesFound
+      testController.expectMsg(M.PlumbingNoDrivesFound)
+      val logWarning1 = testUserLogging.expectMsgType[M.LogWarning]
+      println("[PlumbingTest] logWarning1: " + logWarning1)}
     "by BuildPlumbing, build all drives and response with PlumbingBuilt" in new TestCase {
       //Preparing
       actors.plumbingWithDrives

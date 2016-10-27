@@ -15,7 +15,7 @@
 package mathact.tools.plots
 
 import mathact.core.bricks.blocks.SketchContext
-import mathact.core.bricks.plumbing.ObjFitting
+import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
 import mathact.tools.Tool
 
 import scala.concurrent.Future
@@ -25,7 +25,7 @@ import scala.concurrent.Future
   * Created by CAB on 08.05.2016.
   */
 
-abstract class YChartRecorder(implicit context: SketchContext) extends Tool(context, "YChartRecorder") with ObjFitting{
+abstract class YChartRecorder(implicit context: SketchContext) extends Tool(context, "YChartRecorder") with ObjWiring{
 
 
 

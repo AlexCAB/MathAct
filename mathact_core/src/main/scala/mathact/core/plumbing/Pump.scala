@@ -21,7 +21,7 @@ import akka.event.Logging
 import akka.pattern.ask
 import mathact.core.bricks.blocks.{BlockLike, SketchContext}
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
-import mathact.core.bricks.plumbing.{OnStop, OnStart}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
 import scala.concurrent.Await
@@ -79,10 +79,10 @@ extends PumpLike{
         akkaLog.debug(s"[Pump.connect] Pipes connected: $d")
         d})
   private[core] def blockStart(): Unit = block match{
-    case os: OnStart ⇒ os.doStart()
+    case os: ObjOnStart ⇒ os.doStart()
     case _ ⇒ akkaLog.debug(s"[Pump.blockStart] Block $blockClassName not have doStart method.")}
   private[core] def blockStop(): Unit = block match{
-    case os: OnStop ⇒  os.doStop()
+    case os: ObjOnStop ⇒  os.doStop()
     case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockClassName not have doStop method.")}
   private[core] def pushUserMessage(msg: M.UserData[_]): Unit = Await
     .result(
@@ -99,4 +99,7 @@ extends PumpLike{
             Thread.sleep(d)}
           catch {case e: InterruptedException ⇒
             akkaLog.error(s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, error: $e, block $blockClassName")
-            Thread.currentThread().interrupt()}}})}
+            Thread.currentThread().interrupt()}}})
+  private[core] def userLogInfo(message: String): Unit = drive ! M.UserLogInfo(message)
+  private[core] def userLogWarn(message: String): Unit = drive ! M.UserLogWarn(message)
+  private[core] def userLogError(error: Option[Throwable], message: String): Unit = drive ! M.UserLogError(error, message)}

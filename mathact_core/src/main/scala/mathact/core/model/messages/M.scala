@@ -73,6 +73,7 @@ private[core] object M {
   //SketchControllerActor - PlumbingActor  (life cycle)
   case object BuildPlumbing extends Msg    //Run block constructing, connectivity and turning on, on sketch start
   case object PlumbingBuilt extends Msg
+  case object PlumbingNoDrivesFound extends Msg //Sends instead of PlumbingBuilt in case no drives found
   case object StartPlumbing extends Msg    //Run user start functions on hit UI "START" of by auto-run
   case object PlumbingStarted extends Msg
   case object StopPlumbing extends Msg     //Run user stop functions and turning off,  on hit UI "STOP"
@@ -83,11 +84,14 @@ private[core] object M {
   case object HideAllBlockUi extends Msg
   //Object Pump - PlumbingActor (ask)
   case class NewDrive(blockPump: PumpLike) extends Msg     //Name and image for display in UI
-  //Object Pump - DriveActor (ask)
+  //Object Pump - DriveActor (ask and tell)
   case class AddOutlet(pipe: OutPipe[_], name: Option[String]) extends Msg
   case class AddInlet(pipe: InPipe[_], name: Option[String]) extends Msg
   case class ConnectPipes(out: ()⇒Plug[_], in: ()⇒Socket[_]) extends Msg
   case class UserData[T](outletId: Int, value: T) extends Msg
+  case class UserLogInfo(message: String) extends Msg
+  case class UserLogWarn(message: String) extends Msg
+  case class UserLogError(error: Option[Throwable], message: String) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg

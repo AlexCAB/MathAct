@@ -128,66 +128,106 @@ class SketchControllerTest extends ActorTestSpec {
       controller}}
   //Testing
   "SketchControllerActor on start" should{
-    "by SketchControllerStart, create sketch instance show UI, start plumbing with auto run on" in new TestCase {
+//    "by SketchControllerStart, create sketch instance show UI, start plumbing with auto run on" in new TestCase {
+//      //Preparing
+//      val controller = newSketchController( newTestSketchData(
+//        clazz = classOf[TestSketchWithSmallTimeout],
+//        autorun = true,
+//        showUserLogUi = true,
+//        showVisualisationUi = true))
+//      //Send start
+//      testMainController.send(controller, M.LaunchSketch)
+//      //Show sketch UI
+//      val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+//      println("[SketchControllerTest] statusStr1 " + statusStr1)
+//      testSketchUi.expectMsg(M.ShowSketchUI)
+//      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+//        RunBtn → ElemDisabled,
+//        ShowAllBlocksUiBtn → ElemDisabled,
+//        HideAllBlocksUiBtn → ElemDisabled,
+//        SkipAllTimeoutTaskBtn → ElemDisabled,
+//        StopSketchBtn → ElemDisabled,
+//        LogBtn →  ElemHide,
+//        VisualisationBtn → ElemHide)
+//      testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
+//      //Show user logging UI
+//      testUserLogging.expectMsg(M.ShowUserLoggingUI)
+//      testUserLogging.send(controller, M.UserLoggingUIChanged(isShow = true))
+//      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(LogBtn → ElemHide)
+//      //Show visualization UI
+//      testVisualization.expectMsg(M.ShowVisualizationUI)
+//      testVisualization.send(controller, M.VisualizationUIChanged(isShow = true))
+//      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(VisualisationBtn → ElemHide)
+//      //Creating of sketch instance
+//      testSketchInstance.expectMsg(M.CreateSketchInstance)
+//      testActor.send(controller, M.GetSketchContext(testActor.ref))
+//      testSketchInstance.expectMsgType[M.BuildSketchContextFor].actor shouldEqual testActor.ref
+//      testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
+//      //Update user UI
+//      val titleStr = testSketchUi.expectMsgType[M.UpdateSketchUITitle]
+//      println("[SketchControllerTest] titleStr " + titleStr)
+//      val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+//      println("[SketchControllerTest] statusStr2 " + statusStr2)
+//      //Build plumbing
+//      testPlumbing.expectMsg(M.BuildPlumbing)
+//      testPlumbing.send(controller, M.PlumbingBuilt)
+//      //Run plumbing
+//      testPlumbing.expectMsg(M.StartPlumbing)
+//      testPlumbing.send(controller, M.PlumbingStarted)
+//      //Update user UI
+//      val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+//      println("[SketchControllerTest] statusStr3 " + statusStr3)
+//      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+//        RunBtn → ElemDisabled,
+//        StopSketchBtn → ElemEnabled,
+//        ShowAllBlocksUiBtn → ElemEnabled,
+//        HideAllBlocksUiBtn → ElemEnabled,
+//        SkipAllTimeoutTaskBtn → ElemEnabled)
+//      val statusStr4 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+//      println("[SketchControllerTest] statusStr4 " + statusStr4)
+//      //Log info
+//      val info1 = testUserLogging.expectMsgType[M.LogInfo]
+//      println("[SketchControllerActor] info1: " + info1) //LogInfo(None,Workbench,Sketch 'TestSketch1' successfully built.)
+//      //Sketch built
+//      testMainController.expectMsgType[M.SketchBuilt].className shouldEqual classOf[TestSketchWithSmallTimeout].getName
+//      //Expect no messages
+//      sleep(3.second)
+//      testMainController.expectNoMsg(1.second)
+//      testSketchUi.expectNoMsg(1.second)
+//      testUserLogging.expectNoMsg(1.second)
+//      testVisualization.expectNoMsg(1.second)
+//      testPlumbing.expectNoMsg(1.second)
+//      testSketchInstance.expectNoMsg(1.second)}
+    "by PlumbingNoDrivesFound from blumbing, desable UI and wait for close" in new TestCase {
       //Preparing
-      val controller = newSketchController( newTestSketchData(
-        clazz = classOf[TestSketchWithSmallTimeout],
-        autorun = true,
-        showUserLogUi = true,
-        showVisualisationUi = true))
+      val controller = newSketchController( newTestSketchData())
       //Send start
       testMainController.send(controller, M.LaunchSketch)
-      //Show sketch UI
-      val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr1 " + statusStr1)
+      //Show UI
+      testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       testSketchUi.expectMsg(M.ShowSketchUI)
-      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
-        RunBtn → ElemDisabled,
-        ShowAllBlocksUiBtn → ElemDisabled,
-        HideAllBlocksUiBtn → ElemDisabled,
-        SkipAllTimeoutTaskBtn → ElemDisabled,
-        StopSketchBtn → ElemDisabled,
-        LogBtn →  ElemHide,
-        VisualisationBtn → ElemHide)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState]
       testSketchUi.send(controller, M.SketchUIChanged(isShow = true))
-      //Show user logging UI
-      testUserLogging.expectMsg(M.ShowUserLoggingUI)
-      testUserLogging.send(controller, M.UserLoggingUIChanged(isShow = true))
-      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(LogBtn → ElemHide)
-      //Show visualization UI
-      testVisualization.expectMsg(M.ShowVisualizationUI)
-      testVisualization.send(controller, M.VisualizationUIChanged(isShow = true))
-      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(VisualisationBtn → ElemHide)
       //Creating of sketch instance
       testSketchInstance.expectMsg(M.CreateSketchInstance)
       testActor.send(controller, M.GetSketchContext(testActor.ref))
       testSketchInstance.expectMsgType[M.BuildSketchContextFor].actor shouldEqual testActor.ref
       testSketchInstance.send(controller, M.SketchInstanceReady(new TestSketchWithSmallTimeout))
       //Update user UI
-      val titleStr = testSketchUi.expectMsgType[M.UpdateSketchUITitle]
-      println("[SketchControllerTest] titleStr " + titleStr)
-      val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr2 " + statusStr2)
-      //Build plumbing
+      testSketchUi.expectMsgType[M.UpdateSketchUITitle]
+      testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      //Build plumbing with PlumbingNoDrivesFound response
       testPlumbing.expectMsg(M.BuildPlumbing)
-      testPlumbing.send(controller, M.PlumbingBuilt)
-      //Run plumbing
-      testPlumbing.expectMsg(M.StartPlumbing)
-      testPlumbing.send(controller, M.PlumbingStarted)
+      testPlumbing.send(controller, M.PlumbingNoDrivesFound)
       //Update user UI
-      val statusStr3 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr3 " + statusStr3)
+      val statusStr1 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      println("[SketchControllerTest] statusStr1 " + statusStr1)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
-        StopSketchBtn → ElemEnabled,
-        ShowAllBlocksUiBtn → ElemEnabled,
-        HideAllBlocksUiBtn → ElemEnabled,
-        SkipAllTimeoutTaskBtn → ElemEnabled)
-      val statusStr4 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
-      println("[SketchControllerTest] statusStr4 " + statusStr4)
-      //Log info
-      val info1 = testUserLogging.expectMsgType[M.LogInfo]
-      println("[SketchControllerActor] info1: " + info1) //LogInfo(None,Workbench,Sketch 'TestSketch1' successfully built.)
+        StopSketchBtn → ElemDisabled,
+        ShowAllBlocksUiBtn → ElemDisabled,
+        HideAllBlocksUiBtn → ElemDisabled,
+        SkipAllTimeoutTaskBtn → ElemDisabled)
       //Sketch built
       testMainController.expectMsgType[M.SketchBuilt].className shouldEqual classOf[TestSketchWithSmallTimeout].getName
       //Expect no messages

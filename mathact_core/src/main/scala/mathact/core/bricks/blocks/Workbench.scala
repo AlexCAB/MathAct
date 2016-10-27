@@ -21,7 +21,7 @@ import mathact.core.app.Application
   * Created by CAB on 09.05.2016.
   */
 
-private[mathact] abstract class Workbench extends WorkbenchLike{ //extends ObjFitting{
+private[mathact] abstract class Workbench extends WorkbenchLike{ //extends ObjWiring{
   //Get of SketchContext
   protected implicit val context = Application.getSketchContext(this)
 
@@ -41,7 +41,7 @@ private[mathact] abstract class Workbench extends WorkbenchLike{ //extends ObjFi
 
 
 //
-//  extends ObjFitting{
+//  extends ObjWiring{
 //
 //
 //  //Environment должен констрироватся до того как будетсоздан хоть один инструмент (т.е. самый первый при старте программы),

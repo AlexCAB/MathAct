@@ -12,15 +12,17 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.plumbing.fitting
+package mathact.core.bricks.plumbing.wiring.fun
 
-import mathact.core.plumbing.fitting.FlowLike
+import mathact.core.bricks.blocks.BlockLike
 
 
-/**  Inlet interface
+/** Contains definition for creating of inlets/outlets in functional style
   * Created by CAB on 24.10.2016.
   */
 
-private[core] trait InflowLike[T] extends FlowLike[T]{
-  private[core] def processValue(value: Any): Unit
-  protected def drain(value: T): Unit}
+trait FunWiring { _: BlockLike ⇒
+
+  //TODO
+
+}

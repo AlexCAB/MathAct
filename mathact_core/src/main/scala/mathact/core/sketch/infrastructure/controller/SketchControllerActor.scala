@@ -94,6 +94,10 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
     case (M.PlumbingBuilt, (Building, Shutdown)) ⇒
       reportAndTerminateSelf(Shutdown)
       (Ended, Shutdown)
+    //Plumbing no drives found, switch to Ended
+    case (M.PlumbingNoDrivesFound, (Building, mode)) ⇒
+      plumbingNoDrivesFound()
+      (Ended, mode)
     //If RunBtn hit switch to Starting state
     case (M.SketchUIActionTriggered(RunBtn, _), (Built, Work)) ⇒
       startPlumbing()

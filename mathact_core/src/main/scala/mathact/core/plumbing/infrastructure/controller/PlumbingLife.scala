@@ -68,6 +68,10 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
         s"Can not create block drive in sate $state, request from: $blockClassName")
       log.error(msg)
       sender ! Left(new Exception(msg))}
+  /** Check if drives list empty */
+  def isDrivesEmpty: Boolean = {
+    log.debug(s"[PlumbingLife.isDrivesEmpty] isEmpty : ${drives.isEmpty}.")
+    drives.isEmpty}
   /** Set new state for given drive
     * @param actor - ActorRef, drive actor reference
     * @param newState - DriveState */
@@ -96,6 +100,13 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
   def setDriveStateAndCheckIfAllIn(actor: ActorRef, newState: DriveState): Boolean = {
     setDriveState(actor, newState)
     isAllDrivesIn(newState)}
+  /** No drives found on build */
+  def noDrivesOnBuild(): Unit = {
+    log.debug(s"[PlumbingLife.noDrivesOnBuild] Log and report to controller")
+    userLogging ! M.LogWarning(None, "Plumbing", s"No blocks found on build, nothing to do.")
+    controller ! M.PlumbingNoDrivesFound}
+  /** Adding of verification data
+    * @param verificationData - BlockVerificationData */
   def driveVerification(verificationData: BlockVerificationData): Unit = {
     log.debug(s"[PlumbingLife.blockConstructedInfo] Add to verification list: $verificationData")
     blocksVerificationData += verificationData}

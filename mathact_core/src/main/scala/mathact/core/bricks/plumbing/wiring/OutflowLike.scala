@@ -12,42 +12,14 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples
+package mathact.core.bricks.plumbing.wiring
 
-import examples.wiring.{FunWiringExample, ObjWiringExample}
-import mathact.tools.Sketches
+import mathact.core.plumbing.fitting.{FlowLike, OutPipe}
 
 
-/** List of Examples
-  * Created by CAB on 18.06.2016.
+/** Outlet interface
+  * Created by CAB on 24.10.2016.
   */
 
-object Examples extends Sketches{
-  SketchOf[ObjWiringExample](
-    name = "Obj tap wiring example",
-    description = "Example oftap wiring in object style.",
-    logger = true,
-    visualisation = true)
-  SketchOf[FunWiringExample](
-    name = "Fun tap wiring example",
-    description = "Example of tap wiring in functional style.",
-    logger = true,
-    visualisation = true)
-
-
-
-
-//  sketchOf[ChartPotExample] name "Pot to chart" description "Pot and chart connection example"// autorun
-//
-//
-//  SketchOf[PotPotExample](
-//    name = "Pot to chart",
-//    description = "Pot and chart connection example",
-//    autorun = false,
-//    logger = false,
-//    visualisation = false)
-
-
-
-
-}
+private[core] trait OutflowLike[T] extends FlowLike[T]{
+  private[core] def injectOutPipe(pipe: OutPipe[T]): Unit}

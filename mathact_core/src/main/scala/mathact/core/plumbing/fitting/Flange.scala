@@ -52,7 +52,7 @@ private[core] trait Flange[H]{
 ////
 ////
 ////      case (c1,c2) ⇒ log.error(
-////        s"[Flange.connect] Only Socket-Plug and Socket-Plug connecting acceptable, " +
+////        s"[Flange.connect] Only Socket-Plug and Socket-Plug wiring acceptable, " +
 ////        s"currently connector 1: $c1, and connector 2: $c2")}
 //
 //
