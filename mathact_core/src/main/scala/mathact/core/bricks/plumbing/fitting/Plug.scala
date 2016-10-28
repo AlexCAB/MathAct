@@ -10,4 +10,5 @@ trait Plug[H] extends Flange[H] { _: OutPipe[H] ⇒
   //Methods
   /** Connecting of this Plug to given Socket
     * @param socket - Socket[T] */
-  def attach(socket: ⇒Socket[H]): Unit = pump.connect(()⇒this, ()⇒socket)}
+  def attach(socket: ⇒Socket[H]): Unit = pump.connect(()⇒this, ()⇒socket)
+  def ~> (socket: ⇒Socket[H]): Unit = pump.connect(()⇒this, ()⇒socket)}

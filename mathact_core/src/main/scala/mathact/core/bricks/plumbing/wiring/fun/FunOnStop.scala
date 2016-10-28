@@ -19,6 +19,8 @@ package mathact.core.bricks.plumbing.wiring.fun
   * Created by CAB on 27.10.2016.
   */
 
-trait FunOnStop { _: FunWiring ⇒
+trait FunOnStop[H] { _: FunWiring ⇒
+
+  protected val stop: FunSocket[H] =  ???
 
 }

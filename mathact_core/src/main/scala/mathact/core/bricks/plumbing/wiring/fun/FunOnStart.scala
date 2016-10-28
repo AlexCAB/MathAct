@@ -23,4 +23,7 @@ trait FunOnStart { _: FunWiring ⇒
 
 
 
+  protected val start: Flow[Unit] =  ???
+
+
 }

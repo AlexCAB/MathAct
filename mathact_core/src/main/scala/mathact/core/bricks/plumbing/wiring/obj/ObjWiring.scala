@@ -1,3 +1,17 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+ * @                                                                             @ *
+ *           #          # #                                 #    (c) 2016 CAB      *
+ *          # #      # #                                  #  #                     *
+ *         #  #    #  #           # #     # #           #     #              # #   *
+ *        #   #  #   #             #       #          #        #              #    *
+ *       #     #    #   # # #    # # #    #         #           #   # # #   # # #  *
+ *      #          #         #   #       # # #     # # # # # # #  #    #    #      *
+ *     #          #   # # # #   #       #      #  #           #  #         #       *
+ *  # #          #   #     #   #    #  #      #  #           #  #         #    #   *
+ *   #          #     # # # #   # #   #      #  # #         #    # # #     # #     *
+ * @                                                                             @ *
+\* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 package mathact.core.bricks.plumbing.wiring.obj
 
 import mathact.core.bricks.blocks.BlockLike
@@ -5,14 +19,16 @@ import mathact.core.bricks.plumbing.fitting.{Plug, Socket}
 import mathact.core.bricks.plumbing.wiring.{InflowLike, OutflowLike}
 import mathact.core.plumbing.fitting.{InPipe, OutPipe}
 
+
 /** Contains definition for creating of inlets/outlets in object style
   * Created by CAB on 14.05.2016.
   */
 
 trait ObjWiring { _: BlockLike ⇒
-  //Definitions
+  //Types
   protected trait ObjPlug[H]
   protected trait ObjSocket[H]
+  //Definitions
   /** Base trait for sender implementation */
   protected trait Outflow[T] extends OutflowLike[T]{
     //Variables
@@ -24,7 +40,7 @@ trait ObjWiring { _: BlockLike ⇒
       * @param value - T value to be send, should be immutable*/
     protected def pour(value: T): Unit = pipes match{
       case Nil ⇒
-        throw new IllegalStateException(s"[Flange.getPipe] OutPipe not injected, look like Outlet not registered.")
+        throw new IllegalStateException(s"[ObjWiring.Outflow.pour] OutPipe not injected, look like Outlet not registered.")
       case ps ⇒
         ps.foreach(_.pushUserData(value))}}
   /** Base trait for receiver implementation */
@@ -48,11 +64,11 @@ trait ObjWiring { _: BlockLike ⇒
   private def registerInlet[H](in: Inflow[H], name: Option[String]): Socket[H] with ObjSocket[H] = Option(pump) match{
     case Some(p) ⇒ new InPipe[H](in, name , p) with ObjSocket[H]
     case None ⇒ throw new IllegalStateException("[ObjWiring.registerInlet] Pump not set.")}
-  //Registration if Outlet
+  /** Registration if Outlet */
   protected object Outlet{
     def apply[H](out: Outflow[H]): Plug[H] with ObjPlug[H] = registerOutlet(out, None)
     def apply[H](out: Outflow[H], name: String ): Plug[H] with ObjPlug[H] = registerOutlet(out, Some(name))}
-  //Registration if Inlet
+  /** Registration if Inlet */
   protected object Inlet{
     def apply[H](in: Inflow[H]): Socket[H] with ObjSocket[H] = registerInlet(in, None)
     def apply[H](in: Inflow[H], name: String): Socket[H] with ObjSocket[H] = registerInlet(in, Some(name))}}

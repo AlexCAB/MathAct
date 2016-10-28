@@ -37,7 +37,7 @@ class ObjWiringExample extends SimpleWorkbench {
     protected def onStart(): Unit = Future{
       for (i ← 1 to 10){
         outflow.push(i)
-        Thread.sleep(1000)}}
+        Thread.sleep(1000)}} //Emulate heavy processing
     //Pipes
     val out = Outlet(outflow, "out")}
   val processor = new EmptyBlock with ObjWiring{
@@ -58,5 +58,5 @@ class ObjWiringExample extends SimpleWorkbench {
     //Pipes
     val in = Inlet(inflow, "in")}
   //Connecting
-  producer.out.attach(processor.in)
-  processor.out.attach(consumer.in)}
+  producer.out ~> processor.in
+  processor.out ~> consumer.in}
