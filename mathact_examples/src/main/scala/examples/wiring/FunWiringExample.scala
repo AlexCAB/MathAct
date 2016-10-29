@@ -18,6 +18,8 @@ import mathact.core.bricks.plumbing.wiring.fun.{FunOnStart, FunWiring}
 import mathact.tools.EmptyBlock
 import mathact.tools.workbenches.SimpleWorkbench
 
+import scala.concurrent.Future
+
 
 /** Example of tap wiring in functional style
   * Created by CAB on 27.10.2016.
@@ -29,25 +31,31 @@ class FunWiringExample extends SimpleWorkbench {
     //Parameters
     name = "Producer block"
     imagePath = "examples/connecting/producer.png"
+    //Custom flow
+    val gen = new Flow[Unit, Double]{
+      def pop(v: Unit) = Future{
+         (1 to 10).foreach{i ⇒
+           Thread.sleep(1000) //Thread.sleep(1000) emulate heavy processing
+           push(i)}}}
     //Pipes
-    val out = Outlet[Double]("out")
-    //On start
-    start.unfold(_ ⇒ 1.0 to 10.0 by 1).map{s ⇒ Thread.sleep(1000); s}.to(out)}  //Thread.sleep(1000) emulate heavy processing
+    val out = Out[Double]("out")
+    //Wiring
+    start >> gen >> out}
   val processor = new EmptyBlock with FunWiring{
     //Parameters
     name = "Processor block"
     imagePath = "examples/connecting/processor.png"
     //Pipes
-    val in = Inlet[Double]("in")
-    val out = Outlet[Double]("out")
+    val in = In[Double]("in")
+    val out = Out[Double]("out")
     //Mapping
-    in.map(v ⇒ v * 100).to(out)}
+    in.map(v ⇒ v * 100).next(out)}
   val consumer = new EmptyBlock with FunWiring{
     //Parameters
     name = "Consumer block"
     imagePath = "examples/connecting/consumer.png"
     //Pipes
-    val in = Inlet[Double]
+    val in = In[Double]
     //Logging
     in.foreach(v ⇒  logger.info("Consume value: " + v))}
   //Connecting

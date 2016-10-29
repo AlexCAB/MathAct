@@ -29,160 +29,161 @@ trait FunWiring { _: BlockLike ⇒
 
   //Definitions
   /** */
-  protected trait FunPlug[H]
-  /** */
   protected trait FunSocket[H]
 
-//  /** Base trait for sender implementation */
-//  protected trait Outflow[T] extends OutflowLike[T]{
-//    //Variables
-//    private var pipes = List[OutPipe[T]]()
-//    //Internal API
-//    private[core] def injectOutPipe(pipe: OutPipe[T]): Unit = {pipes +:= pipe}
-//    //Methods
-//    /** Send value to all connected inlets
-//      * @param value - T value to be send, should be immutable*/
-//    protected def pour(value: T): Unit = pipes match{
-//      case Nil ⇒
-//        throw new IllegalStateException(s"[Flange.getPipe] OutPipe not injected, look like Outlet not registered.")
-//      case ps ⇒
-//        ps.foreach(_.pushUserData(value))}}
+  /** */
+  protected trait FunPlug[H]
+
 
 
 
   /** */
-  private class Inflow[H] extends InflowLike[H]{
-    //New flow
-    private[core] val flow = new Flow[H]{}
-    //Methods
-    private[core] def processValue(v: Any): Unit = flow.pushOn(v.asInstanceOf[H])}
-
-
-  /** */
-  private class Outflow[H] extends OutflowLike[H]{
+  protected trait Source[T] {
     //Variables
-    @volatile private var pipe: Option[OutPipe[H]] = None
-    //Methods
-    def injectOutPipe(p: OutPipe[H]): Unit = { pipe = Some(p) }
-    def pour(v: H): Unit = pipe match{
-      case Some(p) ⇒ p.pushUserData(v)
-      case _ ⇒ throw new IllegalStateException(s"[FunWiring.Outflow.pour] OutPipe not injected.")}}
-
+    private var linkedDrains = List[Drain[T]]()
+    //Flow methods
+    protected def push(v: T): Unit = linkedDrains.foreach(_.pass(v))
+    //Connection methods
+    def next[H](flow: Flow[T, H]): Source[H] = {
+      flow.link(this)
+      linkedDrains +:= flow
+      flow}
+    def next(drain: Drain[T]): Unit = {
+      drain.link(this)
+      linkedDrains +:= drain}
+    def >>[H](flow: Flow[T, H]): Source[H] = next(flow)
+    def >>(drain: Drain[T]): Unit = next(drain)}
 
 
   /** */
-  private[core] abstract class Mapper[T, H] extends Flow[H]{ def onPush(v: T): Unit }
+  protected trait SourceWithDefault[T] extends Source[T]{
+
+
+  }
 
 
   /** */
-  private[core] class BufferAll[H,O] extends Flow[(H,O)]{
+  protected trait Drain[H]{
     //Variables
-    @volatile protected var vh: Option[H] = None
-    @volatile protected var vo: Option[O] = None
-    //Functions
-    private def doPushOn(): Unit = (vh, vo) match{
-      case (Some(h), Some(o)) ⇒
-        pushOn(Tuple2(h,o))
-        vh = None
-        vo = None
-      case _ ⇒}
-    //Mappers
-    val hMapper = new Mapper[H,Unit]{ def onPush(v: H): Unit = {
-      vh = Some(v)
-      doPushOn()}}
-    val oMapper = new Mapper[O,Unit]{ def onPush(v: O): Unit = {
-      vo = Some(v)
-      doPushOn()}}}
-
-
-
-
-  /** */
-  private[core] class BufferEach[H,O] extends Flow[(Option[H],Option[O])]{
-    //Variables
-    @volatile protected var vh: Option[H] = None
-    @volatile protected var vo: Option[O] = None
-    //Functions
-    private def doPushOn(): Unit = pushOn(Tuple2(vh, vo))
-    //Mappers
-    val hMapper = new Mapper[H,Unit]{ def onPush(v: H): Unit = {
-      vh = Some(v)
-      doPushOn()
-    } }
-    val oMapper = new Mapper[O,Unit]{ def onPush(v: O): Unit = {
-      vo = Some(v)
-      doPushOn()
-    } }
-
+    private var linkedSource: Option[Source[H]] = None
+    //Flow methods
+    protected def pop(v: H): Unit
+    //Internal methods
+    private[core] def link(drain: Source[H]): Unit = linkedSource match{
+      case None ⇒
+        linkedSource = Some(drain)
+      case Some(d) ⇒
+        throw new IllegalStateException(
+          s"[FunWiring.Drain.link] Source[H] $d already set up, wiring graph can't be cyclic.")}
+    private[core] def pass(v: H): Unit = pop(v)
 
    }
 
+
+
+  /** */
+  protected trait Flow[H,T] extends Drain[H] with Source[T]
+
+
+
+
+
+  /** */
+  private class Inflow[H] extends InflowLike[H] with Source[H]{
+    private[core] def processValue(v: Any): Unit = push(v.asInstanceOf[H])}
+
+
+  /** */
+  private class Outflow[H] extends OutflowLike[H] with Drain[H]{
+    //Variables
+    @volatile private var pipe: Option[OutPipe[H]] = None
+    //Internal methods
+    private[core] def injectOutPipe(p: OutPipe[H]): Unit = { pipe = Some(p) }
+    private[core] override def link(drain: Source[H]): Unit = {}
+    //Flow methods
+    protected def pop(v: H): Unit = pipe match{
+      case Some(p) ⇒ p.pushUserData(v)
+      case _ ⇒ throw new IllegalStateException(s"[FunWiring.Outflow.pop] OutPipe not injected.")}}
 
 
 
   //Variables
   @volatile private var inflowsMap = Map[Int, Inflow[_]]() //(Inlet ID, Inflow)
   @volatile private var outflowsMap = Map[Int, Outflow[_]]() //(Outlet ID, Outflow)
+  //Conversion
+  protected implicit def socket2Source[T](socket: FunSocket[T]): Source[T] = socket match{
+      case in: InPipe[_] ⇒ inflowsMap(in.inletId).asInstanceOf[Source[T]]
+      case _ ⇒ throw new IllegalArgumentException(s"[FunWiring.Socket2Source] $socket is not an instance of InPipe[T].")}
+  protected implicit def slug2Drain[T](plug: FunPlug[T]): Drain[T] = plug match{
+    case out: OutPipe[_] ⇒ outflowsMap(out.outletId).asInstanceOf[Drain[T]]
+    case _ ⇒ throw new IllegalArgumentException(s"[FunWiring.Socket2Source] $plug is not an instance of OutPipe[T].")}
 
 
 
   //DSL
 
-  protected trait FlowWithDefault[H]{
 
 
-  }
+
+
 
   /** */
-  protected trait Flow[H] {
-    //Variables
-    @volatile private[this] var mappers = List[Mapper[H,_]]()
-    //Functions
-    private[core] def addMapper[O](mapper: Mapper[H,O]): Flow[O] = {
-      mappers +:= mapper
-      mapper}
-    //Methods
-    private[core] def pushOn(v: H): Unit = mappers.foreach(_.onPush(v))
-    //DSL
-
-    def to(out1: FunPlug[H], outs: FunPlug[H]*): Unit = addMapper( new Mapper[H,H] {
-      val outlets = (out1 +: outs).map{
-        case out: OutPipe[_] ⇒ outflowsMap(out.outletId).asInstanceOf[Outflow[H]]
-        case out ⇒ throw new IllegalArgumentException(s"[Flow.to] $out is not an instance of OutPipe[T].")}
-      def onPush(v: H): Unit = outlets.foreach(_.pour(v))})
-
-    def map[O](f: H⇒O): Flow[O] =
-      addMapper(new Mapper[H,O]{ def onPush(v: H): Unit = pushOn(f(v))})
-
-    def foreach(f: H⇒Unit): Unit =
-      addMapper( new Mapper[H,Unit]{ def onPush(v: H): Unit = f(v)})
-
-    def unfold[O](f: H⇒Traversable[O]): Flow[O] =
-      addMapper( new Mapper[H,O]{ def onPush(v: H): Unit = f(v).foreach(e ⇒ pushOn(e))})
-
-    def filter(p: H⇒Boolean): Flow[H] =
-      addMapper( new Mapper[H,H]{ def onPush(v: H): Unit = if(p(v)) pushOn(v)})
-
-
-    def flatMapAll[O](flow: Flow[O]): Flow[(H, O)] = {
-      val mapper = new BufferAll[H, O]
-      addMapper(mapper.)
-      flow.addMapper(new Mapper[O,Unit]{ def onPush(v: O): Unit = mapper.onPushO(v) })
-      mapper}
-
-
-    def flatMapEach[O](flow: Flow[O]): Flow[(Option[H], Option[O])] = {
-      val mapper = new FlatMapperEach[H, O]
-      addMapper(new Mapper[H,Unit]{ def onPush(v: H): Unit = mapper.onPushH(v) })
-      flow.addMapper(new Mapper[O,Unit]{ def onPush(v: O): Unit = mapper.onPushO(v) })
-      mapper}
+  protected implicit class FlowDSL[T](source: Source[T]) {
 
 
 
-    def flatMapEach[O](flow: FlowWithDefault[O]): Flow[(Option[H],O)] = ???
+
+
+     def map[H](f: T⇒H): Source[H] = ???
 
 
 
+
+//      addMapper(new Mapper[H,O]{ def onPush(v: H): Unit = pushOn(f(v))})
+
+
+
+    def foreach(f: T⇒Unit): Unit = ???
+
+//      addMapper( new Mapper[H,Unit]{ def onPush(v: H): Unit = f(v)})
+
+    def unfold[O](f: T⇒Traversable[O]): Source[O] = ???
+
+//      addMapper( new Mapper[H,O]{ def onPush(v: H): Unit = f(v).foreach(e ⇒ pushOn(e))})
+
+    def filter(p: T⇒Boolean): Source[T] = ???
+
+//      addMapper( new Mapper[H,H]{ def onPush(v: H): Unit = if(p(v)) pushOn(v)})
+
+
+    def zipAll[H](source: Source[H]): Source[(T, H)] = ???
+
+
+//    {
+////      val mapper = new BufferAll[H, O]
+////      addMapper(mapper.)
+////      flow.addMapper(new Mapper[O,Unit]{ def onPush(v: O): Unit = mapper.onPushO(v) })
+////      mapper
+//    ???}
+
+
+    def zipEach[H](source: Source[H]): Source[(Option[T], Option[H])] = ???
+
+//    {
+////      val mapper = new FlatMapperEach[H, O]
+////      addMapper(new Mapper[H,Unit]{ def onPush(v: H): Unit = mapper.onPushH(v) })
+////      flow.addMapper(new Mapper[O,Unit]{ def onPush(v: O): Unit = mapper.onPushO(v) })
+////      mapper
+//    ???}
+
+
+
+    def zipEach[H](source: SourceWithDefault[H]): Source[(Option[T],H)] = ???
+
+
+
+
+    def ?(default: T): SourceWithDefault = ???
 
 
 
@@ -194,6 +195,15 @@ trait FunWiring { _: BlockLike ⇒
   }
 
 
+  protected implicit class SourceWithDefaultDSL[T](source: SourceWithDefault[T]) {
+
+
+    def zipEach[H](source: Source[H]): Source[(Option[T], Option[H])] = ???
+
+    def zipEach[H](source: SourceWithDefault[H]): Source[(Option[T],H)] = ???
+
+
+  }
 
 
 
@@ -201,88 +211,23 @@ trait FunWiring { _: BlockLike ⇒
 
 
 
+  /** Socket DSL, the same as FlowDSL but with conversion */
+  protected implicit class FunSocketDSL[T](socket: FunSocket[T]) {
+    def map[H](f: T⇒H): Source[H] = socket2Source(socket).map(f)
+    def foreach(f: T⇒Unit): Unit = socket2Source(socket).foreach(f)
+    def unfold[O](f: T⇒Traversable[O]): Source[O] = socket2Source(socket).unfold(f)
+    def filter(p: T⇒Boolean): Source[T] = socket2Source(socket).filter(p)
+    def zipAll[H](s: Source[H]): Source[(T, H)] = socket2Source(socket).zipAll(s)
+    def zipEach[H](s: Source[H]): Source[(Option[T], Option[H])] = socket2Source(socket).zipEach(s)
+    def zipEach[H](s: SourceWithDefault[H]): Source[(Option[T],H)] = socket2Source(socket).zipEach(s)
+    def ?(d: T): SourceWithDefault = socket2Source(socket).?(d)}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-  //Conversion
-  protected implicit def Socket2Flow[T](socket: FunSocket[T]): Flow[T] = socket match{
-    case in: InPipe[_] ⇒ inflowsMap(in.inletId).asInstanceOf[Inflow[T]].flow
-    case _ ⇒ throw new IllegalArgumentException(s"[FunWiring.Socket2Flow] $socket is not an instance of InPipe[T].")}
-
-
-
-  //DSL
-
-//
-//  implicit protected class SocketWithDefaultEx[T](socket: FunSocket[T]){
-//
-//    def flatMapEach[O](o: FunSocket[O]): FunSocket[(T,Option[O])] = ???
-//
-//    def flatMapEach[O](o: SocketWithDefault[O]): FunSocket[(T,O)] = ???
-//
-//
-//  }
-//
-//
-//
-//
-//
-//  implicit protected class FunSocketEx[T](socket: FunSocket[T]){
-//
-
-//
-//
-//
-//
-//
-//
-//    def flatMapEach[O](o: FunSocket[O]): FunSocket[(Option[T],Option[O])] = ???
-//
-//    def flatMapEach[O](o: SocketWithDefault[O]): FunSocket[(Option[T], O)] = ???
-//
-//
-//
-//
-//
-//
-//    def ?[H](default: H): SocketWithDefault[H] = ???
-//
-//
-//  }
-
-
-
-
-
-
-
-  /** Registration if Outlet */
-  protected object Outlet{
-    //Functions
-    private def newOutlet[H](name: Option[String]): Plug[H] with FunPlug[H] = Option(pump) match{
-        case Some(p) ⇒
-          val outflow = new Outflow[H]
-          val outPipe = new OutPipe[H](outflow, name, p) with FunPlug[H]
-          outflowsMap += (outPipe.outletId → outflow)
-          outPipe
-        case None ⇒
-          throw new IllegalStateException("[FunWiring.newOutlet] Pump not created.")}
-    //Methods
-    def apply[H]: Plug[H] with FunPlug[H] = newOutlet(None)
-    def apply[H](name: String): Plug[H] with FunPlug[H] = newOutlet(Some(name))}
-  /** Registration if Inlet */
-  protected object Inlet{
+  //Objects
+  /** Registration of Inlet */
+  protected object In{
     //Functions
     private def newInlet[H](name: Option[String]): Socket[H] with FunSocket[H] = Option(pump) match{
       case Some(p) ⇒
@@ -294,4 +239,18 @@ trait FunWiring { _: BlockLike ⇒
         throw new IllegalStateException("[FunWiring.newInlet] Pump not created.")}
     //Methods
     def apply[H]: Socket[H] with FunSocket[H] = newInlet(None)
-    def apply[H](name: String): Socket[H] with FunSocket[H] = newInlet(Some(name))}}
+    def apply[H](name: String): Socket[H] with FunSocket[H] = newInlet(Some(name))}
+  /** Registration of Outlet */
+  protected object Out{
+    //Functions
+    private def newOutlet[H](name: Option[String]): Plug[H] with FunPlug[H] = Option(pump) match{
+        case Some(p) ⇒
+          val outflow = new Outflow[H]
+          val outPipe = new OutPipe[H](outflow, name, p) with FunPlug[H]
+          outflowsMap += (outPipe.outletId → outflow)
+          outPipe
+        case None ⇒
+          throw new IllegalStateException("[FunWiring.newOutlet] Pump not created.")}
+    //Methods
+    def apply[H]: Plug[H] with FunPlug[H] = newOutlet(None)
+    def apply[H](name: String): Plug[H] with FunPlug[H] = newOutlet(Some(name))}}
