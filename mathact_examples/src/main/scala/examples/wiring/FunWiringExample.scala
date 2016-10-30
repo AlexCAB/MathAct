@@ -30,13 +30,12 @@ class FunWiringExample extends SimpleWorkbench {
   val producer = new EmptyBlock with FunWiring with FunOnStart{
     //Parameters
     name = "Producer block"
-    imagePath = "examples/connecting/producer.png"
+    imagePath = "examples/wiring/producer.png"
     //Custom flow
-    val gen = new Flow[Unit, Double]{
-      def pop(v: Unit) = Future{
-         (1 to 10).foreach{i ⇒
-           Thread.sleep(1000) //Thread.sleep(1000) emulate heavy processing
-           push(i)}}}
+    val gen = Flow[Unit, Double]{ (_, push) ⇒ Future{
+      (1 to 10).foreach{i ⇒
+        Thread.sleep(1000) //Thread.sleep(1000) emulate heavy processing
+        push(i)}}}
     //Pipes
     val out = Out[Double]("out")
     //Wiring
@@ -44,7 +43,7 @@ class FunWiringExample extends SimpleWorkbench {
   val processor = new EmptyBlock with FunWiring{
     //Parameters
     name = "Processor block"
-    imagePath = "examples/connecting/processor.png"
+    imagePath = "examples/wiring/processor.png"
     //Pipes
     val in = In[Double]("in")
     val out = Out[Double]("out")
@@ -53,7 +52,7 @@ class FunWiringExample extends SimpleWorkbench {
   val consumer = new EmptyBlock with FunWiring{
     //Parameters
     name = "Consumer block"
-    imagePath = "examples/connecting/consumer.png"
+    imagePath = "examples/wiring/consumer.png"
     //Pipes
     val in = In[Double]
     //Logging

@@ -14,49 +14,48 @@
 
 package examples.wiring
 
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjWiring}
+import mathact.core.bricks.plumbing.wiring.fun.{FunOnStart, FunWiring}
 import mathact.tools.EmptyBlock
 import mathact.tools.workbenches.SimpleWorkbench
 
 import scala.concurrent.Future
 
-
-/** Example of tap wiring in object style
-  * Created by CAB on 27.10.2016.
+/** Example of using of zipAll and zipEach functions
+  * Created by CAB on 30.10.2016.
   */
 
-class ObjWiringExample extends SimpleWorkbench {
-  //Blocks
-  val producer = new EmptyBlock with ObjWiring with ObjOnStart{
+class FunWiringZipExample extends SimpleWorkbench {
+  //Definitions
+  class Producer extends EmptyBlock with FunWiring with FunOnStart {
     //Parameters
-    name = "Producer block"
     imagePath = "examples/wiring/producer.png"
-    //Handlers
-    private val outflow = new Outflow[Double]{ def push(v: Double) = pour(v) }
-    //On start
-    protected def onStart(): Unit = Future{
-      for (i ← 1 to 10){
-        outflow.push(i)
-        Thread.sleep(1000)}} //Emulate heavy processing
+    //Custom flow
+    def delay(timeout: Long) = Flow[String, String]{ (v, push) ⇒ Future{
+      Thread.sleep(timeout)
+      push(v)}}
     //Pipes
-    val out = Outlet(outflow, "out")}
-  val processor = new EmptyBlock with ObjWiring{
+    val out = Out[String]}
+  class Consumer extends EmptyBlock with FunWiring with FunOnStart {
     //Parameters
-    name = "Processor block"
-    imagePath = "examples/wiring/processor.png"
-    //Handlers
-    private val handler = new Outflow[Double] with Inflow[Double]{ def drain(v: Double): Unit = pour(v * 100) }
-    //Pipes
-    val in = Inlet(handler, "in")
-    val out = Outlet(handler, "out")}
-  val consumer = new EmptyBlock with ObjWiring{
-    //Parameters
-    name = "Consumer block"
     imagePath = "examples/wiring/consumer.png"
-    //Handlers
-    private val inflow = new Inflow[Double]{ def drain(v: Double): Unit = logger.info("Consume value: " + v)}
     //Pipes
-    val in = Inlet(inflow, "in")}
+    val in1 = In[String]
+    val in2 = In[String]}
+  //Blocks
+  val fastProducer = new Producer{ name = "Fast producer"
+    //Wiring
+    start.map(_ ⇒ "Fast Ping") >> delay(1000) >> out}
+  val slowProducer = new Producer{ name = "Slow producer"
+    //Wiring
+    start.map(_ ⇒ "Slow Ping") >> delay(3000) >> out}
+  val zipAllConsumer = new Consumer{ name = "Zip all block"
+    //Wiring and logging
+    in1.zipAll(in2).foreach(v ⇒  logger.info("Consume: " + v))}
+  val zipEachConsumer = new Consumer{ name = "Zip each block"
+    //Wiring and logging
+    (in1 ? "Default 1").zipEach(in2 ? "Default 2").foreach(v ⇒  logger.info("Consume: " + v))}
   //Connecting
-  producer.out ~> processor.in
-  processor.out ~> consumer.in}
+  fastProducer.out ~> zipAllConsumer.in1
+  fastProducer.out ~> zipEachConsumer.in1
+  slowProducer.out ~> zipAllConsumer.in2
+  slowProducer.out ~> zipEachConsumer.in2}

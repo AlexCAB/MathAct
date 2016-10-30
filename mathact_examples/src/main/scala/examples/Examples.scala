@@ -14,7 +14,7 @@
 
 package examples
 
-import examples.wiring.{FunWiringExample, ObjWiringExample}
+import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
 import mathact.tools.Sketches
 
 
@@ -33,21 +33,15 @@ object Examples extends Sketches{
     description = "Example of tap wiring in functional style.",
     logger = true,
     visualisation = true)
+  SketchOf[FunWiringZipExample](
+    name = "Using of zip functions",
+    description = "Example of using of zipAll and zipEach functions.",
+    logger = true,
+    visualisation = true)
 
-
-
-
-//  sketchOf[ChartPotExample] name "Pot to chart" description "Pot and chart connection example"// autorun
-//
-//
-//  SketchOf[PotPotExample](
-//    name = "Pot to chart",
-//    description = "Pot and chart connection example",
-//    autorun = false,
-//    logger = false,
-//    visualisation = false)
-
-
-
+  //TODO Add more
 
 }
+
+
+
