@@ -19,11 +19,13 @@ import java.util.concurrent.ExecutionException
 import akka.actor.ActorRef
 import akka.event.Logging
 import akka.pattern.ask
-import mathact.core.bricks.blocks.{BlockLike, SketchContext}
+import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
+import mathact.core.sketch.blocks.BlockLike
 import scala.concurrent.Await
 
 

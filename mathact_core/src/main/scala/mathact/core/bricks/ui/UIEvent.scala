@@ -12,14 +12,10 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.plumbing.wiring
+package mathact.core.bricks.ui
 
-import mathact.core.plumbing.fitting.{FlowLike, OutPipe}
-
-
-/** Outlet interface
-  * Created by CAB on 24.10.2016.
+/** Base class of UI events (sends from UI to block)
+  * Created by CAB on 31.10.2016.
   */
 
-private[core] trait OutflowLike[T] extends FlowLike[T]{
-  private[core] def injectOutPipe(pipe: OutPipe[T]): Unit}
+trait UIEvent

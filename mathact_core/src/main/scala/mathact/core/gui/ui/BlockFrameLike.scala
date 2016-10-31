@@ -12,16 +12,41 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples
+package mathact.core.gui.ui
 
-import mathact.tools.workbenches.SimpleWorkbench
+import mathact.core.bricks.ui.{UICommand, UIEvent}
+
+import scalafx.beans.property.ReadOnlyObjectProperty
 
 
-/** Pot to pot connection example
-  * Created by CAB on 18.06.2016.
+/** Block frame interface
+  * Created by CAB on 31.10.2016.
   */
 
-class PotPotExample extends SimpleWorkbench{
+private[core] trait BlockFrameLike {
+
+
+
+
+
+
+
+  val scene: ReadOnlyObjectProperty[javafx.scene.Scene]
+
+
+
+
+  //Event exchange
+
+
+  /** Commands processing */
+  def onCommand: PartialFunction[UICommand, Unit]
+
+
+  /** Send event to UI
+    * @param event - UIEvent, event to be send */
+  def sendEvent(event: UIEvent): Unit
+
 
 
 }

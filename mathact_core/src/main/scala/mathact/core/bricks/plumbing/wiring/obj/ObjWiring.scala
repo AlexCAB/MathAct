@@ -14,10 +14,10 @@
 
 package mathact.core.bricks.plumbing.wiring.obj
 
-import mathact.core.bricks.blocks.BlockLike
 import mathact.core.bricks.plumbing.fitting.{Plug, Socket}
-import mathact.core.bricks.plumbing.wiring.{InflowLike, OutflowLike}
-import mathact.core.plumbing.fitting.{InPipe, OutPipe}
+import mathact.core.plumbing.fitting.flows.{OutflowLike, InflowLike}
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
+import mathact.core.sketch.blocks.BlockLike
 
 
 /** Contains definition for creating of inlets/outlets in object style

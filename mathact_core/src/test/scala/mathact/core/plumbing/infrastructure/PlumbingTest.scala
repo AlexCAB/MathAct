@@ -18,12 +18,12 @@ import akka.actor.{PoisonPill, ActorRef, Props}
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import mathact.core.ActorTestSpec
-import mathact.core.bricks.blocks.BlockLike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
 import mathact.core.model.data.verification.{PublisherVerificationData, BlockVerificationData, InletVerificationData}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 import mathact.core.plumbing.PumpLike
+import mathact.core.sketch.blocks.BlockLike
 import org.scalatest.Suite
 
 import scala.concurrent.duration._

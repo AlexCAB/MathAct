@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing
 
-import mathact.core.bricks.blocks.BlockLike
+import mathact.core.sketch.blocks.BlockLike
 
 
 /** Pump interface

@@ -12,18 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure.instance
+package examples.tools
 
-import mathact.core.model.messages.Msg
-import mathact.core.sketch.blocks.WorkbenchLike
+import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Sketch instance
-  * Created by CAB on 17.10.2016.
+/** Pot to pot connection example
+  * Created by CAB on 18.06.2016.
   */
 
-private[core] object SketchInstance {
-  //Local messages
-  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
-  case class SketchInstanceBuiltError(error: Throwable) extends Msg
-  case object SketchInstanceBuildTimeout extends Msg}
+class PotPotExample extends SimpleWorkbench{
+
+
+}

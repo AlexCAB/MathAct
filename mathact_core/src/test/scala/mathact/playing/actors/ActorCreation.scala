@@ -12,16 +12,25 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.blocks
+package mathact.playing.actors
 
-/** Workbench interface
-  * Created by CAB on 07.10.2016.
+import akka.actor.{Props, ActorSystem, Actor}
+
+
+/** Actor creation playing
+  * Created by CAB on 31.10.2016.
   */
 
-private[mathact] trait WorkbenchLike {
-  //Context
-  protected implicit val context: SketchContext
-  //Parameters (this methods will be called by SketchController after sketch will constructed)
-  private[mathact] def sketchTitle: Option[String]}
+object ActorCreation extends App{
+  println("==== ActorCreation ====")
+  //System
+  val system = ActorSystem.create("Termination")
+  //Actors
+  val a = new Actor{
+    def receive = { case m ⇒ }}
+  //Creation
+  system.actorOf(Props(a), "A")
+  system.actorOf(Props[Actor])
 
-
+  //
+  system.terminate()}

@@ -12,18 +12,13 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure.instance
+package mathact.core.plumbing.fitting.life
 
-import mathact.core.model.messages.Msg
-import mathact.core.sketch.blocks.WorkbenchLike
+import mathact.core.sketch.blocks.BlockLike
 
 
-/** Sketch instance
-  * Created by CAB on 17.10.2016.
+/** Adding on start function to block
+  * Created by CAB on 30.10.2016.
   */
 
-private[core] object SketchInstance {
-  //Local messages
-  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
-  case class SketchInstanceBuiltError(error: Throwable) extends Msg
-  case object SketchInstanceBuildTimeout extends Msg}
+private[mathact] trait OnStartLike { _: BlockLike ⇒ private[core] def doStart(): Unit }

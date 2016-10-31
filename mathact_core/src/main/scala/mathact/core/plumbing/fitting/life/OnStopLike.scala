@@ -12,24 +12,13 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.plumbing.fitting
+package mathact.core.plumbing.fitting.life
 
-import mathact.core.bricks.plumbing.fitting.Socket
-import mathact.core.bricks.plumbing.wiring.InflowLike
-import mathact.core.plumbing.Pump
+import mathact.core.sketch.blocks.BlockLike
 
 
-/** Wrapper fot Inlet
-  * Created by CAB on 24.08.2016.
+/** Adding on stop function to block
+  * Created by CAB on 30.10.2016.
   */
 
-private[core] class InPipe[H] (
-  private[core] val in: InflowLike[H],
-  private[core] val inletName: Option[String],
-  private[core] val pump: Pump)
-extends Pipe[H] with Socket[H]{
-  //Construction
-  private[core] val (blockId, inletId) = pump.addInlet(this, inletName)
-  //Methods
-  override def toString: String = s"InPipe(in: $in, outletName: $inletName, pump: $pump)"
-  def processValue(value: Any): Unit = in.processValue(value)}
+private[mathact] trait OnStopLike { _: BlockLike ⇒  private[core] def doStop(): Unit }

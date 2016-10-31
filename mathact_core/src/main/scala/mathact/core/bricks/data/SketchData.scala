@@ -22,7 +22,7 @@ import mathact.core.model.enums.SketchStatus
   * Created by CAB on 19.06.2016.
   */
 
-private[mathact] case class SketchData(
+case class SketchData(
   clazz: Class[_],
   className: String,
   sketchName: Option[String],

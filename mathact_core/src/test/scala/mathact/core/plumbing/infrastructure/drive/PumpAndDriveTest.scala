@@ -19,7 +19,7 @@ import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core._
-import mathact.core.bricks.blocks.{BlockLike, SketchContext}
+import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop, ObjWiring}
 import mathact.core.dummies.TestActor
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}
@@ -28,6 +28,8 @@ import mathact.core.model.enums.VisualisationLaval
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
 import mathact.core.plumbing.Pump
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
+import mathact.core.sketch.blocks.BlockLike
 import org.scalatest.Suite
 
 import scala.concurrent.duration._
@@ -120,7 +122,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       override val plumbing: ActorRef = testPlumbing.ref}
     //Test blocks
     object blocks{
-      lazy val testBlock = new BlockLike with ObjWiring with ObjOnStart with ObjOnStop{ // with UIControl{
+      lazy val testBlock = new BlockLike with ObjWiring with ObjOnStart with ObjOnStop{ // with BlockUILike{
         //Parameters
         def blockName = Some(testBlockName)
         def blockImagePath = None

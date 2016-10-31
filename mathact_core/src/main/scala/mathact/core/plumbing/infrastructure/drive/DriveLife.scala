@@ -14,12 +14,12 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import mathact.core.bricks.plumbing.wiring.{OnStart, OnStop}
 import mathact.core.model.data.verification._
 import mathact.core.model.data.visualisation._
 import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M
-import mathact.core.plumbing.fitting.{InPipe, OutPipe}
+import mathact.core.plumbing.fitting.life.{OnStopLike, OnStartLike}
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 
 import scala.concurrent.duration.Duration
 
@@ -139,7 +139,7 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
     userLogging ! M.LogInfo(Some(blockId), blockName.getOrElse(blockClassName), s"Block successful built.")}
   /** Rus staring task if defined, return isStarted */
   def doStarting(): Boolean = pump.block match{
-    case task: OnStart ⇒
+    case task: OnStartLike ⇒
       log.debug("[DriveLife.doStarting] Try to run starting user function.")
       impeller ! M.RunTask[Unit](TaskKind.Start, -1, config.startFunctionTimeout, ()⇒{ task.doStart() })
       false
@@ -178,7 +178,7 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
       s"Starting function timeout on $execTime, keep waiting.")}
   /** Rus stopping task if defined, return isStopped */
   def doStopping(): Boolean = pump.block match{
-    case task: OnStop ⇒
+    case task: OnStopLike ⇒
       log.debug("[DriveLife.doStopping] Try to run stopping user function.")
       impeller ! M.RunTask[Unit](TaskKind.Stop, -1, config.stopFunctionTimeout, ()⇒{ task.doStop() })
       false

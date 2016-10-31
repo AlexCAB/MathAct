@@ -15,8 +15,8 @@
 package mathact.tools
 
 import mathact.core.app.Application
-import mathact.core.bricks.blocks.WorkbenchLike
 import mathact.core.bricks.data.SketchData
+import mathact.core.sketch.blocks.WorkbenchLike
 
 import scala.reflect._
 

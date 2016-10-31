@@ -12,7 +12,7 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples
+package examples.tools
 
 import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
 import mathact.tools.EmptyBlock

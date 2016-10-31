@@ -12,18 +12,13 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure.instance
-
-import mathact.core.model.messages.Msg
-import mathact.core.sketch.blocks.WorkbenchLike
+package mathact.core.gui.ui
 
 
-/** Sketch instance
-  * Created by CAB on 17.10.2016.
+/** BlockUI interface
+  * Created by CAB on 31.10.2016.
   */
 
-private[core] object SketchInstance {
-  //Local messages
-  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
-  case class SketchInstanceBuiltError(error: Throwable) extends Msg
-  case object SketchInstanceBuildTimeout extends Msg}
+private[core] trait BlockUILike {
+  private[core] def setFrameVisible(boolean: Boolean): Unit
+  private[core] def closeFrame(): Unit}

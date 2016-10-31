@@ -23,7 +23,7 @@ import mathact.core.model.config.PumpConfigLike
   * Created by CAB on 20.06.2016.
   */
 
-private[mathact] class SketchContext(
+class SketchContext(
   val system: ActorSystem,
   val controller: ActorRef,
   val userLogging: ActorRef,

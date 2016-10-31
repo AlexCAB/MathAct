@@ -15,6 +15,7 @@
 package mathact.core.bricks.blocks
 
 import mathact.core.plumbing.Pump
+import mathact.core.sketch.blocks.BlockLike
 
 
 /** Base class for sketch block.

@@ -12,18 +12,25 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure.instance
+package mathact.core.plumbing.fitting.pipes
 
-import mathact.core.model.messages.Msg
-import mathact.core.sketch.blocks.WorkbenchLike
+import mathact.core.bricks.plumbing.fitting.Socket
+import mathact.core.plumbing.Pump
+import mathact.core.plumbing.fitting.Pipe
+import mathact.core.plumbing.fitting.flows.InflowLike
 
 
-/** Sketch instance
-  * Created by CAB on 17.10.2016.
+/** Wrapper fot Inlet
+  * Created by CAB on 24.08.2016.
   */
 
-private[core] object SketchInstance {
-  //Local messages
-  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
-  case class SketchInstanceBuiltError(error: Throwable) extends Msg
-  case object SketchInstanceBuildTimeout extends Msg}
+private[core] class InPipe[H] (
+  private[core] val in: InflowLike[H],
+  private[core] val inletName: Option[String],
+  private[core] val pump: Pump)
+extends Pipe[H] with Socket[H]{
+  //Construction
+  private[core] val (blockId, inletId) = pump.addInlet(this, inletName)
+  //Methods
+  override def toString: String = s"InPipe(in: $in, outletName: $inletName, pump: $pump)"
+  def processValue(value: Any): Unit = in.processValue(value)}

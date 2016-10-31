@@ -15,9 +15,9 @@
 package mathact.core.sketch.infrastructure.controller
 
 import akka.actor.PoisonPill
-import mathact.core.bricks.blocks.WorkbenchLike
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
+import mathact.core.sketch.blocks.WorkbenchLike
 
 import scala.collection.mutable.{ListBuffer => MutList}
 import scalafx.scene.paint.Color

@@ -19,6 +19,7 @@ import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import scala.collection.mutable.{Map ⇒ MutMap}
 
 import scala.util.Try

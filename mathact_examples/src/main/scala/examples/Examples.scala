@@ -14,6 +14,7 @@
 
 package examples
 
+import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
 import mathact.tools.Sketches
 
@@ -38,6 +39,10 @@ object Examples extends Sketches{
     description = "Example of using of zipAll and zipEach functions.",
     logger = true,
     visualisation = true)
+  SketchOf[BlocksWithUiExample](
+    name = "Using of BlockUI",
+    description = "EExample of using of BlockUI trait.")
+
 
   //TODO Add more
 

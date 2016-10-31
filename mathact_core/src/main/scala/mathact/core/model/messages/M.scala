@@ -15,7 +15,6 @@
 package mathact.core.model.messages
 
 import akka.actor.ActorRef
-import mathact.core.bricks.blocks.WorkbenchLike
 import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.model.data.pipes.{InletData, OutletData}
@@ -24,7 +23,8 @@ import mathact.core.model.data.verification.BlockVerificationData
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
 import mathact.core.model.enums._
 import mathact.core.plumbing.PumpLike
-import mathact.core.plumbing.fitting.{InPipe, OutPipe}
+import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
+import mathact.core.sketch.blocks.WorkbenchLike
 
 import scala.concurrent.duration.FiniteDuration
 import scalafx.scene.paint.Color

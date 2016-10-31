@@ -22,8 +22,9 @@ import akka.pattern.ask
 import akka.util.Timeout
 import mathact.core.app.infrastructure.MainController
 import mathact.core.app.view.MainUIActor
-import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
+import mathact.core.sketch.blocks.WorkbenchLike
 import mathact.core.sketch.infrastructure.controller.SketchControllerActor
 import mathact.core.sketch.infrastructure.instance.SketchInstanceActor
 import mathact.core.sketch.view.logging.UserLoggingActor

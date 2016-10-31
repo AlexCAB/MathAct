@@ -14,7 +14,8 @@
 
 package mathact.core.dummies
 
-import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.blocks.SketchContext
+import mathact.core.sketch.blocks.WorkbenchLike
 
 
 /** Test sketch with error

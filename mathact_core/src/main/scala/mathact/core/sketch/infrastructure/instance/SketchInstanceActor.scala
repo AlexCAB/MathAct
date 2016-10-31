@@ -18,10 +18,11 @@ import java.util.concurrent.{TimeoutException, ExecutionException}
 
 import akka.actor.ActorRef
 import mathact.core.WorkerBase
-import mathact.core.bricks.blocks.{WorkbenchLike, SketchContext}
+import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.SketchInstanceConfigLike
 import mathact.core.model.messages.M
+import mathact.core.sketch.blocks.WorkbenchLike
 
 import scala.concurrent.Future
 

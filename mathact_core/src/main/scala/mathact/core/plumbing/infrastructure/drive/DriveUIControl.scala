@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-//import mathact.core.bricks.UIControl
+//import mathact.core.bricks.BlockUILike
 import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M
 
@@ -33,7 +33,7 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
 
 
 //    pump.block match{
-//    case task: UIControl ⇒
+//    case task: BlockUILike ⇒
 //      log.debug("[DriveUIControl.showBlockUi] Try to run show UI user function.")
 //      impeller ! M.RunTask[Unit](TaskKind.ShowUI, -3, config.uiOperationTimeout, ()⇒{ task.doShowUI() })
 //    case _ ⇒
@@ -63,7 +63,7 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
 
 
 //    pump.block match{
-//      case task: UIControl ⇒
+//      case task: BlockUILike ⇒
 //        log.debug("[DriveUIControl.hideBlockUi] Try to run hide UI user function.")
 //        impeller ! M.RunTask[Unit](TaskKind.HideUI, -4, config.uiOperationTimeout, ()⇒{ task.doHideUI() })
 //      case _ ⇒

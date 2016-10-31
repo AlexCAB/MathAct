@@ -1,6 +1,7 @@
 package mathact.core.bricks.plumbing.fitting
 
-import mathact.core.plumbing.fitting.{Flange, InPipe}
+import mathact.core.plumbing.fitting.Flange
+import mathact.core.plumbing.fitting.pipes.InPipe
 
 /** Event receiver must be implemented by Inlet
   * Created by CAB on 17.05.2016.

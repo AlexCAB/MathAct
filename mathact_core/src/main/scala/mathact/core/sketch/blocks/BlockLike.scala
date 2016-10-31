@@ -12,18 +12,18 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.infrastructure.instance
+package mathact.core.sketch.blocks
 
-import mathact.core.model.messages.Msg
-import mathact.core.sketch.blocks.WorkbenchLike
+import mathact.core.plumbing.Pump
 
 
-/** Sketch instance
-  * Created by CAB on 17.10.2016.
+/** Block interface
+  * Created by CAB on 24.10.2016.
   */
 
-private[core] object SketchInstance {
-  //Local messages
-  case class SketchInstanceBuilt(instance: WorkbenchLike) extends Msg
-  case class SketchInstanceBuiltError(error: Throwable) extends Msg
-  case object SketchInstanceBuildTimeout extends Msg}
+private[mathact] trait BlockLike {
+  //Pump
+  private[core] val pump: Pump
+  //Parameters (this methods will be called by Drive after block will constructed)
+  private[core] def blockName: Option[String]
+  private[core] def blockImagePath: Option[String]}
