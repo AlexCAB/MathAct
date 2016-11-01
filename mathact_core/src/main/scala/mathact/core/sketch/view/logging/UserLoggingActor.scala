@@ -14,6 +14,7 @@
 
 package mathact.core.sketch.view.logging
 
+import java.util.concurrent.ExecutionException
 import javafx.event.EventHandler
 import javafx.scene.Parent
 import javafx.stage.WindowEvent
@@ -52,7 +53,7 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       case Some(conf) ⇒
         //Load FXML
         val loader = new FXMLLoader(
-          getClass.getClassLoader.getResource(uiFxmlPath),
+          conf,
           NoDependencyResolver)
         loader.load()
         //Get view and controller
@@ -144,9 +145,15 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       //Build row
       val row = LogRow(LogType.Error, blockName, message + (error match{
         case es if es.nonEmpty ⇒ es
-          .map{ e ⇒
-            "\nException message: " + e.getMessage + "\n" +
-            "Stack trace: \n      " + e.getStackTrace.mkString("\n      ")}
+          .map{
+            case e: ExecutionException ⇒
+              "\nException message: " + e.getCause.getMessage + "\n" +
+              "Stack trace: \n      " + e.getStackTrace.mkString("\n      ") +
+              "\nCase: " + e.getCause + "\n" +
+              "Case stack trace: \n      " + e.getCause.getStackTrace.mkString("\n      ")
+            case e ⇒
+              "\nException message: " + e.getMessage + "\n" +
+              "Stack trace: \n      " + e.getStackTrace.mkString("\n      ")}
           .mkString("")
         case _ ⇒ ""}))
       //Add to Log

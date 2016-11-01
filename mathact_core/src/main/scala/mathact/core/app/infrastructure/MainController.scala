@@ -95,13 +95,16 @@ extends Actor{
     //Sketch built, hide UI
     case M.SketchBuilt(className) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
       mainUi ! M.HideMainUI}
-    //Sketch done
+    //Sketch fail, hide UI
+    case M.SketchFail(className) ⇒ forCurrentSketch(className){ case (_, sketch) ⇒
+      mainUi ! M.HideMainUI}
+    //Sketch done successfully
     case M.SketchDone(className) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       setSketchSate(className, SketchStatus.Ended)
       context.unwatch(sender)
       setAndShowUISketchTable()
       currentSketch = None}
-    //Sketch error
+    //Sketch done with error
     case M.SketchError(className, errors) ⇒ forCurrentSketch(className){ case (actor, sketch) ⇒
       log.error("[MainController @ SketchError] Sketch failed.")
       errors.foreach(e ⇒ log.error(e, "[MainController @ SketchError] Error."))

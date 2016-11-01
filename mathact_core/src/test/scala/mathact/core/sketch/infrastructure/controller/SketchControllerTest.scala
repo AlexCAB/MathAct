@@ -311,6 +311,7 @@ class SketchControllerTest extends ActorTestSpec {
       testActor.send(controller, M.GetSketchContext(testActor.ref))
       testSketchInstance.expectMsgType[M.BuildSketchContextFor].actor shouldEqual testActor.ref
       testSketchInstance.send(controller, M.SketchInstanceError(new Exception("Oops!!!")))
+      testMainController.expectMsgType[M.SketchFail].className shouldEqual classOf[TestSketchWithError].getName
       //Sketch UI update
       val statusStr2 = testSketchUi.expectMsgType[M.SetSketchUIStatusString]
       println("[SketchControllerTest] statusStr2 " + statusStr2)
@@ -564,6 +565,7 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchInstance.expectMsg(M.CreateSketchInstance)
       testSketchInstance.send(controller, M.SketchInstanceError(error1))
       testSketchUi.expectMsgType[M.SetSketchUIStatusString]
+      testMainController.expectMsgType[M.SketchFail]
       //Hit close
       testSketchUi.send(controller, M.SketchUIActionTriggered(CloseBtn, Unit))
       //Expect termination

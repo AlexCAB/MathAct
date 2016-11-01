@@ -36,25 +36,25 @@ trait FunWiring { _: BlockLike ⇒
     //Variables
     private var linkedDrains = List[Drain[T]]()
     //Functions
-    private def addDrain[S <: Drain[T]](drain: S): S = {
+    private def addDrain[R <: Drain[T]](drain: R): R = {
       drain.link(this)
       linkedDrains +:= drain
       drain}
     //Flow methods
     protected def push(v: T): Unit = linkedDrains.foreach(_.pass(v))
     //Connection methods
-    def next[H](flow: Flow[T, H]): Source[H] = addDrain(flow)
-    def next(drain: Drain[T]): Unit = addDrain(drain)
-    def >>[H](flow: Flow[T, H]): Source[H] = addDrain(flow)
-    def >>(drain: Drain[T]): Unit = addDrain(drain)}
+    def next[D >: T, H](flow: Flow[D, H]): Source[H] = addDrain(flow)
+    def next[D >: T](drain: Drain[D]): Unit = addDrain(drain)
+    def >>[D >: T, H](flow: Flow[D, H]): Source[H] = addDrain(flow)
+    def >>[D >: T](drain: Drain[D]): Unit = addDrain(drain)}
   /** Values drain */
-  protected trait Drain[H]{
+  protected trait Drain[-H]{
     //Variables
-    private var linkedSource: Option[Source[H]] = None
+    private var linkedSource: Option[Source[_]] = None
     //Flow methods
     protected def pop(v: H): Unit
     //Internal methods
-    private[core] def link(drain: Source[H]): Unit = linkedSource match{
+    private[core] def link(drain: Source[_]): Unit = linkedSource match{
       case None ⇒
         linkedSource = Some(drain)
       case Some(d) ⇒
@@ -65,7 +65,7 @@ trait FunWiring { _: BlockLike ⇒
   protected object Drain{
     def apply[H](proc: H⇒Unit): Drain[H] = new Drain[H]{ protected def pop(v: H): Unit = proc(v) }}
   /** Flow, compose Drain and Source */
-  protected trait Flow[H,T] extends Drain[H] with Source[T]
+  protected trait Flow[-H,T] extends Drain[H] with Source[T]
   /** Flow creation helper object */
   protected object Flow{
     def apply[H,T](proc: (H,T⇒Unit)⇒Unit): Flow[H,T] = new Flow[H,T]{
@@ -79,7 +79,7 @@ trait FunWiring { _: BlockLike ⇒
     @volatile private var pipe: Option[OutPipe[H]] = None
     //Internal methods
     private[core] def injectOutPipe(p: OutPipe[H]): Unit = { pipe = Some(p) }
-    override def link(drain: Source[H]): Unit = {}
+    override def link(drain: Source[_]): Unit = {}
     //Flow methods
     protected def pop(v: H): Unit = pipe match{
       case Some(p) ⇒ p.pushUserData(v)

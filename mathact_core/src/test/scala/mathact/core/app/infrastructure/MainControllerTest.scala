@@ -103,7 +103,7 @@ class MainControllerTest extends ActorTestSpec {
       testSketchController.expectMsg(M.LaunchSketch)
       testApplication.send(mainController, M.NewSketchContext(null, sketchData.className))
       testSketchController.expectMsgType[M.GetSketchContext].sender shouldEqual testApplication.ref
-      testSketchController.send(mainController, M.SketchBuilt(sketchData.className))
+      testSketchController.send(mainController, M.SketchFail(sketchData.className))
       testMainUi.expectMsg(M.HideMainUI)
       //Send SketchError
       testSketchController.send(mainController, M.SketchError(sketchData.className, Seq(new Exception("Oops!!!"))))

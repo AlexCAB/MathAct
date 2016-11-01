@@ -223,6 +223,26 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
 //      hideBlockUiTaskTimeout(time)
 //    case (M.TaskFailed(HideUI, _, time, error), _) ⇒
 //      hideBlockUiTaskFailed(time, error)
+
+    //User UI event, send to task to impeller
+    case (M.UserUIEvent(event), st)  if st != Init ⇒
+      userUIEvent(event)
+      state
+    //User UI event processed, do nothing
+    case (M.TaskDone(UiEvent, _, time, _), _) ⇒
+      state
+    //UI event task timeout
+    case (M.TaskTimeout(UiEvent, _, time), _) ⇒
+      blockUiEventTaskTimeout(time)
+      state
+    //UI event task failed
+    case (M.TaskFailed(UiEvent, _, time, error), _) ⇒
+      blockUiEventTaskFailed(time, error)
+      state
+
+
+
+
     //User logging info
     case (M.UserLogInfo(message), st)  if st != Init && st != TurnedOff ⇒
       userLogInfo(message)

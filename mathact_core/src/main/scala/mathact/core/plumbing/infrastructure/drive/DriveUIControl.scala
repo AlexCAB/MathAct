@@ -14,7 +14,8 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-//import mathact.core.bricks.BlockUILike
+import mathact.core.bricks.ui.UIEvent
+import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M
 
@@ -84,6 +85,43 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
 //  def hideBlockUiTaskFailed(execTime: FiniteDuration, error: Throwable): Unit = {
 //    log.error(s"[DriveStartStop.hideBlockUiTaskFailed] execTime: $execTime, error: $error.")
 //    userLogging ! M.LogError(Some(blockId),pump.blockName, Seq(error), s"Hide block UI function failed on $execTime.")}
+
+
+  /** User UI event, send to task to impeller
+    * @param event - UIEvent */
+  def userUIEvent(event: UIEvent): Unit = {
+    log.debug(s"[DriveUIControl.userUIEvent] Build process event task and send to impeller, event: $event")
+    //Build task
+    val task = pump.block match{
+      case blockUI: BlockUILike ⇒
+        M.RunTask[Unit](TaskKind.UiEvent, -4, config.uiOperationTimeout, ()⇒{ blockUI.uiEvent(event) })
+      case _ ⇒
+        throw new IllegalArgumentException(
+          "[DriveUIControl.userUIEvent] UIEvent can not be send to block which not implement BlockUILike ")}
+    //Send task
+    impeller ! task}
+  /** Hide block UI task timeout
+    * @param execTime - FiniteDuration */
+  def blockUiEventTaskTimeout(execTime: FiniteDuration): Unit = {
+    log.warning(s"[DriveStartStop.blockUiEventTaskTimeout]  execTime: $execTime.")
+    userLogging ! M.LogWarning(
+      Some(blockId),
+      blockName.getOrElse(blockClassName),
+      s"Processing of UI events function timeout on $execTime, keep waiting.")}
+  /** Hide block UI task failed
+    * @param execTime - FiniteDuration
+    * @param error - Throwable */
+  def blockUiEventTaskFailed(execTime: FiniteDuration, error: Throwable): Unit = {
+    log.error(error, s"[DriveStartStop.blockUiEventTaskFailed] execTime: $execTime.")
+    userLogging ! M.LogError(
+      Some(blockId),
+      blockName.getOrElse(blockClassName),
+      Seq(error),
+      s"Processing of UI events function failed on $execTime.")}
+
+
+
+
 
 
   /** User log info

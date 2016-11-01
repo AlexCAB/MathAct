@@ -128,7 +128,8 @@ extends WorkerBase{ import SketchInstance._
     //Log
     log.error(
       error,
-      s"[SketchInstanceActor.sketchInstanceBuiltError] Error on creating Sketch extends Workbench instance, time: $time")
+      s"[SketchInstanceActor.sketchInstanceBuiltError] Error on creating Sketch extends Workbench instance, " +
+      s"time: $time, isBuildingTimeout: $isBuildingTimeout")
     //Build message and log to user logging
     val msg = error match{
       case err: NoSuchMethodException ⇒ s"NoSuchMethodException, check if sketch class is not inner."

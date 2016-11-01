@@ -41,7 +41,7 @@ object Examples extends Sketches{
     visualisation = true)
   SketchOf[BlocksWithUiExample](
     name = "Using of BlockUI",
-    description = "EExample of using of BlockUI trait.")
+    description = "Example of using of BlockUI trait.")
 
 
   //TODO Add more

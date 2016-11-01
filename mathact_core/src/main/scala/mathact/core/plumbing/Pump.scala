@@ -22,6 +22,7 @@ import akka.pattern.ask
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
+import mathact.core.bricks.ui.UIEvent
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting._
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
@@ -104,4 +105,5 @@ extends PumpLike{
             Thread.currentThread().interrupt()}}})
   private[core] def userLogInfo(message: String): Unit = drive ! M.UserLogInfo(message)
   private[core] def userLogWarn(message: String): Unit = drive ! M.UserLogWarn(message)
-  private[core] def userLogError(error: Option[Throwable], message: String): Unit = drive ! M.UserLogError(error, message)}
+  private[core] def userLogError(error: Option[Throwable], message: String): Unit = drive ! M.UserLogError(error, message)
+  private[core] def sendUiEvent(event: UIEvent): Unit = drive ! M.UserUIEvent(event)}

@@ -31,8 +31,6 @@ private[core] trait BlockFrameLike {
 
 
 
-  val scene: ReadOnlyObjectProperty[javafx.scene.Scene]
-
 
 
 
@@ -48,5 +46,9 @@ private[core] trait BlockFrameLike {
   def sendEvent(event: UIEvent): Unit
 
 
+  //Internal API
+  private[core] def showFrame(): Unit
+  private[core] def hideFrame(): Unit
+  private[core] def closeFrame(): Unit
 
 }

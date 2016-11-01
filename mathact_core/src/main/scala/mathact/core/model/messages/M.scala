@@ -17,6 +17,7 @@ package mathact.core.model.messages
 import akka.actor.ActorRef
 import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
+import mathact.core.bricks.ui.UIEvent
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.SketchInfo
 import mathact.core.model.data.verification.BlockVerificationData
@@ -46,6 +47,7 @@ private[core] object M {
   //MainController - SketchControllerActor
   case object LaunchSketch extends Msg                   //Sends by main controller to, initiate sketch
   case class SketchBuilt(className: String) extends Msg
+  case class SketchFail(className: String) extends Msg
   case class SketchDone(className: String) extends Msg
   case class SketchError(className: String, errors: Seq[Throwable]) extends Msg
   case class GetSketchContext(sender: ActorRef) extends Msg
@@ -92,6 +94,7 @@ private[core] object M {
   case class UserLogInfo(message: String) extends Msg
   case class UserLogWarn(message: String) extends Msg
   case class UserLogError(error: Option[Throwable], message: String) extends Msg
+  case class UserUIEvent(event: UIEvent) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg

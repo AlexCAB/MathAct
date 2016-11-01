@@ -20,5 +20,5 @@ import mathact.core.plumbing.fitting.FlowLike
   * Created by CAB on 24.10.2016.
   */
 
-private[mathact] trait InflowLike[T] extends FlowLike[T]{
+private[mathact] trait InflowLike[T] extends FlowLike{
   private[core] def processValue(value: Any): Unit}

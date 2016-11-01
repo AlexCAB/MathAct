@@ -217,7 +217,8 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param error - Throwable */
   def messageTaskFailed(inletId: Int, execTime: Duration, error: Throwable): Unit = runForInlet(inletId){ inlet ⇒
     log.error(
-      s"[DriveMessaging.messageTaskFailed] inlet: $inlet, execTime: $execTime, error: $error, " +
+      error,
+      s"[DriveMessaging.messageTaskFailed] inlet: $inlet, execTime: $execTime, " +
       s"currentTask: ${inlet.currentTask}, taskQueue: ${inlet.taskQueue}.")
     //Remove current, run next task and send load message
     cleanCurrentTask(inlet)

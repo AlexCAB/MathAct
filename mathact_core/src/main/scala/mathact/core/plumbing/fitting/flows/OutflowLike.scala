@@ -22,5 +22,5 @@ import mathact.core.plumbing.fitting.pipes.OutPipe
   * Created by CAB on 24.10.2016.
   */
 
-private[mathact] trait OutflowLike[T] extends FlowLike[T]{
+private[mathact] trait OutflowLike[T] extends FlowLike{
   private[core] def injectOutPipe(pipe: OutPipe[T]): Unit}

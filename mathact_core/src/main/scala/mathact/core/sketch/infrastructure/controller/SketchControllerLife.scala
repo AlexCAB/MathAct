@@ -52,9 +52,11 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     sketchUi ! M.SetSketchUIStatusString("Building...", Color.Black)}
   /** Sketch instance error */
   def sketchInstanceError(error: Throwable): Unit = {
-    log.error(s"[SketchControllerLife.sketchInstanceError] Update UI, error: $error")
+    log.error(s"[SketchControllerLife.sketchInstanceError] Update UI, inform controller, error: $error")
     //Store errors
     allErrors += error
+    //Report with SketchFail
+    mainController ! M.SketchFail(sketchData.className)
     //Update status string
     sketchUi ! M.SetSketchUIStatusString("Sketch instance error! Check logs.", Color.Red)}
   /** Plumbing successfully built */

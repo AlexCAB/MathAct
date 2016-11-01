@@ -5,7 +5,7 @@ package mathact.core.bricks.ui
   */
 
 object E {
-  //Frame events
+  //SfxFrame events
   case object ShowFrame extends UIEvent
   case object HideFrame extends UIEvent
   case class SetFrameTitle(text: String) extends UIEvent}

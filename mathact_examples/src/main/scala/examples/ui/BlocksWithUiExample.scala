@@ -16,14 +16,17 @@ package examples.ui
 
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
 import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
-import mathact.core.bricks.ui.{UICommand, BlockUI, UIEvent}
+import mathact.core.bricks.ui.{FunUIWiring, UICommand, BlockUI, UIEvent}
 import mathact.tools.EmptyBlock
 import mathact.tools.workbenches.SimpleWorkbench
 
 import scalafx.Includes._
 import scalafx.scene.Scene
-import scalafx.scene.control.{TextField, Button}
+import scalafx.scene.control.{TextArea, Button}
 import scalafx.scene.layout.HBox
+
+import scalafxml.core.macros.sfxml
+
 
 /** Example of using of BlockUI trait
   * Created by CAB on 31.10.2016.
@@ -36,17 +39,24 @@ object BlocksWithUiExample{
   case class AddLine(text: String) extends UICommand
   //Events
   case class LogLine(text: String) extends UIEvent
-  case class DoerSate(isSown: Boolean) extends UIEvent}
+  case class DoerSate(isShown: Boolean) extends UIEvent
+  //FXML UI controller
+  trait LoggerUILike{
+    val textArea: TextArea
+    val showDoer: Button
+    val hideDoer: Button}
+  @sfxml class LoggerUI(val textArea: TextArea, val showDoer: Button, val hideDoer: Button) extends LoggerUILike}
 
 
 class BlocksWithUiExample extends SimpleWorkbench { import BlocksWithUiExample._
   //Blocks
   val doer = new EmptyBlock with BlockUI with ObjWiring{ name = "Doer"
     //UI definition
-    class DoerUI extends Frame{
-      //Scene
+    class DoerUI extends SfxFrame{
+      //Params
       title = "BlocksWithUiExample - Doer"
       showOnStart = true
+      //Scene
       scene = new Scene{
         root = new HBox {
           children = new Button{
@@ -57,43 +67,37 @@ class BlocksWithUiExample extends SimpleWorkbench { import BlocksWithUiExample._
         case ShowDoer ⇒ show()
         case HideDoer ⇒ hide()}}
     //UI registration
-    UI[DoerUI]
+    UI(new DoerUI)
     //Handlers
-    private val handler = new Outflow[String] with Inflow[Boolean]{
+    private val handler = new Outflow[UICommand] with Inflow[UIEvent]{
       //Reactions on UI event
       UI.onEvent{
-        case  LogLine(text) ⇒ pour(text)}
+        case  LogLine(text) ⇒ pour(AddLine(text))}
       //Managing of UI by send commands
-      def drain(v: Boolean): Unit =
-        UI.sendCommand(if(v) ShowDoer else HideDoer)}
+      def drain(v: UIEvent): Unit = v match{
+        case DoerSate(isShown) ⇒ UI.sendCommand(if(isShown) ShowDoer else HideDoer)
+        case _ ⇒}}
     //Pipes
     val in = Inlet(handler)
     val out = Outlet(handler)}
-  val logger = new EmptyBlock with BlockUI with FunWiring { name = "Logger"
+  val logger = new EmptyBlock with BlockUI with FunWiring with FunUIWiring { name = "Logger"
     //Pipes
-    val out = Out[Boolean]
-    val in = In[String]
+    val in = In[UICommand]
+    val out = Out[UIEvent]
     //UI definition
-    UI( new Frame{
-      //Scene
+    UI( new FxmlFrame[LoggerUILike]("examples/ui/logger_ui.fxml"){
+      //Params
       title = "BlocksWithUiExample - Logger"
       showOnStart = true
-      val textField = new TextField
-      scene = new Scene{
-        root = new HBox {
-          children = Seq(
-            new Button{
-              text = "Show doer"
-              onAction = handle{ sendEvent(DoerSate(isSown = true))}},
-            new Button{
-              text = "Hide doer"
-              onAction = handle{ sendEvent(DoerSate(isSown = false))}},
-            textField)}}
+      //Set actions
+      controller.showDoer.onAction = handle{ sendEvent(DoerSate(isShown = true))}
+      controller.hideDoer.onAction = handle{ sendEvent(DoerSate(isShown = false))}
       //Commands reactions
       def onCommand = {
-        case LogLine(text) ⇒  textField.appendText(" " + text)}})
+        case AddLine(text) ⇒ controller.textArea.appendText(text + "\n")
+        case _ ⇒}})
     //Wiring
-    in.map(t ⇒ LogLine(t)) >> UI.map{ case DoerSate(isSown) ⇒ isSown } >> in}
+    in >> UI >> out}
   //Connecting
   doer.out ~> logger.in
-  logger.out ~> doer.in}
+  doer.in  <~ logger.out}
