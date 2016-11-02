@@ -20,7 +20,7 @@ import mathact.core.model.enums._
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
-import mathact.core.plumbing.infrastructure.user.actors.UserActorsRoot
+import mathact.core.plumbing.infrastructure.user.UserActorsRoot
 import mathact.core.{IdGenerator, ControllerBase}
 
 import scala.collection.mutable.{Map ⇒ MutMap}
@@ -38,7 +38,7 @@ private[core] class DriveActor(
   val userLogging: ActorRef,
   val visualization: ActorRef)
 extends ControllerBase(Drive.State.Init) with IdGenerator with DriveLife with DriveConnectivity
-with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind._
+with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._, Drive._, TaskKind._
   //Fields
   val blockClassName =  pump.block.getClass.getTypeName
   //Variables
@@ -103,11 +103,11 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
       sendPendingMessages()
       TurnedOn
     //Start drive, run user starting function
-    case (M.StartDrive, TurnedOn) ⇒ doStarting() match{
-      case true ⇒
-        Working
-      case false ⇒
-        Starting}
+    case (M.StartDrive, TurnedOn) ⇒
+      createBlockUi()
+      doStarting() match{
+        case true ⇒ Working
+        case false ⇒ Starting}
     //Started
     case (M.TaskDone(Start, _, time, _), Starting) ⇒
       startingTaskDone(time)
@@ -123,16 +123,19 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
     //Stop drive, run user stopping function
     case (M.StopDrive, Working) ⇒ doStopping() match{
       case true ⇒
+        closeBlockUi()
         Stopped
       case false ⇒
         Stopping}
     //Stopped
     case (M.TaskDone(Stop, _, time, _), Stopping) ⇒
       stoppingTaskDone(time)
+      closeBlockUi()
       Stopped
     //Stopping failed, only log to user logger and keep working
     case (M.TaskFailed(Stop, _, time, error), Stopping) ⇒
       stoppingTaskFailed(time, error)
+      closeBlockUi()
       Stopped
     //Stopping timeout, only log to user logger and keep waiting
     case (M.TaskTimeout(Stop, _, time), Stopping) ⇒
@@ -201,32 +204,17 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
     case (M.SetVisualisationLaval(laval), _) ⇒
       visualisationLaval = laval
       state
-    //UI control
+    //UI control, show
     case (M.ShowBlockUi, st) if st != Init ⇒
       showBlockUi()
       state
-//    //UI control
-//    case (M.TaskDone(ShowUI, _, time, _), _) ⇒
-//      showBlockUiTaskDone(time)
-//    //UI control
-//    case (M.TaskTimeout(ShowUI, _, time), _) ⇒
-//      showBlockUiTaskTimeout(time)
-//    case (M.TaskFailed(ShowUI, _, time, error), _) ⇒
-//      showBlockUiTaskFailed(time, error)
-    //UI control
+    //UI control, hide
     case (M.HideBlockUi, st)  if st != Init ⇒
       hideBlockUi()
       state
-//    case (M.TaskDone(HideUI, _, time, _), _) ⇒
-//      hideBlockUiTaskDone(time)
-//    case (M.TaskTimeout(HideUI, _, time), _) ⇒
-//      hideBlockUiTaskTimeout(time)
-//    case (M.TaskFailed(HideUI, _, time, error), _) ⇒
-//      hideBlockUiTaskFailed(time, error)
-
     //User UI event, send to task to impeller
     case (M.UserUIEvent(event), st)  if st != Init ⇒
-      userUIEvent(event)
+      blockUiEvent(event)
       state
     //User UI event processed, do nothing
     case (M.TaskDone(UiEvent, _, time, _), _) ⇒
@@ -239,10 +227,6 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
     case (M.TaskFailed(UiEvent, _, time, error), _) ⇒
       blockUiEventTaskFailed(time, error)
       state
-
-
-
-
     //User logging info
     case (M.UserLogInfo(message), st)  if st != Init && st != TurnedOff ⇒
       userLogInfo(message)
@@ -255,18 +239,9 @@ with DriveMessaging with DriveUIControl{ import Drive.State._, Drive._, TaskKind
     case (M.UserLogError(error, message), st)  if st != Init && st != TurnedOff ⇒
       userLogError(error, message)
       state
-
-
-
-
-  }
+    //Creating of new user actor
+    case (M.NewUserActor(props, name), _) ⇒
+      newUserActor(props, name, sender)
+      state}
   //Cleanup
-  def cleanup(): Unit = {
-
-    println("[DriveActor.cleanup] TODO")  //TODO Очистка ресурсов, в частности UI
-
-  }
-
-    //TODO Add more
-
-}
+  def cleanup(): Unit = {}}

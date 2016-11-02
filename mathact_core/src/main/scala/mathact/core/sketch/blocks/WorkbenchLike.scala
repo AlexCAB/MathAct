@@ -20,10 +20,10 @@ import mathact.core.bricks.blocks.SketchContext
   * Created by CAB on 07.10.2016.
   */
 
-private[mathact] trait WorkbenchLike {
+private[core] trait WorkbenchLike {
   //Context
   protected implicit val context: SketchContext
   //Parameters (this methods will be called by SketchController after sketch will constructed)
-  private[mathact] def sketchTitle: Option[String]}
+  private[core] def sketchTitle: Option[String]}
 
 

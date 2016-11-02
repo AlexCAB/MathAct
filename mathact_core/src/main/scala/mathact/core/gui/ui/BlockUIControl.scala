@@ -12,30 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.plumbing.infrastructure.user.actors
-
-import akka.actor.ActorRef
-import mathact.core.WorkerBase
+package mathact.core.gui.ui
 
 
-/** Root for user actors
-  * Created by CAB on 19.10.2016.
+/** Control of block UI
+  * (!) All methods called  in drive context, so they should NOT throw errors.
+  * Created by CAB on 02.11.2016.
   */
 
-private[core] class UserActorsRoot(drive: ActorRef) extends WorkerBase {
-
-  //TODO Здесь создание и обслужывание акторов пользователя.
-
-  //Messages handling
-  def reaction = {
-
-    case m ⇒ println("[UserActorsRoot | TODO] m: " + m)
-
-  }
-
-  //Cleanup
-  def cleanup(): Unit = {
-
-    //TODO
-  }
-}
+trait BlockUIControl {
+  private[core] def createFrame(): Unit
+  private[core] def showFrame(): Unit
+  private[core] def hideFrame(): Unit
+  private[core] def closeFrame(): Unit}

@@ -76,4 +76,3 @@ private[core] trait JFXInteraction {
       case true ⇒ throw new IllegalStateException(
         s"[JFXInteraction.runNow] Block not executed in $runBlockTimeout milliseconds.")
       case false ⇒ result.get}}}
-

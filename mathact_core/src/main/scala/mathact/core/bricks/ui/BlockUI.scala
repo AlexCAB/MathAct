@@ -15,7 +15,7 @@
 package mathact.core.bricks.ui
 
 import mathact.core.gui.JFXInteraction
-import mathact.core.gui.ui.{BlockFrameLike, BlockUILike}
+import mathact.core.gui.ui.BlockUILike
 import mathact.core.sketch.blocks.BlockLike
 
 import scala.reflect.ClassTag
@@ -30,39 +30,37 @@ import javafx.scene.Parent
   * Created by CAB on 31.08.2016.
   */
 
-trait BlockUI extends BlockUILike { _: BlockLike ⇒
+trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
   //Variables
   @volatile private var isUIRegistered = false
+  @volatile private var _showOnStart = false
   @volatile private var currentFrame: Option[BlockFrameLike] = None
-
-
-
-
+  @volatile private var eventProcs = List[PartialFunction[UIEvent,Unit]]()
   //Definitions
+  /** Block frame interface */
+  private[core] trait BlockFrameLike {
+    //Control flow
+    def onCommand: PartialFunction[UICommand, Unit]
+    def sendEvent(event: UIEvent): Unit
+    //Internal API
+    private[core] def showFrame(): Unit
+    private[core] def hideFrame(): Unit
+    private[core] def closeFrame(): Unit}
+  /** Base class for ScalaFS frame */
   protected trait SfxFrame extends Stage with BlockFrameLike {
     //Check if registered
     if (! isUIRegistered) throw new IllegalStateException(
       "[BlockUI.SfxFrame.<init>] SfxFrame instance should be created by using of UI object.")
-    //
-
+    //DSL
+    def showOnStart: Boolean = _showOnStart
+    def showOnStart_=(v: Boolean) { _showOnStart = v }
+    //Control flow
     def sendEvent(event: UIEvent): Unit = pump.sendUiEvent(event)
-
-
-    def showOnStart: Boolean = ???
-    def showOnStart_=(v: Boolean) {
-      //???
-    }
-
-
     //Internal API
     private[core] def showFrame(): Unit = show()
     private[core] def hideFrame(): Unit = hide()
-    private[core] def closeFrame(): Unit = close()
-
-
-  }
-
-
+    private[core] def closeFrame(): Unit = close()}
+  /** Base class for frame with FXML loading */
   protected abstract class FxmlFrame[C](uiFxmlPath: String) extends SfxFrame{
     //Try to load resource
     val (view, controller) = Option(getClass.getClassLoader.getResource(uiFxmlPath)) match{
@@ -75,30 +73,14 @@ trait BlockUI extends BlockUILike { _: BlockLike ⇒
         //Get view and controller
         val view = loader.getRoot[Parent]
         val controller = loader.getController[C]
-
         //Set scene
         scene = new Scene(view)
         (view, controller)
       case None ⇒
         throw new IllegalArgumentException(
-          s"[FxmlFrame.<init>] Cannot load FXML by '$uiFxmlPath path.'")}
-
-
-
-  }
-
-
-
-
-
-
-
+          s"[FxmlFrame.<init>] Cannot load FXML by '$uiFxmlPath path.'")}}
   //UI creation
-  protected object UI extends JFXInteraction{
-    //Variables
-    @volatile private var eventProcs = List[PartialFunction[UIEvent,Unit]]()
-
-
+  protected object UI{
     //Constructors
     def apply[T <: BlockFrameLike : ClassTag]: Unit = {
       //Set registered
@@ -106,61 +88,19 @@ trait BlockUI extends BlockUILike { _: BlockLike ⇒
       //Creating stage
       val clazz = implicitly[ClassTag[T]].runtimeClass
       val frame = runNow(clazz.newInstance().asInstanceOf[BlockFrameLike])
-
-      runAndWait(frame.showFrame())
-
-      currentFrame = Some(frame)
-
-      //???
-
-    }
-
-
-    def apply(frame: ⇒BlockFrameLike): Unit = {
+      currentFrame = Some(frame)}
+    def apply(frameCreator: ⇒BlockFrameLike): Unit = {
       //Set registered
       isUIRegistered = true
       //Creating stage
-      val f = runNow(frame)
-
-      runAndWait(f.showFrame())
-
-      currentFrame = Some(f)
-
-      //???
-
-
-
-
-    }
-
-
+      val frame = runNow(frameCreator)
+      currentFrame = Some(frame)}
+    //Control flow
     def sendCommand(command: UICommand): Unit = currentFrame.foreach{ f ⇒ runAndWait(f.onCommand.apply(command))}
-
-
-
-    def onEvent(proc: PartialFunction[UIEvent,Unit]): Unit = {eventProcs +:= proc}
-
-
-    private[core] def procEvent(event: UIEvent): Unit = eventProcs.foreach(_.apply(event))
-
-
-  }
-
-
-
-  //TODO Если включен авто показ фрейма, он должен выполнятся сразу перед функцией старта (не на постройке)
-
-
-
+    def onEvent(proc: PartialFunction[UIEvent,Unit]): Unit = {eventProcs +:= proc}}
   //Internal API
-  private[core] def showFrame(): Unit = ???
-  private[core] def hideFrame(): Unit = ???
-  private[core] def closeFrame(): Unit = ???
-  private[core] def uiEvent(event: UIEvent): Unit = UI.procEvent(event)
-
-
-
-
-
-
-}
+  private[core] def createFrame(): Unit = if(_showOnStart) currentFrame.foreach(f ⇒ runLater(f.showFrame()))
+  private[core] def showFrame(): Unit = currentFrame.foreach(f ⇒ runLater(f.showFrame()))
+  private[core] def hideFrame(): Unit = currentFrame.foreach(f ⇒ runLater(f.hideFrame()))
+  private[core] def closeFrame(): Unit = currentFrame.foreach(f ⇒ runLater(f.closeFrame()))
+  private[core] def uiEvent(event: UIEvent): Unit = eventProcs.foreach(_.apply(event))}

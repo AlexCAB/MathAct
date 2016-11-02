@@ -14,6 +14,7 @@
 
 package mathact.core.bricks.blocks
 
+import akka.actor.{ActorRef, Props}
 import mathact.core.plumbing.Pump
 import mathact.core.sketch.blocks.BlockLike
 
@@ -27,6 +28,8 @@ abstract class Block (context: SketchContext) extends BlockLike{
   private[core] val pump: Pump = new Pump(context, this)
   //Helpers
   implicit val executionContext = context.system.dispatcher
+  def actorOf(props: Props): ActorRef = pump.askForNewUserActor(props, None)
+  def actorOf(props: Props, name: String): ActorRef = pump.askForNewUserActor(props, Some(name))
   //User logger
   object logger {
     def info(message: String): Unit = pump.userLogInfo(message)

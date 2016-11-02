@@ -14,41 +14,13 @@
 
 package mathact.core.gui.ui
 
-import mathact.core.bricks.ui.{UICommand, UIEvent}
-
-import scalafx.beans.property.ReadOnlyObjectProperty
+import mathact.core.bricks.ui.UIEvent
 
 
-/** Block frame interface
-  * Created by CAB on 31.10.2016.
+/** Block UI events methods
+  * (!) All methods called  in impeller context, so they can throw errors.
+  * Created by CAB on 02.11.2016.
   */
 
-private[core] trait BlockFrameLike {
-
-
-
-
-
-
-
-
-
-
-  //Event exchange
-
-
-  /** Commands processing */
-  def onCommand: PartialFunction[UICommand, Unit]
-
-
-  /** Send event to UI
-    * @param event - UIEvent, event to be send */
-  def sendEvent(event: UIEvent): Unit
-
-
-  //Internal API
-  private[core] def showFrame(): Unit
-  private[core] def hideFrame(): Unit
-  private[core] def closeFrame(): Unit
-
-}
+trait BlockUIEvents {
+  private[core] def uiEvent(event: UIEvent): Unit}

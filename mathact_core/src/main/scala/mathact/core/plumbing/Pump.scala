@@ -16,7 +16,7 @@ package mathact.core.plumbing
 
 import java.util.concurrent.ExecutionException
 
-import akka.actor.ActorRef
+import akka.actor.{Props, ActorRef}
 import akka.event.Logging
 import akka.pattern.ask
 import mathact.core.bricks.blocks.SketchContext
@@ -60,7 +60,7 @@ extends PumpLike{
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {
-        akkaLog.error(s"[Pump.addPipe] Error on adding of pipe, msg: $msg, error: $t")
+        akkaLog.error(t, s"[Pump.addPipe] Error on adding of pipe, msg: $msg")
         throw new ExecutionException(t)},
       d ⇒ {
         akkaLog.debug(s"[Pump.addPipe] Pipe added, inletId: $d")
@@ -76,7 +76,7 @@ extends PumpLike{
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {
-        akkaLog.error(s"[Pump.connect] Error on connecting of pipes: $t")
+        akkaLog.error(t, s"[Pump.connect] Error on connecting of pipes.")
         throw new ExecutionException(t)},
       d ⇒ {
         akkaLog.debug(s"[Pump.connect] Pipes connected: $d")
@@ -93,7 +93,7 @@ extends PumpLike{
       context.pumpConfig.askTimeout.duration)
     .fold(
       error ⇒ {
-        akkaLog.error(s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, error: $error, block $blockClassName")
+        akkaLog.error(error, s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, block $blockClassName")
         throw new ExecutionException(error)},
       timeout ⇒ {
         akkaLog.debug(s"[Pump.pushUserMessage] Message pushed, msg: $msg, timeout, $timeout, block $blockClassName")
@@ -101,9 +101,20 @@ extends PumpLike{
           try{
             Thread.sleep(d)}
           catch {case e: InterruptedException ⇒
-            akkaLog.error(s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, error: $e, block $blockClassName")
+            akkaLog.error(e, s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, block $blockClassName")
             Thread.currentThread().interrupt()}}})
   private[core] def userLogInfo(message: String): Unit = drive ! M.UserLogInfo(message)
   private[core] def userLogWarn(message: String): Unit = drive ! M.UserLogWarn(message)
   private[core] def userLogError(error: Option[Throwable], message: String): Unit = drive ! M.UserLogError(error, message)
-  private[core] def sendUiEvent(event: UIEvent): Unit = drive ! M.UserUIEvent(event)}
+  private[core] def sendUiEvent(event: UIEvent): Unit = drive ! M.UserUIEvent(event)
+  private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef = Await
+    .result(
+      ask(drive,  M.NewUserActor(props, name))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,ActorRef]],
+      context.pumpConfig.askTimeout.duration)
+    .fold(
+      t ⇒ {
+        akkaLog.error(t, s"[Pump.askForNewUserActor] Error creating of user actor, props: $props, name: $name.")
+        throw new ExecutionException(t)},
+      a ⇒ {
+        akkaLog.debug(s"[Pump.askForNewUserActor] User actor created: $a")
+        a})}

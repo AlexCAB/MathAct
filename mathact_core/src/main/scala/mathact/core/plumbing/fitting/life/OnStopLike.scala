@@ -21,4 +21,4 @@ import mathact.core.sketch.blocks.BlockLike
   * Created by CAB on 30.10.2016.
   */
 
-private[mathact] trait OnStopLike { _: BlockLike ⇒  private[core] def doStop(): Unit }
+private[core] trait OnStopLike { _: BlockLike ⇒  private[core] def doStop(): Unit }

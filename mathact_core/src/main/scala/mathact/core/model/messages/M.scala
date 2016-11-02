@@ -14,7 +14,7 @@
 
 package mathact.core.model.messages
 
-import akka.actor.ActorRef
+import akka.actor.{Props, ActorRef}
 import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.ui.UIEvent
@@ -95,6 +95,7 @@ private[core] object M {
   case class UserLogWarn(message: String) extends Msg
   case class UserLogError(error: Option[Throwable], message: String) extends Msg
   case class UserUIEvent(event: UIEvent) extends Msg
+  case class NewUserActor(props: Props, name: Option[String]) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg
@@ -109,8 +110,9 @@ private[core] object M {
   case object TurnOffDrive extends Msg //Stop user message processing, response witt DriveTurnedOff after all message processed
   case object DriveTurnedOff extends Msg
   case class DriveVerification(verificationData: BlockVerificationData) extends Msg
-  //PlumbingActor - DriveActor (UI control)
+  //PlumbingActor - DriveActor (execution control)
   case object SkipTimeoutTask extends Msg
+  //PlumbingActor - DriveActor (UI control)
   case object ShowBlockUi extends Msg
   case object HideBlockUi extends Msg
   //DriveActor - DriveActor
@@ -125,6 +127,8 @@ private[core] object M {
   case class TaskDone(kind: TaskKind, id: Int, execTime: FiniteDuration, taskRes: Any) extends Msg
   case class TaskTimeout(kind: TaskKind, id: Int, timeFromStart: FiniteDuration) extends Msg
   case class TaskFailed(kind: TaskKind, id: Int, execTime: FiniteDuration, error: Throwable) extends Msg
+  //DriveActor - UserActorsRoot
+  case class CreateUserActor(props: Props, name: Option[String], sender: ActorRef) extends Msg
   //User logging
   case class LogInfo(blockId: Option[Int], blockName: String, message: String) extends Msg
   case class LogWarning(blockId: Option[Int], blockName: String, message: String) extends Msg
