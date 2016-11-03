@@ -23,6 +23,7 @@ import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.dummies.{TestSketchWithBigTimeout, TestSketchWithError, TestSketchWithSmallTimeout}
 import mathact.core.model.config._
+import mathact.core.model.holders.{LayoutRef, PlumbingRef, UserLoggingRef, SketchControllerRef}
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 
@@ -56,15 +57,17 @@ class SketchInstanceTest extends ActorTestSpec {
     lazy val testSketchController = TestProbe("TestSketchController_" + randomString())
     lazy val testUserLogging = TestProbe("TestUserLogging_" + randomString())
     lazy val testPlumbing = TestProbe("TestPlumbing_" + randomString())
+    lazy val testLayout = TestProbe("Layout_" + randomString())
     //Sketch instance actor
     def newSketchInstanceActor(sketchData: SketchData): ActorRef = {
       val controller = system.actorOf(Props(
         new SketchInstanceActor(
           testSketchInstanceConfig,
           sketchData,
-          testSketchController.ref,
-          testUserLogging.ref,
-          testPlumbing.ref)),
+          SketchControllerRef(testSketchController.ref),
+          UserLoggingRef(testUserLogging.ref),
+          PlumbingRef(testPlumbing.ref),
+          LayoutRef(testLayout.ref))),
         "SketchInstanceActor_" + randomString())
       testSketchController.watch(controller)
       controller}}
@@ -155,11 +158,5 @@ class SketchInstanceTest extends ActorTestSpec {
       testSketchController.expectNoMsg(1.second)
       testUserLogging.expectNoMsg(1.second)
       testPlumbing.expectNoMsg(1.second)}
-//    "by TerminateSketchInstance, terminate SketchInstanceActor" in new TestCase {
-//      //Preparing
-//      val controller = newSketchInstanceActor(newTestSketchData())
-//      //Test
-//      testSketchController.send(controller, M.TerminateSketchInstance)
-//      testSketchController.expectTerminated(controller)}
   }
 }

@@ -23,6 +23,7 @@ import mathact.core.model.enums.SketchUIElement._
 import mathact.core.model.enums.SketchUiElemState._
 import mathact.core.ActorTestSpec
 import mathact.core.model.config._
+import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 import akka.util.Timeout
@@ -45,6 +46,7 @@ class SketchControllerTest extends ActorTestSpec {
         val sketchBuildingTimeout = 5.second
         val pumpConfig = new PumpConfigLike{
           val askTimeout = Timeout(1.second)}}
+      val layout = null
       val plumbing = new PlumbingConfigLike{
         val drive = new DriveConfigLike{
           val pushTimeoutCoefficient = 0
@@ -89,15 +91,17 @@ class SketchControllerTest extends ActorTestSpec {
     lazy val testUserLogging = TestProbe("TestUserLogging_" + randomString())
     lazy val testVisualization = TestProbe("Visualization_" + randomString())
     lazy val testPlumbing = TestProbe("TestPlumbing_" + randomString())
+    lazy val testLayout = TestProbe("TestLayout_" + randomString())
     lazy val testSketchInstance = TestProbe("TestSketchInstance_" + randomString())
     //SketchControllerActor
     def newSketchController(sketch: SketchData): ActorRef = system.actorOf(Props(
-      new SketchControllerActor(testMainConfig, sketch, testMainController.ref){
-        val sketchUi = testSketchUi.ref
-        val userLogging = testUserLogging.ref
-        val visualization = testVisualization.ref
-        val plumbing = testPlumbing.ref
-        val sketchInstance = testSketchInstance.ref}),
+      new SketchControllerActor(testMainConfig, sketch, MainControllerRef(testMainController.ref)){
+        val sketchUi = SketchUIRef(testSketchUi.ref)
+        val userLogging = UserLoggingRef(testUserLogging.ref)
+        val visualization = VisualizationRef(testVisualization.ref)
+        val layout = LayoutRef(testLayout.ref)
+        val plumbing = PlumbingRef(testPlumbing.ref)
+        val sketchInstance = SketchInstanceRef(testSketchInstance.ref)}),
       "SketchController_" + randomString())
     def newBuiltSketchController(): ActorRef = {
       val controller = newSketchController( newTestSketchData())
@@ -358,12 +362,18 @@ class SketchControllerTest extends ActorTestSpec {
       //Hit ShowAllBlocksUiBtn
       testSketchUi.send(controller, M.SketchUIActionTriggered(ShowAllBlocksUiBtn, Unit))
       testPlumbing.expectMsg(M.ShowAllBlockUi)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+        ShowAllBlocksUiBtn → ElemEnabled)
       //Hit HideAllBlocksUiBtn
       testSketchUi.send(controller, M.SketchUIActionTriggered(HideAllBlocksUiBtn, Unit))
       testPlumbing.expectMsg(M.HideAllBlockUi)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+        HideAllBlocksUiBtn → ElemEnabled)
       //Hit SkipAllTimeoutTaskBtn
       testSketchUi.send(controller, M.SketchUIActionTriggered(SkipAllTimeoutTaskBtn, Unit))
       testPlumbing.expectMsg(M.SkipAllTimeoutTask)
+      testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
+        SkipAllTimeoutTaskBtn → ElemEnabled)
       //Hit LogBtn
       testSketchUi.send(controller, M.SketchUIActionTriggered(LogBtn, ElemShow))
       testUserLogging.expectMsg(M.ShowUserLoggingUI)

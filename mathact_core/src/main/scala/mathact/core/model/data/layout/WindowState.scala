@@ -12,21 +12,11 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.config
-
-import com.typesafe.config.Config
+package mathact.core.model.data.layout
 
 
-/** Main config
-  * Created by CAB on 03.09.2016.
+/** Represent window current state
+  * Created by CAB on 03.11.2016.
   */
 
-private [core] trait MainConfigLike {
-  val config: Config
-  val sketchInstance: SketchInstanceConfigLike
-  val layout: LayoutConfigLike
-  val plumbing: PlumbingConfigLike
-  val sketchUI: SketchUIConfigLike
-  val mainUI: MainUIConfigLike
-  val userLogging: UserLoggingConfigLike
-  val visualization:  VisualizationConfigLike}
+case class WindowState(isShown: Boolean, x: Double, y: Double, h: Double, w: Double)

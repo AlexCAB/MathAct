@@ -170,6 +170,10 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
           s"Blocks verification data: $verificationData"
         log.error(msg)
         throw new IllegalStateException(msg)}}
+  /** All drives constructed */
+  def allDrivesConstructed(): Unit = {
+    log.debug(s"[PlumbingLife.allDrivesConstructed] Report to layout.")
+    layout ! M.AllDrivesConstruct}
   /** All drives built */
   def allDrivesBuilt(): Unit = {
     log.debug(s"[PlumbingLife.allDrivesBuilt] Report to controller, userLogging and visualization.")

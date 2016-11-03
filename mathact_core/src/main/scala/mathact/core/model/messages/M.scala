@@ -18,6 +18,7 @@ import akka.actor.{Props, ActorRef}
 import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.ui.UIEvent
+import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.SketchInfo
 import mathact.core.model.data.verification.BlockVerificationData
@@ -96,6 +97,14 @@ private[core] object M {
   case class UserLogError(error: Option[Throwable], message: String) extends Msg
   case class UserUIEvent(event: UIEvent) extends Msg
   case class NewUserActor(props: Props, name: Option[String]) extends Msg
+  //Object Pump - LayoutActor (tell)
+  case class RegisterWindow(drive: ActorRef, id: Int, state: WindowState, prefs: WindowPreference) extends Msg
+  case class WindowUpdated(drive: ActorRef, id: Int, state: WindowState) extends Msg
+  case class LayoutWindow(drive: ActorRef, id: Int) extends Msg
+  //PlumbingActor - LayoutActor
+  case object AllDrivesConstruct extends Msg
+  //LayoutActor - DriveActor
+  case class UpdateWindowPosition(id: Int, x: Double, y: Double) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg
@@ -136,7 +145,7 @@ private[core] object M {
   //PlumbingActor - Visualization
   case class BlockConstructedInfo(builtInfo: BlockInfo) extends Msg   //Send to Visualization from DriveActor after block built
   case class BlocksConnectedInfo(outletInfo: OutletInfo, inletInfo: InletInfo) extends Msg   //Send to Visualization from DriveActor after pipes connected
-  case object AllBlockBuilt
+  case object AllBlockBuilt  extends Msg
   case class SetVisualisationLaval(laval: VisualisationLaval) extends Msg //Send to DriveActor from Visualization
 
   //TODO Add more

@@ -19,6 +19,7 @@ import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
 import mathact.core.model.config.SketchUIConfigLike
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
+import mathact.core.model.holders.SketchControllerRef
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 
@@ -38,7 +39,9 @@ class SketchUITest extends UIActorTestSpec {
     //Helpers actors
     val sketchController = TestProbe("TestSketchController_" + randomString())
     //UI Actor
-    val ui = system.actorOf(Props(new SketchUIActor(sketchUIConfig, sketchController.ref)), "SketchUI_" + randomString())
+    val ui = system.actorOf(
+      Props(new SketchUIActor(sketchUIConfig, SketchControllerRef(sketchController.ref))),
+      "SketchUI_" + randomString())
     sketchController.watch(ui)}
   //Testing
   "SketchUI" should{

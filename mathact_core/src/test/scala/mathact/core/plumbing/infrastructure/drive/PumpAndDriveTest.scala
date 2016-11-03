@@ -26,8 +26,10 @@ import mathact.core.bricks.ui.UIEvent
 import mathact.core.dummies.TestActor
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}
+import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.data.pipes.{OutletData, InletData}
 import mathact.core.model.enums.VisualisationLaval
+import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.plumbing.Pump
 import mathact.core.plumbing.fitting.flows.{InflowLike, OutflowLike}
@@ -101,7 +103,14 @@ class PumpAndDriveTest extends ActorTestSpec{
     lazy val testPlumbing = TestActor("TestPlumbing_" + randomString())((self, context) ⇒ {
       case M.NewDrive(blockPump) ⇒ Some{ Right{
         val drive = context.actorOf(Props(
-          new DriveActor(testDriveConfig, testBlockId, blockPump, self, testUserLogging.ref, testVisualization.ref){
+          new DriveActor(
+            testDriveConfig,
+            testBlockId,
+            blockPump,
+            PlumbingRef(self),
+            UserLoggingRef(testUserLogging.ref),
+            VisualizationRef(testVisualization.ref))
+          {
             //Get actor state
             override def receive: PartialFunction[Any, Unit]  = {
               case GetDriveState ⇒ sender ! DriveState(
@@ -122,15 +131,18 @@ class PumpAndDriveTest extends ActorTestSpec{
           s"[PumpAndDriveTest.testPlumbing.NewDrive] Created of drive for " +
           s"block: ${blockPump.block.blockName}, drive: $drive")
         drive}}})
+    lazy val testLayout = TestProbe("Layout_" + randomString())
     //Test workbench context
     lazy val testSketchContext = new SketchContext(
-      system, testController.ref,
-      testUserLogging.ref,
-      testPlumbing.ref,
+      system,
+      SketchControllerRef(testController.ref),
+      UserLoggingRef(testUserLogging.ref),
+      LayoutRef(testLayout.ref),
+      PlumbingRef(testPlumbing.ref),
       testPumpConfig,
       ConfigFactory.load())
     {
-      override val plumbing: ActorRef = testPlumbing.ref}
+      override val plumbing = PlumbingRef(testPlumbing.ref)}
     //Test blocks
     object blocks{
       lazy val testBlock = new BlockLike with OnStartLike with OnStopLike with BlockUILike{
@@ -140,10 +152,12 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Variable
         @volatile private var onStartCalled = false
         @volatile private var onStopCalled = false
+        @volatile private var initFrameCalled = false
         @volatile private var createFrameCalled = false
         @volatile private var showFrameUICalled = false
         @volatile private var hideFrameCalled = false
         @volatile private var closeFrameCalled = false
+        @volatile private var lastLayout: Option[(Int, Double, Double)] = None
         @volatile private var lastUiEvent: Option[UIEvent] = None
         @volatile private var procTimeout: Option[Duration] = None
         @volatile private var procError: Option[Throwable] = None
@@ -165,10 +179,13 @@ class PumpAndDriveTest extends ActorTestSpec{
           procTimeout.foreach(d ⇒ sleep(d))
           procError.foreach(e ⇒ throw e)}
         //UI internal API
-        private[core] def createFrame(): Unit = { createFrameCalled = true }
-        private[core] def showFrame(): Unit = { showFrameUICalled = true }
-        private[core] def hideFrame(): Unit = { hideFrameCalled = true }
-        private[core] def closeFrame(): Unit = { closeFrameCalled = true }
+        private[core] def uiInit(): Unit = { initFrameCalled = true }
+        private[core] def uiCreate(): Unit = { createFrameCalled = true }
+        private[core] def uiShow(): Unit = { showFrameUICalled = true }
+        private[core] def uiHide(): Unit = { hideFrameCalled = true }
+        private[core] def uiClose(): Unit = { closeFrameCalled = true }
+        private[core] def uiLayout(windowId: Int, x: Double, y: Double): Unit = {
+          lastLayout = Some(Tuple3(windowId, x, y)) }
         private[core] def uiEvent(event: UIEvent): Unit = {
           lastUiEvent = Some(event)
           procError.foreach(e ⇒ throw e)}
@@ -177,6 +194,8 @@ class PumpAndDriveTest extends ActorTestSpec{
         def setProcError(err: Option[Throwable]): Unit = { procError = err }
         def isOnStartCalled: Boolean = onStartCalled
         def isOnStopCalled: Boolean = onStopCalled
+        def isInitFrameCalled: Boolean = initFrameCalled
+        def getLastUiLayout: Option[(Int, Double, Double)] = lastLayout
         def isCreateFrameCalled: Boolean = createFrameCalled
         def isShowFrameUICalled: Boolean = showFrameUICalled
         def isHideFrameCalled: Boolean = hideFrameCalled
@@ -795,7 +814,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       val driveLoad2 = blocks.otherDrive.expectMsgType[M.DriveLoad]
       println("[PumpAndDriveTest] driveLoad2: " + driveLoad2)
       driveLoad2.inletQueueSize shouldEqual 0
-      testPlumbing.expectMsg(M.DriveTurnedOff)
+      testPlumbing.expectMsg(M.DriveTurnedOff)(6.seconds)
       //Test received
       blocks.testBlock.testHandler.getReceivedValues shouldEqual List(value1, value2)
       //Expect no more messages
@@ -829,12 +848,62 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.send(blocks.testDrive, M.SetVisualisationLaval(newVisualisationLaval))
       //Check
       blocks.testDrive.askForState[DriveState].visualisationLaval shouldEqual newVisualisationLaval}
-    "call createFrame() on starting of drive" in new TestCase {
+    "call uiInit() on buildung of drive" in new TestCase {
+      //Preparing
+      blocks.builtBlock
+      //Check
+      blocks.testBlock.isInitFrameCalled shouldEqual true
+      blocks.testBlock.isCreateFrameCalled shouldEqual false
+      blocks.testBlock.isShowFrameUICalled shouldEqual false
+      blocks.testBlock.isHideFrameCalled shouldEqual false
+      blocks.testBlock.isCloseFrameCalled shouldEqual false}
+    "call uiCreate() on starting of drive" in new TestCase {
       //Preparing
       blocks.startedBlock
       //Check
-      blocks.testBlock.isCreateFrameCalled shouldEqual true}
-    "call showFrame() and hideFrame() by M.ShowBlockUi and M.HideBlockUi" in new TestCase {
+      blocks.testBlock.isInitFrameCalled shouldEqual true
+      blocks.testBlock.isCreateFrameCalled shouldEqual true
+      blocks.testBlock.isShowFrameUICalled shouldEqual false
+      blocks.testBlock.isHideFrameCalled shouldEqual false
+      blocks.testBlock.isCloseFrameCalled shouldEqual false}
+    "call uiLayout() on M.UpdateWindowPosition" in new TestCase {
+      //Preparing
+      blocks.builtBlock
+      val upMsg = M.UpdateWindowPosition(1, randomDouble(), randomDouble())
+      //Send
+      testLayout.send(blocks.testDrive, upMsg)
+      sleep(1.second) //Wait for receiving
+      //Check
+      blocks.testBlock.getLastUiLayout shouldEqual Some(Tuple3(upMsg.id, upMsg.x, upMsg.y))}
+    "pass messages to LayoutActor on calling of pump methods" in new TestCase {
+      //Preparing
+      blocks.builtBlock
+      val windowId = randomInt()
+      val state = WindowState(
+        isShown = randomBoolean(),
+        x = randomDouble(),
+        y = randomDouble(),
+        h = randomDouble(),
+        w = randomDouble())
+      val prefs = WindowPreference(
+        prefX = randomOpt(randomDouble()),
+        prefY = randomOpt(randomDouble()))
+      //Test for registerWindow
+      blocks.testBlock.pump.registerWindow(windowId, state, prefs)
+      val registerMsg = testLayout.expectMsgType[M.RegisterWindow]
+      registerMsg.id shouldEqual windowId
+      registerMsg.state shouldEqual state
+      registerMsg.prefs shouldEqual prefs
+      //Test for windowUpdated
+      blocks.testBlock.pump.windowUpdated(windowId, state)
+      val updatedMsg = testLayout.expectMsgType[M.WindowUpdated]
+      updatedMsg.id shouldEqual windowId
+      updatedMsg.state shouldEqual state
+      //Test for layoutWindow
+      blocks.testBlock.pump.layoutWindow(windowId)
+      val layoutMsg = testLayout.expectMsgType[M.LayoutWindow]
+      layoutMsg.id shouldEqual windowId}
+    "call uiShow() and uiHide() by M.ShowBlockUi and M.HideBlockUi" in new TestCase {
       //Preparing
       blocks.startedBlock
       //Test for M.ShowBlockUi

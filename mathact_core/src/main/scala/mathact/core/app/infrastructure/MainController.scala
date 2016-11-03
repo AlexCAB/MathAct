@@ -19,6 +19,7 @@ import akka.event.{Logging, LoggingAdapter}
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.enums.SketchStatus
+import mathact.core.model.holders.MainUIRef
 import mathact.core.model.messages.M
 
 
@@ -31,7 +32,7 @@ extends Actor{
   //Objects
   val log: LoggingAdapter = Logging.getLogger(context.system, this)
   //Sub actors (abstract fields defined here to capture this actor context)
-  val mainUi: ActorRef
+  val mainUi: MainUIRef
   //Variables
   var sketchList = List[(SketchData, SketchStatus)]()
   var currentSketch: Option[(ActorRef,SketchData)] = None

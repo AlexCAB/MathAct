@@ -23,6 +23,7 @@ import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.UserLoggingConfigLike
+import mathact.core.model.holders.SketchControllerRef
 import mathact.core.model.messages.M
 
 import scalafx.Includes._
@@ -35,7 +36,7 @@ import scalafxml.core.{NoDependencyResolver, FXMLLoader}
   * Created by CAB on 26.08.2016.
   */
 
-private[core] class UserLoggingActor(config: UserLoggingConfigLike, workbenchController: ActorRef)
+private[core] class UserLoggingActor(config: UserLoggingConfigLike, sketchController: SketchControllerRef)
 extends WorkerBase with JFXInteraction { import UserLogging._
   //Parameters
   val windowTitle = "MathAct - Logger"
@@ -71,7 +72,7 @@ extends WorkerBase with JFXInteraction { import UserLogging._
             isShown = false
             stg.hide()
             //Send message
-            workbenchController ! M.UserLoggingUIChanged(isShown)}})
+            sketchController ! M.UserLoggingUIChanged(isShown)}})
         //Set params and return
         stg.resizable = true
         stg.sizeToScene()
@@ -123,13 +124,13 @@ extends WorkerBase with JFXInteraction { import UserLogging._
       isShown = true
       refreshUi()
       runAndWait(window.show())
-      workbenchController ! M.UserLoggingUIChanged(isShown)
+      sketchController ! M.UserLoggingUIChanged(isShown)
     //Hide UI
     case M.HideUserLoggingUI ⇒
       isShown = false
       refreshUi()
       runAndWait(window.hide())
-      workbenchController ! M.UserLoggingUIChanged(isShown)
+      sketchController ! M.UserLoggingUIChanged(isShown)
     //Log info
     case M.LogInfo(blockId, blockName, message) ⇒
       //Build row

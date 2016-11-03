@@ -21,6 +21,7 @@ import mathact.core.bricks.data.SketchData
 import mathact.core.model.enums.SketchStatus
 import mathact.core.ActorTestSpec
 import mathact.core.model.config.MainConfigLike
+import mathact.core.model.holders.MainUIRef
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 
@@ -36,6 +37,7 @@ class MainControllerTest extends ActorTestSpec {
     lazy val testMainConfig = new MainConfigLike{
       val config = ConfigFactory.load()
       val sketchInstance = null
+      val layout = null
       val plumbing = null
       val mainUI = null
       val sketchUI = null
@@ -59,7 +61,7 @@ class MainControllerTest extends ActorTestSpec {
     //MainController
     lazy val mainController = system.actorOf(Props(
       new MainController(testMainConfig, i ⇒ {exitCode = Some(i)}){
-        val mainUi = testMainUi.ref
+        val mainUi = MainUIRef(testMainUi.ref)
         context.watch(testMainUi.ref)
         def createSketchController(c: MainConfigLike, d: SketchData): ActorRef = testSketchController.ref}),
       "TestAskMainController_" + randomString())

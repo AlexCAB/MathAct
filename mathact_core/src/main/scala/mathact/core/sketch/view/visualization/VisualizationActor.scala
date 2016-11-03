@@ -21,6 +21,7 @@ import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.VisualizationConfigLike
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
+import mathact.core.model.holders.SketchControllerRef
 import mathact.core.model.messages.M
 
 
@@ -29,7 +30,7 @@ import mathact.core.model.messages.M
   */
 
 
-private[core] class VisualizationActor(config: VisualizationConfigLike, workbenchController: ActorRef)
+private[core] class VisualizationActor(config: VisualizationConfigLike, sketchController: SketchControllerRef)
 extends WorkerBase with JFXInteraction { import Visualization._
   //Parameters
   val buildingLayoutType = LayoutType.OrganicLayout
@@ -108,12 +109,12 @@ extends WorkerBase with JFXInteraction { import Visualization._
       isShow = true
       buildAndUpdateGraph(constructedInfo, connectedInfo, ! isFinalGraphBuilt, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
       isFinalGraphBuilt = true
-      workbenchController ! M.VisualizationUIChanged(isShow)
+      sketchController ! M.VisualizationUIChanged(isShow)
     //Close button hit
     case DoClose ⇒
       runAndWait(window.hide())
       isShow = false
-      workbenchController ! M.VisualizationUIChanged(isShow)
+      sketchController ! M.VisualizationUIChanged(isShow)
     //Block constructed info, sends each time some block done building
     case M.BlockConstructedInfo(builtInfo) ⇒
       //Add toll info
@@ -141,7 +142,7 @@ extends WorkerBase with JFXInteraction { import Visualization._
     case M.HideVisualizationUI ⇒
       runAndWait(window.hide())
       isShow = false
-      workbenchController ! M.VisualizationUIChanged(isShow)}
+      sketchController ! M.VisualizationUIChanged(isShow)}
   //Cleanup
   def cleanup(): Unit = {
     log.debug(s"[VisualizationActor.cleanup] Actor stopped, close UI.")

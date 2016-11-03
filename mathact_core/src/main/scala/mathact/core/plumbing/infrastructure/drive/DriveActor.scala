@@ -17,6 +17,7 @@ package mathact.core.plumbing.infrastructure.drive
 import akka.actor._
 import mathact.core.model.config.DriveConfigLike
 import mathact.core.model.enums._
+import mathact.core.model.holders.{VisualizationRef, UserLoggingRef, PlumbingRef}
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
@@ -34,9 +35,9 @@ private[core] class DriveActor(
   val config: DriveConfigLike,
   val blockId: Int,
   val pump: PumpLike,
-  val plumbing: ActorRef,
-  val userLogging: ActorRef,
-  val visualization: ActorRef)
+  val plumbing: PlumbingRef,
+  val userLogging: UserLoggingRef,
+  val visualization: VisualizationRef)
 extends ControllerBase(Drive.State.Init) with IdGenerator with DriveLife with DriveConnectivity
 with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._, Drive._, TaskKind._
   //Fields
@@ -66,6 +67,7 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       blockName = pump.block.blockName
       blockImagePath = pump.block.blockImagePath
       constructDrive()
+      initBlockUi()
       Constructed
     //Build drive, connect connections from pending list
     case (M.ConnectingDrive, Constructed) ⇒
@@ -149,29 +151,32 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       case false ⇒
         TurningOff}
     //Turning off, if no more messages after TaskDone
-    case (M.TaskDone(Massage, inletId, time, _), TurningOff) ⇒ isAllMsgProcessed match{
-      case true ⇒
-        driveTurnedOff()
-        TurnedOff
-      case false ⇒
-        messageTaskDone(inletId, time)
-        state}
+    case (M.TaskDone(Massage, inletId, time, _), TurningOff) ⇒
+      messageTaskDone(inletId, time)
+      isAllMsgProcessed match{
+        case true ⇒
+          driveTurnedOff()
+          TurnedOff
+        case false ⇒
+          state}
     //Turning off, if no more messages after TaskTimeout
-    case (M.TaskTimeout(Massage, inId, time), TurningOff) ⇒ isAllMsgProcessed match{
-      case true ⇒
-        driveTurnedOff()
-        TurnedOff
-      case false ⇒
-        messageTaskTimeout(inId, time)
-        state}
+    case (M.TaskTimeout(Massage, inId, time), TurningOff) ⇒
+      messageTaskTimeout(inId, time)
+      isAllMsgProcessed match{
+        case true ⇒
+          driveTurnedOff()
+          TurnedOff
+        case false ⇒
+          state}
     //Turning off, if no more messages after TaskFailed
-    case (M.TaskFailed(Massage, inId, t, err), TurningOff) ⇒ isAllMsgProcessed match{
-      case true ⇒
-        driveTurnedOff()
-        TurnedOff
-      case false ⇒
-        messageTaskFailed(inId, t, err)
-        state}
+    case (M.TaskFailed(Massage, inId, t, err), TurningOff) ⇒
+      messageTaskFailed(inId, t, err)
+      isAllMsgProcessed match{
+        case true ⇒
+          driveTurnedOff()
+          TurnedOff
+        case false ⇒
+          state}
     //Messaging, ask from object
     case (M.UserData(outletId, value), state) ⇒
       sender ! userDataAsk(outletId, value, state)
@@ -203,6 +208,10 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
     //Managing, set visualisation laval
     case (M.SetVisualisationLaval(laval), _) ⇒
       visualisationLaval = laval
+      state
+    //UI control, update window position
+    case (M.UpdateWindowPosition(id, x, y), st) if st != Init ⇒
+      updateBlockUiPosition(id, x, y)
       state
     //UI control, show
     case (M.ShowBlockUi, st) if st != Init ⇒

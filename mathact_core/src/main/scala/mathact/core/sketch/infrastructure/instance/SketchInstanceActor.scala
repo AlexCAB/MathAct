@@ -21,6 +21,7 @@ import mathact.core.WorkerBase
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.SketchInstanceConfigLike
+import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.sketch.blocks.WorkbenchLike
 
@@ -34,9 +35,10 @@ import scala.concurrent.Future
 private[core] class SketchInstanceActor(
   config: SketchInstanceConfigLike,
   sketchData: SketchData,
-  controller: ActorRef,
-  userLogging: ActorRef,
-  plumbing: ActorRef)
+  controller: SketchControllerRef,
+  userLogging: UserLoggingRef,
+  plumbing: PlumbingRef,
+  layout: LayoutRef)
 extends WorkerBase{ import SketchInstance._
   //Variables
   var isBuildingRan = false
@@ -79,6 +81,7 @@ extends WorkerBase{ import SketchInstance._
         context.system,
         controller,
         userLogging,
+        layout,
         plumbing,
         config.pumpConfig,
         config.commonConfig)}

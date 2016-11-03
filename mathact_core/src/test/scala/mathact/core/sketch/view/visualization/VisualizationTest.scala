@@ -19,6 +19,7 @@ import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
 import mathact.core.model.config.VisualizationConfigLike
 import mathact.core.model.data.visualisation._
+import mathact.core.model.holders.SketchControllerRef
 import mathact.core.model.messages.M
 import org.scalatest.Suite
 
@@ -37,7 +38,8 @@ class VisualizationTest extends UIActorTestSpec {
     //Helpers actors
     val sketchController = TestProbe("TestSketchController_" + randomString())
     //UI Actor
-    val visualization = system.actorOf(Props(new VisualizationActor(testConfig, sketchController.ref)))
+    val visualization = system.actorOf(
+      Props(new VisualizationActor(testConfig, SketchControllerRef(sketchController.ref))))
     sketchController.watch(visualization)}
   //Testing
   "Visualization" should{

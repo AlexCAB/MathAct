@@ -21,7 +21,9 @@ package mathact.core.gui.ui
   */
 
 trait BlockUIControl {
-  private[core] def createFrame(): Unit
-  private[core] def showFrame(): Unit
-  private[core] def hideFrame(): Unit
-  private[core] def closeFrame(): Unit}
+  private[core] def uiInit(): Unit
+  private[core] def uiCreate(): Unit
+  private[core] def uiLayout(windowId: Int, x: Double, y: Double): Unit
+  private[core] def uiShow(): Unit
+  private[core] def uiHide(): Unit
+  private[core] def uiClose(): Unit}

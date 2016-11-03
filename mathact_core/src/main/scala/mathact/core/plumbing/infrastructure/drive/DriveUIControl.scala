@@ -36,21 +36,34 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
       log.debug(s"[DriveUIControl.executeIfBlockHaveUi] Block have no UI, nothing to do.")}
   //Methods
   /** Create block UI */
+  def updateBlockUiPosition(id: Int, x: Double, y: Double): Unit = pump.block match{
+    case blockUi: BlockUIControl ⇒
+      log.debug(s"[DriveUIControl.updateBlockUiPosition] Call uiLayout() of block, id: $id, x: $x, y: $y")
+      blockUi.uiLayout(id, x, y)
+    case _ ⇒
+      throw new IllegalArgumentException(
+        s"[DriveUIControl.updateBlockUiPosition] uiLayout() can not be called on block which " +
+        s"not implement BlockUIControl. Id: $id, x: $x, y: $y")}
+  /** Create block UI */
+  def initBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
+    log.debug(s"[DriveUIControl.initBlockUi] Call uiCreate() of block.")
+    blockUi.uiInit()}
+  /** Create block UI */
   def createBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
-    log.debug(s"[DriveUIControl.createBlockUi] Call createFrame() of block.")
-    blockUi.createFrame()}
+    log.debug(s"[DriveUIControl.createBlockUi] Call uiCreate() of block.")
+    blockUi.uiCreate()}
   /** Show block UI */
   def showBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
-    log.debug(s"[DriveUIControl.showBlockUi] Call showFrame() of block.")
-    blockUi.showFrame()}
+    log.debug(s"[DriveUIControl.showBlockUi] Call uiShow() of block.")
+    blockUi.uiShow()}
   /** Hide block UI */
   def hideBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
-    log.debug(s"[DriveUIControl.showBlockUi] Call hideFrame() of block.")
-    blockUi.hideFrame()}
+    log.debug(s"[DriveUIControl.showBlockUi] Call uiHide() of block.")
+    blockUi.uiHide()}
   /** Closing of block window on end of work */
   def closeBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
-    log.debug(s"[DriveUIControl.closeBlockUi] Call closeFrame() of block.")
-    blockUi.closeFrame()}
+    log.debug(s"[DriveUIControl.closeBlockUi] Call uiClose() of block.")
+    blockUi.uiClose()}
   /** User UI event, send to task to impeller
     * @param event - UIEvent */
   def blockUiEvent(event: UIEvent): Unit = {

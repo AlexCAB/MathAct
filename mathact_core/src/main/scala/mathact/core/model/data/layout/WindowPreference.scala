@@ -12,37 +12,11 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.layout.infrastructure
-
-import akka.actor.ActorRef
-import mathact.core.WorkerBase
-import mathact.core.gui.JFXInteraction
-import mathact.core.model.config.UserLoggingConfigLike
+package mathact.core.model.data.layout
 
 
-/** Control of block UI layout
-  * Created by CAB on 28.09.2016.
+/** Window preference
+  * Created by CAB on 03.11.2016.
   */
 
-private[core] class LayoutController(
-  config: UserLoggingConfigLike,
-  workbenchController: ActorRef)
-extends WorkerBase with JFXInteraction {
-
-
-
-
-
-
-  //Messages handling with logging
-  def reaction: PartialFunction[Any, Unit]  = {
-
-
-    case m ⇒ println("[LayoutController] message: " + m)
-
-  }
-
-  //Cleanup
-  def cleanup(): Unit = {  }
-
-}
+case class WindowPreference(prefX: Option[Double], prefY: Option[Double])

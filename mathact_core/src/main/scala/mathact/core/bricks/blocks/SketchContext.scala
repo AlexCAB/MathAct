@@ -14,9 +14,10 @@
 
 package mathact.core.bricks.blocks
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import mathact.core.model.config.PumpConfigLike
+import mathact.core.model.holders._
 
 
 /** Provide support and management of Workbench
@@ -25,8 +26,9 @@ import mathact.core.model.config.PumpConfigLike
 
 class SketchContext(
   val system: ActorSystem,
-  val controller: ActorRef,
-  val userLogging: ActorRef,
-  val plumbing: ActorRef,
+  val controller: SketchControllerRef,
+  val userLogging: UserLoggingRef,
+  val layout: LayoutRef,
+  val plumbing: PlumbingRef,
   val pumpConfig: PumpConfigLike,
   val commonConfig: Config)

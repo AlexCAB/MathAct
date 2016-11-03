@@ -18,6 +18,7 @@ import java.util.UUID
 
 import akka.actor._
 import mathact.core.model.config.PlumbingConfigLike
+import mathact.core.model.holders._
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.drive.DriveActor
@@ -30,15 +31,16 @@ import mathact.core.ControllerBase
 
 private [core] class PlumbingActor(
   val config: PlumbingConfigLike,
-  val controller: ActorRef,
+  val controller: SketchControllerRef,
   val sketchName: String,
-  val userLogging: ActorRef,
-  val visualization: ActorRef)
+  val userLogging: UserLoggingRef,
+  val visualization: VisualizationRef,
+  val layout: LayoutRef)
 extends ControllerBase(Plumbing.State.Init)
 with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
   //Creators functions
   def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef = newController(
-    new DriveActor(config.drive, blockId, blockPump, self, userLogging, visualization),
+    new DriveActor(config.drive, blockId, blockPump, PlumbingRef(self), userLogging, visualization),
     "DriveOf_" + blockPump.getClass.getTypeName + "_" + UUID.randomUUID)
   //Message handling
   def reaction: PartialFunction[(Msg, State), State] = {
@@ -57,6 +59,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
     //Check if all drives constructed, and run wiring if so
     case (M.DriveConstructed, Constructing) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConstructed) match{
       case true ⇒
+        allDrivesConstructed()
         sendToEachDrive(M.ConnectingDrive)
         Connecting
       case false ⇒

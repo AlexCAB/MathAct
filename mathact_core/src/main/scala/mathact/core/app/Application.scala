@@ -24,6 +24,8 @@ import mathact.core.app.infrastructure.MainController
 import mathact.core.app.view.MainUIActor
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
+import mathact.core.layout.infrastructure.LayoutActor
+import mathact.core.model.holders._
 import mathact.core.sketch.blocks.WorkbenchLike
 import mathact.core.sketch.infrastructure.controller.SketchControllerActor
 import mathact.core.sketch.infrastructure.instance.SketchInstanceActor
@@ -83,26 +85,32 @@ private [core] object Application{
       //Create main controller
       val controller = system.actorOf(Props(
         new MainController(config, doStop){
-          val mainUi = context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor")
-          context.watch(mainUi)
+          val mainUi = MainUIRef(context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor"))
+          context.watch(mainUi.ref)
           def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
             context.actorOf(Props(
-              new SketchControllerActor(config, sketchData, self){
-                val sketchUi = newWorker(
-                  new SketchUIActor(config.sketchUI, self),
-                  "SketchUIActor_" + sketchData.className)
-                val userLogging = newWorker(
-                  new UserLoggingActor(config.userLogging, self),
-                  "UserLoggingActor_" + sketchData.className)
-                val visualization = newWorker(
-                  new VisualizationActor(config.visualization, self),
-                  "VisualizationActor_" + sketchData.className)
-                val plumbing = newController(
-                  new PlumbingActor(config.plumbing, self, sketchName, userLogging, visualization),
-                  "PlumbingActor_" + sketchData.className)
-                val sketchInstance = newWorker(
-                  new SketchInstanceActor(config.sketchInstance, sketchData, self, userLogging, plumbing),
-                  "SketchInstanceActor_" + sketchData.className)}),
+              new SketchControllerActor(config, sketchData, MainControllerRef(self)){
+                val selfRef = SketchControllerRef(self)
+                val sketchUi = SketchUIRef(newWorker(
+                  new SketchUIActor(config.sketchUI, selfRef),
+                  "SketchUIActor_" + sketchData.className))
+                val userLogging = UserLoggingRef(newWorker(
+                  new UserLoggingActor(config.userLogging, selfRef),
+                  "UserLoggingActor_" + sketchData.className))
+                val visualization = VisualizationRef(newWorker(
+                  new VisualizationActor(config.visualization, selfRef),
+                  "VisualizationActor_" + sketchData.className))
+                val layout = LayoutRef(newWorker(
+                  new LayoutActor(config.layout, selfRef),
+                  "LayoutActor_" + sketchData.className))
+                val plumbing = PlumbingRef(newController(
+                  new PlumbingActor(
+                    config.plumbing, SketchControllerRef(self), sketchName, userLogging, visualization, layout),
+                  "PlumbingActor_" + sketchData.className))
+                val sketchInstance = SketchInstanceRef(newWorker(
+                  new SketchInstanceActor(
+                    config.sketchInstance, sketchData,  SketchControllerRef(self), userLogging, plumbing, layout),
+                  "SketchInstanceActor_" + sketchData.className))}),
               "SketchControllerActor_" + sketchData.className)}}),
         "MainControllerActor")
       //Start main controller

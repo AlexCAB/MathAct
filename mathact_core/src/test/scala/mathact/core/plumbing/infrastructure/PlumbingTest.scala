@@ -20,6 +20,7 @@ import akka.util.Timeout
 import mathact.core.ActorTestSpec
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
 import mathact.core.model.data.verification.{PublisherVerificationData, BlockVerificationData, InletVerificationData}
+import mathact.core.model.holders.{LayoutRef, VisualizationRef, UserLoggingRef, SketchControllerRef}
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 import mathact.core.plumbing.PumpLike
@@ -38,6 +39,7 @@ class PlumbingTest extends ActorTestSpec{
   trait TestCase extends Suite{
     //Test controller and logger
     lazy val testController = TestProbe("TestSketchController_" + randomString())
+    lazy val testLayout = TestProbe("TestLayout_" + randomString())
     lazy val testUserLogging = TestProbe("UserLogging_" + randomString())
     lazy val testVisualization = TestProbe("Visualization_" + randomString())
     //Test drives
@@ -61,7 +63,14 @@ class PlumbingTest extends ActorTestSpec{
     //PlumbingActor
     object actors{
       lazy val plumbing = newRootChildActorOf(Props(
-        new PlumbingActor(testPlumbingConfig, testController.ref,  "TestSketch", testUserLogging.ref, testVisualization.ref){
+        new PlumbingActor(
+          testPlumbingConfig,
+          SketchControllerRef(testController.ref),
+          "TestSketch",
+          UserLoggingRef(testUserLogging.ref),
+          VisualizationRef(testVisualization.ref),
+          LayoutRef(testLayout.ref))
+        {
           override def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef  = {
             val actor = List(testDrive1.ref, testDrive2.ref)(blockPump.asInstanceOf[TestPump].index)
             context.watch(actor)

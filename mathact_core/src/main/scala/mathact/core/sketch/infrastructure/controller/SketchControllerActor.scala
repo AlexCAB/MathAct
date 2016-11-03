@@ -19,6 +19,7 @@ import mathact.core.ControllerBase
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.MainConfigLike
 import mathact.core.model.enums._
+import mathact.core.model.holders._
 import mathact.core.model.messages.{M, Msg}
 
 
@@ -29,18 +30,19 @@ import mathact.core.model.messages.{M, Msg}
 private[core] abstract class SketchControllerActor(
   val config: MainConfigLike,
   val sketchData: SketchData,
-  val mainController: ActorRef)
+  val mainController: MainControllerRef)
 extends ControllerBase((SketchController.State.Init, SketchController.Mode.Work))
 with SketchControllerUIControl with SketchControllerLife
 with SketchControllerUIActions{ import SketchController._, State._, Mode._, SketchUIElement._
   //Values
   val sketchName = sketchData.sketchName.getOrElse(sketchData.className)
   //Sub actors (abstract fields defined here to capture this actor context)
-  val sketchUi: ActorRef
-  val userLogging: ActorRef
-  val visualization: ActorRef
-  val plumbing: ActorRef
-  val sketchInstance: ActorRef
+  val sketchUi: SketchUIRef
+  val userLogging: UserLoggingRef
+  val visualization: VisualizationRef
+  val layout: LayoutRef
+  val plumbing: PlumbingRef
+  val sketchInstance: SketchInstanceRef
   //Message handling
   def reaction: PartialFunction[(Msg, (State, Mode)), (State, Mode)] = {
     //On SketchControllerStart show all UI

@@ -34,6 +34,8 @@ private[core] class AppConfig extends MainConfigLike{
     val sketchBuildingTimeout = config.getInt("main.sketch.building.timeout").millis
     val pumpConfig = new PumpConfigLike{
       val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}}
+  //Layout config
+  val layout = new LayoutConfigLike{}
   //Parse plumbing config
   val plumbing = new PlumbingConfigLike{
     val drive = new DriveConfigLike{

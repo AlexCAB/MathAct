@@ -19,6 +19,7 @@ import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.SketchUIConfigLike
 import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
+import mathact.core.model.holders.SketchControllerRef
 import mathact.core.model.messages.M
 
 
@@ -28,11 +29,11 @@ import mathact.core.model.messages.M
 
 private[core] class SketchUIActor(
   config: SketchUIConfigLike,
-  workbenchController: ActorRef)
+  sketchController: SketchControllerRef)
 extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemState._
   //Construction
   private val window = runNow{
-    val stg = new SketchUIViewAndController(config, workbenchController, log)
+    val stg = new SketchUIViewAndController(config, sketchController.ref, log)
     stg.resizable = false
     stg.sizeToScene()
     stg}
@@ -41,7 +42,7 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
     //Show UI
     case M.ShowSketchUI ⇒
       runAndWait(window.show())
-      workbenchController ! M.SketchUIChanged(isShow = true)
+      sketchController ! M.SketchUIChanged(isShow = true)
     //Update UI state
     case M.UpdateSketchUIState(newState) ⇒ newState.foreach{
       case (LogBtn, s) if s == ElemDisabled || s == ElemShow || s == ElemHide ⇒ runAndWait{
@@ -70,7 +71,7 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
     //Hide UI
     case M.HideSketchUI ⇒
       runAndWait(window.hide())
-      workbenchController ! M.SketchUIChanged(isShow = false)}
+      sketchController ! M.SketchUIChanged(isShow = false)}
   //Cleanup
   def cleanup(): Unit = {
     log.debug(s"[SketchUIActor.cleanup] Actor stopped, close UI.")

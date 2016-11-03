@@ -12,21 +12,35 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.config
+package mathact.core.model
 
-import com.typesafe.config.Config
+import akka.actor.ActorRef
+import mathact.core.model.messages.Msg
 
 
-/** Main config
-  * Created by CAB on 03.09.2016.
+/** Value holders
+  * Created by CAB on 03.11.2016.
   */
 
-private [core] trait MainConfigLike {
-  val config: Config
-  val sketchInstance: SketchInstanceConfigLike
-  val layout: LayoutConfigLike
-  val plumbing: PlumbingConfigLike
-  val sketchUI: SketchUIConfigLike
-  val mainUI: MainUIConfigLike
-  val userLogging: UserLoggingConfigLike
-  val visualization:  VisualizationConfigLike}
+package holders {
+
+  import akka.actor.Actor
+
+  //Definitions
+  private[core] trait RefHolder{
+    private[core] val ref: ActorRef
+    private[core] def !(m: Msg)(implicit sender: ActorRef = Actor.noSender): Unit = ref.tell(m, sender)}
+  //Actors ref holders
+  case class MainControllerRef(ref: ActorRef) extends RefHolder
+  case class MainUIRef(ref: ActorRef) extends RefHolder
+  case class SketchControllerRef(ref: ActorRef) extends RefHolder
+  case class LayoutRef(ref: ActorRef) extends RefHolder
+  case class PlumbingRef(ref: ActorRef) extends RefHolder
+  case class SketchUIRef(ref: ActorRef) extends RefHolder
+  case class UserLoggingRef(ref: ActorRef) extends RefHolder
+  case class VisualizationRef(ref: ActorRef) extends RefHolder
+  case class SketchInstanceRef(ref: ActorRef) extends RefHolder
+
+ //TODO Add more
+
+}

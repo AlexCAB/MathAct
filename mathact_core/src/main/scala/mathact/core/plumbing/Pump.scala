@@ -23,8 +23,8 @@ import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
 import mathact.core.bricks.ui.UIEvent
+import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.messages.M
-import mathact.core.plumbing.fitting._
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
 import scala.concurrent.Await
@@ -50,7 +50,7 @@ extends PumpLike{
     def error(msg: String): Unit = akkaLog.error(s"[$blockClassName] $msg")  }
   //Actors
   private[core] val drive: ActorRef = Await
-    .result(ask(context.plumbing, M.NewDrive(this))(context.pumpConfig.askTimeout)
+    .result(ask(context.plumbing.ref, M.NewDrive(this))(context.pumpConfig.askTimeout)
       .mapTo[Either[Throwable,ActorRef]], context.pumpConfig.askTimeout.duration)
     .fold(t ⇒ throw new ExecutionException(t), d ⇒ d)
   //Functions
@@ -103,10 +103,6 @@ extends PumpLike{
           catch {case e: InterruptedException ⇒
             akkaLog.error(e, s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, block $blockClassName")
             Thread.currentThread().interrupt()}}})
-  private[core] def userLogInfo(message: String): Unit = drive ! M.UserLogInfo(message)
-  private[core] def userLogWarn(message: String): Unit = drive ! M.UserLogWarn(message)
-  private[core] def userLogError(error: Option[Throwable], message: String): Unit = drive ! M.UserLogError(error, message)
-  private[core] def sendUiEvent(event: UIEvent): Unit = drive ! M.UserUIEvent(event)
   private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef = Await
     .result(
       ask(drive,  M.NewUserActor(props, name))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,ActorRef]],
@@ -117,4 +113,18 @@ extends PumpLike{
         throw new ExecutionException(t)},
       a ⇒ {
         akkaLog.debug(s"[Pump.askForNewUserActor] User actor created: $a")
-        a})}
+        a})
+  private[core] def userLogInfo(message: String): Unit =
+    drive ! M.UserLogInfo(message)
+  private[core] def userLogWarn(message: String): Unit =
+    drive ! M.UserLogWarn(message)
+  private[core] def userLogError(error: Option[Throwable], message: String): Unit =
+    drive ! M.UserLogError(error, message)
+  private[core] def sendUiEvent(event: UIEvent): Unit =
+    drive ! M.UserUIEvent(event)
+  private[core] def registerWindow(id: Int, state: WindowState, prefs: WindowPreference): Unit =
+    context.layout ! M.RegisterWindow(drive, id, state, prefs)
+  private[core] def windowUpdated(id: Int, state: WindowState): Unit =
+    context.layout ! M.WindowUpdated(drive, id, state)
+  private[core] def layoutWindow(id: Int): Unit =
+    context.layout ! M.LayoutWindow(drive, id)}

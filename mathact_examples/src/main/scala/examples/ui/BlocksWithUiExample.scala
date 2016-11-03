@@ -59,6 +59,7 @@ class BlocksWithUiExample extends SimpleWorkbench { import BlocksWithUiExample._
       //Scene
       scene = new Scene{
         root = new HBox {
+          prefWidth = 280
           children = new Button{
             text = "Say Hi!"
             onAction = handle{ sendEvent(LogLine("Hi!"))}}}}
