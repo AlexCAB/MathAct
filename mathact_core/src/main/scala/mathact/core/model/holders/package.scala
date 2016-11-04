@@ -36,6 +36,7 @@ package holders {
   case class SketchControllerRef(ref: ActorRef) extends RefHolder
   case class LayoutRef(ref: ActorRef) extends RefHolder
   case class PlumbingRef(ref: ActorRef) extends RefHolder
+  case class DriveRef(ref: ActorRef) extends RefHolder
   case class SketchUIRef(ref: ActorRef) extends RefHolder
   case class UserLoggingRef(ref: ActorRef) extends RefHolder
   case class VisualizationRef(ref: ActorRef) extends RefHolder

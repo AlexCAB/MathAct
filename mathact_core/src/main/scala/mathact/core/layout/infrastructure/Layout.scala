@@ -12,11 +12,32 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.model.data.layout
+package mathact.core.layout.infrastructure
+
+import mathact.core.model.data.layout.{WindowPreference, WindowState}
+import mathact.core.model.holders.DriveRef
 
 
-/** Represent window current state
-  * Created by CAB on 03.11.2016.
+/** Layout
+  * Created by CAB on 04.11.2016.
   */
 
-case class WindowState(isShown: Boolean, x: Double, y: Double, h: Double, w: Double, title: String)
+object Layout {
+  //Definitions
+  case class WindowData(
+    drive: DriveRef,
+    windowId: Int,
+    preference: WindowPreference,
+    var state: WindowState)
+  case class WindowPosition(
+    drive: DriveRef,
+    windowId: Int,
+    x: Double,
+    y: Double)
+  //Algorithms
+  def fillAllScreenLayout(windows: Seq[WindowData]): Seq[WindowPosition]  = ???
+  def windowsStairsLayout(windows: Seq[WindowData]): Seq[WindowPosition]  = ???
+
+
+
+}

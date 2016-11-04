@@ -83,6 +83,16 @@ class SketchUITest extends UIActorTestSpec {
       val runBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
       runBtn.element shouldEqual RunBtn
       runBtn.action shouldEqual ElemEnabled
+      //Buttons test: LayoutFillBtn
+      sketchController.send(ui, M.UpdateSketchUIState(Map(LayoutFillBtn → ElemEnabled)))
+      val layoutFillBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      layoutFillBtn.element shouldEqual LayoutFillBtn
+      layoutFillBtn.action shouldEqual ElemEnabled
+      //Buttons test: LayoutStairsBtn
+      sketchController.send(ui, M.UpdateSketchUIState(Map(LayoutStairsBtn → ElemEnabled)))
+      val layoutStairsBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)
+      layoutStairsBtn.element shouldEqual LayoutStairsBtn
+      layoutStairsBtn.action shouldEqual ElemEnabled
       //Buttons test: ShowAllBlocksUiBtn
       sketchController.send(ui, M.UpdateSketchUIState(Map(ShowAllBlocksUiBtn → ElemEnabled)))
       val showAllBlocksUiBtn = sketchController.expectMsgType[M.SketchUIActionTriggered](10.seconds)

@@ -45,6 +45,8 @@ package object enums {
     val LogBtn = Value
     val VisualisationBtn = Value
     val RunBtn = Value
+    val LayoutFillBtn = Value
+    val LayoutStairsBtn = Value
     val ShowAllBlocksUiBtn = Value
     val HideAllBlocksUiBtn = Value
     val SkipAllTimeoutTaskBtn = Value
@@ -58,6 +60,13 @@ package object enums {
     val ElemShow = Value
     val ElemHide = Value}
   type SketchUiElemState = SketchUiElemState.Value
+  //WindowsLayoutKind
+  object WindowsLayoutKind extends Enumeration {
+    val FillScreen = Value
+    val WindowsStairs = Value}
+  type WindowsLayoutKind = WindowsLayoutKind.Value
+
+
 
 //TODO Add more
 

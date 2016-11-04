@@ -14,11 +14,10 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import akka.actor.ActorRef
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo}
+import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
-import mathact.core.plumbing.fitting._
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import scala.collection.mutable.{Map ⇒ MutMap}
 
@@ -63,7 +62,7 @@ private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   def doConnectivity(): Unit = pendingConnections.foreach{ case (connectionId, M.ConnectPipes(out, in)) ⇒
     (out(),in()) match{
       case (outlet: OutPipe[_], inlet: InPipe[_]) ⇒
-        inlet.pump.drive ! M.AddConnection(connectionId, self, outlet, inlet)
+        inlet.pump.drive ! M.AddConnection(connectionId, DriveRef(self), outlet, inlet)
       case (o, i) ⇒
         throw new IllegalArgumentException(
           s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance of Outlet[_] " +
@@ -73,10 +72,10 @@ private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
     * @param initiator - ActorRef
     * @param outlet - OutPipe[_]
     * @param inlet - InPipe[_] */
-  def addConnection(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InPipe[_]): Unit = {
+  def addConnection(connectionId: Int, initiator: DriveRef, outlet: OutPipe[_], inlet: InPipe[_]): Unit = {
     //Check data
     assume(
-      inlet.pump.drive == self,
+      inlet.pump.drive.ref == self,
       s"[DriveConnectivity.addConnection] inlet.pump.drive != self, inlet: $inlet, self: $self")
     assume(
       inlets.contains(inlet.inletId),
@@ -94,17 +93,17 @@ private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
       connectionId,
       initiator,
       outlet,
-      InletData(self, blockId, blockName, inState.inletId, inState.name))
+      InletData(DriveRef(self), blockId, blockName, inState.inletId, inState.name))
     log.debug(s"[DriveConnectivity.addConnection] Connection added from $outlet to $inState.")}
   /** Adding of connection to given outlet (inletId), and send M.PipesConnected
     * @param connectionId - Int
     * @param initiator - ActorRef
     * @param outlet - OutPipe[_]
     * @param inlet - InletData */
-  def connectTo(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InletData): Unit = {
+  def connectTo(connectionId: Int, initiator: DriveRef, outlet: OutPipe[_], inlet: InletData): Unit = {
     //Check data
     assume(
-      outlet.pump.drive == self,
+      outlet.pump.drive.ref == self,
       s"[DriveConnectivity.connectTo] outlet.pump.drive != self, outlet: $outlet, self: $self")
     assume(
       outlets.contains(outlet.outletId),
@@ -121,17 +120,17 @@ private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
     initiator ! M.PipesConnected(
       connectionId,
       initiator,
-      OutletData(self, blockId, blockName, outState.outletId, outState.name),
+      OutletData(DriveRef(self), blockId, blockName, outState.outletId, outState.name),
       inlet)
     log.debug(s"[DriveConnectivity.connectTo] Connection added, from: $outlet, to: $inlet")}
   /** Remove connected connection from pendingConnections list
     * @param connectionId - Int
     * @param outlet - Int
     * @param inlet - Int */
-  def pipesConnected(connectionId: Int, initiator: ActorRef, outlet: OutletData, inlet: InletData): Unit = {
+  def pipesConnected(connectionId: Int, initiator: DriveRef, outlet: OutletData, inlet: InletData): Unit = {
     //Check data
     assume(
-      initiator == self,
+      initiator.ref == self,
       s"[DriveConnectivity.pipesConnected] initiator == self, initiator: $initiator, self: $self")
     assume(
       pendingConnections.contains(connectionId),

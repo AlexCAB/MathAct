@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import akka.actor.ActorRef
+import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 
@@ -42,13 +42,13 @@ private[core] object Drive {
   type State = State.Value
   //Definitions
   case class PublisherData(
-    id: (ActorRef, Int),
-    blockDrive: ActorRef,
+    id: (DriveRef, Int),
+    blockDrive: DriveRef,
     blockId: Int,
     outletId: Int)
   case class SubscriberData(
-    id: (ActorRef, Int),
-    blockDrive: ActorRef,
+    id: (DriveRef, Int),
+    blockDrive: DriveRef,
     blockId: Int,
     inletId: Int,
     var inletQueueSize: Int = 0)
@@ -56,14 +56,14 @@ private[core] object Drive {
     outletId: Int,
     name: Option[String],
     pipe: OutPipe[_],
-    subscribers: MutMap[(ActorRef, Int), SubscriberData] = MutMap(),  //((subscribe block drive, inlet ID), SubscriberData)
+    subscribers: MutMap[(DriveRef, Int), SubscriberData] = MutMap(),  //((subscribe block drive, inlet ID), SubscriberData)
     var pushTimeout: Option[Long] = None)
   case class InletState(
     inletId: Int,
     name: Option[String],
     pipe: InPipe[_],
     taskQueue: MutQueue[M.RunTask[_]] = MutQueue(),
-    publishers: MutMap[(ActorRef, Int), PublisherData] = MutMap(),  // ((publishers block drive, outlet ID), PublishersData)
+    publishers: MutMap[(DriveRef, Int), PublisherData] = MutMap(),  // ((publishers block drive, outlet ID), PublishersData)
     var currentTask: Option[M.RunTask[_]] = None)
   //Messages
 

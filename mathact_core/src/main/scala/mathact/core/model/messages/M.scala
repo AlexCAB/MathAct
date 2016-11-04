@@ -24,6 +24,7 @@ import mathact.core.model.data.sketch.SketchInfo
 import mathact.core.model.data.verification.BlockVerificationData
 import mathact.core.model.data.visualisation.{InletInfo, OutletInfo, BlockInfo}
 import mathact.core.model.enums._
+import mathact.core.model.holders.DriveRef
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.WorkbenchLike
@@ -98,13 +99,15 @@ private[core] object M {
   case class UserUIEvent(event: UIEvent) extends Msg
   case class NewUserActor(props: Props, name: Option[String]) extends Msg
   //Object Pump - LayoutActor (tell)
-  case class RegisterWindow(drive: ActorRef, id: Int, state: WindowState, prefs: WindowPreference) extends Msg
-  case class WindowUpdated(drive: ActorRef, id: Int, state: WindowState) extends Msg
-  case class LayoutWindow(drive: ActorRef, id: Int) extends Msg
+  case class RegisterWindow(drive: DriveRef, id: Int, state: WindowState, prefs: WindowPreference) extends Msg
+  case class WindowUpdated(drive: DriveRef, id: Int, state: WindowState) extends Msg
+  case class LayoutWindow(drive: DriveRef, id: Int) extends Msg
   //PlumbingActor - LayoutActor
   case object AllDrivesConstruct extends Msg
+  //SketchControllerActor - LayoutActor
+  case class DoLayout(kind: WindowsLayoutKind) extends Msg
   //LayoutActor - DriveActor
-  case class UpdateWindowPosition(id: Int, x: Double, y: Double) extends Msg
+  case class SetWindowPosition(id: Int, x: Double, y: Double) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg
@@ -125,11 +128,11 @@ private[core] object M {
   case object ShowBlockUi extends Msg
   case object HideBlockUi extends Msg
   //DriveActor - DriveActor
-  case class AddConnection(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InPipe[_]) extends Msg
-  case class ConnectTo(connectionId: Int, initiator: ActorRef, outlet: OutPipe[_], inlet: InletData) extends Msg
-  case class PipesConnected(connectionId: Int, initiator: ActorRef, outlet: OutletData, inlet: InletData) extends Msg
+  case class AddConnection(connectionId: Int, initiator: DriveRef, outlet: OutPipe[_], inlet: InPipe[_]) extends Msg
+  case class ConnectTo(connectionId: Int, initiator: DriveRef, outlet: OutPipe[_], inlet: InletData) extends Msg
+  case class PipesConnected(connectionId: Int, initiator: DriveRef, outlet: OutletData, inlet: InletData) extends Msg
   case class UserMessage[T](outletId: Int, inletId: Int, value: T) extends Msg
-  case class DriveLoad(subscriberId: (ActorRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
+  case class DriveLoad(subscriberId: (DriveRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
   //DriveActor - ImpellerActor
   case class RunTask[R](kind: TaskKind, id: Int, timeout: FiniteDuration, task: ()⇒R) extends Msg
   case object SkipCurrentTask extends Msg //Makes impeller to skip the current task, but not terminate it (impeller just will not wait for this more)

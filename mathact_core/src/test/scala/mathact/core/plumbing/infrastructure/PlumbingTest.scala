@@ -20,7 +20,7 @@ import akka.util.Timeout
 import mathact.core.ActorTestSpec
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike, PlumbingConfigLike}
 import mathact.core.model.data.verification.{PublisherVerificationData, BlockVerificationData, InletVerificationData}
-import mathact.core.model.holders.{LayoutRef, VisualizationRef, UserLoggingRef, SketchControllerRef}
+import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.plumbing.infrastructure.controller.PlumbingActor
 import mathact.core.plumbing.PumpLike
@@ -71,10 +71,10 @@ class PlumbingTest extends ActorTestSpec{
           VisualizationRef(testVisualization.ref),
           LayoutRef(testLayout.ref))
         {
-          override def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef  = {
+          override def createDriveActor(blockId: Int, blockPump: PumpLike): DriveRef  = {
             val actor = List(testDrive1.ref, testDrive2.ref)(blockPump.asInstanceOf[TestPump].index)
             context.watch(actor)
-            actor}}),
+            DriveRef(actor)}}),
         "Plumbing_" + randomString())
       lazy val plumbingWithDrives = {
         plumbing
@@ -118,12 +118,12 @@ class PlumbingTest extends ActorTestSpec{
       testController.send(actors.plumbing, M.NewDrive(TestPump(0)))
       val drive1 = testController.expectMsgType[Either[Throwable, ActorRef]]
       drive1.isRight shouldEqual true
-      drive1.right.get shouldEqual testDrive1.ref
+      drive1.right.get shouldEqual DriveRef(testDrive1.ref)
       //Create second drive
       testController.send(actors.plumbing, M.NewDrive(TestPump(1)))
       val drive2 = testController.expectMsgType[Either[Throwable, ActorRef]]
       drive2.isRight shouldEqual true
-      drive2.right.get shouldEqual testDrive2.ref}
+      drive2.right.get shouldEqual DriveRef(testDrive2.ref)}
     "by BuildPlumbing, if no drives found report with PlumbingNoDrivesFound" in new TestCase {
       //Preparing
       actors.plumbing

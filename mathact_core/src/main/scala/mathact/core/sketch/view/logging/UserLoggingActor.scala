@@ -19,7 +19,6 @@ import javafx.event.EventHandler
 import javafx.scene.Parent
 import javafx.stage.WindowEvent
 
-import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.UserLoggingConfigLike
@@ -159,7 +158,15 @@ extends WorkerBase with JFXInteraction { import UserLogging._
         case _ ⇒ ""}))
       //Add to Log
       logRows +:= row
-      refreshUi()}
+      //Refresh and show UI if required
+      config.showUIOnError && ! isShown match{
+        case true ⇒
+          isShown = true
+          refreshUi()
+          runAndWait(window.hide())
+          sketchController ! M.UserLoggingUIChanged(isShown)
+        case false ⇒
+          refreshUi()}}
   //Cleanup
   def cleanup(): Unit = {
     log.debug(s"[UserLoggingActor.cleanup] Actor stopped, close UI.")

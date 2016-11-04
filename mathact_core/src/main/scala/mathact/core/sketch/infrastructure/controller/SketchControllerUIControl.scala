@@ -40,6 +40,8 @@ private[core] trait SketchControllerUIControl { _: SketchControllerActor ⇒
     sketchUi ! M.ShowSketchUI
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
+      LayoutFillBtn → ElemDisabled,
+      LayoutStairsBtn → ElemDisabled,
       ShowAllBlocksUiBtn → ElemDisabled,
       HideAllBlocksUiBtn → ElemDisabled,
       SkipAllTimeoutTaskBtn → ElemDisabled,

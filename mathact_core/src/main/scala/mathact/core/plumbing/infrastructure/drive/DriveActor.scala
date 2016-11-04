@@ -210,7 +210,7 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       visualisationLaval = laval
       state
     //UI control, update window position
-    case (M.UpdateWindowPosition(id, x, y), st) if st != Init ⇒
+    case (M.SetWindowPosition(id, x, y), st) if st != Init ⇒
       updateBlockUiPosition(id, x, y)
       state
     //UI control, show

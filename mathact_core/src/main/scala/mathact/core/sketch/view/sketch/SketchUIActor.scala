@@ -51,6 +51,10 @@ extends WorkerBase with JFXInteraction { import SketchUIElement._, SketchUiElemS
         window.visualisationBtn.setState(s)}
       case (RunBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
         window.runBtn.setState(s)}
+      case (LayoutFillBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
+        window.layoutFillBtn.setState(s)}
+      case (LayoutStairsBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
+        window.layoutStairsBtn.setState(s)}
       case (ShowAllBlocksUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{
         window.showAllBlocksUiBtn.setState(s)}
       case (HideAllBlocksUiBtn, s)  if s == ElemDisabled || s == ElemEnabled ⇒ runAndWait{

@@ -118,7 +118,7 @@ extends Actor{
       stopAppByNormal()
     //Termination of actor
     case Terminated(actor) ⇒ actor match{
-      case a if a == mainUi ⇒
+      case a if a == mainUi.ref ⇒
         val msg = s"[MainController @ Terminated] Main UI terminated suddenly, currentSketch: $currentSketch"
         log.error(msg)
         stopAppByError(new Exception(msg))

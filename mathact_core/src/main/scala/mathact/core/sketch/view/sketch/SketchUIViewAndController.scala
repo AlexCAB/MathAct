@@ -48,6 +48,12 @@ extends Stage {
   //Params
   val windowTitle = "MathAct - Workbench"
   val buttonsImageSize = 30
+  val logBtnDPath             = "mathact/sketchIU/log_btn_d.png"
+  val logBtnSPath             = "mathact/sketchIU/log_btn_s.png"
+  val logBtnHPath             = "mathact/sketchIU/log_btn_h.png"
+  val visualisationBtnDPath   = "mathact/sketchIU/visualisation_btn_d.png"
+  val visualisationBtnSPath   = "mathact/sketchIU/visualisation_btn_s.png"
+  val visualisationBtnHPath   = "mathact/sketchIU/visualisation_btn_h.png"
   val runBtnDPath             = "mathact/sketchIU/run_btn_d.png"
   val runBtnEPath             = "mathact/sketchIU/run_btn_e.png"
   val showAllBlocksUiDPath    = "mathact/sketchIU/show_all_blocks_ui_d.png"
@@ -58,12 +64,10 @@ extends Stage {
   val skipAllTimeoutTaskEPath = "mathact/sketchIU/skip_all_timeout_task_e.png"
   val stopSketchBtnDPath      = "mathact/sketchIU/stop_sketch_btn_d.png"
   val stopSketchBtnEPath      = "mathact/sketchIU/stop_sketch_btn_e.png"
-  val logBtnDPath             = "mathact/sketchIU/log_btn_d.png"
-  val logBtnSPath             = "mathact/sketchIU/log_btn_s.png"
-  val logBtnHPath             = "mathact/sketchIU/log_btn_h.png"
-  val visualisationBtnDPath   = "mathact/sketchIU/visualisation_btn_d.png"
-  val visualisationBtnSPath   = "mathact/sketchIU/visualisation_btn_s.png"
-  val visualisationBtnHPath   = "mathact/sketchIU/visualisation_btn_h.png"
+  val layoutFillEPath         = "mathact/sketchIU/layout_fill_e.png"
+  val layoutFillDPath         = "mathact/sketchIU/layout_fill_d.png"
+  val layoutStairsEPath       = "mathact/sketchIU/layout_stairs_e.png"
+  val layoutStairsDPath       = "mathact/sketchIU/layout_stairs_d.png"
   //Definitions
   class MWButton[I](elem: SketchUIElement, states: List[(I, String)], action: (SketchUIElement,I)⇒Unit) extends Button{
     //Variables
@@ -118,6 +122,14 @@ extends Stage {
     RunBtn,
     List(ElemDisabled → runBtnDPath, ElemEnabled → runBtnEPath),
     actionTriggered)
+  val layoutFillBtn = new MWButton[SketchUiElemState](
+    LayoutFillBtn,
+    List(ElemDisabled → layoutFillDPath, ElemEnabled → layoutFillEPath),
+    actionTriggered)
+  val layoutStairsBtn = new MWButton[SketchUiElemState](
+    LayoutStairsBtn,
+    List(ElemDisabled → layoutStairsDPath, ElemEnabled → layoutStairsEPath),
+    actionTriggered)
   val showAllBlocksUiBtn = new MWButton[SketchUiElemState](
     ShowAllBlocksUiBtn,
     List(ElemDisabled → showAllBlocksUiDPath, ElemEnabled → showAllBlocksUiEPath),
@@ -145,10 +157,11 @@ extends Stage {
       top = new HBox {
         alignment = Pos.Center
         children = Seq(
-          new ButtonBox(2, Seq(logBtn,visualisationBtn)),
-          new ButtonBox(0, Seq(runBtn)),
-          new ButtonBox(2, Seq(showAllBlocksUiBtn,hideAllBlocksUiBtn)),
-          new ButtonBox(2, Seq(skipAllTimeoutTaskBtn,stopSketchBtn)))}
+          new ButtonBox(spacing = 2, Seq(logBtn,visualisationBtn)),
+          new ButtonBox(spacing = 0, Seq(runBtn)),
+          new ButtonBox(spacing = 2, Seq(layoutFillBtn,layoutStairsBtn)),
+          new ButtonBox(spacing = 2, Seq(showAllBlocksUiBtn,hideAllBlocksUiBtn)),
+          new ButtonBox(spacing = 2, Seq(skipAllTimeoutTaskBtn,stopSketchBtn)))}
       bottom = new HBox {
         style = "-fx-border-color: #808080; -fx-border-width: 1px; -fx-border-radius: 3.0; " +
           "-fx-border-insets: 2.0 2.0 2.0 2.0;"

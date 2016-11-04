@@ -14,6 +14,8 @@
 
 package mathact.core.bricks.ui
 
+import javafx.beans.value.{ObservableValue, ChangeListener}
+
 import mathact.core.gui.JFXInteraction
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
@@ -34,6 +36,7 @@ import javafx.scene.Parent
 trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
   //Variables
   @volatile private var isUIRegistered = false
+  @volatile private var isWindowShown = false
   @volatile private var _showOnStart = false
   @volatile private var _prefX: Option[Double] = None
   @volatile private var _prefY: Option[Double] = None
@@ -45,6 +48,9 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
     //Check if registered
     if (! isUIRegistered) throw new IllegalStateException(
       "[BlockUI.SfxFrame.<init>] SfxFrame instance should be created by using of UI object.")
+    //Functions
+    private def stateChanged(): Unit = {
+      pump.windowUpdated(id = 1, WindowState(isWindowShown, x.value, y.value, height.value, width.value, title.value))}
     //DSL
     def showOnStart: Boolean = _showOnStart
     def showOnStart_=(v: Boolean) { _showOnStart = v }
@@ -52,6 +58,21 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
     def prefX_=(v: Double) { _prefX = Some(v) }
     def prefY: Double = _prefY.getOrElse(-1)
     def prefY_=(v: Double) { _prefY =  Some(v) }
+    //Minimisation and show/hide listeners
+    onHidden = handle{
+      isWindowShown = false
+      stateChanged()}
+    onShown = handle{
+      isWindowShown = true
+      stateChanged()}
+    delegate.iconifiedProperty.onChange{ (_, _, isMaximized) ⇒ {
+      isWindowShown = ! isMaximized
+      stateChanged()}}
+    //Resize and position listeners
+    delegate.heightProperty.onChange{ (_, _, _) ⇒ stateChanged()}
+    delegate.widthProperty.onChange{ (_, _, _) ⇒ stateChanged()}
+    delegate.xProperty.onChange{ (_, _, _) ⇒ stateChanged()}
+    delegate.yProperty.onChange{ (_, _, _) ⇒ stateChanged()}
     //Control flow
     def sendEvent(event: UIEvent): Unit = pump.sendUiEvent(event)
     def onCommand: PartialFunction[UICommand, Unit]}
@@ -98,7 +119,7 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
     f.sizeToScene()
     pump.registerWindow(
       id = 1,
-      WindowState(_showOnStart, f.x.value, f.y.value, f.height.value, f.width.value),
+      WindowState(_showOnStart, f.x.value, f.y.value, f.height.value, f.width.value, f.title.value),
       WindowPreference(_prefX, _prefY))})
   private[core] def uiCreate(): Unit = if(_showOnStart) currentFrame.foreach(f ⇒ runLater(f.show()))
   private[core] def uiShow(): Unit = currentFrame.foreach(f ⇒ runLater(f.show()))

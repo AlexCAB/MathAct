@@ -24,6 +24,7 @@ import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
 import mathact.core.bricks.ui.UIEvent
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
+import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
@@ -49,14 +50,14 @@ extends PumpLike{
     def warning(msg: String): Unit = akkaLog.warning(s"[$blockClassName] $msg")
     def error(msg: String): Unit = akkaLog.error(s"[$blockClassName] $msg")  }
   //Actors
-  private[core] val drive: ActorRef = Await
+  private[core] val drive = Await
     .result(ask(context.plumbing.ref, M.NewDrive(this))(context.pumpConfig.askTimeout)
-      .mapTo[Either[Throwable,ActorRef]], context.pumpConfig.askTimeout.duration)
+      .mapTo[Either[Throwable,DriveRef]], context.pumpConfig.askTimeout.duration)
     .fold(t ⇒ throw new ExecutionException(t), d ⇒ d)
   //Functions
   private def addPipe(msg: Any): (Int, Int) = Await //Return: (block ID, pipe ID)
     .result(
-      ask(drive, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable,(Int, Int)]],
+      ask(drive.ref, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable,(Int, Int)]],
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {
@@ -72,7 +73,7 @@ extends PumpLike{
   private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddInlet(pipe, name))
   private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int = Await //Return: connection ID
     .result(
-      ask(drive,  M.ConnectPipes(out, in))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,Int]],
+      ask(drive.ref,  M.ConnectPipes(out, in))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,Int]],
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {
@@ -89,7 +90,7 @@ extends PumpLike{
     case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockClassName not have doStop method.")}
   private[core] def pushUserMessage(msg: M.UserData[_]): Unit = Await
     .result(
-      ask(drive, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, Option[Long]]],  //Either(error,  Option[sleep timeout])
+      ask(drive.ref, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, Option[Long]]],  //Either(error,  Option[sleep timeout])
       context.pumpConfig.askTimeout.duration)
     .fold(
       error ⇒ {
@@ -105,7 +106,7 @@ extends PumpLike{
             Thread.currentThread().interrupt()}}})
   private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef = Await
     .result(
-      ask(drive,  M.NewUserActor(props, name))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,ActorRef]],
+      ask(drive.ref,  M.NewUserActor(props, name))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,ActorRef]],
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {

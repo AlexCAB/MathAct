@@ -15,8 +15,6 @@
 package mathact.core.plumbing.infrastructure.controller
 
 import java.util.UUID
-
-import akka.actor._
 import mathact.core.model.config.PlumbingConfigLike
 import mathact.core.model.holders._
 import mathact.core.model.messages.{M, Msg}
@@ -39,9 +37,9 @@ private [core] class PlumbingActor(
 extends ControllerBase(Plumbing.State.Init)
 with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
   //Creators functions
-  def createDriveActor(blockId: Int, blockPump: PumpLike): ActorRef = newController(
+  def createDriveActor(blockId: Int, blockPump: PumpLike): DriveRef = DriveRef(newController(
     new DriveActor(config.drive, blockId, blockPump, PlumbingRef(self), userLogging, visualization),
-    "DriveOf_" + blockPump.getClass.getTypeName + "_" + UUID.randomUUID)
+    "DriveOf_" + blockPump.getClass.getTypeName + "_" + UUID.randomUUID))
   //Message handling
   def reaction: PartialFunction[(Msg, State), State] = {
     //Creating of drive for new block instance
@@ -57,7 +55,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
         sendToEachDrive(M.ConstructDrive)
         Constructing}
     //Check if all drives constructed, and run wiring if so
-    case (M.DriveConstructed, Constructing) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConstructed) match{
+    case (M.DriveConstructed, Constructing) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveConstructed) match{
       case true ⇒
         allDrivesConstructed()
         sendToEachDrive(M.ConnectingDrive)
@@ -65,7 +63,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
       case false ⇒
         state}
     //Check if all drives connected, verify, and turning on if so
-    case (M.DriveConnected, Connecting) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveConnected) match{
+    case (M.DriveConnected, Connecting) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveConnected) match{
       case true ⇒
         verifyGraphStructure()
         sendToEachDrive(M.TurnOnDrive)
@@ -73,7 +71,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
       case false ⇒
         state}
     //Check if all drives turned on, and if so switch to TurnedOn and wait for start command
-    case (M.DriveTurnedOn, TurningOn) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveTurnedOn) match{
+    case (M.DriveTurnedOn, TurningOn) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveTurnedOn) match{
       case true ⇒
         allDrivesBuilt()
         TurnedOn
@@ -84,7 +82,7 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
       sendToEachDrive(M.StartDrive)
       Starting
     //Check if all drives started, and if so switch to Working
-    case (M.DriveStarted, Starting) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveWorking) match{
+    case (M.DriveStarted, Starting) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveWorking) match{
       case true ⇒
         allDrivesStarted()
         Working
@@ -95,14 +93,14 @@ with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
       sendToEachDrive(M.StopDrive)
       Stopping
     //Check if all drives stopped and run turning off if so
-    case (M.DriveStopped, Stopping) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveStopped) match{
+    case (M.DriveStopped, Stopping) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveStopped) match{
       case true ⇒
         sendToEachDrive(M.TurnOffDrive)
         TurningOff
       case false ⇒
         state}
     //Check if all drives turned off and if so switch to TurnedOff and wait for termination
-    case (M.DriveTurnedOff, TurningOff) ⇒ setDriveStateAndCheckIfAllIn(sender, DriveTurnedOff) match{
+    case (M.DriveTurnedOff, TurningOff) ⇒ setDriveStateAndCheckIfAllIn(DriveRef(sender), DriveTurnedOff) match{
       case true ⇒
         allDrivesStopped()
         TurnedOff

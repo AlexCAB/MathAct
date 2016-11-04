@@ -152,6 +152,12 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
       visualizationUIChanged(isShow)
       state
     //UI actions
+    case (M.SketchUIActionTriggered(LayoutFillBtn, _), (Working, _)) ⇒
+      layoutFillBtnHit()
+      state
+    case (M.SketchUIActionTriggered(LayoutStairsBtn, _), (Working, _)) ⇒
+      layoutStairsBtnHit()
+      state
     case (M.SketchUIActionTriggered(ShowAllBlocksUiBtn, _), (Working, _)) ⇒
       showAllBlocksUiBtnHit()
       state

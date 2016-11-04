@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.infrastructure.controller
 
-import mathact.core.model.enums.{SketchUIElement, SketchUiElemState}
+import mathact.core.model.enums.{WindowsLayoutKind, SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
 /** SketchControllerActor UI actions processing
@@ -23,6 +23,16 @@ import mathact.core.model.messages.M
 
 private[core] trait SketchControllerUIActions { _: SketchControllerActor ⇒ import SketchUIElement._, SketchUiElemState._
   //Methods
+  /** Layout fill btn hit */
+  def layoutFillBtnHit(): Unit = {
+    log.debug(s"[SketchControllerUIActions.layoutFillBtnHit] Send M.DoLayout(FillScreen).")
+    sketchUi ! M.UpdateSketchUIState(Map(LayoutFillBtn → ElemEnabled))
+    layout ! M.DoLayout(WindowsLayoutKind.FillScreen)}
+  /** Layout stairs btn hit */
+  def layoutStairsBtnHit(): Unit = {
+    log.debug(s"[SketchControllerUIActions.layoutStairsBtnHit] Send M.DoLayout(WindowsStairs).")
+    sketchUi ! M.UpdateSketchUIState(Map(LayoutStairsBtn → ElemEnabled))
+    layout ! M.DoLayout(WindowsLayoutKind.WindowsStairs)}
   /** Show all blocks UI btn hit */
   def showAllBlocksUiBtnHit(): Unit = {
     log.debug(s"[SketchControllerUIActions.showAllBlocksUiBtn] Update UI and send ShowAllBlockUi.")

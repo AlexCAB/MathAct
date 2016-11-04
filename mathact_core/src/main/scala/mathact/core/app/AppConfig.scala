@@ -17,6 +17,7 @@ package mathact.core.app
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core.model.config._
+import mathact.core.model.enums._
 
 import scala.concurrent.duration._
 
@@ -35,7 +36,8 @@ private[core] class AppConfig extends MainConfigLike{
     val pumpConfig = new PumpConfigLike{
       val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}}
   //Layout config
-  val layout = new LayoutConfigLike{}
+  val layout = new LayoutConfigLike{
+    val initialLayoutType = WindowsLayoutKind.withName(config.getString("view.layout.initial"))}
   //Parse plumbing config
   val plumbing = new PlumbingConfigLike{
     val drive = new DriveConfigLike{

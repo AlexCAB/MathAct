@@ -14,8 +14,8 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import akka.actor.ActorRef
 import mathact.core.model.enums._
+import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
 import scala.collection.mutable.{ListBuffer ⇒ MutList}
 
@@ -109,7 +109,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     inlet.publishers.values.foreach{ publisher ⇒
       val load = inlet.taskQueue.size
       log.debug(s"[DriveMessaging.sendLoadMessage] Send DriveLoad($load), to publisher: $publisher.")
-      publisher.blockDrive ! M.DriveLoad((self, inlet.inletId), publisher.outletId, load)}}
+      publisher.blockDrive ! M.DriveLoad((DriveRef(self), inlet.inletId), publisher.outletId, load)}}
   //Methods
   /** User message from self outlet, send to all outlet subscribers
     * @param outletId - Int, source ID
@@ -243,7 +243,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param subscriberId - (subscriber ActorRef, inlet ID Int), connected drive-subscriber
     * @param outletId - Int, connected outlet
     * @param inletQueueSize - Int */
-  def driveLoad(subscriberId: (ActorRef, Int), outletId: Int, inletQueueSize: Int): Unit = {
+  def driveLoad(subscriberId: (DriveRef, Int), outletId: Int, inletQueueSize: Int): Unit = {
     //Check data
     assume(
       outlets.contains(outletId),

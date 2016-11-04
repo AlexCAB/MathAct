@@ -14,9 +14,9 @@
 
 package mathact.core.plumbing.infrastructure.controller
 
-import akka.actor.ActorRef
 import mathact.core.IdGenerator
 import mathact.core.model.data.verification.BlockVerificationData
+import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.controller.Plumbing.DriveState._
@@ -30,10 +30,10 @@ import scala.collection.mutable.{Map ⇒ MutMap, ListBuffer ⇒ MutList}
 
 private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ import Plumbing._
   //Variables
-  private val drives = MutMap[ActorRef, DriveData]()
+  private val drives = MutMap[DriveRef, DriveData]()
   private val blocksVerificationData = MutList[BlockVerificationData]()
   //Functions
-  private def forDriveDo(driveActor: ActorRef)(proc: DriveData⇒Unit): Unit = {
+  private def forDriveDo(driveActor: DriveRef)(proc: DriveData⇒Unit): Unit = {
     //Check data
     assume(
       drives.contains(driveActor),
@@ -45,7 +45,7 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
     * @param blockPump - block data received from pump
     * @param state - current state
     * @param newActor - ref of new drive actor */
-  def newDrive(blockPump: PumpLike, state: State, newActor: (Int, PumpLike)⇒ActorRef)
+  def newDrive(blockPump: PumpLike, state: State, newActor: (Int, PumpLike)⇒DriveRef)
   :Unit = state match{
     case Init | Constructing ⇒
       //New drive
@@ -75,7 +75,7 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
   /** Set new state for given drive
     * @param actor - ActorRef, drive actor reference
     * @param newState - DriveState */
-  def setDriveState(actor: ActorRef, newState: DriveState): Unit = forDriveDo(actor){ driveData ⇒
+  def setDriveState(actor: DriveRef, newState: DriveState): Unit = forDriveDo(actor){ driveData ⇒
     log.debug(s"[PlumbingLife.setDriveState] Set $state state for drive $actor.")
     drives += actor → driveData.copy(driveState = newState)}
   /** Send given message to all drives
@@ -97,7 +97,7 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
     * @param actor - ActorRef, drive actor reference
     * @param newState - DriveState
     * @return - Boolean, true if all in given state */
-  def setDriveStateAndCheckIfAllIn(actor: ActorRef, newState: DriveState): Boolean = {
+  def setDriveStateAndCheckIfAllIn(actor: DriveRef, newState: DriveState): Boolean = {
     setDriveState(actor, newState)
     isAllDrivesIn(newState)}
   /** No drives found on build */

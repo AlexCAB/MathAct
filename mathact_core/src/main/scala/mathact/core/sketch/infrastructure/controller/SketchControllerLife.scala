@@ -89,6 +89,8 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
       StopSketchBtn → ElemDisabled,
+      LayoutFillBtn → ElemDisabled,
+      LayoutStairsBtn → ElemDisabled,
       ShowAllBlocksUiBtn → ElemDisabled,
       HideAllBlocksUiBtn → ElemDisabled,
       SkipAllTimeoutTaskBtn → ElemDisabled))
@@ -108,6 +110,8 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
       StopSketchBtn → ElemEnabled,
+      LayoutFillBtn → ElemEnabled,
+      LayoutStairsBtn → ElemEnabled,
       ShowAllBlocksUiBtn → ElemEnabled,
       HideAllBlocksUiBtn → ElemEnabled,
       SkipAllTimeoutTaskBtn → ElemEnabled))
@@ -126,6 +130,8 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     //Update UI
     sketchUi ! M.UpdateSketchUIState(Map(
       RunBtn → ElemDisabled,
+      LayoutFillBtn → ElemDisabled,
+      LayoutStairsBtn → ElemDisabled,
       ShowAllBlocksUiBtn → ElemDisabled,
       HideAllBlocksUiBtn → ElemDisabled,
       SkipAllTimeoutTaskBtn → ElemDisabled,

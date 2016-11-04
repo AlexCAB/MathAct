@@ -14,7 +14,7 @@
 
 package mathact.core.model.data.pipes
 
-import akka.actor.ActorRef
+import mathact.core.model.holders.DriveRef
 
 
 /** Outlet data
@@ -22,7 +22,7 @@ import akka.actor.ActorRef
   */
 
 private[core] case class OutletData(
-  blockDrive: ActorRef,
+  blockDrive: DriveRef,
   blockId: Int,
   blockName: Option[String],
   outletId: Int,

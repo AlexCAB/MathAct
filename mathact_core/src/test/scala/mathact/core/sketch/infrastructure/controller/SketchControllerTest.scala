@@ -147,6 +147,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.ShowSketchUI)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
+        LayoutFillBtn → ElemDisabled,
+        LayoutStairsBtn → ElemDisabled,
         ShowAllBlocksUiBtn → ElemDisabled,
         HideAllBlocksUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
@@ -184,6 +186,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
         StopSketchBtn → ElemEnabled,
+        LayoutFillBtn → ElemEnabled,
+        LayoutStairsBtn → ElemEnabled,
         ShowAllBlocksUiBtn → ElemEnabled,
         HideAllBlocksUiBtn → ElemEnabled,
         SkipAllTimeoutTaskBtn → ElemEnabled)
@@ -229,6 +233,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
         StopSketchBtn → ElemDisabled,
+        LayoutFillBtn → ElemDisabled,
+        LayoutStairsBtn → ElemDisabled,
         ShowAllBlocksUiBtn → ElemDisabled,
         HideAllBlocksUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled)
@@ -254,6 +260,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.ShowSketchUI)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
+        LayoutFillBtn → ElemDisabled,
+        LayoutStairsBtn → ElemDisabled,
         ShowAllBlocksUiBtn → ElemDisabled,
         HideAllBlocksUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
@@ -303,6 +311,8 @@ class SketchControllerTest extends ActorTestSpec {
       testSketchUi.expectMsg(M.ShowSketchUI)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
+        LayoutFillBtn → ElemDisabled,
+        LayoutStairsBtn → ElemDisabled,
         ShowAllBlocksUiBtn → ElemDisabled,
         HideAllBlocksUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,
@@ -341,6 +351,8 @@ class SketchControllerTest extends ActorTestSpec {
       testPlumbing.send(controller, M.PlumbingStarted)
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(    //On PlumbingStarted
         RunBtn → ElemDisabled,
+        LayoutFillBtn → ElemEnabled,
+        LayoutStairsBtn → ElemEnabled,
         ShowAllBlocksUiBtn → ElemEnabled,
         HideAllBlocksUiBtn → ElemEnabled,
         SkipAllTimeoutTaskBtn → ElemEnabled,
@@ -409,6 +421,8 @@ class SketchControllerTest extends ActorTestSpec {
       //UI update
       testSketchUi.expectMsgType[M.UpdateSketchUIState].state shouldEqual Map(
         RunBtn → ElemDisabled,
+        LayoutFillBtn → ElemDisabled,
+        LayoutStairsBtn → ElemDisabled,
         ShowAllBlocksUiBtn → ElemDisabled,
         HideAllBlocksUiBtn → ElemDisabled,
         SkipAllTimeoutTaskBtn → ElemDisabled,

@@ -16,7 +16,7 @@ package mathact.core.plumbing.infrastructure.drive
 
 import java.util.concurrent.ExecutionException
 
-import akka.actor.{Terminated, Actor, ActorRef, Props}
+import akka.actor.{Terminated, Actor, Props}
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -51,7 +51,7 @@ class PumpAndDriveTest extends ActorTestSpec{
   trait TestCase extends Suite{
     //Helpers definitions
     case class DriveState(
-      outlets: Map[Int, (OutPipe[_], Option[Long], Map[(ActorRef, Int), Int])], // (Outlet ID, (Outlet, subscribers(id, inletQueueSize))
+      outlets: Map[Int, (OutPipe[_], Option[Long], Map[(DriveRef, Int), Int])], // (Outlet ID, (Outlet, subscribers(id, inletQueueSize))
       inlets: Map[Int, (InPipe[_], Int)],    // (Inlet ID, Outlet, taskQueueSize)
       pendingConnections: Map[Int, M.ConnectPipes],
       pendingMessages:  List[(Int, Any)],
@@ -63,7 +63,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       private var procTimeout: Option[Duration] = None
       private var procError: Option[Throwable] = None
       //Set pipe
-      private[core]  def injectOutPipe(pipe: OutPipe[Double]): Unit = {opPipe = Some(pipe)}
+      private[core] def injectOutPipe(pipe: OutPipe[Double]): Unit = {opPipe = Some(pipe)}
       //Receive user message
       private[core] def processValue(value: Any): Unit = synchronized{
         println(
@@ -130,7 +130,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         println(
           s"[PumpAndDriveTest.testPlumbing.NewDrive] Created of drive for " +
           s"block: ${blockPump.block.blockName}, drive: $drive")
-        drive}}})
+        DriveRef(drive)}}})
     lazy val testLayout = TestProbe("Layout_" + randomString())
     //Test workbench context
     lazy val testSketchContext = new SketchContext(
@@ -201,7 +201,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         def isHideFrameCalled: Boolean = hideFrameCalled
         def isCloseFrameCalled: Boolean = closeFrameCalled
         def getLastUiEvent: Option[UIEvent] = lastUiEvent}
-      lazy val testDrive = testBlock.pump.drive
+      lazy val testDrive = testBlock.pump.drive.ref
       lazy val otherDrive = TestActor("TestOtherDriver_" + randomString())((self, _) ⇒ {
         case M.AddOutlet(pipe, _) ⇒ Some(Right((0, 1)))  // (block ID, pipe ID)
         case M.AddInlet(pipe, _) ⇒  Some(Right((0, 2)))  // (block ID, pipe ID)
@@ -212,7 +212,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         def blockImagePath = None
         //Pump
         val pump: Pump = new Pump(testSketchContext, this){
-          override val drive = otherDrive.ref}
+          override val drive = DriveRef(otherDrive.ref)}
         //Pipes
         val otherHandler = new TestHandler
         lazy val outlet = new OutPipe(otherHandler, Some("otherOutlet"), pump)
@@ -221,12 +221,12 @@ class PumpAndDriveTest extends ActorTestSpec{
         testBlock
         testPlumbing.send(blocks.testDrive, M.ConstructDrive)
         testPlumbing.expectMsg(M.DriveConstructed)
-        testPlumbing.send(testBlock.pump.drive, M.ConnectingDrive)
+        testPlumbing.send(testBlock.pump.drive.ref, M.ConnectingDrive)
         testPlumbing.expectMsgType[M.DriveVerification]
         testPlumbing.expectMsg(M.DriveConnected)
         testUserLogging.expectMsgType[M.LogInfo]
         testVisualization.expectMsgType[M.BlockConstructedInfo]
-        testPlumbing.send(testBlock.pump.drive, M.TurnOnDrive)
+        testPlumbing.send(testBlock.pump.drive.ref, M.TurnOnDrive)
         testPlumbing.expectMsg(M.DriveTurnedOn)
         testBlock.isOnStartCalled shouldEqual false
         testBlock}
@@ -252,12 +252,12 @@ class PumpAndDriveTest extends ActorTestSpec{
         testPlumbing.send(testDrive, M.ConnectingDrive)
         val conMsg =  otherDrive.expectNMsg(2)
         val addCon = conMsg.getOneWithType[M.AddConnection]
-        val inletData = InletData(otherDrive.ref, blockId = 0, None, addCon.inlet.inletId, addCon.inlet.inletName)
+        val inletData = InletData(DriveRef(otherDrive.ref), blockId = 0, None, addCon.inlet.inletId, addCon.inlet.inletName)
         otherDrive.send(testDrive, M.ConnectTo(addCon.connectionId, addCon.initiator, addCon.outlet, inletData))
         val conTo = conMsg.getOneWithType[M.ConnectTo]
         val outletData = OutletData(
           conTo.outlet.pump.drive, conTo.outlet.blockId, Some("otherOutlet"), otherOutlet.outletId, otherOutlet.outletName)
-        otherDrive.send(conTo.initiator, M.PipesConnected(conTo.connectionId, conTo.initiator, outletData, conTo.inlet))
+        otherDrive.send(conTo.initiator.ref, M.PipesConnected(conTo.connectionId, conTo.initiator, outletData, conTo.inlet))
         testPlumbing.expectMsgType[M.DriveVerification]
         testPlumbing.expectMsg(M.DriveConnected)
         testUserLogging.expectMsgType[M.LogInfo]
@@ -342,14 +342,14 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Test wiring
       val connectTo = blocks.otherDrive.expectMsgType[M.ConnectTo]
       println(s"[PumpAndDriveTest] connectTo: $connectTo")
-      connectTo.initiator        shouldEqual blocks.testDrive
+      connectTo.initiator        shouldEqual DriveRef(blocks.testDrive)
       connectTo.outlet.outletId  shouldEqual outlet.outletId
       connectTo.inlet.inletId    shouldEqual inlet.inletId
       //Send M.PipesConnected and expect M.DriveConnected
       val outletData = OutletData(outlet.pump.drive, outlet.blockId, None, outlet.outletId, outlet.outletName)
       val inletData = InletData(inlet.pump.drive, inlet.blockId, None, inlet.inletId, inlet.inletName)
       blocks.otherDrive.send(
-        connectTo.initiator,
+        connectTo.initiator.ref,
         M.PipesConnected(connectTo.connectionId, connectTo.initiator, outletData, inletData))
       val verData = testPlumbing.expectMsgType[M.DriveVerification].verificationData
       println(s"[PumpAndDriveTest] verData: $verData")
@@ -390,7 +390,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.send(blocks.testDrive, M.ConnectingDrive)
       //Test wiring
       val addConnection = blocks.otherDrive.expectMsgType[M.AddConnection]
-      addConnection.initiator       shouldEqual blocks.testDrive
+      addConnection.initiator       shouldEqual DriveRef(blocks.testDrive)
       addConnection.inlet.inletId   shouldEqual inlet.inletId
       addConnection.outlet.outletId shouldEqual outlet.outletId
       val inletData = InletData(inlet.pump.drive, inlet.blockId, None, inlet.inletId, inlet.inletName)
@@ -581,12 +581,12 @@ class PumpAndDriveTest extends ActorTestSpec{
       testPlumbing.expectMsg(M.DriveConstructed)
       testPlumbing.send(blocks.testDrive, M.ConnectingDrive)
       val connectTo = blocks.otherDrive.expectMsgType[M.ConnectTo]
-      connectTo.initiator       shouldEqual blocks.testDrive
+      connectTo.initiator       shouldEqual DriveRef(blocks.testDrive)
       connectTo.outlet.outletId shouldEqual outlet.outletId
       connectTo.inlet.inletId   shouldEqual inlet.inletId
       val outletData = OutletData(outlet.pump.drive, outlet.blockId, None, outlet.outletId, outlet.outletName)
       blocks.otherDrive.send(
-        connectTo.initiator,
+        connectTo.initiator.ref,
         M.PipesConnected(connectTo.connectionId,connectTo.initiator, outletData, connectTo.inlet))
       testPlumbing.expectMsgType[M.DriveVerification]
       testPlumbing.expectMsg(M.DriveConnected)
@@ -647,13 +647,13 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Load messages
       val driveLoad1 = blocks.otherDrive.expectMsgType[M.DriveLoad]
       println("[PumpAndDriveTest] driveLoad1: " + driveLoad1)
-      driveLoad1.subscriberId shouldEqual Tuple2(blocks.testDrive, testInlet.inletId)
+      driveLoad1.subscriberId shouldEqual Tuple2(DriveRef(blocks.testDrive), testInlet.inletId)
       driveLoad1.outletId shouldEqual otherOutlet.outletId
       driveLoad1.inletQueueSize shouldEqual 1
       sleep(1.second) //Wait for end processing of first message
       val driveLoad2 = blocks.otherDrive.expectMsgType[M.DriveLoad]
       println("[PumpAndDriveTest] driveLoad2: " + driveLoad2)
-      driveLoad2.subscriberId shouldEqual Tuple2(blocks.testDrive, testInlet.inletId)
+      driveLoad2.subscriberId shouldEqual Tuple2(DriveRef(blocks.testDrive), testInlet.inletId)
       driveLoad2.outletId shouldEqual otherOutlet.outletId
       driveLoad2.inletQueueSize shouldEqual 0
       //Check of message processing
@@ -696,7 +696,7 @@ class PumpAndDriveTest extends ActorTestSpec{
     "by DriveLoad, evaluate message handling timeout" in new TestCase {
       //Preparing
       val (testOutlet, testInlet, otherOutlet, otherInlet) = blocks.connectedBlocks
-      val subId = (blocks.otherDrive.ref, otherInlet.inletId)
+      val subId = (DriveRef(blocks.otherDrive.ref), otherInlet.inletId)
       val queueSize = randomInt(100, 1000)
       //Test for first message
       blocks.otherDrive.send(blocks.testDrive, M.DriveLoad(subId, testOutlet.outletId, queueSize))
@@ -741,7 +741,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Preparing
       val (_, _, _, otherInlet) = blocks.connectedBlocks
       testPlumbing.watch(blocks.testDrive)
-      val subId = (blocks.otherDrive.ref, otherInlet.inletId)
+      val subId = (DriveRef(blocks.otherDrive.ref), otherInlet.inletId)
       val queueSize = randomInt(100, 1000)
       //Send DriveLoad
       blocks.otherDrive.send(blocks.testDrive, M.DriveLoad(subId, 123456789, queueSize)) //Incorrect outlet ID
@@ -866,10 +866,10 @@ class PumpAndDriveTest extends ActorTestSpec{
       blocks.testBlock.isShowFrameUICalled shouldEqual false
       blocks.testBlock.isHideFrameCalled shouldEqual false
       blocks.testBlock.isCloseFrameCalled shouldEqual false}
-    "call uiLayout() on M.UpdateWindowPosition" in new TestCase {
+    "call uiLayout() on M.SetWindowPosition" in new TestCase {
       //Preparing
       blocks.builtBlock
-      val upMsg = M.UpdateWindowPosition(1, randomDouble(), randomDouble())
+      val upMsg = M.SetWindowPosition(1, randomDouble(), randomDouble())
       //Send
       testLayout.send(blocks.testDrive, upMsg)
       sleep(1.second) //Wait for receiving
@@ -884,7 +884,8 @@ class PumpAndDriveTest extends ActorTestSpec{
         x = randomDouble(),
         y = randomDouble(),
         h = randomDouble(),
-        w = randomDouble())
+        w = randomDouble(),
+        title = "Test block")
       val prefs = WindowPreference(
         prefX = randomOpt(randomDouble()),
         prefY = randomOpt(randomDouble()))
