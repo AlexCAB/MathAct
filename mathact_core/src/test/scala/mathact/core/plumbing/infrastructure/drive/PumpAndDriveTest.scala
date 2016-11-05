@@ -100,6 +100,7 @@ class PumpAndDriveTest extends ActorTestSpec{
     lazy val testController = TestProbe("TestController_" + randomString())
     lazy val testUserLogging = TestProbe("UserLogging_" + randomString())
     lazy val testVisualization = TestProbe("Visualization_" + randomString())
+    lazy val testLayout = TestProbe("Layout_" + randomString())
     lazy val testPlumbing = TestActor("TestPlumbing_" + randomString())((self, context) ⇒ {
       case M.NewDrive(blockPump) ⇒ Some{ Right{
         val drive = context.actorOf(Props(
@@ -107,6 +108,7 @@ class PumpAndDriveTest extends ActorTestSpec{
             testDriveConfig,
             testBlockId,
             blockPump,
+            LayoutRef(testLayout.ref),
             PlumbingRef(self),
             UserLoggingRef(testUserLogging.ref),
             VisualizationRef(testVisualization.ref))
@@ -131,7 +133,6 @@ class PumpAndDriveTest extends ActorTestSpec{
           s"[PumpAndDriveTest.testPlumbing.NewDrive] Created of drive for " +
           s"block: ${blockPump.block.blockName}, drive: $drive")
         DriveRef(drive)}}})
-    lazy val testLayout = TestProbe("Layout_" + randomString())
     //Test workbench context
     lazy val testSketchContext = new SketchContext(
       system,
@@ -872,9 +873,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       val upMsg = M.SetWindowPosition(1, randomDouble(), randomDouble())
       //Send
       testLayout.send(blocks.testDrive, upMsg)
-      sleep(1.second) //Wait for receiving
+      testLayout.expectMsgType[M.WindowPositionUpdated].windowId shouldEqual 1
       //Check
-      blocks.testBlock.getLastUiLayout shouldEqual Some(Tuple3(upMsg.id, upMsg.x, upMsg.y))}
+      blocks.testBlock.getLastUiLayout shouldEqual Some(Tuple3(upMsg.windowId, upMsg.x, upMsg.y))}
     "pass messages to LayoutActor on calling of pump methods" in new TestCase {
       //Preparing
       blocks.builtBlock
@@ -892,18 +893,18 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Test for registerWindow
       blocks.testBlock.pump.registerWindow(windowId, state, prefs)
       val registerMsg = testLayout.expectMsgType[M.RegisterWindow]
-      registerMsg.id shouldEqual windowId
+      registerMsg.windowId shouldEqual windowId
       registerMsg.state shouldEqual state
       registerMsg.prefs shouldEqual prefs
       //Test for windowUpdated
       blocks.testBlock.pump.windowUpdated(windowId, state)
       val updatedMsg = testLayout.expectMsgType[M.WindowUpdated]
-      updatedMsg.id shouldEqual windowId
+      updatedMsg.windowId shouldEqual windowId
       updatedMsg.state shouldEqual state
       //Test for layoutWindow
       blocks.testBlock.pump.layoutWindow(windowId)
       val layoutMsg = testLayout.expectMsgType[M.LayoutWindow]
-      layoutMsg.id shouldEqual windowId}
+      layoutMsg.windowId shouldEqual windowId}
     "call uiShow() and uiHide() by M.ShowBlockUi and M.HideBlockUi" in new TestCase {
       //Preparing
       blocks.startedBlock

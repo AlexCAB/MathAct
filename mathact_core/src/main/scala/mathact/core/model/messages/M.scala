@@ -99,15 +99,16 @@ private[core] object M {
   case class UserUIEvent(event: UIEvent) extends Msg
   case class NewUserActor(props: Props, name: Option[String]) extends Msg
   //Object Pump - LayoutActor (tell)
-  case class RegisterWindow(drive: DriveRef, id: Int, state: WindowState, prefs: WindowPreference) extends Msg
-  case class WindowUpdated(drive: DriveRef, id: Int, state: WindowState) extends Msg
-  case class LayoutWindow(drive: DriveRef, id: Int) extends Msg
+  case class RegisterWindow(drive: DriveRef, windowId: Int, state: WindowState, prefs: WindowPreference) extends Msg
+  case class WindowUpdated(drive: DriveRef, windowId: Int, state: WindowState) extends Msg
+  case class LayoutWindow(drive: DriveRef, windowId: Int) extends Msg
   //PlumbingActor - LayoutActor
   case object AllDrivesConstruct extends Msg
   //SketchControllerActor - LayoutActor
   case class DoLayout(kind: WindowsLayoutKind) extends Msg
   //LayoutActor - DriveActor
-  case class SetWindowPosition(id: Int, x: Double, y: Double) extends Msg
+  case class SetWindowPosition(windowId: Int, x: Double, y: Double) extends Msg
+  case class WindowPositionUpdated(windowId: Int) extends Msg
   //PlumbingActor - DriveActor (life cycle)
   case object ConstructDrive extends Msg //Lock creation of new inlets/outlets
   case object DriveConstructed extends Msg

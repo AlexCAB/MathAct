@@ -36,14 +36,15 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
       log.debug(s"[DriveUIControl.executeIfBlockHaveUi] Block have no UI, nothing to do.")}
   //Methods
   /** Create block UI */
-  def updateBlockUiPosition(id: Int, x: Double, y: Double): Unit = pump.block match{
+  def updateBlockUiPosition(windowId: Int, x: Double, y: Double): Unit = pump.block match{
     case blockUi: BlockUIControl ⇒
-      log.debug(s"[DriveUIControl.updateBlockUiPosition] Call uiLayout() of block, id: $id, x: $x, y: $y")
-      blockUi.uiLayout(id, x, y)
+      log.debug(s"[DriveUIControl.updateBlockUiPosition] Call uiLayout() of block, windowId: $windowId, x: $x, y: $y")
+      blockUi.uiLayout(windowId, x, y)
+      layout ! M.WindowPositionUpdated(windowId)
     case _ ⇒
       throw new IllegalArgumentException(
         s"[DriveUIControl.updateBlockUiPosition] uiLayout() can not be called on block which " +
-        s"not implement BlockUIControl. Id: $id, x: $x, y: $y")}
+        s"not implement BlockUIControl. Id: $windowId, x: $x, y: $y")}
   /** Create block UI */
   def initBlockUi(): Unit = executeIfBlockHaveUi{ blockUi ⇒
     log.debug(s"[DriveUIControl.initBlockUi] Call uiCreate() of block.")

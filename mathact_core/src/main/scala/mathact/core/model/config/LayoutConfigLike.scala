@@ -21,6 +21,6 @@ import mathact.core.model.enums.WindowsLayoutKind
   */
 
 trait LayoutConfigLike {
-  val initialLayoutType: WindowsLayoutKind
-
-}
+  val initialLayoutKind: WindowsLayoutKind
+  val screenIndent: Int
+  val stairsStep: Int}

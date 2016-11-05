@@ -79,7 +79,7 @@ private [core] object Application{
         mainController.isEmpty,
         s"[Application.start] This method can be called only on start, mainController: $mainController")
       //Run Java FX Application
-      JFXApplication.init(args, log)
+      val screenBounds = JFXApplication.init(args, log)
       Platform.implicitExit = false
       log.debug(s"[Application.start] JFXApplication created, starting application.")
       //Create main controller
@@ -101,7 +101,7 @@ private [core] object Application{
                   new VisualizationActor(config.visualization, selfRef),
                   "VisualizationActor_" + sketchData.className))
                 val layout = LayoutRef(newWorker(
-                  new LayoutActor(config.layout, selfRef),
+                  new LayoutActor(config.layout, selfRef, screenBounds),
                   "LayoutActor_" + sketchData.className))
                 val plumbing = PlumbingRef(newController(
                   new PlumbingActor(

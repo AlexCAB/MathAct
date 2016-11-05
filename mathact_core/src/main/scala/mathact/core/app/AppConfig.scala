@@ -21,6 +21,8 @@ import mathact.core.model.enums._
 
 import scala.concurrent.duration._
 
+import javafx.stage.Screen
+
 
 /** Read and hold main commonConfig
   * Created by CAB on 03.09.2016.
@@ -37,7 +39,9 @@ private[core] class AppConfig extends MainConfigLike{
       val askTimeout = Timeout(config.getInt("plumbing.pump.ask.timeout").millis)}}
   //Layout config
   val layout = new LayoutConfigLike{
-    val initialLayoutType = WindowsLayoutKind.withName(config.getString("view.layout.initial"))}
+    val initialLayoutKind = WindowsLayoutKind.withName(config.getString("view.layout.initial"))
+    val screenIndent = config.getInt("view.layout.indent")
+    val stairsStep = config.getInt("view.layout.algo.stairs.step")}
   //Parse plumbing config
   val plumbing = new PlumbingConfigLike{
     val drive = new DriveConfigLike{

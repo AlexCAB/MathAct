@@ -20,7 +20,9 @@ import akka.event.LoggingAdapter
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import javafx.stage.Stage
+import javafx.stage.{Screen, Stage}
+
+import javafx.geometry.Rectangle2D
 
 
 /** FX Application class and helper object
@@ -37,7 +39,7 @@ private[core] object JFXApplication{
   /** Do run of Java FX
     * @param args - Array[String], application arguments from def main()
     * @param log - LoggingAdapter, logging. */
-  def init(args: Array[String], log: LoggingAdapter): Unit = {
+  def init(args: Array[String], log: LoggingAdapter): Rectangle2D = {
     //Starting app
     log.debug("[JFXApplication.init] Try to start Java FX.")
     Future{
@@ -50,7 +52,9 @@ private[core] object JFXApplication{
     //Check if run
     primaryStage.isEmpty match{
       case true ⇒ throw new IllegalStateException("[JFXApplication.init] Java FX not started.")
-      case false ⇒ log.info("[JFXApplication.init] Java FX started.")}}}
+      case false ⇒ log.info("[JFXApplication.init] Java FX started.")}
+    //Get screen bounds
+    Screen.getPrimary.getBounds}}
 
 
 private[core] class JFXApplication extends Application{

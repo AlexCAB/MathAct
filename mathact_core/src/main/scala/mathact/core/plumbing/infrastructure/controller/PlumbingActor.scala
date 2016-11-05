@@ -38,8 +38,8 @@ extends ControllerBase(Plumbing.State.Init)
 with PlumbingLife{ import Plumbing._, Plumbing.State._, Plumbing.DriveState._
   //Creators functions
   def createDriveActor(blockId: Int, blockPump: PumpLike): DriveRef = DriveRef(newController(
-    new DriveActor(config.drive, blockId, blockPump, PlumbingRef(self), userLogging, visualization),
-    "DriveOf_" + blockPump.getClass.getTypeName + "_" + UUID.randomUUID))
+    new DriveActor(config.drive, blockId, blockPump, layout, PlumbingRef(self), userLogging, visualization),
+    "DriveOf_" + blockPump.block.getClass.getTypeName + "_" + UUID.randomUUID))
   //Message handling
   def reaction: PartialFunction[(Msg, State), State] = {
     //Creating of drive for new block instance

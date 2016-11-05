@@ -17,7 +17,7 @@ package mathact.core.plumbing.infrastructure.drive
 import akka.actor._
 import mathact.core.model.config.DriveConfigLike
 import mathact.core.model.enums._
-import mathact.core.model.holders.{VisualizationRef, UserLoggingRef, PlumbingRef}
+import mathact.core.model.holders.{LayoutRef, VisualizationRef, UserLoggingRef, PlumbingRef}
 import mathact.core.model.messages.{M, Msg}
 import mathact.core.plumbing.PumpLike
 import mathact.core.plumbing.infrastructure.impeller.ImpellerActor
@@ -35,6 +35,7 @@ private[core] class DriveActor(
   val config: DriveConfigLike,
   val blockId: Int,
   val pump: PumpLike,
+  val layout: LayoutRef,
   val plumbing: PlumbingRef,
   val userLogging: UserLoggingRef,
   val visualization: VisualizationRef)
