@@ -14,6 +14,8 @@
 
 package mathact.core.plumbing.infrastructure.impeller
 
+import mathact.core.model.enums._
+
 import scala.concurrent.duration.FiniteDuration
 
 /** Impeller
@@ -21,6 +23,14 @@ import scala.concurrent.duration.FiniteDuration
   */
 
 private[core] object Impeller {
+  //Definitions
+  case class TaskState(
+    taskNumber: Long,
+    kind: TaskKind,
+    taskId: Int,
+    skipOnTimeout: Boolean,
+    startTime: Long,
+    isTimeout: Boolean)
   //Local messages
   case class TaskTimeout(taskNumber: Long, timeout: FiniteDuration)
   case class TaskSuccess(taskNumber: Long, res: Any)

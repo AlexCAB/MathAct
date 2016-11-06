@@ -135,10 +135,10 @@ private[core] object M {
   case class UserMessage[T](outletId: Int, inletId: Int, value: T) extends Msg
   case class DriveLoad(subscriberId: (DriveRef, Int), outletId: Int, inletQueueSize: Int) extends Msg //subscriberId: (drive, inletId)
   //DriveActor - ImpellerActor
-  case class RunTask[R](kind: TaskKind, id: Int, timeout: FiniteDuration, task: ()⇒R) extends Msg
+  case class RunTask[R](kind: TaskKind, id: Int, timeout: FiniteDuration, skipOnTimeout: Boolean, task: ()⇒R) extends Msg
   case object SkipCurrentTask extends Msg //Makes impeller to skip the current task, but not terminate it (impeller just will not wait for this more)
   case class TaskDone(kind: TaskKind, id: Int, execTime: FiniteDuration, taskRes: Any) extends Msg
-  case class TaskTimeout(kind: TaskKind, id: Int, timeFromStart: FiniteDuration) extends Msg
+  case class TaskTimeout(kind: TaskKind, id: Int, timeFromStart: FiniteDuration, skipOnTimeout: Boolean) extends Msg
   case class TaskFailed(kind: TaskKind, id: Int, execTime: FiniteDuration, error: Throwable) extends Msg
   //DriveActor - UserActorsRoot
   case class CreateUserActor(props: Props, name: Option[String], sender: ActorRef) extends Msg

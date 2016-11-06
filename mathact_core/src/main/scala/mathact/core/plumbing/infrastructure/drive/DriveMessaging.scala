@@ -53,6 +53,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     kind = TaskKind.Massage,
     id = inlet.inletId,
     timeout = config.messageProcessingTimeout,
+    skipOnTimeout = false,
     task = ()⇒{inlet.pipe.processValue(value)})
   private def enqueueMessageTask(inlet: InletState, value: Any): Unit = {
     val newRunTask = buildTask(inlet, value)

@@ -29,13 +29,16 @@ private[core] object Drive {
   //enums
   object State extends Enumeration {
     val Init = Value
+    val Construction = Value
     val Constructed = Value
     val Connecting = Value
     val Connected = Value
     val TurnedOn = Value
+    val CreatingUI = Value
     val Starting = Value
     val Working = Value
     val Stopping = Value
+    val ClosingUI = Value
     val Stopped = Value
     val TurningOff = Value
     val TurnedOff = Value}

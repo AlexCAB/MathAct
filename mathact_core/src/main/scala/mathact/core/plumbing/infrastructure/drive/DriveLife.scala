@@ -96,9 +96,9 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
       //Return exception
       Left(new IllegalStateException(msg))}
   /** Drive constructed */
-  def constructDrive(): Unit = {
+  def driveConstructed(): Unit = {
     log.debug(
-      s"[DriveLife.constructDrive] Drive constructed, new pipes and connections will not accepted. " +
+      s"[DriveLife.driveConstructed] Drive constructed, new pipes and connections will not accepted. " +
       s"Current: outlets: $outlets, inlets: $inlets")
     //Report to plumbing
     plumbing ! M.DriveConstructed
@@ -141,7 +141,12 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
   def doStarting(): Boolean = pump.block match{
     case task: OnStartLike ⇒
       log.debug("[DriveLife.doStarting] Try to run starting user function.")
-      impeller ! M.RunTask[Unit](TaskKind.Start, -1, config.startFunctionTimeout, ()⇒{ task.doStart() })
+      impeller ! M.RunTask[Unit](
+        TaskKind.Start,
+        id = -1,
+        config.startFunctionTimeout,
+        skipOnTimeout = false,
+        task = ()⇒{ task.doStart() })
       false
     case _ ⇒
       log.debug("[DriveLife.doStarting] Starting user function not defined, nothing to do.")
@@ -180,7 +185,12 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
   def doStopping(): Boolean = pump.block match{
     case task: OnStopLike ⇒
       log.debug("[DriveLife.doStopping] Try to run stopping user function.")
-      impeller ! M.RunTask[Unit](TaskKind.Stop, -1, config.stopFunctionTimeout, ()⇒{ task.doStop() })
+      impeller ! M.RunTask[Unit](
+        TaskKind.Stop,
+        id = -2,
+        config.stopFunctionTimeout,
+        skipOnTimeout = false,
+        task = ()⇒{ task.doStop() })
       false
     case _ ⇒
       log.debug("[DriveLife.doStopping] Stopping user function not defined, nothing to do.")
@@ -188,14 +198,12 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
         Some(blockId),
         blockName.getOrElse(blockClassName),
         s"No stopping function, nothing to do.")
-      plumbing ! M.DriveStopped
       true}
   /** Stopping task done, set of stopped
     * @param execTime - Duration */
   def stoppingTaskDone(execTime: Duration): Unit = {
     log.debug(s"[DriveLife.stoppingTaskDone] execTime: $execTime.")
-    userLogging ! M.LogInfo(Some(blockId), blockName.getOrElse(blockClassName), s"Block successful stopped.")
-    plumbing ! M.DriveStopped}
+    userLogging ! M.LogInfo(Some(blockId), blockName.getOrElse(blockClassName), s"Block successful stopped.")}
   /** Stopping task failed, set of stopped, log to user console
     * @param execTime - Duration
     * @param error - Throwable */
@@ -205,8 +213,7 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
       Some(blockId),
       blockName.getOrElse(blockClassName),
       Seq(error),
-      s"Stopping function failed on $execTime.")
-    plumbing ! M.DriveStopped}
+      s"Stopping function failed on $execTime.")}
   /** Stopping task timeout, log to user console
     * @param execTime - Duration */
   def stoppingTaskTimeout(execTime: Duration): Unit = {
@@ -215,6 +222,11 @@ private[core] trait DriveLife { _: DriveActor ⇒ import Drive._
       Some(blockId),
       blockName.getOrElse(blockClassName),
       s"Stopping function timeout on $execTime, keep waiting.")}
+  /** Drive stopped */
+  def driveStopped(): Unit = {
+    log.debug("[DriveLife.driveStopped] Send DriveStopped to plumbing.")
+    plumbing ! M.DriveStopped}
+  /** Drive turned off */
   def driveTurnedOff(): Unit = {
     log.debug(s"[DriveLife.driveTurnedOff] Send DriveTurnedOff")
     plumbing ! M.DriveTurnedOff}}

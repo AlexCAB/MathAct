@@ -63,12 +63,23 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
     case (M.AddInlet(pipe, name), state) ⇒
       sender ! addInletAsk(pipe, name, state)
       state
-    //Construct drive, just switch state to Created to disable future adding of inlets, outlets and connections
+    //Construct drive, disable future adding of inlets, outlets and connections
     case (M.ConstructDrive, Init) ⇒
       blockName = pump.block.blockName
       blockImagePath = pump.block.blockImagePath
-      constructDrive()
-      initBlockUi()
+      initBlockUi() match{
+        case true ⇒
+          Construction
+        case false ⇒
+          driveConstructed()
+          Constructed}
+    case (M.TaskDone(UiInit, _, time, _), Construction) ⇒
+      blockUiInitialized(error = None, time)
+      driveConstructed()
+      Constructed
+    case (M.TaskFailed(UiInit, _, time, error), Construction) ⇒
+      blockUiInitialized(Some(error), time)
+      driveConstructed()
       Constructed
     //Build drive, connect connections from pending list
     case (M.ConnectingDrive, Constructed) ⇒
@@ -107,51 +118,77 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       TurnedOn
     //Start drive, run user starting function
     case (M.StartDrive, TurnedOn) ⇒
-      createBlockUi()
+      createBlockUi() match{
+        case true ⇒
+          CreatingUI
+        case false ⇒  //Not have UI
+          doStarting() match{
+            case true ⇒ Working
+            case false ⇒ Starting}}
+    case (M.TaskDone(UiCreate, _, time, _), CreatingUI) ⇒
+      blockUiCreated(error = None, time)
       doStarting() match{
         case true ⇒ Working
         case false ⇒ Starting}
-    //Started
+    case (M.TaskFailed(UiCreate, _, time, error), CreatingUI) ⇒
+      blockUiCreated(Some(error), time)
+      doStarting() match{
+        case true ⇒ Working
+        case false ⇒ Starting}
     case (M.TaskDone(Start, _, time, _), Starting) ⇒
       startingTaskDone(time)
       Working
-    //Starting failed, only log to user logger and keep working
     case (M.TaskFailed(Start, _, time, error), Starting) ⇒
       startingTaskFailed(time, error)
       Working
-    //Starting timeout, only log to user logger and keep waiting
-    case (M.TaskTimeout(Start, _, time), Starting) ⇒
+    case (M.TaskTimeout(Start, _, time, _), Starting) ⇒
       startingTaskTimeout(time)
       state
     //Stop drive, run user stopping function
     case (M.StopDrive, Working) ⇒ doStopping() match{
       case true ⇒
-        closeBlockUi()
-        Stopped
+        closeBlockUi() match{
+          case true ⇒
+            ClosingUI
+          case false ⇒ //Not have UI
+            driveStopped()
+            Stopped}
       case false ⇒
         Stopping}
-    //Stopped
     case (M.TaskDone(Stop, _, time, _), Stopping) ⇒
       stoppingTaskDone(time)
-      closeBlockUi()
-      Stopped
-    //Stopping failed, only log to user logger and keep working
+      closeBlockUi() match{
+        case true ⇒
+          ClosingUI
+        case false ⇒ //Not have UI
+          driveStopped()
+          Stopped}
     case (M.TaskFailed(Stop, _, time, error), Stopping) ⇒
       stoppingTaskFailed(time, error)
-      closeBlockUi()
-      Stopped
-    //Stopping timeout, only log to user logger and keep waiting
-    case (M.TaskTimeout(Stop, _, time), Stopping) ⇒
+      closeBlockUi() match{
+        case true ⇒
+          ClosingUI
+        case false ⇒ //Not have UI
+          driveStopped()
+          Stopped}
+    case (M.TaskTimeout(Stop, _, time, _), Stopping) ⇒
       stoppingTaskTimeout(time)
       state
-    ///Turning off, done if no messages to process
+    case (M.TaskDone(UiClose, _, time, _), ClosingUI) ⇒
+      blockUiClosed(error = None, time)
+      driveStopped()
+      Stopped
+    case (M.TaskFailed(UiClose, _, time, error), ClosingUI) ⇒
+      blockUiClosed(Some(error), time)
+      driveStopped()
+      Stopped
+    //Turning off, done if no messages to process
     case (M.TurnOffDrive, Stopped) ⇒ isAllMsgProcessed match{
       case true ⇒
         driveTurnedOff()
         TurnedOff
       case false ⇒
         TurningOff}
-    //Turning off, if no more messages after TaskDone
     case (M.TaskDone(Massage, inletId, time, _), TurningOff) ⇒
       messageTaskDone(inletId, time)
       isAllMsgProcessed match{
@@ -160,8 +197,7 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
           TurnedOff
         case false ⇒
           state}
-    //Turning off, if no more messages after TaskTimeout
-    case (M.TaskTimeout(Massage, inId, time), TurningOff) ⇒
+    case (M.TaskTimeout(Massage, inId, time, _), TurningOff) ⇒
       messageTaskTimeout(inId, time)
       isAllMsgProcessed match{
         case true ⇒
@@ -169,7 +205,6 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
           TurnedOff
         case false ⇒
           state}
-    //Turning off, if no more messages after TaskFailed
     case (M.TaskFailed(Massage, inId, t, err), TurningOff) ⇒
       messageTaskFailed(inId, t, err)
       isAllMsgProcessed match{
@@ -178,27 +213,22 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
           TurnedOff
         case false ⇒
           state}
-    //Messaging, ask from object
+    //Messaging
     case (M.UserData(outletId, value), state) ⇒
       sender ! userDataAsk(outletId, value, state)
       state
-    //Messaging, user message
     case (M.UserMessage(outletId, inletId, value), st) ⇒
       userMessage(outletId, inletId, value, st)
       state
-    //Messaging, drive load
     case (M.DriveLoad(sub, outId, queueSize), st) if st != Init && st != Constructed && st != Connecting ⇒
       driveLoad(sub, outId, queueSize)
       state
-    //Messaging, task done
     case (M.TaskDone(Massage, inletId, time, _), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskDone(inletId, time)
       state
-    //Messaging, task timeout
-    case (M.TaskTimeout(Massage, inId, time), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
+    case (M.TaskTimeout(Massage, inId, time, _), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskTimeout(inId, time)
       state
-    //Messaging, task failed
     case (M.TaskFailed(Massage, inId, t, err), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
       messageTaskFailed(inId, t, err)
       state
@@ -210,46 +240,58 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
     case (M.SetVisualisationLaval(laval), _) ⇒
       visualisationLaval = laval
       state
-    //UI control, update window position
-    case (M.SetWindowPosition(id, x, y), st) if st != Init ⇒
-      updateBlockUiPosition(id, x, y)
-      state
     //UI control, show
     case (M.ShowBlockUi, st) if st != Init ⇒
       showBlockUi()
+      state
+    case (M.TaskDone(UiShow, _, time, _), _) ⇒
+      blockUiShown(error = None, time)
+      state
+    case (M.TaskFailed(UiShow, _, time, error), _) ⇒
+      blockUiShown(Some(error), time)
       state
     //UI control, hide
     case (M.HideBlockUi, st)  if st != Init ⇒
       hideBlockUi()
       state
-    //User UI event, send to task to impeller
+    case (M.TaskDone(UiHide, _, time, _), _) ⇒
+      blockUiHidden(error = None, time)
+      state
+    case (M.TaskFailed(UiHide, _, time, error), _) ⇒
+      blockUiHidden(Some(error), time)
+      state
+    //UI control, update window position
+    case (M.SetWindowPosition(id, x, y), st) if st != Init ⇒
+      updateBlockUiPosition(id, x, y)
+      state
+    case (M.TaskDone(UiLayout, windowId, time, _), _) ⇒
+      blockUiPositionUpdate(windowId, error = None, time)
+      state
+    case (M.TaskFailed(UiLayout, windowId, time, error), _) ⇒
+      blockUiPositionUpdate(windowId, Some(error), time)
+      state
+    //User UI event
     case (M.UserUIEvent(event), st)  if st != Init ⇒
       blockUiEvent(event)
       state
-    //User UI event processed, do nothing
     case (M.TaskDone(UiEvent, _, time, _), _) ⇒
       state
-    //UI event task timeout
-    case (M.TaskTimeout(UiEvent, _, time), _) ⇒
+    case (M.TaskTimeout(UiEvent, _, time, _), _) ⇒
       blockUiEventTaskTimeout(time)
       state
-    //UI event task failed
     case (M.TaskFailed(UiEvent, _, time, error), _) ⇒
       blockUiEventTaskFailed(time, error)
       state
-    //User logging info
+    //User logging
     case (M.UserLogInfo(message), st)  if st != Init && st != TurnedOff ⇒
       userLogInfo(message)
       state
-    //User logging warn
     case (M.UserLogWarn(message), st)  if st != Init && st != TurnedOff ⇒
       userLogWarn(message)
       state
-    //User logging error
     case (M.UserLogError(error, message), st)  if st != Init && st != TurnedOff ⇒
       userLogError(error, message)
       state
-    //Creating of new user actor
     case (M.NewUserActor(props, name), _) ⇒
       newUserActor(props, name, sender)
       state}

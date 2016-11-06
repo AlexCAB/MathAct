@@ -34,7 +34,7 @@ package object enums {
   type WorkMode = WorkMode.Value
   //TaskKind
   object TaskKind extends Enumeration {
-    val Start, Massage, Stop, UiEvent = Value}
+    val Start, Massage, Stop, UiInit, UiCreate, UiShow, UiHide, UiClose, UiLayout, UiEvent = Value}
   type TaskKind = TaskKind.Value
   //VisualisationLaval
   object VisualisationLaval extends Enumeration {
