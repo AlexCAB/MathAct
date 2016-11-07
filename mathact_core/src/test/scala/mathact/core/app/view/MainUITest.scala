@@ -12,17 +12,17 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.sketch.view.main
+package mathact.core.app.view
 
 import akka.actor.{PoisonPill, Props}
 import akka.testkit.TestProbe
 import mathact.core.UIActorTestSpec
-import mathact.core.app.view.MainUIActor
 import mathact.core.model.config.MainUIConfigLike
 import mathact.core.model.data.sketch.SketchInfo
 import mathact.core.model.enums.SketchStatus
 import mathact.core.model.messages.M
 import org.scalatest.Suite
+
 import scala.concurrent.duration._
 
 

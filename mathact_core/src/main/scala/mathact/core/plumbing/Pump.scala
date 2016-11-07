@@ -21,14 +21,14 @@ import akka.event.Logging
 import akka.pattern.ask
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart}
 import mathact.core.bricks.ui.UIEvent
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.holders.DriveRef
-import mathact.core.model.messages.M
+import mathact.core.model.messages.{Msg, M}
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
 import scala.concurrent.Await
+import scala.reflect.ClassTag
 
 
 /** Process of blocks communications
@@ -68,53 +68,50 @@ extends PumpLike{
         d})
   //Overridden methods
   override def toString: String = s"Pump(context: $context, block: $blockClassName)"
-  //Methods
-  private[core] def addOutlet(pipe: OutPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddOutlet(pipe, name))
-  private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) = addPipe(M.AddInlet(pipe, name))
-  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int = Await //Return: connection ID
-    .result(
-      ask(drive.ref,  M.ConnectPipes(out, in))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,Int]],
-      context.pumpConfig.askTimeout.duration)
-    .fold(
-      t ⇒ {
-        akkaLog.error(t, s"[Pump.connect] Error on connecting of pipes.")
-        throw new ExecutionException(t)},
-      d ⇒ {
-        akkaLog.debug(s"[Pump.connect] Pipes connected: $d")
-        d})
-  private[core] def blockStart(): Unit = block match{
-    case os: ObjOnStart ⇒ os.doStart()
-    case _ ⇒ akkaLog.debug(s"[Pump.blockStart] Block $blockClassName not have doStart method.")}
-  private[core] def blockStop(): Unit = block match{
-    case os: ObjOnStop ⇒  os.doStop()
-    case _ ⇒ akkaLog.debug(s"[Pump.blockStop] Block $blockClassName not have doStop method.")}
-  private[core] def pushUserMessage(msg: M.UserData[_]): Unit = Await
+  //Functions
+  private def askDriveAndHandleTimeout(msg: Msg): Unit = Await
     .result(
       ask(drive.ref, msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, Option[Long]]],  //Either(error,  Option[sleep timeout])
       context.pumpConfig.askTimeout.duration)
     .fold(
       error ⇒ {
-        akkaLog.error(error, s"[Pump.pushUserMessage] Error on ask of drive, msg: $msg, block $blockClassName")
+        akkaLog.error(
+          error,
+          s"[Pump.askDriveAndHandleTimeout] Error on ask of drive, msg: $msg, block $blockClassName")
         throw new ExecutionException(error)},
       timeout ⇒ {
-        akkaLog.debug(s"[Pump.pushUserMessage] Message pushed, msg: $msg, timeout, $timeout, block $blockClassName")
+        akkaLog.debug(
+          s"[Pump.askDriveAndHandleTimeout] Message pushed, msg: $msg, timeout, $timeout, block $blockClassName")
         timeout.foreach{ d ⇒
           try{
             Thread.sleep(d)}
-          catch {case e: InterruptedException ⇒
-            akkaLog.error(e, s"[Pump.pushUserMessage] Error on Thread.sleep, msg: $msg, block $blockClassName")
+          catch {case error: InterruptedException ⇒
+            akkaLog.error(
+              error,
+              s"[Pump.askDriveAndHandleTimeout] Error on Thread.sleep, msg: $msg, block $blockClassName")
             Thread.currentThread().interrupt()}}})
-  private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef = Await
+  def askDrive[T : ClassTag](msg: Msg): T = Await
     .result(
-      ask(drive.ref,  M.NewUserActor(props, name))(context.pumpConfig.askTimeout).mapTo[Either[Throwable,ActorRef]],
+      ask(drive.ref,  msg)(context.pumpConfig.askTimeout).mapTo[Either[Throwable, T]],
       context.pumpConfig.askTimeout.duration)
     .fold(
       t ⇒ {
-        akkaLog.error(t, s"[Pump.askForNewUserActor] Error creating of user actor, props: $props, name: $name.")
+        akkaLog.error(t, s"[Pump.askDrive] Drive returned error for msg: $msg.")
         throw new ExecutionException(t)},
-      a ⇒ {
-        akkaLog.debug(s"[Pump.askForNewUserActor] User actor created: $a")
-        a})
+      r ⇒ {
+        akkaLog.debug(s"[Pump.askDrive] Drive returned result: $r")
+        r})
+  //Methods
+  private[core] def addOutlet(pipe: OutPipe[_], name: Option[String]): (Int, Int) =
+    addPipe(M.AddOutlet(pipe, name))
+  private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) =
+    addPipe(M.AddInlet(pipe, name))
+  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int =
+    askDrive[Int](M.ConnectPipes(out, in))
+  private[core] def pushUserMessage(msg: M.UserData[_]): Unit =
+    askDriveAndHandleTimeout(msg)
+  private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef =
+    askDrive[ActorRef](M.NewUserActor(props, name))
   private[core] def userLogInfo(message: String): Unit =
     drive ! M.UserLogInfo(message)
   private[core] def userLogWarn(message: String): Unit =
@@ -122,7 +119,7 @@ extends PumpLike{
   private[core] def userLogError(error: Option[Throwable], message: String): Unit =
     drive ! M.UserLogError(error, message)
   private[core] def sendUiEvent(event: UIEvent): Unit =
-    drive ! M.UserUIEvent(event)
+    askDriveAndHandleTimeout(M.UserUIEvent(event))
   private[core] def registerWindow(id: Int, state: WindowState, prefs: WindowPreference): Unit =
     context.layout ! M.RegisterWindow(drive, id, state, prefs)
   private[core] def windowUpdated(id: Int, state: WindowState): Unit =

@@ -103,7 +103,8 @@ private[core] object M {
   case class WindowUpdated(drive: DriveRef, windowId: Int, state: WindowState) extends Msg
   case class LayoutWindow(drive: DriveRef, windowId: Int) extends Msg
   //PlumbingActor - LayoutActor
-  case object AllDrivesConstruct extends Msg
+  case object AllUiInitialized extends Msg
+  case object AllUiCreated extends Msg
   //SketchControllerActor - LayoutActor
   case class DoLayout(kind: WindowsLayoutKind) extends Msg
   //LayoutActor - DriveActor

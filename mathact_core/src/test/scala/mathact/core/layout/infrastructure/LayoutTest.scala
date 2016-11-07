@@ -77,7 +77,7 @@ class LayoutTest extends ActorTestSpec {
         layout
         testDrive1.send(layout, window1)
         testDrive2.send(layout, window2)
-        testPlumbing.send(layout,  M.AllDrivesConstruct)
+        testPlumbing.send(layout,  M.AllUiInitialized)
         testDrive1.expectMsgType[M.SetWindowPosition]
         testDrive1.send(layout, M.WindowPositionUpdated(windowId = 1))
         testDrive2.expectMsgType[M.SetWindowPosition]
@@ -86,17 +86,17 @@ class LayoutTest extends ActorTestSpec {
   }
   //Testing
   "Layout" should{
-    "by M.RegisterWindow add window to list and by M.AllDrivesConstruct do layout of each window" in new TestCase {
+    "by M.RegisterWindow add window to list and by M.AllUiInitialized do layout of each window" in new TestCase {
       //Preparing
       actors.layout
       //Register window 1
       testDrive1.send(actors.layout, window1)
       //Register window 2
       testDrive2.send(actors.layout, window2)
-      //Send  M.AllDrivesConstruct
+      //Send  M.AllUiInitialized
       testDrive1.expectNoMsg(1.second)
       testDrive2.expectNoMsg(1.second)
-      testPlumbing.send(actors.layout,  M.AllDrivesConstruct)
+      testPlumbing.send(actors.layout,  M.AllUiInitialized)
       //Expect SetWindowPosition
       testDrive1.expectMsgType[M.SetWindowPosition].windowId shouldEqual 1
       testDrive1.expectNoMsg(1.second)

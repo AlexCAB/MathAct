@@ -26,7 +26,7 @@ import mathact.tools.Sketches
 object Examples extends Sketches{
   SketchOf[ObjWiringExample](
     name = "Obj tap wiring example",
-    description = "Example oftap wiring in object style.",
+    description = "Example of tap wiring in object style.",
     logger = true,
     visualisation = true)
   SketchOf[FunWiringExample](

@@ -59,7 +59,8 @@ class PlumbingTest extends ActorTestSpec{
         val messageProcessingTimeout = 1.second
         val stopFunctionTimeout = 1.second
         val impellerMaxQueueSize = 0
-        val uiOperationTimeout = 1.second}}
+        val uiOperationTimeout = 1.second
+        val uiSlowdownCoefficient = 0}}
     //PlumbingActor
     object actors{
       lazy val plumbing = newRootChildActorOf(Props(
@@ -98,6 +99,7 @@ class PlumbingTest extends ActorTestSpec{
         testDrive1.send(actors.plumbing, M.DriveTurnedOn)
         testDrive2.expectMsg(M.TurnOnDrive)
         testDrive2.send(actors.plumbing, M.DriveTurnedOn)
+        testLayout.expectMsg(M.AllUiInitialized)
         testController.expectMsg(M.PlumbingBuilt)
         testUserLogging.expectMsgType[M.LogInfo]
         plumbingWithDrives}
@@ -108,6 +110,7 @@ class PlumbingTest extends ActorTestSpec{
         testDrive1.send(plumbing, M.DriveStarted)
         testDrive2.expectMsg(M.StartDrive)
         testDrive2.send(plumbing, M.DriveStarted)
+        testLayout.expectMsg(M.AllUiCreated)
         testController.expectMsg(M.PlumbingStarted)
         testVisualization.expectMsg(M.AllBlockBuilt)
         builtPlumbing}}}
@@ -160,6 +163,7 @@ class PlumbingTest extends ActorTestSpec{
       sleep(1.second)
       testDrive2.send(actors.plumbing, M.DriveTurnedOn)
       //Built
+      testLayout.expectMsg(M.AllUiInitialized)
       testController.expectMsg(M.PlumbingBuilt)
       val logInfo = testUserLogging.expectMsgType[M.LogInfo]
       println("[PlumbingTest] logInfo: " + logInfo)}
@@ -212,6 +216,7 @@ class PlumbingTest extends ActorTestSpec{
       sleep(1.second)
       testDrive2.send(actors.plumbing, M.DriveStarted)
       //Built
+      testLayout.expectMsg(M.AllUiCreated)
       testController.expectMsg(M.PlumbingStarted)
       testVisualization.expectMsg(M.AllBlockBuilt)}
     "by M.StopPlumbing, stop all drives, response M.PlumbingStopped" in new TestCase {

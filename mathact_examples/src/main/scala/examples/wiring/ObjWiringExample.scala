@@ -32,14 +32,14 @@ class ObjWiringExample extends SimpleWorkbench {
     name = "Producer block"
     imagePath = "examples/wiring/producer.png"
     //Handlers
-    private val outflow = new Outflow[Double]{ def push(v: Double) = pour(v) }
+    val outflowXXX = new Outflow[Double]{ def push(v: Double) = pour(v) }
     //On start
     protected def onStart(): Unit = Future{
       for (i ← 1 to 10){
-        outflow.push(i)
+        outflowXXX.push(i)
         Thread.sleep(1000)}} //Emulate heavy processing
     //Pipes
-    val out = Outlet(outflow, "out")}
+    val out = Outlet(outflowXXX, "out")}
   val processor = new EmptyBlock with ObjWiring{
     //Parameters
     name = "Processor block"

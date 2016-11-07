@@ -173,7 +173,7 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
   /** All drives constructed */
   def allDrivesConstructed(): Unit = {
     log.debug(s"[PlumbingLife.allDrivesConstructed] Report to layout.")
-    layout ! M.AllDrivesConstruct}
+    layout ! M.AllUiInitialized}
   /** All drives built */
   def allDrivesBuilt(): Unit = {
     log.debug(s"[PlumbingLife.allDrivesBuilt] Report to controller, userLogging and visualization.")
@@ -184,6 +184,7 @@ private [core] trait PlumbingLife extends IdGenerator{  _: PlumbingActor ⇒ imp
   def allDrivesStarted(): Unit = {
     log.debug(s"[PlumbingLife.allDrivesStarted] All drives started, send M.PlumbingStarted, drives: ${drives.values}.")
     drives.foreach{case (key, driveData) ⇒ drives += key → driveData.copy(driveState = DriveWorking)}
+    layout ! M.AllUiCreated
     controller ! M.PlumbingStarted
     userLogging ! M.LogInfo(None, "Plumbing", s"All blocks started, working!")}
   /** All drives stopped */

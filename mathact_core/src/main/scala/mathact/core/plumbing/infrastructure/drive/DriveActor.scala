@@ -272,9 +272,10 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       state
     //User UI event
     case (M.UserUIEvent(event), st)  if st != Init ⇒
-      blockUiEvent(event)
+      sender ! blockUiEvent(event)
       state
     case (M.TaskDone(UiEvent, _, time, _), _) ⇒
+      blockUiEventTaskDone(time)
       state
     case (M.TaskTimeout(UiEvent, _, time, _), _) ⇒
       blockUiEventTaskTimeout(time)

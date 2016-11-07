@@ -21,8 +21,6 @@ import mathact.core.model.enums._
 
 import scala.concurrent.duration._
 
-import javafx.stage.Screen
-
 
 /** Read and hold main commonConfig
   * Created by CAB on 03.09.2016.
@@ -50,7 +48,8 @@ private[core] class AppConfig extends MainConfigLike{
       val messageProcessingTimeout = config.getInt("plumbing.drive.message.processing.timeout").millis
       val stopFunctionTimeout = config.getInt("plumbing.drive.stop.function.timeout").millis
       val impellerMaxQueueSize = config.getInt("plumbing.drive.impeller.max.queue.size")
-      val uiOperationTimeout = config.getInt("plumbing.drive.ui.operation.timeout").millis}}
+      val uiOperationTimeout = config.getInt("plumbing.drive.ui.operation.timeout").millis
+      val uiSlowdownCoefficient = config.getInt("plumbing.drive.ui.slowdown.coefficient")}}
   //Build SketchUI config
   val sketchUI = new SketchUIConfigLike{}
   //Main SketchUI config

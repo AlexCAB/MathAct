@@ -49,7 +49,7 @@ extends WorkerBase with JFXInteraction { import Layout._
     states += (id → state)}
   /** Send next WindowPosition form toUpdateQueue */
   def sendNextWindowUpdate(): Unit =
-    toUpdateQueue.headOption.foreach(d ⇒ d.drive !  M.SetWindowPosition(d.windowId, d.x, d.y))
+    toUpdateQueue.headOption.foreach(d ⇒ d.drive !  M.SetWindowPosition(d.windowId, d.pos.x, d.pos.y))
   /** Check if window in list and run proc */
   def runIfWindowExist(drive: DriveRef, windowId: Int)(proc: (WinID, WindowState) ⇒ Unit): Unit = {
     val id = Tuple2(drive, windowId)
@@ -89,7 +89,7 @@ extends WorkerBase with JFXInteraction { import Layout._
       case Some(c) ⇒
         val position = c.evalGiven(states, drive, windowId)
         log.debug(s"[LayoutActor.layoutWindow] drive: $drive, windowId: $windowId, position: $position")
-        position.drive ! M.SetWindowPosition(position.windowId, position.x, position.y)
+        position.drive ! M.SetWindowPosition(position.windowId, position.pos.x, position.pos.y)
       case None ⇒
         log.error(s"[LayoutActor.layoutWindow] No calc setup, drive: $drive, windowId: $windowId")}}
   //Messages handling with logging
@@ -104,7 +104,9 @@ extends WorkerBase with JFXInteraction { import Layout._
     case M.WindowPositionUpdated(windowId) ⇒
       windowPositionUpdated(DriveRef(sender), windowId)
     //All drives construct, do initial layout
-    case M.AllDrivesConstruct ⇒
+    case M.AllUiInitialized ⇒
+      //TODO Do nothing for now
+    case M.AllUiCreated ⇒
       constructCalcAndUpdatePositions(config.initialLayoutKind)
     //Layout of given window
     case M.LayoutWindow(drive, windowId) ⇒

@@ -36,6 +36,7 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
   @volatile private var isUIRegistered = false
   @volatile private var isWindowShown = false
   @volatile private var _showOnStart = false
+  @volatile private var isShown = false
   @volatile private var _prefX: Option[Double] = None
   @volatile private var _prefY: Option[Double] = None
   @volatile private var currentFrame: Option[SfxFrame] = None
@@ -113,13 +114,14 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
     def sendCommand(command: UICommand): Unit = currentFrame.foreach{ f ⇒ runAndWait(f.onCommand.apply(command))}
     def onEvent(proc: PartialFunction[UIEvent,Unit]): Unit = {eventProcs +:= proc}}
   //Internal API
-  private[core] def uiInit(): Unit = currentFrame.foreach(f ⇒ runAndWait{
-    f.sizeToScene()
+  private[core] def uiInit(): Unit = {
     pump.registerWindow(
       id = 1,
-      WindowState(_showOnStart, f.x.value, f.y.value, f.height.value, f.width.value, f.title.value),
-      WindowPreference(_prefX, _prefY))})
-  private[core] def uiCreate(): Unit = if(_showOnStart) currentFrame.foreach(f ⇒ runAndWait(f.show()))
+      WindowState(isShown = false, 0, 0, 0, 0, currentFrame.map(_.title.value).getOrElse("---")),
+      WindowPreference(_prefX, _prefY))}
+  private[core] def uiCreate(): Unit = if(_showOnStart) currentFrame.foreach{ f ⇒ runAndWait{
+    f.show()
+    f.sizeToScene()}}
   private[core] def uiShow(): Unit = currentFrame.foreach(f ⇒ runAndWait(f.show()))
   private[core] def uiHide(): Unit = currentFrame.foreach(f ⇒ runAndWait(f.hide()))
   private[core] def uiClose(): Unit = currentFrame.foreach(f ⇒ runAndWait(f.close()))

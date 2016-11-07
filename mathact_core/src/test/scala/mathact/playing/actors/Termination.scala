@@ -22,7 +22,7 @@ import akka.actor._
   * Created by CAB on 19.10.2016.
   */
 
-object Termination extends App{
+object Termination extends App {
   println("==== Termination ====")
   //Helpers
   abstract class ActorBase extends Actor{
