@@ -14,6 +14,7 @@
 
 package examples
 
+import examples.tools.generators.DiscreteGeneratorExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
 import mathact.tools.Sketches
@@ -42,6 +43,10 @@ object Examples extends Sketches{
   SketchOf[BlocksWithUiExample](
     name = "Using of BlockUI",
     description = "Example of using of BlockUI trait.")
+  SketchOf[DiscreteGeneratorExample](
+    name = "Using of DiscreteGenerator",
+    description = "Simple example of using of DiscreteGenerator tool.")
+
 
   //TODO Add more
 

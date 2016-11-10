@@ -12,30 +12,31 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.tools
+package examples.tools.generators
 
-import mathact.core.bricks.blocks.{Block, SketchContext}
+import mathact.core.bricks.plumbing.wiring.fun.FunWiring
+import mathact.tools.EmptyBlock
+import mathact.tools.generators.DiscreteGenerator
+import mathact.tools.generators.DiscreteGenerator.TimedEvent
+import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Base class for tall tools.
-  * Created by CAB on 07.05.2016.
+/** Example of using of discrete generator
+  * Created by CAB on 10.11.2016.
   */
 
-private[mathact] abstract class Tool(
-  context: SketchContext,
-  toolTypeName: String,
-  toolImgPath: String)
-extends Block(context){
-  //Variables
-  private var _name: Option[String] = None
-  //DSL
-  def name_=(v: String) { _name = v match{case "" ⇒ None; case s ⇒ Some(s)} }
-  def name = _name
-  //Abstract callbacks (will called by system after sketch will constructed)
-  private[mathact] def blockName: Option[String] =
-    Some(toolTypeName + (_name match{case Some(n) ⇒ " - " + n case _ ⇒ ""}))
-  private[mathact] def blockImagePath: Option[String] = Some(toolImgPath)
+class DiscreteGeneratorExample extends SimpleWorkbench {
+  //Sketch parameters
+  heading = "Discrete generator example"
+  //Blocks
+  val generator = new DiscreteGenerator{
+    name = "Example generator"
 
-  //TODO Add more
 
-}
+
+  }
+  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
+    val in = In[TimedEvent]
+    in.foreach(v ⇒ logger.info("Logger receive: " + v))}
+  //Connecting
+  generator.out ~> logger.in}

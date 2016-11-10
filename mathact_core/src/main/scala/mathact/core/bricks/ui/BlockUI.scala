@@ -33,10 +33,9 @@ import javafx.scene.Parent
 
 trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
   //Variables
-  @volatile private var isUIRegistered = false
+  @volatile private var frameCreator: Option[()⇒SfxFrame] = None
   @volatile private var isWindowShown = false
   @volatile private var _showOnStart = false
-  @volatile private var isShown = false
   @volatile private var _prefX: Option[Double] = None
   @volatile private var _prefY: Option[Double] = None
   @volatile private var currentFrame: Option[SfxFrame] = None
@@ -45,7 +44,7 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
   /** Base class for ScalaFS frame */
   protected trait SfxFrame extends Stage {
     //Check if registered
-    if (! isUIRegistered) throw new IllegalStateException(
+    if (frameCreator.isEmpty) throw new IllegalStateException(
       "[BlockUI.SfxFrame.<init>] SfxFrame instance should be created by using of UI object.")
     //Functions
     private def stateChanged(): Unit = {
@@ -93,32 +92,32 @@ trait BlockUI extends BlockUILike with JFXInteraction{ _: BlockLike ⇒
         (view, controller)
       case None ⇒
         throw new IllegalArgumentException(
-          s"[FxmlFrame.<init>] Cannot load FXML by '$uiFxmlPath path.'")}}
+          s"[FxmlFrame.<init>] Cannot load FXML by '$uiFxmlPath' path.")}}
   //UI creation
   protected object UI{
     //Constructors
     def apply[T <: SfxFrame : ClassTag]: Unit = {
-      //Set registered
-      isUIRegistered = true
-      //Creating stage
       val clazz = implicitly[ClassTag[T]].runtimeClass
-      val frame = runNow(clazz.newInstance().asInstanceOf[SfxFrame])
-      currentFrame = Some(frame)}
-    def apply(frameCreator: ⇒SfxFrame): Unit = {
-      //Set registered
-      isUIRegistered = true
-      //Creating stage
-      val frame = runNow(frameCreator)
-      currentFrame = Some(frame)}
+      frameCreator = Some(() ⇒ { clazz.newInstance().asInstanceOf[SfxFrame]})}
+    def apply(creator: ⇒SfxFrame): Unit = {
+      frameCreator = Some(() ⇒ creator)}
     //Control flow
     def sendCommand(command: UICommand): Unit = currentFrame.foreach{ f ⇒ runAndWait(f.onCommand.apply(command))}
     def onEvent(proc: PartialFunction[UIEvent,Unit]): Unit = {eventProcs +:= proc}}
   //Internal API
-  private[core] def uiInit(): Unit = {
-    pump.registerWindow(
-      id = 1,
-      WindowState(isShown = false, 0, 0, 0, 0, currentFrame.map(_.title.value).getOrElse("---")),
-      WindowPreference(_prefX, _prefY))}
+  private[core] def uiInit(): Unit = frameCreator match {
+    case Some(creator) ⇒
+      //Creating frame
+      val frame = runNow(creator())
+      currentFrame = Some(frame)
+      //Registering
+      pump.registerWindow(
+        id = 1,
+        WindowState(isShown = false, 0, 0, 0, 0, runNow(frame.title.value)),
+        WindowPreference(_prefX, _prefY))
+    case None ⇒
+      throw new IllegalStateException(
+        s"[BlockUI.uiInit] UI frame not registered, use 'UI(new MyUI)' or 'UI[MyUI]' to register.")}
   private[core] def uiCreate(): Unit = if(_showOnStart) currentFrame.foreach{ f ⇒ runAndWait{
     f.show()
     f.sizeToScene()}}
