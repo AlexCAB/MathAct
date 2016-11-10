@@ -66,8 +66,6 @@ package object enums {
     val WindowsStairs = Value}
   type WindowsLayoutKind = WindowsLayoutKind.Value
 
-
-
 //TODO Add more
 
 }

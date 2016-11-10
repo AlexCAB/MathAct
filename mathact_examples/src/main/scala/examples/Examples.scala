@@ -43,7 +43,6 @@ object Examples extends Sketches{
     name = "Using of BlockUI",
     description = "Example of using of BlockUI trait.")
 
-
   //TODO Add more
 
 }

@@ -36,5 +36,3 @@ extends Pipe[H] with Plug[H]{
   //Methods
   private[core] def pushUserData(value: H): Unit = pump.pushUserMessage(M.UserData[H](outletId, value))
   override def toString: String = s"OutPipe(in: $out, outletName: $outletName, pump: $pump)"}
-
-

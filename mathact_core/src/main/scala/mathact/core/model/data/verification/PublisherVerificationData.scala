@@ -14,6 +14,7 @@
 
 package mathact.core.model.data.verification
 
+
 /** Publisher verification data
   * Created by CAB on 26.10.2016.
   */

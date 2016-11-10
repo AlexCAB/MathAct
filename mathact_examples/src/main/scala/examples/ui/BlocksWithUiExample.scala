@@ -51,6 +51,9 @@ object BlocksWithUiExample{
 class BlocksWithUiExample extends SimpleWorkbench { import BlocksWithUiExample._
   //Blocks
   val doer = new EmptyBlock with BlockUI with ObjWiring{ name = "Doer"
+
+    throw new Exception("Oops!!")
+
     //UI definition
     class DoerUI extends SfxFrame{
       //Params

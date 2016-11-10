@@ -12,7 +12,6 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 package mathact.core
 
 import akka.actor.SupervisorStrategy.Stop

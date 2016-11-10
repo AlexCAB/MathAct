@@ -1,6 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+ * @                                                                             @ *
+ *           #          # #                                 #    (c) 2016 CAB      *
+ *          # #      # #                                  #  #                     *
+ *         #  #    #  #           # #     # #           #     #              # #   *
+ *        #   #  #   #             #       #          #        #              #    *
+ *       #     #    #   # # #    # # #    #         #           #   # # #   # # #  *
+ *      #          #         #   #       # # #     # # # # # # #  #    #    #      *
+ *     #          #   # # # #   #       #      #  #           #  #         #       *
+ *  # #          #   #     #   #    #  #      #  #           #  #         #    #   *
+ *   #          #     # # # #   # #   #      #  # #         #    # # #     # #     *
+ * @                                                                             @ *
+\* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 package mathact.core.plumbing.infrastructure.controller
 
-import akka.actor.ActorRef
 import mathact.core.model.data.visualisation.BlockInfo
 import mathact.core.model.holders.DriveRef
 

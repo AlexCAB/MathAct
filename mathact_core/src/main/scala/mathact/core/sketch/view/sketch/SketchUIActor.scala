@@ -14,7 +14,6 @@
 
 package mathact.core.sketch.view.sketch
 
-import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.SketchUIConfigLike

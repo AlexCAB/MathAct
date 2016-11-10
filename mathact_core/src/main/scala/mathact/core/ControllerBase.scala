@@ -83,8 +83,4 @@ private[core] abstract class ControllerBase[S](initState: S) extends Actor{
     case message: Any ⇒
       log.error(s"Receive not a Msg type: $message")}
   //On stop
-  override def postStop(): Unit = cleanup()
-
-  //TODO Add more
-
-}
+  override def postStop(): Unit = cleanup()}

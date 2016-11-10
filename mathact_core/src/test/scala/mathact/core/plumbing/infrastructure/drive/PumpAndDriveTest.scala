@@ -16,7 +16,7 @@ package mathact.core.plumbing.infrastructure.drive
 
 import java.util.concurrent.ExecutionException
 
-import akka.actor.{Terminated, Actor, Props}
+import akka.actor.{PoisonPill, Terminated, Actor, Props}
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -120,7 +120,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       @volatile private var createFrameCalled = false
       @volatile private var showFrameUICallsCounter = 0
       @volatile private var hideFrameCallsCounter = 0
-      @volatile private var closeFrameCalled = false
+      @volatile private var closeFrameCounter = 0
       @volatile private var lastLayout: Option[(Int, Double, Double)] = None
       @volatile private var uiEventList = List[UIEvent]()
       @volatile private var uiProcTimeout: Option[Duration] = None
@@ -143,7 +143,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         hideFrameCallsCounter += 1
         waitOrFail()}
       private[core] def uiClose(): Unit = {
-        closeFrameCalled = true
+        closeFrameCounter += 1
         waitOrFail()}
       private[core] def uiLayout(windowId: Int, x: Double, y: Double): Unit = {
         lastLayout = Some(Tuple3(windowId, x, y))
@@ -161,7 +161,8 @@ class PumpAndDriveTest extends ActorTestSpec{
       def getShowFrameUINumberOfCalls: Int = showFrameUICallsCounter
       def isHideFrameCalled: Boolean = hideFrameCallsCounter != 0
       def getHideFrameUINumberOfCalls: Int = hideFrameCallsCounter
-      def isCloseFrameCalled: Boolean = closeFrameCalled
+      def isCloseFrameCalled: Boolean = closeFrameCounter != 0
+      def getCloseFrameNumberOfCalls: Int = closeFrameCounter
       def getLastUiEvent: Option[UIEvent] = uiEventList.headOption
       def getAllUiEvent: List[UIEvent] = uiEventList.reverse}
     //Helpers values
@@ -1234,6 +1235,31 @@ class PumpAndDriveTest extends ActorTestSpec{
         e}
       sleep(10.second) //Wait for all events will processed
       builtBlockWithUi.getAllUiEvent shouldEqual sendEvents.toList}
+    "on termination if UI not closed call uiClose()" in new BlocksWithUi {
+      import blocks._
+      //Test
+      testPlumbing.watch(testDrive)
+      testBlockWithUi.getCloseFrameNumberOfCalls shouldEqual 0
+      testDrive ! PoisonPill
+      testPlumbing.expectMsgType[Terminated].actor shouldEqual testDrive
+      sleep(1.second) //Wait for cleanup processing
+      testBlockWithUi.getCloseFrameNumberOfCalls shouldEqual 1}
+    "on termination not do double call of uiClose()" in new BlocksWithUi {
+      import blocks._
+      //Preparing
+      startedBlockWithUi
+      testPlumbing.watch(testDrive)
+      //Stop
+      testPlumbing.send(testDrive, M.StopDrive)
+      testPlumbing.expectMsg(M.DriveStopped)
+      //Check after stop
+      testBlockWithUi.getCloseFrameNumberOfCalls shouldEqual 1
+      //Terminate
+      testDrive ! PoisonPill
+      testPlumbing.expectMsgType[Terminated].actor shouldEqual testDrive
+      sleep(1.second) //Wait for cleanup processing
+      //Check after terminate
+      testBlockWithUi.getCloseFrameNumberOfCalls shouldEqual 1}
   }
   "Service methods" should{
     "re send user logging to logger actor" in new SimpleBlocks {

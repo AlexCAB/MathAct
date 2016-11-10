@@ -20,7 +20,7 @@ import akka.actor.{ActorRef, ActorSystem, PoisonPill, Props}
 import akka.event.Logging
 import akka.pattern.ask
 import akka.util.Timeout
-import mathact.core.app.infrastructure.MainController
+import mathact.core.app.infrastructure.MainControllerActor
 import mathact.core.app.view.MainUIActor
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
@@ -84,7 +84,7 @@ private [core] object Application{
       log.debug(s"[Application.start] JFXApplication created, starting application.")
       //Create main controller
       val controller = system.actorOf(Props(
-        new MainController(config, doStop){
+        new MainControllerActor(config, doStop){
           val mainUi = MainUIRef(context.actorOf(Props(new MainUIActor(config.mainUI, self)), "MainControllerUIActor"))
           context.watch(mainUi.ref)
           def createSketchController(config: MainConfigLike, sketchData: SketchData): ActorRef = {
@@ -122,7 +122,7 @@ private [core] object Application{
       throw new ExecutionException(e)}
   /** Get of SketchContext for new Workbench
     * @param workbench - Workbench
-    * @return - MainController ActorRef or thrown exception */
+    * @return - MainControllerActor ActorRef or thrown exception */
   def getSketchContext(workbench: WorkbenchLike): SketchContext = mainController match{
     case Some(controller) ⇒
       val opClassName = Option(workbench.getClass.getCanonicalName)

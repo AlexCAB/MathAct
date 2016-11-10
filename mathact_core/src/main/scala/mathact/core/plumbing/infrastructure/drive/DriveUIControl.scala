@@ -20,7 +20,9 @@ import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M
 
 import scala.collection.mutable
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
+import scala.util.{Failure, Success}
 
 
 /** Handling of UI control
@@ -35,6 +37,7 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
   private var isHidingInProgress = false
   private val uiEventTaskQueue = mutable.Queue[M.RunTask[_]]()
   private var currentUiEventTask: Option[M.RunTask[_]] = None
+  private var isUIClosed = false
   //Functions
   private def executeIfBlockHaveUi(proc: BlockUILike⇒Unit): Boolean = pump.block match{ //Return: isBlockHaveUi
     case blockUi: BlockUILike ⇒
@@ -183,4 +186,16 @@ private[core] trait DriveUIControl { _: DriveActor ⇒
   /** Block UI closed, log error if is */
   def blockUiClosed(error: Option[Throwable], execTime: FiniteDuration): Unit = {
     log.debug(s"[DriveUIControl.blockUiClosed] Log error if it is, error: $error")
-    logErrorIfItIs(error, s"Error on block UI closing, execution time: $execTime.")}}
+    isUIClosed = error.isEmpty
+    logErrorIfItIs(error, s"Error on block UI closing, execution time: $execTime.")}
+  /** If UI not closed try to close */
+  def blockUiCleanup(): Unit = executeIfBlockHaveUi{ blockUi ⇒ isUIClosed match{
+    case false ⇒
+      log.warning(s"[DriveUIControl.blockUiCleanup] UI not closed. try to close.")
+      Future{blockUi.uiClose()}.onComplete{
+        case Success(_) ⇒
+          log.debug(s"[DriveUIControl.blockUiCleanup] UI successfully closed.")
+        case Failure(e) ⇒
+          log.error(e, s"[DriveUIControl.blockUiCleanup] UI closing failed.")}
+    case true ⇒
+      log.debug(s"[DriveUIControl.blockUiCleanup] UI already closed, nothing to do.")}}}

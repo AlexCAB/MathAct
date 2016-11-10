@@ -48,4 +48,6 @@ private[core] object Visualization {
   //Messages
   case object DoClose
   case class LayoutTypeChanced(layoutType: LayoutType)
-  case object DoLayoutBtnHit}
+  case object DoLayoutBtnHit
+  case object RebuildGraph
+  case class DoLayout(steps: Int, delay: Int)}

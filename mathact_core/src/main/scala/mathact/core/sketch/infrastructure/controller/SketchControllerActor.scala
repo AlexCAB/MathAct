@@ -14,7 +14,6 @@
 
 package mathact.core.sketch.infrastructure.controller
 
-import akka.actor.ActorRef
 import mathact.core.ControllerBase
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.MainConfigLike
@@ -94,7 +93,7 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
         (Built, Work)}
     //Plumbing built in Shutdown, terminate sketch
     case (M.PlumbingBuilt, (Building, Shutdown)) ⇒
-      reportAndTerminateSelf(Shutdown)
+      terminateSelf(Shutdown)
       (Ended, Shutdown)
     //Plumbing no drives found, switch to Ended
     case (M.PlumbingNoDrivesFound, (Building, mode)) ⇒
@@ -122,7 +121,7 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
       (Ended, Work)
     //If plumbing stopped in Shutdown, terminate sketch
     case (M.PlumbingStopped, (Stopping, Shutdown)) ⇒
-      reportAndTerminateSelf(Shutdown)
+      terminateSelf(Shutdown)
       (Ended, Shutdown)
     //On hit close start shutdown in Creating, Constructing, Building, Starting or Stopping only update status
     case (M.SketchUIActionTriggered(CloseBtn, _), (Init | Creating | Constructing | Building | Starting | Stopping, Work)) ⇒
@@ -133,9 +132,9 @@ with SketchControllerUIActions{ import SketchController._, State._, Mode._, Sket
       closeHitInNotInterruptState()
       stopPlumbing()
       (Stopping, Shutdown)
-    //On hit close start shutdown in Built, Ended or Failed, terminate sketch
+    //On hit close start terminating in Built, Ended or Failed, terminate sketch
     case (M.SketchUIActionTriggered(CloseBtn, _), (Built | Ended, Work | Fail)) ⇒
-      reportAndTerminateSelf(state._2)
+      terminateSelf(state._2)
       (Ended, state._2)
     //Get sketch context, from objects asks
     case (M.GetSketchContext(actor), _) ⇒

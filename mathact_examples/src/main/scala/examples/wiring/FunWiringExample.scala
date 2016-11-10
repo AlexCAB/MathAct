@@ -56,7 +56,7 @@ class FunWiringExample extends SimpleWorkbench {
     //Pipes
     val in = In[Double]
     //Logging
-    in.foreach(v ⇒  logger.info("Consume value: " + v))}
+    in.foreach(v ⇒ logger.info("Consume value: " + v))}
   //Connecting
   producer.out ~> processor.in
   processor.out ~> consumer.in}

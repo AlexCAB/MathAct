@@ -27,9 +27,3 @@ private[core] case class InletData(
   blockName: Option[String],
   inletId: Int,
   inletName: Option[String])
-
-
-
-
-
-

@@ -29,7 +29,6 @@ import javafx.geometry.Rectangle2D
   * Created by CAB on 21.05.2016.
   */
 
-
 private[core] object JFXApplication{
   //Parameters
   val appRunTimeout: Int = 5000  //In milliseconds

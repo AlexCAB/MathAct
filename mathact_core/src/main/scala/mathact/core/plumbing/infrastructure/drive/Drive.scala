@@ -67,10 +67,4 @@ private[core] object Drive {
     pipe: InPipe[_],
     taskQueue: MutQueue[M.RunTask[_]] = MutQueue(),
     publishers: MutMap[(DriveRef, Int), PublisherData] = MutMap(),  // ((publishers block drive, outlet ID), PublishersData)
-    var currentTask: Option[M.RunTask[_]] = None)
-  //Messages
-
-
-  //TODO Add more
-
-}
+    var currentTask: Option[M.RunTask[_]] = None)}

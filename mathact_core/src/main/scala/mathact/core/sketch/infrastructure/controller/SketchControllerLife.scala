@@ -22,6 +22,7 @@ import mathact.core.sketch.blocks.WorkbenchLike
 import scala.collection.mutable.{ListBuffer => MutList}
 import scalafx.scene.paint.Color
 
+
 /** SketchControllerActor sketch building
   * Created by CAB on 04.09.2016.
   */
@@ -143,16 +144,15 @@ private[core] trait SketchControllerLife { _: SketchControllerActor ⇒
     log.debug(s"[SketchControllerLife.closeHitInNotInterruptState] Update status string.")
     sketchUi ! M.SetSketchUIStatusString("Initiated shutdown sequence...", Color.Black)}
   /** Report to main controller and terminate self */
-  def reportAndTerminateSelf(mode: Mode): Unit = {
+  def terminateSelf(mode: Mode): Unit = {
     //Response
+    log.debug(s"[SketchControllerLife.terminateSelf in $mode] Send PoisonPill.")
     mode match{
       case Mode.Shutdown |  Mode.Work ⇒
-        log.debug(
-          s"[SketchControllerLife.reportAndTerminateSelf @ Shutdown] Send SketchDone.")
+        log.debug(s"[SketchControllerLife.terminateSelf @ Shutdown] Send SketchDone.")
         mainController ! M.SketchDone(sketchData.className)
       case Mode.Fail ⇒
-        log.error(
-          s"[SketchControllerLife.reportAndTerminateSelf @ Fail] Send SketchError with errors: $allErrors.")
+        log.error(s"[SketchControllerLife.terminateSelf @ Fail] Send SketchError with errors: $allErrors.")
         mainController ! M.SketchError(sketchData.className, allErrors.toList)}
     //Terminate self
     self ! PoisonPill}}

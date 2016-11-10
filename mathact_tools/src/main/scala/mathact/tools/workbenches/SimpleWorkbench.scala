@@ -32,5 +32,4 @@ class SimpleWorkbench extends Workbench{
 
   //TODO Add more
 
-
 }

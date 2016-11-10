@@ -17,6 +17,7 @@ package mathact.core.sketch.view.logging
 import akka.actor.ActorRef
 import mathact.core.sketch.view.logging.UserLogging.LogRow
 
+
 /** UserLogUIController interface
   * Created by CAB on 07.10.2016.
   */

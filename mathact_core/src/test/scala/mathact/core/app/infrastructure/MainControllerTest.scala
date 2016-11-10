@@ -58,9 +58,9 @@ class MainControllerTest extends ActorTestSpec {
     lazy val testSketchController = TestProbe("TestSketchController_" + randomString())
     //Variables
     @volatile private var exitCode: Option[Int] = None
-    //MainController
+    //MainControllerActor
     lazy val mainController = system.actorOf(Props(
-      new MainController(testMainConfig, i ⇒ {exitCode = Some(i)}){
+      new MainControllerActor(testMainConfig, i ⇒ {exitCode = Some(i)}){
         val mainUi = MainUIRef(testMainUi.ref)
         context.watch(testMainUi.ref)
         def createSketchController(c: MainConfigLike, d: SketchData): ActorRef = testSketchController.ref}),
@@ -69,7 +69,7 @@ class MainControllerTest extends ActorTestSpec {
     //Methods
     def getExitCode: Option[Int] = exitCode}
   //Testing
-  "MainController" should{
+  "MainControllerActor" should{
     "by MainControllerStart with no auto-run, set sketch list to UI and wait for user action" in new TestCase {
       //Send MainControllerStart
       testApplication.send(mainController, M.MainControllerStart(List(sketchData)))

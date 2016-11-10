@@ -1,7 +1,22 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+ * @                                                                             @ *
+ *           #          # #                                 #    (c) 2016 CAB      *
+ *          # #      # #                                  #  #                     *
+ *         #  #    #  #           # #     # #           #     #              # #   *
+ *        #   #  #   #             #       #          #        #              #    *
+ *       #     #    #   # # #    # # #    #         #           #   # # #   # # #  *
+ *      #          #         #   #       # # #     # # # # # # #  #    #    #      *
+ *     #          #   # # # #   #       #      #  #           #  #         #       *
+ *  # #          #   #     #   #    #  #      #  #           #  #         #    #   *
+ *   #          #     # # # #   # #   #      #  # #         #    # # #     # #     *
+ * @                                                                             @ *
+\* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 package mathact.core.bricks.plumbing.fitting
 
 import mathact.core.plumbing.fitting.Flange
 import mathact.core.plumbing.fitting.pipes.OutPipe
+
 
 /** Source of events, must be implemented by Outlet
   * Created by CAB on 17.05.2016.

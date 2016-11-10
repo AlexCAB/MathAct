@@ -16,7 +16,7 @@ package mathact.core.plumbing.fitting.flows
 
 import mathact.core.plumbing.fitting.FlowLike
 
-/**  Inlet interface
+/** Inlet interface
   * Created by CAB on 24.10.2016.
   */
 

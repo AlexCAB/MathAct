@@ -14,6 +14,7 @@
 
 package mathact.core.model.data.verification
 
+
 /** Inlet verification info
   * Created by CAB on 23.10.2016.
   */

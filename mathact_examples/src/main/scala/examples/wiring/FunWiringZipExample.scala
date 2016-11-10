@@ -20,6 +20,7 @@ import mathact.tools.workbenches.SimpleWorkbench
 
 import scala.concurrent.Future
 
+
 /** Example of using of zipAll and zipEach functions
   * Created by CAB on 30.10.2016.
   */

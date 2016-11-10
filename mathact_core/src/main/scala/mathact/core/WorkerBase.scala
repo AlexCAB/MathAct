@@ -35,9 +35,4 @@ private[core] abstract class WorkerBase extends Actor{
     log.debug(s"MESSAGE: $m FROM: $sender")
     reaction.applyOrElse[Any, Unit](m, _ ⇒ log.warning(s"LAST MESSAGE NOT HANDLED: $m"))}
   //On stop
-  override def postStop(): Unit = cleanup()
-
-  //TODO Add more
-
-
-}
+  override def postStop(): Unit = cleanup()}

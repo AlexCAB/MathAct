@@ -16,7 +16,7 @@ package mathact.core.bricks.ui
 
 
 /** Base trait for UI commands (sends from block to UI)
-  * Created by WORK on 31.10.2016.
+  * Created by CAB on 31.10.2016.
   */
 
 trait UICommand

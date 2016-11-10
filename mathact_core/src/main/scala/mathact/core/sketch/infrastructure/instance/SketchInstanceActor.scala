@@ -16,7 +16,6 @@ package mathact.core.sketch.infrastructure.instance
 
 import java.util.concurrent.{TimeoutException, ExecutionException}
 
-import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.data.SketchData
@@ -120,7 +119,7 @@ extends WorkerBase{ import SketchInstance._
           None,
           "SketchInstance",
           Seq(),
-          s"Built after timeout (${config.sketchBuildingTimeout}), building time time: $time.")}}
+          s"Built after timeout (${config.sketchBuildingTimeout}), building time: $time.")}}
   /** Error during sketch instance building
     * @param error - Throwable */
   def sketchInstanceBuiltError(error: Throwable): Unit = {
@@ -172,8 +171,4 @@ extends WorkerBase{ import SketchInstance._
      //Sketch instance built timeout
      case SketchInstanceBuildTimeout ⇒ sketchInstanceBuiltTimeout()}
   //Cleanup
-  def cleanup(): Unit = {
-
-    //TODO
-
-  }}
+  def cleanup(): Unit = { }}

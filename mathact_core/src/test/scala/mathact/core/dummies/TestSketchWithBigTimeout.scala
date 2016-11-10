@@ -20,7 +20,6 @@ import mathact.core.sketch.blocks.WorkbenchLike
 import scala.concurrent.duration._
 
 
-
 /** Test sketch with big timeout
   * Created by CAB on 06.09.2016.
   */

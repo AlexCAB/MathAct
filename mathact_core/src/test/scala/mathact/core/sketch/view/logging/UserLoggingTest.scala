@@ -87,6 +87,37 @@ class UserLoggingTest extends UIActorTestSpec {
       sleep(30.second)  //Time for playing with UI
       //Terminate UI
       userLog ! PoisonPill
+      sketchController.expectTerminated(userLog)}
+    "show logger on error" in new TestCase {
+      //Preparing
+      val userLog = newUserLog(newConfig(showOnErr = true))
+      sketchController.watch(userLog)
+      //Log error 1
+      sketchController.send(userLog, M.LogError(
+        blockId = Some(1001),
+        blockName = "Block 1",
+        errors = Seq(new Exception("Oops!!!")),
+        message = "!!!ERROR!!!"))
+      sketchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual true
+      sleep(2.second)
+      //Hide UI
+      sketchController.send(userLog, M.HideUserLoggingUI)
+      sketchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual false
+      sleep(2.second)
+      //Log error 2
+      sketchController.send(userLog, M.LogError(
+        blockId = Some(1002),
+        blockName = "Block 2",
+        errors = Seq(new Exception("Oops!!!")),
+        message = "!!!ERROR!!!"))
+      sketchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual true
+      sleep(2.second)
+      //Hide UI
+      sketchController.send(userLog, M.HideUserLoggingUI)
+      sketchController.expectMsgType[M.UserLoggingUIChanged].isShow shouldEqual false
+      sleep(2.second)
+      //Terminate UI
+      userLog ! PoisonPill
       sketchController.expectTerminated(userLog)
     }
   }

@@ -18,6 +18,7 @@ import mathact.core.model.enums._
 
 import scala.concurrent.duration.FiniteDuration
 
+
 /** Impeller
   * Created by CAB on 16.10.2016.
   */

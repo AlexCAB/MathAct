@@ -163,7 +163,7 @@ extends WorkerBase with JFXInteraction { import UserLogging._
         case true ⇒
           isShown = true
           refreshUi()
-          runAndWait(window.hide())
+          runAndWait(window.show())
           sketchController ! M.UserLoggingUIChanged(isShown)
         case false ⇒
           refreshUi()}}

@@ -38,15 +38,15 @@ import scalafx.scene.paint.Color
   */
 
 private[core] object M {
-  //Application - MainController
+  //Application - MainControllerActor
   case class MainControllerStart(sketches: List[SketchData]) extends Msg
   case class NewSketchContext(workbench: WorkbenchLike, sketchClassName: String) extends Msg
-  //MainController - MainUI
+  //MainControllerActor - MainUI
   case class SetSketchList(sketches: List[SketchInfo]) extends Msg //Show UI
   case class RunSketch(sketch: SketchInfo) extends Msg     //MainUI sends it and Hide UI
   case object HideMainUI extends Msg
   case object MainCloseBtnHit extends Msg
-  //MainController - SketchControllerActor
+  //MainControllerActor - SketchControllerActor
   case object LaunchSketch extends Msg                   //Sends by main controller to, initiate sketch
   case class SketchBuilt(className: String) extends Msg
   case class SketchFail(className: String) extends Msg

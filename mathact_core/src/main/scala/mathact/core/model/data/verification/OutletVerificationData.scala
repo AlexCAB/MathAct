@@ -22,4 +22,3 @@ package mathact.core.model.data.verification
 private[core] case class OutletVerificationData(
   outletId: Int,
   subscribers: Seq[SubscriberVerificationData])
-

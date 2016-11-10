@@ -16,7 +16,6 @@ package mathact.core.sketch.view.visualization
 
 import javax.imageio.ImageIO
 
-import akka.actor.ActorRef
 import mathact.core.WorkerBase
 import mathact.core.gui.JFXInteraction
 import mathact.core.model.config.VisualizationConfigLike
@@ -28,7 +27,6 @@ import mathact.core.model.messages.M
 /** SketchData visualization actor
   * Created by CAB on 31.08.2016.
   */
-
 
 private[core] class VisualizationActor(config: VisualizationConfigLike, sketchController: SketchControllerRef)
 extends WorkerBase with JFXInteraction { import Visualization._
@@ -82,32 +80,14 @@ extends WorkerBase with JFXInteraction { import Visualization._
           None}}
     //Return
     GraphData(blocks, connections)}
-  private def buildAndUpdateGraph(
-    constructedInfo: List[(BlockInfo, Option[BlockImageData])],
-    connectedInfo: List[(OutletInfo, InletInfo)],
-    doUpdate: Boolean,
-    morphingSteps: Int,
-    morphingDelay: Int)
-  :Unit = {
-    doUpdate match {
-      case true ⇒
-        val graphData = buildGraphView(constructedInfo, connectedInfo)
-        log.debug(
-          s"[VisualizationActor.buildAndUpdateGraph] morphingSteps: $morphingSteps, morphingDelay: $morphingDelay, " +
-          s"built graph data: $graphData")
-        //Update view
-        runAndWait{
-          window.drawGraph(graphData)
-          window.doLayout(buildingLayoutType, morphingSteps, morphingDelay)}
-      case false ⇒
-        log.debug("[VisualizationActor.buildAndUpdateGraph] UI not show or allBlockBuilt, skip building of graph data.")}}
   //Messages handling with logging
   def reaction: PartialFunction[Any, Unit]  = {
     //Show UI
     case M.ShowVisualizationUI ⇒
       runAndWait{window.show()}
       isShow = true
-      buildAndUpdateGraph(constructedInfo, connectedInfo, ! isFinalGraphBuilt, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      if(! isFinalGraphBuilt) self ! RebuildGraph
+      if(! isFinalGraphBuilt) self ! DoLayout(finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
       isFinalGraphBuilt = true
       sketchController ! M.VisualizationUIChanged(isShow)
     //Close button hit
@@ -120,24 +100,34 @@ extends WorkerBase with JFXInteraction { import Visualization._
       //Add toll info
       constructedInfo +:= prepareBlockInfo(builtInfo)
       //Build view if visible
-      buildAndUpdateGraph(constructedInfo, connectedInfo, isShow, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
+      if(isShow) self ! RebuildGraph
+      if(isShow) self ! DoLayout(buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
     //Block connected info, sends each time some block done building
     case M.BlocksConnectedInfo(outletInfo, inletInfo) ⇒
       //Add toll info
       connectedInfo +:= (outletInfo → inletInfo)
       //Build view if visible
-      buildAndUpdateGraph(constructedInfo, connectedInfo, isShow, buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
+      if(isShow) self ! RebuildGraph
+      if(isShow) self ! DoLayout(buildingLayoutMorphingSteps, buildingLayoutMorphingDelay)
     //AllBlockBuilt, validate graph structure
     case M.AllBlockBuilt ⇒
       //Finale build and layout
-      buildAndUpdateGraph(constructedInfo, connectedInfo, isShow, finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
+      if(isShow) self ! RebuildGraph
+      if(isShow) self ! DoLayout(finaleLayoutMorphingSteps, finaleLayoutMorphingDelay)
       isFinalGraphBuilt = isShow
     //Change layout
     case LayoutTypeChanced(layoutType) ⇒
       currentLayoutType = layoutType
-    //Do layout
+    //Layout on hit button
     case DoLayoutBtnHit ⇒
-      runAndWait{window.doLayout(currentLayoutType, doLayoutMorphingSteps, doLayoutMorphingDelay)}
+      self ! DoLayout(doLayoutMorphingSteps, doLayoutMorphingDelay)
+    //Rebuild graph
+    case RebuildGraph ⇒
+      val graphData = buildGraphView(constructedInfo, connectedInfo)
+      runAndWait{ window.drawGraph(graphData) }
+    //Do layout
+    case DoLayout(steps, delay) ⇒
+      runAndWait{ window.doLayout(currentLayoutType, steps, delay) }
     //Hide UI
     case M.HideVisualizationUI ⇒
       runAndWait(window.hide())

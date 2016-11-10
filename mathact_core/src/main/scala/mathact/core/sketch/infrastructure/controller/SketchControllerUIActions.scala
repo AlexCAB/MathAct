@@ -17,6 +17,7 @@ package mathact.core.sketch.infrastructure.controller
 import mathact.core.model.enums.{WindowsLayoutKind, SketchUIElement, SketchUiElemState}
 import mathact.core.model.messages.M
 
+
 /** SketchControllerActor UI actions processing
   * Created by CAB on 07.09.2016.
   */

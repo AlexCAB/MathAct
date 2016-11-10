@@ -26,6 +26,7 @@ import mathact.core.{IdGenerator, ControllerBase}
 
 import scala.collection.mutable.{Map ⇒ MutMap}
 
+
 /** Manage block
   * Inlets and outlets never removes
   * Created by CAB on 15.05.2016.
@@ -297,4 +298,5 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
       newUserActor(props, name, sender)
       state}
   //Cleanup
-  def cleanup(): Unit = {}}
+  def cleanup(): Unit = {
+    blockUiCleanup()}}

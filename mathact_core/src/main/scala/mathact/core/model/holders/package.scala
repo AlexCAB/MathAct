@@ -16,6 +16,7 @@ package mathact.core.model
 
 import akka.actor.ActorRef
 import mathact.core.model.messages.Msg
+import akka.actor.Actor
 
 
 /** Value holders
@@ -23,9 +24,6 @@ import mathact.core.model.messages.Msg
   */
 
 package holders {
-
-  import akka.actor.Actor
-
   //Definitions
   private[core] trait RefHolder{
     private[core] val ref: ActorRef

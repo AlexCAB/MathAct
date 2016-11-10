@@ -21,6 +21,7 @@ import mathact.core.sketch.blocks.BlockLike
 
 import scala.language.implicitConversions
 
+
 /** Contains definition for creating of inlets/outlets in functional style
   * Created by CAB on 24.10.2016.
   */

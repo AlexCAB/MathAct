@@ -197,7 +197,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param execTime - Duration */
   def messageTaskDone(inletId: Int, execTime: Duration): Unit = runForInlet(inletId){ inlet ⇒
     log.debug(
-      s"[DriveMessaging.messageTaskFailed] inlet: $inlet, execTime: $execTime, " +
+      s"[DriveMessaging.messageTaskDone] inlet: $inlet, execTime: $execTime, " +
       s"currentTask: ${inlet.currentTask}, taskQueue: ${inlet.taskQueue}.")
     //Remove current, run next task and send load message
     cleanCurrentTask(inlet)
@@ -211,7 +211,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     userLogging ! M.LogWarning(
       Some(blockId),
       blockName.getOrElse(blockClassName),
-      s"Message handling timeout for ${inlet.name.getOrElse("")} inlet, on '$execTime', keep waiting.")}
+      s"Message handling timeout for ${inlet.name.getOrElse("")} inlet, on $execTime, keep waiting.")}
   /** Message processing end with error, send error to user logger
     * @param inletId - Int
     * @param execTime - Duration
@@ -229,7 +229,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
       Some(blockId),
       blockName.getOrElse(blockClassName),
       Seq(error),
-      s"Message handling fail for ${inlet.name.getOrElse("")} inlet, on '$execTime'.")}
+      s"Message handling fail for ${inlet.name.getOrElse("")} inlet, on $execTime.")}
   /** Check if no messages to process
     * @return - true if so */
   def isAllMsgProcessed: Boolean = {
