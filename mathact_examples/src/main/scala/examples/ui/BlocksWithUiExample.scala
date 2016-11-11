@@ -16,7 +16,8 @@ package examples.ui
 
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
 import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
-import mathact.core.bricks.ui.{FunUIWiring, UICommand, BlockUI, UIEvent}
+import mathact.core.bricks.ui.interaction.{UIEvent, UICommand}
+import mathact.core.bricks.ui.{FunUIWiring, BlockUI}
 import mathact.tools.EmptyBlock
 import mathact.tools.workbenches.SimpleWorkbench
 

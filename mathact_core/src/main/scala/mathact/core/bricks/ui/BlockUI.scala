@@ -14,6 +14,7 @@
 
 package mathact.core.bricks.ui
 
+import mathact.core.bricks.ui.interaction.{UIEvent, UICommand}
 import mathact.core.gui.JFXInteraction
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.data.layout.{WindowPreference, WindowState}

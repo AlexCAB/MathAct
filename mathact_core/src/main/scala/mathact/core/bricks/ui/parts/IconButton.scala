@@ -12,31 +12,31 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
+package mathact.core.bricks.ui.parts
 
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.tools.EmptyBlock
-import mathact.tools.generators.DiscreteGenerator
-import mathact.tools.generators.DiscreteGenerator.TimedEvent
-import mathact.tools.workbenches.SimpleWorkbench
+import scalafx.Includes._
+import scalafx.scene.control.Button
+import scalafx.scene.image.{ImageView, Image}
 
 
-/** Example of using of discrete generator
-  * Created by CAB on 10.11.2016.
+/** Button with icon
+  * Created by CAB on 11.11.2016.
   */
 
-class DiscreteGeneratorExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = "Discrete generator example"
-  //Blocks
-  val generator = new DiscreteGenerator{
-    name = "Example generator"
-    initFrequency = 2 //Hertz
-
-
-  }
-  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
-    val in = In[TimedEvent]
-    in.foreach(v ⇒ logger.info("Logger receive: " + v))}
-  //Connecting
-  generator.out ~> logger.in}
+class IconButton(enabledImg: Image, disabledImg: Image)(action: ⇒Unit) extends Button {
+  //Images
+  private val eView = new ImageView{ image =  enabledImg }
+  private val dView = new ImageView{ image =  disabledImg }
+  //Config
+  graphic = dView
+  disable = true
+  onAction = handle{
+    passive()
+    action }
+  //Methods
+  def active(): Unit = {
+    graphic = eView
+    disable = false}
+  def passive(): Unit = {
+    graphic = dView
+    disable = true}}

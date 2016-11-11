@@ -14,7 +14,7 @@
 
 package mathact.core.plumbing.infrastructure.drive
 
-import mathact.core.bricks.ui.UIEvent
+import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.enums.TaskKind
 import mathact.core.model.messages.M

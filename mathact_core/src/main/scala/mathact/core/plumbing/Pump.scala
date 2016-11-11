@@ -21,7 +21,7 @@ import akka.event.Logging
 import akka.pattern.ask
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
-import mathact.core.bricks.ui.UIEvent
+import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.{Msg, M}

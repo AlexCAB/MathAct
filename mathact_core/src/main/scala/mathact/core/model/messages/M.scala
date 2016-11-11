@@ -17,7 +17,7 @@ package mathact.core.model.messages
 import akka.actor.{Props, ActorRef}
 import mathact.core.bricks.data.SketchData
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
-import mathact.core.bricks.ui.UIEvent
+import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.data.pipes.{InletData, OutletData}
 import mathact.core.model.data.sketch.SketchInfo

@@ -12,15 +12,10 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.ui
+package mathact.core.bricks.ui.interaction
 
-
-/** Set predefined of UI events
+/** Base class of UI events (sends from UI to block)
   * Created by CAB on 31.10.2016.
   */
 
-object E {
-  //SfxFrame events
-  case object ShowFrame extends UIEvent
-  case object HideFrame extends UIEvent
-  case class SetFrameTitle(text: String) extends UIEvent}
+trait UIEvent

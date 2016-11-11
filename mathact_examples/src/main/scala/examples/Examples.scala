@@ -45,7 +45,8 @@ object Examples extends Sketches{
     description = "Example of using of BlockUI trait.")
   SketchOf[DiscreteGeneratorExample](
     name = "Using of DiscreteGenerator",
-    description = "Simple example of using of DiscreteGenerator tool.")
+    description = "Simple example of using of DiscreteGenerator tool.",
+    autorun = true)
 
 
   //TODO Add more

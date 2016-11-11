@@ -22,7 +22,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core._
 import mathact.core.bricks.blocks.SketchContext
-import mathact.core.bricks.ui.UIEvent
+import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.dummies.TestActor
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}

@@ -14,7 +14,7 @@
 
 package mathact.core.gui.ui
 
-import mathact.core.bricks.ui.UIEvent
+import mathact.core.bricks.ui.interaction.UIEvent
 
 
 /** BlockUI interface

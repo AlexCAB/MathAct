@@ -15,6 +15,7 @@
 package mathact.core.bricks.ui
 
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
+import mathact.core.bricks.ui.interaction.{UIEvent, UICommand}
 import mathact.core.sketch.blocks.BlockLike
 
 import scala.language.implicitConversions
