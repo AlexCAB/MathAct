@@ -24,7 +24,8 @@ object E {
   case object Start extends UIEvent
   case object Stop extends UIEvent
   case object Step extends UIEvent
-  case class ValueChanged(newVal: Long) extends UIEvent
+  case class LongValueChanged(newVal: Long) extends UIEvent
+  case class DoubleValueChanged(newVal: Double) extends UIEvent
 
   //TODO Add more
 

@@ -15,6 +15,7 @@
 package examples
 
 import examples.tools.generators.DiscreteGeneratorExample
+import examples.tools.pots.TimedValuesPotExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
 import mathact.tools.Sketches
@@ -46,8 +47,12 @@ object Examples extends Sketches{
   SketchOf[DiscreteGeneratorExample](
     name = "Using of DiscreteGenerator",
     description = "Simple example of using of DiscreteGenerator tool.",
+    logger = true)
+  SketchOf[TimedValuesPotExample](
+    name = "Using of TimedValuesPot",
+    description = "Example of using of TimedValuesPot tool.",
+    logger = true,
     autorun = true)
-
 
   //TODO Add more
 

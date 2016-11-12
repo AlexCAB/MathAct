@@ -26,6 +26,7 @@ import mathact.core.bricks.ui.interaction.{E, C}
 import mathact.core.bricks.ui.parts.IconButton
 import mathact.tools.Tool
 
+import scala.concurrent.Future
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Label, Slider}
@@ -35,13 +36,14 @@ import scalafx.Includes._
 import scalafx.scene.paint.Color._
 
 
-/** Tool generate discrete timed events
+/** Tool to generate discrete timed events
   * Created by CAB on 10.11.2016.
   */
 
 object DiscreteGenerator{
   //Definitions
-  case class TimedEvent(time: Long)}  //System time
+  case class TimedEvent(time: Long){ //System time
+    override def toString = s"TimedEvent(time = $time)"}}
 
 
 abstract class DiscreteGenerator(implicit context: SketchContext)
@@ -80,7 +82,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
     val minFreq = if(_minFreq < 1) 1 else if(_minFreq > maxVal ) maxVal else _minFreq
     val maxFreq = if(_maxFreq < minFreq) minFreq else if(_maxFreq > maxVal) maxVal else _maxFreq
     val initFreq = if(_initFreq < minFreq) minFreq else if(_initFreq > maxFreq) maxFreq else _initFreq
-    val sliderStep = if (_sliderStep <= 0) 1 else if(_sliderStep > maxVal) maxVal else _sliderStep
+    val freqStep = if (_sliderStep <= 0) 1 else if(_sliderStep > maxVal) maxVal else _sliderStep
     //Functions
     def buildStatus(currentFreq: Double): String =
       s"Frequency(Hz): min = ${decimalFormat.format(minFreq / precision)}, " +
@@ -96,6 +98,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
       startBtn.active()
       sendEvent(E.Stop)})
     val stepBtn: IconButton = new IconButton(stepEImg, stepDImg)({
+      stepBtn.active()
       sendEvent(E.Step)})
     val stateString = new Label{
       text = buildStatus(initFreq)
@@ -106,18 +109,18 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
       value = initFreq / precision
       showTickLabels = true
       showTickMarks = true
-      majorTickUnit = sliderStep * 10 / precision
+      majorTickUnit = freqStep * 10 / precision
       minorTickCount = 4
-      blockIncrement = sliderStep / precision
+      blockIncrement = freqStep / precision
       prefHeight = btnSize
       prefWidth = sliderWidth
       disable = true
-      delegate.valueProperty.addListener{ (o: ObservableValue[_ <: Number], ov: Number, newVal: Number) ⇒
-        val rVal = (newVal.doubleValue() * precision / sliderStep).toInt * sliderStep
+      value.onChange{
+        val rVal = (value.value * precision / freqStep).toLong * freqStep
         if(rVal != oldSliderPos) {
           oldSliderPos = rVal
           stateString.text = buildStatus(rVal)
-          sendEvent(E.ValueChanged((1000 * precision) / rVal))}}}  //Sends in milli seconds
+          sendEvent(E.LongValueChanged((1000 * precision) / rVal))}}}  //Sends in milli seconds
     //Scene
     scene = new Scene{
       fill = White
@@ -144,11 +147,12 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
     //Commands reactions
     def onCommand = {
       case C.Start ⇒
-        sendEvent(E.ValueChanged((1000 * precision) / initFreq)) //Sends in milli seconds
+        sendEvent(E.LongValueChanged((1000 * precision) / initFreq)) //Sends in milli seconds
         startBtn.active()
         stepBtn.active()
         speedSlider.disable = false
       case C.Stop ⇒
+        sendEvent(E.Stop)
         startBtn.passive()
         stopBtn.passive()
         stepBtn.passive()
@@ -160,31 +164,58 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
   protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
   //Outflow
   private val outflow = new Outflow[TimedEvent]{
-
-
-  }
+    def riseEvent(): Unit = pour(
+      TimedEvent(System.currentTimeMillis()))}
   //Processor
-  private val processor = actorOf(Props(new Actor {
-    //Definitions
-    case class Timeout(speedVersion: Long)
-    //Variable
-    var speedVersion = 0L
-    //Receive
-    def receive = {
-      case E.Start ⇒
-      case E.Stop ⇒
-      case E.Step ⇒
-      case E.ValueChanged(newVal) ⇒
-
-        println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR: " + newVal)
-
-    }
-
-
-
-  }),
+  private val processor = actorOf(
+    Props(new Actor {
+      //Variable
+      var isStarted = false
+      var version = 0L
+      var period = 0L
+      var lastTime = 0L
+      //Functions
+      def currentTime: Long = System.currentTimeMillis()
+      def sleep(delay: Long, version: Long): Unit =
+        try{ if (delay > 0) Thread.sleep(delay) }
+        catch{ case error: InterruptedException ⇒ Thread.currentThread().interrupt() }
+        finally{ self ! version }
+      //Logic
+      def newTick(): Unit = {
+        val delay = (lastTime + period) - currentTime //Difference between next time and current time
+        lastTime += period  //Next last time
+        if(delay > 10) Future{ sleep(delay, version) } else sleep(delay, version)}
+      def restart(): Unit = {
+        version += 1
+        lastTime = currentTime
+        isStarted = true}
+      def stop(): Unit = {
+        isStarted = false
+        version += 1}
+      def update(newPeriod: Long): Unit = {
+        period = newPeriod}
+      //Receive
+      def receive = {
+        case E.Start ⇒
+          restart()
+          outflow.riseEvent()
+          newTick()
+        case E.Stop ⇒
+          stop()
+        case E.Step ⇒
+          outflow.riseEvent()
+        case E.LongValueChanged(newVal) if isStarted ⇒
+          update(newVal)
+          restart()
+          outflow.riseEvent()
+          newTick()
+        case E.LongValueChanged(newVal) ⇒
+          update(newVal)
+        case pv: Long if pv == version && isStarted ⇒
+          outflow.riseEvent()
+          newTick()}}),
     "DiscreteGeneratorProcessor")
-  UI.onEvent{case e ⇒ processor ! e}
+  UI.onEvent{ case e ⇒ processor ! e }
   //DSL
   def initFrequency: Double = _initFreq / precision
   def initFrequency_=(v: Double){ _initFreq = (v * precision).toLong}
@@ -194,7 +225,5 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGener
   def maxFrequency_=(v: Double){ _maxFreq = (v * precision).toLong}
   def sliderStep: Double = _sliderStep / precision
   def sliderStep_=(v: Double){ _sliderStep = (v * precision).toLong}
-
-
   //Output
   val out = Outlet[TimedEvent](outflow)}
