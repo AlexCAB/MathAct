@@ -14,7 +14,9 @@
 
 package examples
 
+import examples.linking.CompactLinking
 import examples.tools.generators.DiscreteGeneratorExample
+import examples.tools.plots.ChartRecorderExample
 import examples.tools.pots.TimedValuesPotExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
@@ -41,6 +43,11 @@ object Examples extends Sketches{
     description = "Example of using of zipAll and zipEach functions.",
     logger = true,
     visualisation = true)
+  SketchOf[CompactLinking](
+    name = "Compact linking",
+    description = "Example of using of compact linking DSL.",
+    logger = true,
+    visualisation = true)
   SketchOf[BlocksWithUiExample](
     name = "Using of BlockUI",
     description = "Example of using of BlockUI trait.")
@@ -51,8 +58,14 @@ object Examples extends Sketches{
   SketchOf[TimedValuesPotExample](
     name = "Using of TimedValuesPot",
     description = "Example of using of TimedValuesPot tool.",
-    logger = true,
+    logger = true)
+  SketchOf[ChartRecorderExample](
+    name = "Using of ChartRecorder",
+    description = "Example of using of simple chart recorder tool.",
     autorun = true)
+
+
+
 
   //TODO Add more
 

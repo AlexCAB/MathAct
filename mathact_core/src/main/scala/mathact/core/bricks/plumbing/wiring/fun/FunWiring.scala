@@ -29,9 +29,9 @@ import scala.language.implicitConversions
 trait FunWiring { _: BlockLike ⇒
   //Definitions
   /** Internal socket mark type */
-  protected trait FunSocket[H]
+  protected trait FunSocket[H] extends Socket[H] { _: InPipe[H] ⇒ }
   /** Internal plug mark type */
-  protected trait FunPlug[H]
+  protected trait FunPlug[H] extends Plug[H] { _: OutPipe[H] ⇒ }
   /** Values  source */
   protected trait Source[T] {
     //Variables
@@ -92,7 +92,7 @@ trait FunWiring { _: BlockLike ⇒
   protected implicit def socket2Source[T](socket: FunSocket[T]): Source[T] = socket match{
     case in: InPipe[_] ⇒ inflowsMap(in.inletId).asInstanceOf[Source[T]]
     case _ ⇒ throw new IllegalArgumentException(s"[FunWiring.Socket2Source] $socket is not an instance of InPipe[T].")}
-  protected implicit def slug2Drain[T](plug: FunPlug[T]): Drain[T] = plug match{
+  protected implicit def plug2Drain[T](plug: FunPlug[T]): Drain[T] = plug match{
     case out: OutPipe[_] ⇒ outflowsMap(out.outletId).asInstanceOf[Drain[T]]
     case _ ⇒ throw new IllegalArgumentException(s"[FunWiring.Socket2Source] $plug is not an instance of OutPipe[T].")}
   protected implicit def source2DefDrain[T](source: Source[T]): Drain[T]⇒Option[T]⇒Option[T] = drain ⇒ {

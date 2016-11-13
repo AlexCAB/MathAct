@@ -16,8 +16,9 @@ package mathact.tools.generators
 
 import java.text.{DecimalFormatSymbols, DecimalFormat}
 import java.util.Locale
-import javafx.beans.value.ObservableValue
 
+import mathact.core.bricks.linking.LinkOut
+import mathact.data.TimedEvent
 import akka.actor.{Props, Actor}
 import mathact.core.bricks.blocks.SketchContext
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
@@ -32,7 +33,6 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Label, Slider}
 import scalafx.scene.image.Image
 import scalafx.scene.layout.{BorderPane, HBox}
-import scalafx.Includes._
 import scalafx.scene.paint.Color._
 
 
@@ -40,19 +40,13 @@ import scalafx.scene.paint.Color._
   * Created by CAB on 10.11.2016.
   */
 
-object DiscreteGenerator{
-  //Definitions
-  case class TimedEvent(time: Long){ //System time
-    override def toString = s"TimedEvent(time = $time)"}}
-
-
 abstract class DiscreteGenerator(implicit context: SketchContext)
 extends Tool(context, "DG", "mathact/tools/generators/discrete_generator.png")
-with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import DiscreteGenerator._
+with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEvent]{
   //Parameters
-  val defaultInitFreq: Double = 1.0
-  val defaultMinFreq: Double = 1.0
-  val defaultMaxFreq: Double = 10.0
+  val defaultInitFreq: Double = 2
+  val defaultMinFreq: Double = 1
+  val defaultMaxFreq: Double = 10
   val defaultSliderStep: Double = 0.1
   val btnSize: Int = 25
   val sliderWidth: Int = 300

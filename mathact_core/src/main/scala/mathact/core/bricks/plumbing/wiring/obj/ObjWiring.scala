@@ -26,8 +26,8 @@ import mathact.core.sketch.blocks.BlockLike
 
 trait ObjWiring { _: BlockLike ⇒
   //Types
-  protected trait ObjPlug[H]
-  protected trait ObjSocket[H]
+  protected trait ObjPlug[H] extends Plug[H] { _: OutPipe[H] ⇒ }
+  protected trait ObjSocket[H] extends Socket[H] { _: InPipe[H] ⇒ }
   //Definitions
   /** Base trait for sender implementation */
   protected trait Outflow[T] extends OutflowLike[T]{

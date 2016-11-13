@@ -14,11 +14,12 @@
 
 package examples.tools.pots
 
+import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
+import mathact.data.TimedValue
 import mathact.tools.EmptyBlock
 import mathact.tools.generators.DiscreteGenerator
 import mathact.tools.pots.TimedValuesPot
-import mathact.tools.pots.TimedValuesPot.TimedValue
 import mathact.tools.workbenches.SimpleWorkbench
 
 
@@ -38,9 +39,9 @@ class TimedValuesPotExample extends SimpleWorkbench {
       init = 0
       min = -1
       max = 1}
-  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
-      val in = In[TimedValue]
-      in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  val logger =  new EmptyBlock with FunWiring with LinkIn[TimedValue]{
+    name = "Logger"
+    val in = In[TimedValue]
+    in.foreach(v ⇒ logger.info("Logger received: " + v))}
   //Connecting
-  generator.out ~> pot.in
-  pot.out ~> logger.in}
+  generator ~> pot ~> logger}

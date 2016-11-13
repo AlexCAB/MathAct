@@ -12,16 +12,12 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools
-
-import mathact.tools.workbenches.SimpleWorkbench
+package mathact.data
 
 
-/** Pot to pot connection example
-  * Created by CAB on 18.06.2016.
+/** Represent event with time-stamp
+  * Created by CAB on 13.11.2016.
   */
 
-class PotPotExample extends SimpleWorkbench{
-
-
-}
+case class TimedEvent(time: Long){ //System time
+  override def toString = s"TimedEvent(time = $time)"}

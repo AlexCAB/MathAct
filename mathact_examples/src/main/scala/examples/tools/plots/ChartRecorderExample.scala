@@ -12,28 +12,29 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
+package examples.tools.plots
 
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.TimedEvent
-import mathact.tools.EmptyBlock
 import mathact.tools.generators.DiscreteGenerator
+import mathact.tools.plots.ChartRecorder
+import mathact.tools.pots.TimedValuesPot
 import mathact.tools.workbenches.SimpleWorkbench
+import scalafx.scene.paint.Color._
 
 
-/** Example of using of discrete generator
-  * Created by CAB on 10.11.2016.
+/** Example of using of simple chart recorder
+  * Created by CAB on 13.11.2016.
   */
 
-class DiscreteGeneratorExample extends SimpleWorkbench {
+class ChartRecorderExample extends SimpleWorkbench {
   //Sketch parameters
-  heading = "Discrete generator example"
+  heading = "Chart simple recorder example"
   //Blocks
-  val generator = new DiscreteGenerator{
-    name = "Example generator"
-    initFrequency = 2} //Hertz
-  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
-    val in = In[TimedEvent]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  val generator = new DiscreteGenerator{ name = "generator" }
+  val pot1 = new TimedValuesPot{ name = "pot1" }
+  val pot2 = new TimedValuesPot{ name = "pot2" }
+  val pot3 = new TimedValuesPot{ name = "pot3" }
+  val chart =  new ChartRecorder{ name = "chart" }
   //Connecting
-  generator.out ~> logger.in}
+  generator ~> pot1 ~> chart
+  generator ~> pot2 ~> chart
+  generator ~> pot3 ~> chart.line(name = "Pot 3 line", color = Red)}

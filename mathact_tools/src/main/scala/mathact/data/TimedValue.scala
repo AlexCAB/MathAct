@@ -12,28 +12,12 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
-
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.TimedEvent
-import mathact.tools.EmptyBlock
-import mathact.tools.generators.DiscreteGenerator
-import mathact.tools.workbenches.SimpleWorkbench
+package mathact.data
 
 
-/** Example of using of discrete generator
-  * Created by CAB on 10.11.2016.
+/** Represent of one double value with time-stamp
+  * Created by CAB on 13.11.2016.
   */
 
-class DiscreteGeneratorExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = "Discrete generator example"
-  //Blocks
-  val generator = new DiscreteGenerator{
-    name = "Example generator"
-    initFrequency = 2} //Hertz
-  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
-    val in = In[TimedEvent]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
-  //Connecting
-  generator.out ~> logger.in}
+case class TimedValue(time: Long, value: Double){   //System time
+  override def toString = s"TimedEvent(time = $time, value = $value)"}

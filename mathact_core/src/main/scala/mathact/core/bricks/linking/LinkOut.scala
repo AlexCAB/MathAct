@@ -12,28 +12,22 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
+package mathact.core.bricks.linking
 
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.TimedEvent
-import mathact.tools.EmptyBlock
-import mathact.tools.generators.DiscreteGenerator
-import mathact.tools.workbenches.SimpleWorkbench
+import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
+import mathact.core.sketch.blocks.BlockLike
 
 
-/** Example of using of discrete generator
-  * Created by CAB on 10.11.2016.
+/** Chain connecting for blocks with single outflow
+  * Created by CAB on 13.11.2016.
   */
 
-class DiscreteGeneratorExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = "Discrete generator example"
-  //Blocks
-  val generator = new DiscreteGenerator{
-    name = "Example generator"
-    initFrequency = 2} //Hertz
-  val logger =  new EmptyBlock with FunWiring{  name = "Logger"
-    val in = In[TimedEvent]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
-  //Connecting
-  generator.out ~> logger.in}
+trait LinkOut[T]{ _: BlockLike ⇒
+  //Outlet producer method
+  def out: Plug[T]
+  //Connecting methods
+  def ~>(linkIn: LinkIn[T]): Unit = out.attach(linkIn.in)
+  def ~>(in: Socket[T]): Unit = out.attach(in)
+  def ~>[H](linkThrough: LinkThrough[T,H]): LinkThrough[T,H] = {
+    out.attach(linkThrough.in)
+    linkThrough}}

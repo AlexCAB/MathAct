@@ -15,11 +15,12 @@
 package mathact.tools.pots
 
 import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.linking.LinkThrough
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
 import mathact.core.bricks.ui.interaction.{E, C}
+import mathact.data.{TimedEvent, TimedValue}
 import mathact.tools.Tool
-import mathact.tools.generators.DiscreteGenerator.TimedEvent
 import scalafx.scene.Scene
 import scalafx.scene.control.{Spinner, SpinnerValueFactory, Slider}
 import scalafx.scene.layout.HBox
@@ -31,22 +32,20 @@ import scalafx.scene.paint.Color._
   * Created by CAB on 12.11.2016.
   */
 
-object TimedValuesPot{
-  //Definitions
-  case class TimedValue(time: Long, value: Double){   //System time
-    override def toString = s"TimedEvent(time = $time, value = $value)"}}
-
 class TimedValuesPot(implicit context: SketchContext)
 extends Tool(context, "TVP", "mathact/tools/pots/timed_values_pot.png")
-with ObjWiring with ObjOnStart with ObjOnStop with BlockUI{ import TimedValuesPot._
+with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[TimedEvent, TimedValue]{
   //Parameters
   val elemsHeight: Int = 25
   val spinnerWidth: Int = 100
   val sliderWidth: Int = 300
+  val defaultInit: Double = 0
+  val defaultMin: Double = -1
+  val defaultMax: Double = 1
   //Variables
-  @volatile private var _init = 0.0
-  @volatile private var _min = 0.0
-  @volatile private var _max = 0.0
+  @volatile private var _init = defaultInit
+  @volatile private var _min = defaultMin
+  @volatile private var _max = defaultMax
   @volatile private var currentValue = 0.0
   //UI definition
   private class PotUI extends SfxFrame{
