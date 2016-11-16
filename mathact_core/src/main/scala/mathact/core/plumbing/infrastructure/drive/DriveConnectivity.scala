@@ -21,8 +21,6 @@ import mathact.core.model.messages.M
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import scala.collection.mutable.{Map ⇒ MutMap}
 
-import scala.util.Try
-
 
 /** Handling of connections and disconnections
   * Created by CAB on 22.08.2016.
@@ -30,43 +28,51 @@ import scala.util.Try
 
 private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
   //Variables
-  private val pendingConnections = MutMap[Int, M.ConnectPipes]()
+  private val pendingConnections = MutMap[Int, (OutPipe[_], InPipe[_])]()
   //Methods
   /** Adding of ConnectPipes to pending connections
     * Can be called only from blocks constructor on sketch construction.
     * @param message = ConnectPipes */
-  def connectPipesAsk(message: M.ConnectPipes, state: Drive.State): Either[Throwable,Int] = state match{
-    case Drive.State.Init ⇒
-      //On create store to pending connections
-      val connectionId = nextIntId
-      pendingConnections += (connectionId → message)
-      log.debug(s"[DriveConnectivity.connectPipes] Connection added to pending list, connectionId: $connectionId")
-      Right(connectionId)
-    case s ⇒
-      //Incorrect state
-      val msg =
-        s"[DriveConnectivity.connectPipes | blockName: $blockClassName, message: $message] " +
-        s"Incorrect state $s, required DriveInit"
-      log.error(msg)
-      //User logging
-      val outPipe = Try{message.out()}.toOption
-      val inPipe = Try{message.in()}.toOption
-      val userMsg =
-        s"Pipes ${outPipe.getOrElse("---")} and ${inPipe.getOrElse("---")} can be connected only " +
-        s"on block construction, current state $s"
-      userLogging ! M.LogWarning(Some(blockId), blockName.getOrElse(blockClassName), userMsg)
-      //Return error
-      Left(new IllegalStateException(msg))}
+  def connectPipesAsk(message: M.ConnectPipes, state: Drive.State): Either[Throwable,Int] = {
+    log.debug(s"[DriveConnectivity.connectPipesAsk] Try to check and add connection $message, state: $state")
+    (state, message.out, message.in) match{
+      case (Drive.State.Init, outlet: OutPipe[_], inlet: InPipe[_])  ⇒
+        //On create store to pending connections
+        val connectionId = nextIntId
+        pendingConnections += (connectionId → Tuple2(outlet, inlet))
+        log.debug(s"[DriveConnectivity.connectPipes] Connection added to pending list, connectionId: $connectionId")
+        Right(connectionId)
+      case  (Drive.State.Init, outlet, inlet)  ⇒
+        //Incorrect outlet or inlet type
+        val msg =
+          s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance of OutPipe[_] " +
+          s"or InPipe[_], outlet: $outlet, inlet: $inlet."
+        log.error(msg)
+        //User logging
+        userLogging ! M.LogWarning(
+          Some(blockId),
+          blockName.getOrElse(blockClassName),
+          s"Plug or Socket is not an instance of OutPipe[_] or InPipe[_], outlet: $outlet, inlet: $inlet.")
+        //Return error
+        Left(new IllegalStateException(msg))
+      case (s, _, _) ⇒
+        //Incorrect state
+        val msg =
+          s"[DriveConnectivity.connectPipes | blockName: $blockClassName, message: $message] " +
+          s"Incorrect state $s, required DriveInit"
+        log.error(msg)
+        //User logging
+        val userMsg =
+          s"Pipes ${message.out} and ${message.in} can be connected only " +
+          s"on block construction, current state $s"
+        userLogging ! M.LogWarning(Some(blockId), blockName.getOrElse(blockClassName), userMsg)
+        //Return error
+        Left(new IllegalStateException(msg))}}
   /** Connecting of pipes on build of drive
     * Sends M.AddConnection to all inlets drive from pendingConnections list */
-  def doConnectivity(): Unit = pendingConnections.foreach{ case (connectionId, M.ConnectPipes(out, in)) ⇒
-    (out(),in()) match{
-      case (outlet: OutPipe[_], inlet: InPipe[_]) ⇒
-        inlet.pump.drive ! M.AddConnection(connectionId, DriveRef(self), outlet, inlet)
-      case (o, i) ⇒
-        throw new IllegalArgumentException(
-          s"[DriveConnectivity.doConnectivity] Plug or Socket is not an instance of Outlet[_] " +
-          s"or Inlet[_], out: $o, in: $i.")}}
+  def doConnectivity(): Unit = pendingConnections.foreach{ case (connectionId, (outlet, inlet)) ⇒
+    log.debug(s"[DriveConnectivity.doConnectivity] Start connecting from $outlet to $inlet, connectionId: $connectionId")
+    inlet.pump.drive ! M.AddConnection(connectionId, DriveRef(self), outlet, inlet)}
   /** Adding of connection to given inlet (inletId), send  M.ConnectTo to outlet
     * @param connectionId - Int
     * @param initiator - ActorRef
@@ -155,4 +161,4 @@ private[core] trait DriveConnectivity { _: DriveActor ⇒ import Drive._
       false}
   /** Get of pending list, used in test
     * @return -  Map[Int, M.ConnectPipes] */
-  def getConnectionsPendingList: Map[Int, M.ConnectPipes] = pendingConnections.toMap}
+  def getConnectionsPendingList: Map[Int, (OutPipe[_], InPipe[_])] = pendingConnections.toMap}

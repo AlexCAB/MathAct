@@ -22,7 +22,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import mathact.core.app.infrastructure.MainControllerActor
 import mathact.core.app.view.MainUIActor
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.layout.infrastructure.LayoutActor
 import mathact.core.model.holders._
@@ -120,15 +120,15 @@ private [core] object Application{
       log.error(s"[Application.start] Error on start: $e, terminate ActorSystem.")
       doTerminate()
       throw new ExecutionException(e)}
-  /** Get of SketchContext for new Workbench
+  /** Get of BlockContext for new Workbench
     * @param workbench - Workbench
     * @return - MainControllerActor ActorRef or thrown exception */
-  def getSketchContext(workbench: WorkbenchLike): SketchContext = mainController match{
+  def getSketchContext(workbench: WorkbenchLike): BlockContext = mainController match{
     case Some(controller) ⇒
       val opClassName = Option(workbench.getClass.getCanonicalName)
       val askTimeout = Timeout(creatingSketchContextTimeout).duration
       log.debug(
-        s"[Application.getSketchContext] Try to create SketchContext for workbench $workbench, " +
+        s"[Application.getSketchContext] Try to create BlockContext for workbench $workbench, " +
         s"class name: $opClassName, askTimeout: $askTimeout.")
       opClassName match{
         case Some(className) ⇒
@@ -137,14 +137,14 @@ private [core] object Application{
             .result(
               ask(
                 controller,
-                M.NewSketchContext(workbench, className))(askTimeout).mapTo[Either[Exception,SketchContext]],
+                M.NewSketchContext(workbench, className))(askTimeout).mapTo[Either[Exception,BlockContext]],
               askTimeout)
             .fold(
               e ⇒ {
                 log.debug(s"[Application.getSketchContext] Error on ask for ${workbench.getClass.getName}, err: $e.")
                 throw new ExecutionException(e)},
               wc ⇒ {
-                log.debug(s"[Application.getSketchContext] SketchContext created for ${workbench.getClass.getName}.")
+                log.debug(s"[Application.getSketchContext] BlockContext created for ${workbench.getClass.getName}.")
                 wc})
         case None ⇒
           throw new IllegalArgumentException(

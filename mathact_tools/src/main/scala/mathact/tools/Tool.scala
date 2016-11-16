@@ -14,7 +14,7 @@
 
 package mathact.tools
 
-import mathact.core.bricks.blocks.{Block, SketchContext}
+import mathact.core.bricks.blocks.{Block, BlockContext}
 
 
 /** Base class for tall tools.
@@ -22,10 +22,10 @@ import mathact.core.bricks.blocks.{Block, SketchContext}
   */
 
 private[mathact] abstract class Tool(
-  context: SketchContext,
+  blockContext: BlockContext,
   toolTypeName: String,
   toolImgPath: String)
-extends Block(context){
+extends Block(blockContext){
   //Variables
   private var _name: Option[String] = None
   //DSL

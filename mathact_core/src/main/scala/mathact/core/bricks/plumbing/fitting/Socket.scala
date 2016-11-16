@@ -14,6 +14,7 @@
 
 package mathact.core.bricks.plumbing.fitting
 
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.plumbing.fitting.Flange
 import mathact.core.plumbing.fitting.pipes.InPipe
 
@@ -26,5 +27,5 @@ trait Socket[H] extends Flange[H] { _: InPipe[H] ⇒
   //Methods
   /** Connecting of this Socket to given Plug
     * @param plug - Plug[T] */
-  def plug(plug: ⇒Plug[H]): Unit = pump.connect(()⇒plug, ()⇒this)
-  def <~ (plug: ⇒Plug[H]): Unit = pump.connect(()⇒plug, ()⇒this)}
+  def plug(plug: ⇒Plug[H])(implicit context: BlockContext): Unit = pump.connect(context, plug, this)
+  def <~ (plug: ⇒Plug[H])(implicit context: BlockContext): Unit = pump.connect(context, plug, this)}

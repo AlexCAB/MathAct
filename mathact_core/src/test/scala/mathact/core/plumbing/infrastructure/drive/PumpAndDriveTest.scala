@@ -21,14 +21,14 @@ import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core._
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.dummies.TestActor
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
 import mathact.core.model.data.pipes.{OutletData, InletData}
-import mathact.core.model.enums.VisualisationLaval
+import mathact.core.model.enums.{BlockType, VisualisationLaval}
 import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.plumbing.Pump
@@ -53,7 +53,7 @@ class PumpAndDriveTest extends ActorTestSpec{
     case class DriveState(
       outlets: Map[Int, (OutPipe[_], Option[Long], Map[(DriveRef, Int), Int])], // (Outlet ID, (Outlet, subscribers(id, inletQueueSize))
       inlets: Map[Int, (InPipe[_], Int)],    // (Inlet ID, Outlet, taskQueueSize)
-      pendingConnections: Map[Int, M.ConnectPipes],
+      pendingConnections: Map[Int, (OutPipe[_], InPipe[_])],
       pendingMessages:  List[(Int, Any)],
       visualisationLaval: VisualisationLaval)
     class TestHandler extends OutflowLike[Double] with InflowLike[Double]{
@@ -83,7 +83,9 @@ class PumpAndDriveTest extends ActorTestSpec{
       def receive = {
         case "Hi!" ⇒ sender ! "Hey!"
         case m ⇒ println("[TeatActor] m: " + m)}}
-    class TestBlock extends BlockLike with OnStartLike with OnStopLike{
+    class TestBlock(blockContext: BlockContext) extends BlockLike with OnStartLike with OnStopLike{
+      //Context
+      protected implicit val context: BlockContext = blockContext.copy(blockType = BlockType.Block)
       //Parameters
       def blockName = Some(testBlockName)
       def blockImagePath = None
@@ -114,7 +116,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       def setProcError(err: Option[Throwable]): Unit = { procError = err }
       def isOnStartCalled: Boolean = onStartCalled
       def isOnStopCalled: Boolean = onStopCalled}
-    class TestBlockWithUI extends TestBlock with BlockUILike{
+    class TestBlockWithUI(blockContext: BlockContext) extends TestBlock(blockContext) with BlockUILike{
       //Variable
       @volatile private var initFrameCalled = false
       @volatile private var createFrameCalled = false
@@ -217,26 +219,27 @@ class PumpAndDriveTest extends ActorTestSpec{
           s"block: ${blockPump.block.blockName}, drive: $drive")
         DriveRef(drive)}}})
     //Test workbench context
-    lazy val testSketchContext = new SketchContext(
+    lazy implicit val testSketchContext = new BlockContext(
+      BlockType.Workbench,
       system,
       SketchControllerRef(testController.ref),
       UserLoggingRef(testUserLogging.ref),
       LayoutRef(testLayout.ref),
       PlumbingRef(testPlumbing.ref),
       testPumpConfig,
-      ConfigFactory.load())
-    {
-      override val plumbing = PlumbingRef(testPlumbing.ref)}}
+      ConfigFactory.load())}
   //Test blocks
   trait SimpleBlocks extends TestCase{
     object blocks{
-      lazy val testBlock = new TestBlock
+      lazy val testBlock = new TestBlock(testSketchContext)
       lazy val testDrive = testBlock.pump.drive.ref
       lazy val otherDrive = TestActor("TestOtherDriver_" + randomString())((self, _) ⇒ {
         case M.AddOutlet(pipe, _) ⇒ Some(Right((0, 1)))  // (block ID, pipe ID)
         case M.AddInlet(pipe, _) ⇒  Some(Right((0, 2)))  // (block ID, pipe ID)
         case M.UserData(outletId, _) ⇒  Some(Right(None))})
       lazy val otherBlock = new BlockLike{
+        //Context
+        protected implicit val context: BlockContext = testSketchContext.copy(blockType = BlockType.Block)
         //Parameters
         def blockName = Some("OtherBlock")
         def blockImagePath = None
@@ -303,13 +306,15 @@ class PumpAndDriveTest extends ActorTestSpec{
         (testOutlet, testInlet, otherOutlet, otherInlet)}}}
   trait BlocksWithUi extends TestCase{
     object blocks{
-      lazy val testBlockWithUi = new TestBlockWithUI
+      lazy val testBlockWithUi = new TestBlockWithUI(testSketchContext)
       lazy val testDrive = testBlockWithUi.pump.drive.ref
       lazy val otherDrive = TestActor("TestOtherDriver_" + randomString())((self, _) ⇒ {
         case M.AddOutlet(pipe, _) ⇒ Some(Right((0, 1)))  // (block ID, pipe ID)
         case M.AddInlet(pipe, _) ⇒  Some(Right((0, 2)))  // (block ID, pipe ID)
         case M.UserData(outletId, _) ⇒  Some(Right(None))})
       lazy val otherBlock = new BlockLike{
+        //Context
+        protected implicit val context: BlockContext = testSketchContext.copy(blockType = BlockType.Block)
         //Parameters
         def blockName = Some("OtherBlock")
         def blockImagePath = None

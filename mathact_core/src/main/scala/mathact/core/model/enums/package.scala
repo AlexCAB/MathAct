@@ -24,6 +24,10 @@ package object enums {
   object SketchStatus extends Enumeration {
     val Ready, Ended, Failed = Value}
   type SketchStatus = SketchStatus.Value
+  //BlockType
+  object BlockType extends Enumeration {
+    val Workbench, Block = Value}
+  type BlockType = BlockType.Value
   //StepMode
   object StepMode extends Enumeration {
     val HardSynchro, SoftSynchro, Asynchro, None = Value}

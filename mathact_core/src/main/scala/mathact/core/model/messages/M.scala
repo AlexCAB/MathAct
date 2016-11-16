@@ -91,7 +91,7 @@ private[core] object M {
   //Object Pump - DriveActor (ask and tell)
   case class AddOutlet(pipe: OutPipe[_], name: Option[String]) extends Msg
   case class AddInlet(pipe: InPipe[_], name: Option[String]) extends Msg
-  case class ConnectPipes(out: ()⇒Plug[_], in: ()⇒Socket[_]) extends Msg
+  case class ConnectPipes(out: Plug[_], in: Socket[_]) extends Msg
   case class UserData[T](outletId: Int, value: T) extends Msg
   case class UserLogInfo(message: String) extends Msg
   case class UserLogWarn(message: String) extends Msg

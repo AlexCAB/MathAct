@@ -19,10 +19,11 @@ import java.util.concurrent.ExecutionException
 import akka.actor.{Props, ActorRef}
 import akka.event.Logging
 import akka.pattern.ask
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
+import mathact.core.model.enums.BlockType
 import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.{Msg, M}
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
@@ -36,7 +37,7 @@ import scala.reflect.ClassTag
   */
 
 private[core] class Pump(
-  context: SketchContext,
+  context: BlockContext,
   val block: BlockLike)
 extends PumpLike{
   //Fields
@@ -106,8 +107,10 @@ extends PumpLike{
     addPipe(M.AddOutlet(pipe, name))
   private[core] def addInlet(pipe: InPipe[_], name: Option[String]): (Int, Int) =
     addPipe(M.AddInlet(pipe, name))
-  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Int =
-    askDrive[Int](M.ConnectPipes(out, in))
+  private[core] def connect(context: BlockContext, out: Plug[_], in: Socket[_]): Int = {
+    if (context.blockType != BlockType.Workbench) throw new IllegalArgumentException(
+      s"[Pump.connect] Blocks cannot be connected inside block definition, connect it in Workbench")
+    askDrive[Int](M.ConnectPipes(out, in))}
   private[core] def pushUserMessage(msg: M.UserData[_]): Unit =
     askDriveAndHandleTimeout(msg)
   private[core] def askForNewUserActor(props: Props, name: Option[String]): ActorRef =

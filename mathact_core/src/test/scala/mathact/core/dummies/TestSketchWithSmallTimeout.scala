@@ -14,7 +14,7 @@
 
 package mathact.core.dummies
 
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.sketch.blocks.WorkbenchLike
 
 import scala.concurrent.duration._
@@ -26,7 +26,7 @@ import scala.concurrent.duration._
 
 class TestSketchWithSmallTimeout extends WorkbenchLike{
   def sketchTitle = Some("TestSketchWithSmallTimeout")
-  protected implicit val context: SketchContext = null
+  protected implicit val context: BlockContext = null
   val timeout = 2.second
   println(s"[TestSketchWithTimeout] DriveCreating, timeout: $timeout.")
   Thread.sleep(timeout.toMillis)}

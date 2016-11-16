@@ -14,6 +14,7 @@
 
 package mathact.core.sketch.blocks
 
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.plumbing.Pump
 
 
@@ -22,6 +23,8 @@ import mathact.core.plumbing.Pump
   */
 
 private[core] trait BlockLike {
+  //Context
+  protected implicit val context: BlockContext
   //Pump
   private[core] val pump: Pump
   //Parameters (this methods will be called by Drive after block will constructed)

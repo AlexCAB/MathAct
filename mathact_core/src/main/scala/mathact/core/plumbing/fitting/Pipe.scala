@@ -24,6 +24,4 @@ import mathact.core.plumbing.Pump
 
 private[core] trait Pipe[H]{
   //Fields
-  private[core] val pump: Pump
-  //Methods
-  private[core] def connect(out: ()⇒Plug[_], in: ()⇒Socket[_]): Unit = pump.connect(out, in)}
+  private[core] val pump: Pump}

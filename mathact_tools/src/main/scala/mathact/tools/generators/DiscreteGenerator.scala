@@ -20,7 +20,7 @@ import java.util.Locale
 import mathact.core.bricks.linking.LinkOut
 import mathact.data.TimedEvent
 import akka.actor.{Props, Actor}
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
 import mathact.core.bricks.ui.interaction.{E, C}
@@ -40,8 +40,8 @@ import scalafx.scene.paint.Color._
   * Created by CAB on 10.11.2016.
   */
 
-abstract class DiscreteGenerator(implicit context: SketchContext)
-extends Tool(context, "DG", "mathact/tools/generators/discrete_generator.png")
+abstract class DiscreteGenerator(implicit blockContext: BlockContext)
+extends Tool(blockContext, "DG", "mathact/tools/generators/discrete_generator.png")
 with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEvent]{
   //Parameters
   val defaultInitFreq: Double = 2

@@ -23,5 +23,5 @@ import mathact.core.sketch.blocks.WorkbenchLike
   */
 
 abstract class Workbench extends WorkbenchLike{
-  //Get of SketchContext
+  //Get of BlockContext
   protected implicit val context = Application.getSketchContext(this)}

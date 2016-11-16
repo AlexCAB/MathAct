@@ -17,9 +17,10 @@ package mathact.core.sketch.infrastructure.instance
 import java.util.concurrent.{TimeoutException, ExecutionException}
 
 import mathact.core.WorkerBase
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.model.config.SketchInstanceConfigLike
+import mathact.core.model.enums.BlockType
 import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.sketch.blocks.WorkbenchLike
@@ -71,12 +72,13 @@ extends WorkerBase{ import SketchInstance._
       //Already build log error
       log.error(
         s"[SketchInstanceActor.sketchRunBuilding] Sketch instance already build.")}
-  /** Get workbench context, create and return of SketchContext
-    * @return - Either[Exception, SketchContext] */
-  def buildSketchContext(): Either[Exception, SketchContext] = isSketchContextBuilt match{
+  /** Get workbench context, create and return of BlockContext
+    * @return - Either[Exception, BlockContext] */
+  def buildSketchContext(): Either[Exception, BlockContext] = isSketchContextBuilt match{
     case false ⇒
-      log.debug(s"[SketchInstanceActor.getSketchContext] Build SketchContext")
-      val response = Right{ new SketchContext(
+      log.debug(s"[SketchInstanceActor.getSketchContext] Build BlockContext")
+      val response = Right{ new BlockContext(
+        BlockType.Workbench,
         context.system,
         controller,
         userLogging,
@@ -106,12 +108,12 @@ extends WorkerBase{ import SketchInstance._
         //Report to controller
         controller ! M.SketchInstanceReady(workbench)
       case (false, _) ⇒
-        log.error(s"[SketchInstanceActor.sketchInstanceBuilt] Building failed, SketchContext is not built, time: $time.")
+        log.error(s"[SketchInstanceActor.sketchInstanceBuilt] Building failed, BlockContext is not built, time: $time.")
         //Log to user logging
-        userLogging ! M.LogError(None, "SketchInstance", Seq(), "SketchContext is not built in init of sketch instance.")
+        userLogging ! M.LogError(None, "SketchInstance", Seq(), "BlockContext is not built in init of sketch instance.")
         //Send SketchInstanceFail
         controller ! M.SketchInstanceError(new IllegalStateException(
-          s"[SketchInstanceActor.sketchInstanceBuilt] SketchContext is not built, time: $time."))
+          s"[SketchInstanceActor.sketchInstanceBuilt] BlockContext is not built, time: $time."))
       case (_, true) ⇒
         log.error(s"[SketchInstanceActor.sketchInstanceBuilt] Built after timeout, do nothing, time: $time.")
         //Log to user logging

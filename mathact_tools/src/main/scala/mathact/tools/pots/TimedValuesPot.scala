@@ -14,7 +14,7 @@
 
 package mathact.tools.pots
 
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkThrough
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
@@ -32,7 +32,7 @@ import scalafx.scene.paint.Color._
   * Created by CAB on 12.11.2016.
   */
 
-class TimedValuesPot(implicit context: SketchContext)
+class TimedValuesPot(implicit context: BlockContext)
 extends Tool(context, "TVP", "mathact/tools/pots/timed_values_pot.png")
 with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[TimedEvent, TimedValue]{
   //Parameters

@@ -14,7 +14,7 @@
 
 package mathact.tools.plots
 
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.fitting.Socket
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
@@ -29,7 +29,7 @@ import scalafx.scene.paint.Color
   * Created by CAB on 13.11.2016.
   */
 
-class ChartRecorder(implicit context: SketchContext)
+class ChartRecorder(implicit context: BlockContext)
 extends Tool(context, "CR", "mathact/tools/pots/chart_recorder.png")
   with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[TimedValue]{
 
@@ -47,16 +47,6 @@ extends Tool(context, "CR", "mathact/tools/pots/chart_recorder.png")
 
   }
 
-  //TODO Проблема в том что при таком конструировнии инлетов/оутлетов, фактическое конструирование выполняется
-  //TODO на этапе подключения, что приводит к ошыбке:
-  //TODO Решение:
-  //TODO   1. Всё констуирование должно выполнятся в SketchInstance
-  //TODO   2. Сначало выполнянется конструтирование самого скетча, при это создаётся как-ято часть
-  //TODO      инлетов/оутлетов и подключений.
-  //TODO   3. Для всех подключений вызывается сонструктор, что приводит к созданию новых  инлетов/оутлетов и подключени
-  //TODO   4. Шаг 3 выполняется до тех пор пока все подключения ни будут выполнены (может быть много вложений)
-  //TODO   5. Все сконструированые инлеты  инлетов/оутлетов и подключени передаются плампингу.
-  //TODO
 
   //Functions
   private def nextColor: Color = Color.Magenta

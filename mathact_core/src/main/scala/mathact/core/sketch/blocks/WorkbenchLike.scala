@@ -14,7 +14,7 @@
 
 package mathact.core.sketch.blocks
 
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 
 
 /** Workbench interface
@@ -23,6 +23,6 @@ import mathact.core.bricks.blocks.SketchContext
 
 private[core] trait WorkbenchLike {
   //Context
-  protected implicit val context: SketchContext
+  protected implicit val context: BlockContext
   //Parameters (this methods will be called by SketchController after sketch will constructed)
   private[core] def sketchTitle: Option[String]}

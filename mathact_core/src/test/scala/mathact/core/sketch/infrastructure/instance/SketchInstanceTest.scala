@@ -19,7 +19,7 @@ import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import mathact.core.ActorTestSpec
-import mathact.core.bricks.blocks.SketchContext
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.data.SketchData
 import mathact.core.dummies.{TestSketchWithBigTimeout, TestSketchWithError, TestSketchWithSmallTimeout}
 import mathact.core.model.config._
@@ -81,7 +81,7 @@ class SketchInstanceTest extends ActorTestSpec {
       sleep(1.second) //Some building timeout
       //Get context
       testActor.send(controller, M.BuildSketchContextFor(testActor.ref))
-      val context = testActor.expectMsgType[Either[Exception, SketchContext]]
+      val context = testActor.expectMsgType[Either[Exception, BlockContext]]
       println("[SketchInstanceTest] context: " + context)
       //Expect SketchInstanceReady
       val instance = testSketchController.expectMsgType[M.SketchInstanceReady]
@@ -119,7 +119,7 @@ class SketchInstanceTest extends ActorTestSpec {
       sleep(1.second) //Some building timeout
       //Get context
       testActor.send(controller, M.BuildSketchContextFor(testActor.ref))
-      val context = testActor.expectMsgType[Either[Exception, SketchContext]]
+      val context = testActor.expectMsgType[Either[Exception, BlockContext]]
       println("[SketchInstanceTest] context: " + context)
       //Expect SketchInstanceReady
       val fail = testSketchController.expectMsgType[M.SketchInstanceError]
@@ -140,7 +140,7 @@ class SketchInstanceTest extends ActorTestSpec {
       sleep(1.second) //Some building timeout
       //Get context
       testActor.send(controller, M.BuildSketchContextFor(testActor.ref))
-      val context = testActor.expectMsgType[Either[Exception, SketchContext]]
+      val context = testActor.expectMsgType[Either[Exception, BlockContext]]
       println("[SketchInstanceTest] context: " + context)
       sleep(4.second) //Wait timeout
       //Expect SketchInstanceReady

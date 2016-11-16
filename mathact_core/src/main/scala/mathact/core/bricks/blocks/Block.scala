@@ -15,6 +15,7 @@
 package mathact.core.bricks.blocks
 
 import akka.actor.{ActorRef, Props}
+import mathact.core.model.enums.BlockType
 import mathact.core.plumbing.Pump
 import mathact.core.sketch.blocks.BlockLike
 
@@ -23,7 +24,11 @@ import mathact.core.sketch.blocks.BlockLike
   * Created by CAB on 22.10.2016.
   */
 
-abstract class Block (context: SketchContext) extends BlockLike{
+abstract class Block (blockContext: BlockContext) extends BlockLike{
+  //Context
+  if(blockContext.blockType != BlockType.Workbench) throw new IllegalArgumentException(
+    "[Block.<init>] Block should not be created inside other Block, create it in Workbench.")
+  protected implicit val context = blockContext.copy(blockType = BlockType.Block)
   //Pump
   private[core] val pump: Pump = new Pump(context, this)
   //Helpers

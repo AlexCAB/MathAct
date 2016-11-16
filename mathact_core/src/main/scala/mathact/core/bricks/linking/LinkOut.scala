@@ -14,6 +14,7 @@
 
 package mathact.core.bricks.linking
 
+import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
 import mathact.core.sketch.blocks.BlockLike
 
@@ -26,8 +27,8 @@ trait LinkOut[T]{ _: BlockLike ⇒
   //Outlet producer method
   def out: Plug[T]
   //Connecting methods
-  def ~>(linkIn: LinkIn[T]): Unit = out.attach(linkIn.in)
-  def ~>(in: Socket[T]): Unit = out.attach(in)
-  def ~>[H](linkThrough: LinkThrough[T,H]): LinkThrough[T,H] = {
-    out.attach(linkThrough.in)
+  def ~>(linkIn: LinkIn[T])(implicit context: BlockContext): Unit = out.attach(linkIn.in)(context)
+  def ~>(in: Socket[T])(implicit context: BlockContext): Unit = out.attach(in)(context)
+  def ~>[H](linkThrough: LinkThrough[T,H])(implicit context: BlockContext): LinkThrough[T,H] = {
+    out.attach(linkThrough.in)(context)
     linkThrough}}

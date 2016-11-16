@@ -14,6 +14,7 @@
 
 package mathact.core.plumbing.fitting.flows
 
+import mathact.core.plumbing.Pump
 import mathact.core.plumbing.fitting.FlowLike
 import mathact.core.plumbing.fitting.pipes.OutPipe
 
