@@ -66,7 +66,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[Time
       disable = true
       editable = true
       value.onChange{
-        slider.value = this.value.value
+        Option(slider).foreach(_.value = this.value.value)
         sendEvent(E.DoubleValueChanged(this.value.value))}
       valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(minVal, maxVal, initVal, valStep)
         .asInstanceOf[SpinnerValueFactory[Double]]}

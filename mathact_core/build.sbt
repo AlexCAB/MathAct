@@ -15,13 +15,9 @@ libraryDependencies  ++= Seq(
   "com.typesafe.akka"             %% "akka-actor"           % "2.4.8",
   "org.scalafx"                   %% "scalafx"              % "8.0.102-R11",
   "org.scalafx"                   %% "scalafxml-core-sfx8"  % "0.2.2",
-  "org.scala-lang.modules"        %% "scala-xml"            % "1.0.5",
   "org.tinyjee.jgraphx"           %  "jgraphx"              % "3.4.1.3",
   "org.scalatest"                 %% "scalatest"            % "3.0.0"          % "test",
   "com.typesafe.akka"             %% "akka-testkit"         % "2.4.8"          % "test"
 )
 
-
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-
-

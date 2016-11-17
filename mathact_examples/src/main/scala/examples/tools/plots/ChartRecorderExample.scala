@@ -37,6 +37,4 @@ class ChartRecorderExample extends SimpleWorkbench {
   //Connecting
   generator ~> pot1 ~> chart
   generator ~> pot2 ~> chart
-  generator ~> pot3 ~> chart.line(name = "Pot 3 line", color = Red)
-
-}
+  generator ~> pot3 ~> chart.line(name = "Pot 3 line", color = Red)}
