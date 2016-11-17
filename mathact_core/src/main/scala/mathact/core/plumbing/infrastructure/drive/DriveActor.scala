@@ -224,13 +224,13 @@ with DriveMessaging with DriveUIControl with DriveService{ import Drive.State._,
     case (M.DriveLoad(sub, outId, queueSize), st) if st != Init && st != Constructed && st != Connecting ⇒
       driveLoad(sub, outId, queueSize)
       state
-    case (M.TaskDone(Massage, inletId, time, _), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
+    case (M.TaskDone(Massage, inletId, time, _), st) if st != Init && st != Constructed && st != Connecting ⇒
       messageTaskDone(inletId, time)
       state
-    case (M.TaskTimeout(Massage, inId, time, _), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
+    case (M.TaskTimeout(Massage, inId, time, _), st) if st != Init && st != Constructed && st != Connecting ⇒
       messageTaskTimeout(inId, time)
       state
-    case (M.TaskFailed(Massage, inId, t, err), Connected | TurnedOn | Starting | Working | Stopping | Stopped) ⇒
+    case (M.TaskFailed(Massage, inId, t, err), st) if st != Init && st != Constructed && st != Connecting ⇒
       messageTaskFailed(inId, t, err)
       state
     //Managing, skip timeout task

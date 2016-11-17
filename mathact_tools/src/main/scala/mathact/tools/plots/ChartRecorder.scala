@@ -47,12 +47,11 @@ import info.monitorenter.util.Range
   */
 
 class ChartRecorder(implicit context: BlockContext)
-extends Tool(context, "CR", "mathact/tools/pots/chart_recorder.png")
+extends Tool(context, "CR", "mathact/tools/plots/chart_recorder.png")
 with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   //Parameters
   val defaultMinRange: Double = -1
   val defaultMaxRange: Double = 1
-  val defaultAutoRange: Boolean = false
   val defaultAxisXName: String = "time in seconds"
   val defaultAxisYName: String = "value"
   val defaultMaxTraceSize: Int = 100
@@ -64,7 +63,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   //Variables
   @volatile private var _minRange     = defaultMinRange
   @volatile private var _maxRange     = defaultMaxRange
-  @volatile private var _autoRange    = defaultAutoRange
   @volatile private var _axisXName    = defaultAxisXName
   @volatile private var _axisYName    = defaultAxisYName
   @volatile private var _maxTraceSize = defaultMaxTraceSize
@@ -164,8 +162,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   def minRange_=(v: Double){ _minRange = v }
   def maxRange: Double = _maxRange
   def maxRange_=(v: Double){ _maxRange = v }
-  def autoRange: Boolean = _autoRange
-  def autoRange_=(v: Boolean){ _autoRange = v }
   def axisXName: String = _axisXName
   def axisXName_=(v: String){ _axisXName = v }
   def axisYName: String = _axisYName
