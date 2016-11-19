@@ -12,21 +12,25 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.ui.interaction
+package mathact.data.ui
 
+import mathact.core.bricks.ui.interaction.UICommand
 
-/** Set of predefined of UI events
-  * Created by CAB on 11.11.2016.
+/** Set of predefined of UI commands
+  * Created by CAB on 31.10.2016.
   */
 
-object E {
-  //Execution events
-  case object Start extends UIEvent
-  case object Stop extends UIEvent
-  case object Step extends UIEvent
-  case class LongValueChanged(newVal: Long) extends UIEvent
-  case class DoubleValueChanged(newVal: Double) extends UIEvent
+object C {
+  //Frame commands
+  case object ShowFrame extends UICommand
+  case object HideFrame extends UICommand
+  case class SetFrameTitle(text: String) extends UICommand
+  //Execution commands
+  case object Ready extends UICommand
+  case object Start extends UICommand
+  case object Stop extends UICommand
 
   //TODO Add more
+
 
 }

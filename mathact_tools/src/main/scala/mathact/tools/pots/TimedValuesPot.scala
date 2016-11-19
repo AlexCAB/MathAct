@@ -18,8 +18,8 @@ import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkThrough
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
-import mathact.core.bricks.ui.interaction.{E, C}
-import mathact.data.{TimedEvent, TimedValue}
+import mathact.data.discrete.{TimedValue, TimedEvent}
+import mathact.data.ui.{E, C}
 import mathact.tools.Tool
 import scalafx.scene.Scene
 import scalafx.scene.control.{Spinner, SpinnerValueFactory, Slider}

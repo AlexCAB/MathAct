@@ -15,7 +15,7 @@
 package examples.tools.generators
 
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.TimedEvent
+import mathact.data.discrete.TimedEvent
 import mathact.tools.EmptyBlock
 import mathact.tools.generators.DiscreteGenerator
 import mathact.tools.workbenches.SimpleWorkbench

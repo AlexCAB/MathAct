@@ -18,13 +18,13 @@ import java.text.{DecimalFormatSymbols, DecimalFormat}
 import java.util.Locale
 
 import mathact.core.bricks.linking.LinkOut
-import mathact.data.TimedEvent
 import akka.actor.{Props, Actor}
 import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
-import mathact.core.bricks.ui.interaction.{E, C}
-import mathact.core.bricks.ui.parts.IconButton
+import mathact.data.discrete.TimedEvent
+import mathact.data.ui.{E, C}
+import mathact.parts.ui.IconButton
 import mathact.tools.Tool
 
 import scala.concurrent.Future

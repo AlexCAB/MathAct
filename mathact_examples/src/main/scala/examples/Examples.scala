@@ -15,7 +15,7 @@
 package examples
 
 import examples.linking.CompactLinking
-import examples.tools.generators.DiscreteGeneratorExample
+import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
 import examples.tools.plots.ChartRecorderExample
 import examples.tools.pots.TimedValuesPotExample
 import examples.ui.BlocksWithUiExample
@@ -61,8 +61,15 @@ object Examples extends Sketches{
     logger = true)
   SketchOf[ChartRecorderExample](
     name = "Using of ChartRecorder",
-    description = "Example of using of simple chart recorder tool.",
+    description = "Example of using of simple chart recorder tool.")
+  SketchOf[AnalogGeneratorExample](
+    name = "Using of AnalogGenerator",
+    description = "Example of using analog generator tool.",
+    logger = true,
     autorun = true)
+
+
+
 
 
 

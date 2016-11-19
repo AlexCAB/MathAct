@@ -12,12 +12,22 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data
+package mathact.data.ui
 
+import mathact.core.bricks.ui.interaction.UIEvent
 
-/** Represent event with time-stamp
-  * Created by CAB on 13.11.2016.
+/** Set of predefined of UI events
+  * Created by CAB on 11.11.2016.
   */
 
-case class TimedEvent(time: Long){ //System time
-  override def toString = s"TimedEvent(time = $time)"}
+object E {
+  //Execution events
+  case object Start extends UIEvent
+  case object Stop extends UIEvent
+  case object Step extends UIEvent
+  case class LongValueChanged(newVal: Long) extends UIEvent
+  case class DoubleValueChanged(newVal: Double) extends UIEvent
+
+  //TODO Add more
+
+}

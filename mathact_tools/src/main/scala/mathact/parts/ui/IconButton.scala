@@ -12,11 +12,11 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.bricks.ui.parts
+package mathact.parts.ui
 
 import scalafx.Includes._
 import scalafx.scene.control.Button
-import scalafx.scene.image.{ImageView, Image}
+import scalafx.scene.image.{Image, ImageView}
 
 
 /** Button with icon

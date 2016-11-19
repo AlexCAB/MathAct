@@ -27,8 +27,9 @@ import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.fitting.Socket
 import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
-import mathact.core.bricks.ui.interaction.{UICommand, C}
-import mathact.data.TimedValue
+import mathact.core.bricks.ui.interaction.UICommand
+import mathact.data.discrete.TimedValue
+import mathact.data.ui.C
 import mathact.tools.Tool
 
 import scalafx.embed.swing.SwingNode
