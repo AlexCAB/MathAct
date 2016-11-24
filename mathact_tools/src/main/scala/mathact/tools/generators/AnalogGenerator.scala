@@ -16,7 +16,7 @@ package mathact.tools.generators
 
 import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkOut
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
 import mathact.core.bricks.ui.interaction.UIEvent
 import mathact.data.analog.Sample
@@ -27,7 +27,7 @@ import mathact.tools.Tool
 import scala.concurrent.Future
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.{Label, SpinnerValueFactory, Spinner}
+import scalafx.scene.control.{Label, Spinner, SpinnerValueFactory}
 import scalafx.scene.image.Image
 import scalafx.scene.layout.HBox
 import scalafx.scene.paint.Color
@@ -67,38 +67,48 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
   //Definitions
   private case class SetGen(sampleRate: Int, period: Int) extends UIEvent
   private case object StopGen extends UIEvent
-  private class Gen(sampleRate: Int, period: Int, function: Double⇒Double, outflow: {def riseEvent(s: Sample): Unit}){
+  private class Handler extends Outflow[Sample]{def riseEvent(s: Sample): Unit = pour(s) }
+  private class Gen(sampleRate: Int, period: Int, function: Double⇒Double, outflow: Handler){
+    //Params
+    val samplePeriod = 1000 / sampleRate  //In mills
     //Variables
     @volatile private var work = true
+    @volatile private var totalTime = 0L
+    @volatile private var prevTime = 0L
+    @volatile private object Mutex
     //Methods
-    def stop(): Unit = { work = false }
+    def stop(): Unit = {
+      work = false
+      Mutex.synchronized(Mutex.notifyAll())}
     //Worker
     Future{
-
-
-      ???
-
-
-
-
-
-    }
-
-
-
-
-  }
+      //Set times
+      totalTime = 0
+      prevTime = System.currentTimeMillis() - samplePeriod
+      //Work loop
+      while (work) {
+        //Eval t and f
+        val ct = System.currentTimeMillis()
+        val t = (totalTime % period).toDouble / period
+        val f = _f
+        //Increase total time
+        val delta = ct - prevTime
+        totalTime += delta
+        prevTime = ct
+        //Call user function and rise event
+        try{
+          val v = f(t)
+          outflow.riseEvent(Sample(
+            time = ct,
+            shift = t,
+            value = v))}
+        catch{ case e: Throwable ⇒
+          logger.error(e, "[AnalogGenerator.Gen.Worker] Error on call of user generator function.")}
+        //Sleep
+        val timeout = samplePeriod + (samplePeriod - delta)
+        Mutex.synchronized(Mutex.wait(if(timeout < 1) 1 else timeout))}}}
   //Variables
   @volatile private var currentGen: Option[Gen] = None
-
-
-
-
-
-
-
-
-
   //UI definition
   UI{ new SfxFrame{
     //Params
@@ -111,13 +121,21 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
     val period =
       if(_period < minPeriod) minPeriod else if(_period > maxPeriod ) maxPeriod else _period
     //Components
+    val onOffBtn: OnOffButton = new OnOffButton(onBtnImg, offBtnImg, disableBtnImg)(
+      doOn = {
+        onOffBtn.off()
+        setGen()},
+      doOff = {
+        onOffBtn.on()
+        setTitle(isOn = false)
+        sendEvent(StopGen)})
     val spinnerSampleRate = new Spinner[Int]{
       prefHeight = uiElemsHeight
       prefWidth = uiSpinnerWidth
       style = "-fx-font-size: 11pt;"
       disable = true
       editable = true
-      value.onChange{ if(! disable.value) setGen() }
+      value.onChange{ if(! disable.value && ! onOffBtn.isOn) setGen() }
       valueFactory = new SpinnerValueFactory
         .IntegerSpinnerValueFactory(minSampleRate, maxSampleRate, sampleRate, sampleRateStep)
         .asInstanceOf[SpinnerValueFactory[Int]]}
@@ -127,18 +145,10 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
       style = "-fx-font-size: 11pt;"
       disable = true
       editable = true
-      value.onChange{ if(! disable.value) setGen() }
+      value.onChange{ if(! disable.value && ! onOffBtn.isOn) setGen() }
       valueFactory = new SpinnerValueFactory
         .IntegerSpinnerValueFactory(minPeriod, maxPeriod, period, periodStep)
         .asInstanceOf[SpinnerValueFactory[Int]]}
-    val onOffBtn: OnOffButton = new OnOffButton(onBtnImg, offBtnImg, disableBtnImg)(
-      doOn = {
-        onOffBtn.off()
-        setGen()},
-      doOff = {
-        onOffBtn.on()
-        setTitle(isOn = false)
-        sendEvent(StopGen)})
     //Functions
     def setTitle(isOn: Boolean): Unit = { title = initTitle + " | " + (if (isOn) "ON" else "OFF") }
     def setGen(): Unit = {
@@ -174,7 +184,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
         onOffBtn.passive()
         sendEvent(StopGen)}}}
   //Outflow
-  private val outflow = new Outflow[Sample]{ def riseEvent(s: Sample): Unit = pour(s) }
+  private val outflow = new Handler
   //On start and on stop
   protected def onStart(): Unit = { UI.sendCommand(C.Start) }
   protected def onStop(): Unit = { UI.sendCommand(C.Stop) }

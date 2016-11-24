@@ -14,7 +14,7 @@
 
 package mathact.tools.plots
 
-import java.text.{DecimalFormatSymbols, DecimalFormat}
+import java.text.{DecimalFormat, DecimalFormatSymbols}
 import java.util.Locale
 import javax.swing.SwingUtilities
 
@@ -36,11 +36,13 @@ import scalafx.embed.swing.SwingNode
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.Label
-import scalafx.scene.layout.{FlowPane, BorderPane, HBox}
+import scalafx.scene.layout.{BorderPane, FlowPane, HBox}
 import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
-import java.awt.{Color ⇒ JColor}
+import java.awt.{Color => JColor}
+
 import info.monitorenter.util.Range
+import mathact.parts.ui.{Colors, DoubleValueBox}
 
 
 /** Simple Chart recorder
@@ -49,7 +51,7 @@ import info.monitorenter.util.Range
 
 class ChartRecorder(implicit context: BlockContext)
 extends Tool(context, "CR", "mathact/tools/plots/chart_recorder.png")
-with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
+with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
   //Parameters
   val defaultMinRange: Double = -1
   val defaultMaxRange: Double = 1
@@ -58,7 +60,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   val defaultMaxTraceSize: Int = 100
   val defaultPrefW: Double = 600
   val defaultPrefH: Double = 300
-  val lineColors = List(Black, Gold, Gray, Green, Bisque, Blue, Honeydew)
   val gridColor = JColor.GRAY
   val chartBackgroundColor = JColor.WHITE
   //Variables
@@ -71,32 +72,13 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   @volatile private var _prefH        = defaultPrefH
   @volatile private var _startTime    = -1L
   @volatile private var lines = List[Line]()
-  @volatile private var currentColor = 0
   //Definitions
   private case class ChartUpdate(i: Int, value: Double, time: Long) extends UICommand
   private class Line(val i: Int, val name: String = "", val color: Color, ui: UI.type) extends Inflow[TimedValue] {
     protected def drain(v: TimedValue): Unit = ui.sendCommand(ChartUpdate(i, v.value, v.time))}
-  private class ValueBox(name: String, color: Color) extends HBox(2){
-    //Parameters
-    alignment = Pos.Center
-    //Helpers
-    val decimalFormat = new DecimalFormat("0.0###",  new DecimalFormatSymbols(Locale.US))
-    //UI
-    val label =  new Label{
-      text = "---; "
-      textFill = color
-      style = "-fx-font-size: 11pt;"}
-    children = Seq(
-      new Label{
-        text = name + " = "
-        textFill = color
-        style = "-fx-font-weight: bold; -fx-font-size: 11pt;"},
-      label)
-    //Methods
-    def update(value: Double): Unit = { label.text = decimalFormat.format(value) + "; " }}
   private class ChartUI extends SfxFrame{
     //Params
-    title = "Timed vals pot" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
+    title = "Chart recorder" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
     showOnStart = true
     //Bounds
     val minRange = _minRange
@@ -105,13 +87,10 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
     //Components
     val (labels, traces) = lines
       .map{ line ⇒
-        val label = new ValueBox(line.name, line.color)
+        val label = new DoubleValueBox(line.name, line.color)
         val trace = new Trace2DLtd(_maxTraceSize)
         trace.setName(null)
-        trace.setColor(new JColor(
-          (line.color.red * 255).toInt,
-          (line.color.green * 255).toInt,
-          (line.color.blue * 255).toInt))
+        trace.setColor(line.color.toJColor)
         (label, trace)}
       .toVector
       .unzip
@@ -148,10 +127,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue]{
   //UI registration and events handling
   UI(new ChartUI)
   //Functions
-  private def nextColor: Color = {
-    val c = lineColors(currentColor)
-    currentColor = if(currentColor >= lineColors.size) 0 else currentColor + 1
-    c}
   private def buildLine(name: String, color: Color): Line = {
     val line = new Line(lines.size, name, color, UI)
     lines +:= line

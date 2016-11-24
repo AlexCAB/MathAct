@@ -12,34 +12,36 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
+package mathact.parts.ui
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.analog.Sample
-import mathact.tools.EmptyBlock
-import mathact.tools.generators.AnalogGenerator
-import mathact.tools.workbenches.SimpleWorkbench
+import java.text.{DecimalFormat, DecimalFormatSymbols}
+import java.util.Locale
+
+import scalafx.geometry.Pos
+import scalafx.scene.control.Label
+import scalafx.scene.layout.HBox
+import scalafx.scene.paint.Color
 
 
-/** Example of using AnalogGenerator tool
-  * Created by CAB on 19.11.2016.
+/** Displaying double value with name
+  * Created by CAB on 24.11.2016.
   */
 
-class AnalogGeneratorExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = " Analog generator example"
-  //Blocks
-  val generator = new AnalogGenerator{
-    //Params
-    name = "Analog generator of sin(x)"
-    sampleRate = 10 //Hertz
-    period = 1000     //Milliseconds
-    //Gen function
-    f = (t) ⇒ math.sin(t * math.Pi)}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Sample]{
-    name = "Logger"
-    val in = In[Sample]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
-  //Connecting
-  generator ~> logger}
+class DoubleValueBox(name: String, color: Color) extends HBox(2){
+  //Parameters
+  alignment = Pos.Center
+  //Helpers
+  val decimalFormat = new DecimalFormat("0.0###",  new DecimalFormatSymbols(Locale.US))
+  //UI
+  val label =  new Label{
+    text = "---; "
+    textFill = color
+    style = "-fx-font-size: 11pt;"}
+  children = Seq(
+    new Label{
+      text = name + " = "
+      textFill = color
+      style = "-fx-font-weight: bold; -fx-font-size: 11pt;"},
+    label)
+  //Methods
+  def update(value: Double): Unit = { label.text = decimalFormat.format(value) + "; " }}

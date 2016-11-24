@@ -12,34 +12,31 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
+package examples.tools.plots
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.analog.Sample
-import mathact.tools.EmptyBlock
 import mathact.tools.generators.AnalogGenerator
+import mathact.tools.plots.SimpleScope
+import mathact.tools.pots.AnalogPot
 import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Example of using AnalogGenerator tool
-  * Created by CAB on 19.11.2016.
+/** Example of using of SimpleScope tool
+  * Created by CAB on 24.11.2016.
   */
 
-class AnalogGeneratorExample extends SimpleWorkbench {
+class SimpleScopeExample extends SimpleWorkbench {
   //Sketch parameters
-  heading = " Analog generator example"
+  heading = "Simple scope example"
   //Blocks
   val generator = new AnalogGenerator{
-    //Params
-    name = "Analog generator of sin(x)"
-    sampleRate = 10 //Hertz
-    period = 1000     //Milliseconds
-    //Gen function
+    name = "Example generator"
+    sampleRate = 100
+    period = 100
     f = (t) ⇒ math.sin(t * math.Pi)}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Sample]{
-    name = "Logger"
-    val in = In[Sample]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  val pot = new AnalogPot{
+    name = "Example pot"
+    init = .5}
+  val scope =  new SimpleScope{
+    name = "Scope"}
   //Connecting
-  generator ~> logger}
+  generator ~> pot ~> scope}

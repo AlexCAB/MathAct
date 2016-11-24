@@ -19,6 +19,8 @@ package mathact.data.analog
   */
 
 case class Sample(
-  time: Long,
+  time: Long, //System time
   shift: Double,
   value: Double)
+{
+  override def toString = s"Sample(time = $time, shift = $shift, value = $value)"}

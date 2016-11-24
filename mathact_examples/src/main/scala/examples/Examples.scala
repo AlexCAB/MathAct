@@ -16,10 +16,10 @@ package examples
 
 import examples.linking.CompactLinking
 import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
-import examples.tools.plots.ChartRecorderExample
-import examples.tools.pots.TimedValuesPotExample
+import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
+import examples.tools.pots.{AnalogPotExample, TimedValuesPotExample}
 import examples.ui.BlocksWithUiExample
-import examples.wiring.{FunWiringZipExample, FunWiringExample, ObjWiringExample}
+import examples.wiring.{FunWiringExample, FunWiringZipExample, ObjWiringExample}
 import mathact.tools.Sketches
 
 
@@ -65,14 +65,16 @@ object Examples extends Sketches{
   SketchOf[AnalogGeneratorExample](
     name = "Using of AnalogGenerator",
     description = "Example of using analog generator tool.",
+    logger = true)
+  SketchOf[AnalogPotExample](
+    name = "Using of AnalogPot",
+    description = "Example of using simple analog potentiometer.",
+    logger = true)
+  SketchOf[SimpleScopeExample](
+    name = "Using of SimpleScope",
+    description = "Example of using simple oscilloscope tool.",
     logger = true,
     autorun = true)
-
-
-
-
-
-
 
   //TODO Add more
 

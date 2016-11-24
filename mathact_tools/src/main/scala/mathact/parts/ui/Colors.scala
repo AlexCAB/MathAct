@@ -12,34 +12,27 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.generators
-
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.analog.Sample
-import mathact.tools.EmptyBlock
-import mathact.tools.generators.AnalogGenerator
-import mathact.tools.workbenches.SimpleWorkbench
+package mathact.parts.ui
+import scalafx.scene.paint.Color
+import scalafx.scene.paint.Color._
+import java.awt.{Color => JColor}
 
 
-/** Example of using AnalogGenerator tool
-  * Created by CAB on 19.11.2016.
+
+/** Tools for working with colors
+  * Created by CAB on 24.11.2016.
   */
 
-class AnalogGeneratorExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = " Analog generator example"
-  //Blocks
-  val generator = new AnalogGenerator{
-    //Params
-    name = "Analog generator of sin(x)"
-    sampleRate = 10 //Hertz
-    period = 1000     //Milliseconds
-    //Gen function
-    f = (t) ⇒ math.sin(t * math.Pi)}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Sample]{
-    name = "Logger"
-    val in = In[Sample]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
-  //Connecting
-  generator ~> logger}
+trait Colors {
+  //Parameters
+  val lineColors = List(Black, Gold, Gray, Green, Bisque, Blue, Honeydew)
+  //Variables
+  @volatile private var currentColor = 0
+  //Methods
+  protected def nextColor: Color = {
+    val c = lineColors(currentColor)
+    currentColor = if(currentColor >= lineColors.size) 0 else currentColor + 1
+    c}
+  //Helpers
+  implicit class ColorEx (c: Color) {
+    def toJColor: JColor = new JColor((c.red * 255).toInt, (c.green * 255).toInt, (c.blue * 255).toInt)}}

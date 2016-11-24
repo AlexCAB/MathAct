@@ -28,22 +28,23 @@ class OnOffButton(onImg: Image, offImg: Image, disabledImg: Image)(doOn: ⇒Unit
   private val offView = new ImageView{ image = offImg }
   private val dView = new ImageView{ image = disabledImg }
   //Variables
-  private var isOn = false
+  private var isOnS = false
   //Config
   graphic = dView
   disable = true
   onAction = handle{
     passive()
-    if (isOn) doOn else doOff}
+    if (isOnS) doOn else doOff}
   //Methods
   def on(): Unit = {
     graphic = onView
     disable = false
-    isOn = true}
+    isOnS = true}
   def off(): Unit = {
     graphic = offView
     disable = false
-    isOn = false}
+    isOnS = false}
   def passive(): Unit = {
     graphic = dView
-    disable = true}}
+    disable = true}
+  def isOn: Boolean = isOnS}
