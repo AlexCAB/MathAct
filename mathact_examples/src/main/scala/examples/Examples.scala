@@ -73,7 +73,6 @@ object Examples extends Sketches{
   SketchOf[SimpleScopeExample](
     name = "Using of SimpleScope",
     description = "Example of using simple oscilloscope tool.",
-    logger = true,
     autorun = true)
 
   //TODO Add more

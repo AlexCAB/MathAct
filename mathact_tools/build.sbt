@@ -12,7 +12,9 @@ scalacOptions ++= Seq("-encoding", "UTF-8", s"-target:jvm-$jdkVersion", "-featur
 
 
 libraryDependencies  ++= Seq(
-  "net.sf.jchart2d"               %  "jchart2d"             % "3.3.2"
+  "net.sf.jchart2d"               %  "jchart2d"             % "3.3.2",
+  "org.jfree"                     % "jfreechart"            % "1.0.19",
+  "org.jfree"                     % "fxgraphics2d"          % "1.5"
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)

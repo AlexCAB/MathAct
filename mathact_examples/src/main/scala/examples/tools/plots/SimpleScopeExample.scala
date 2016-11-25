@@ -28,15 +28,24 @@ class SimpleScopeExample extends SimpleWorkbench {
   //Sketch parameters
   heading = "Simple scope example"
   //Blocks
-  val generator = new AnalogGenerator{
-    name = "Example generator"
+  val sinGen = new AnalogGenerator{
+    name = "Example generator sin"
     sampleRate = 100
     period = 100
     f = (t) ⇒ math.sin(t * math.Pi)}
-  val pot = new AnalogPot{
-    name = "Example pot"
+  val cosGen = new AnalogGenerator{
+    name = "Example generator cos"
+    sampleRate = 100
+    period = 100
+    f = (t) ⇒ math.cos(t * math.Pi)}
+  val sinPot = new AnalogPot{
+    name = "Example sin pot"
+    init = .5}
+  val cosPot = new AnalogPot{
+    name = "Example cos pot"
     init = .5}
   val scope =  new SimpleScope{
     name = "Scope"}
   //Connecting
-  generator ~> pot ~> scope}
+  sinGen ~> sinPot ~> scope
+  cosGen ~> cosPot ~> scope}
