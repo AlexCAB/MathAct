@@ -31,13 +31,13 @@ class SimpleScopeExample extends SimpleWorkbench {
   val sinGen = new AnalogGenerator{
     name = "Example generator sin"
     sampleRate = 100
-    period = 100
-    f = (t) ⇒ math.sin(t * math.Pi)}
+    period = 1000
+    f = (t) ⇒ math.sin(2 * math.Pi * t)}
   val cosGen = new AnalogGenerator{
     name = "Example generator cos"
     sampleRate = 100
-    period = 100
-    f = (t) ⇒ math.cos(t * math.Pi)}
+    period = 1000
+    f = (t) ⇒ math.cos(2 * math.Pi * t)}
   val sinPot = new AnalogPot{
     name = "Example sin pot"
     init = .5}
@@ -45,7 +45,8 @@ class SimpleScopeExample extends SimpleWorkbench {
     name = "Example cos pot"
     init = .5}
   val scope =  new SimpleScope{
-    name = "Scope"}
+    name = "example scope"
+    traceTime = 5000}
   //Connecting
-  sinGen ~> sinPot ~> scope
-  cosGen ~> cosPot ~> scope}
+  sinGen ~> sinPot ~> scope.line("sin t")
+  cosGen ~> cosPot ~> scope.line("cos t")}

@@ -17,8 +17,9 @@ package mathact.core.plumbing.infrastructure.drive
 import mathact.core.model.enums._
 import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
-import scala.collection.mutable.{ListBuffer ⇒ MutList}
+import mathact.core.plumbing.infrastructure.drive.Drive.State
 
+import scala.collection.mutable.{ListBuffer => MutList}
 import scala.concurrent.duration.Duration
 
 
@@ -127,7 +128,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
           s"was put in pending list: $pendingUserMessages, pushTimeout: $pushTimeout")
         //Return
         Right(pushTimeout)
-      case State.TurnedOn |State.Starting | State.Working | State.Stopping | State.Stopped ⇒
+      case st if st != State.TurningOff && st != State.TurnedOff ⇒
         //Get of outlet
         outlets.get(outletId) match{
           case Some(outlet) ⇒
@@ -148,7 +149,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
         //Incorrect state
         val msg =
           s"[DriveMessaging.userDataAsk] User message can be processed only in Starting, Working, " +
-          s"Stopping states, current state: $s"
+          s"Stopping states, outletId: $outletId, current state: $s, value: $value"
         log.error(msg)
         Left(new IllegalStateException(msg))}
   /** Send pending messages, called after dive turned on*/

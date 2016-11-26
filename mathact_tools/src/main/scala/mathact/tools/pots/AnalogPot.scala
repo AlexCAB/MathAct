@@ -40,9 +40,8 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[Samp
   val spinnerWidth: Int = 100
   val sliderWidth: Int = 300
   val defaultInit: Double = 0.5
-  //Variables
+  //Properties
   @volatile private var _init = defaultInit
-  @volatile private var level = 0.0
   //UI definition
   private class PotUI extends SfxFrame{
     //Params
@@ -99,15 +98,26 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[Samp
       case C.Stop ⇒
         spinner.disable = true
         slider.disable = true}}
-  //On start and on stop
-  protected def onStart(): Unit = { UI.sendCommand(C.Start) }
-  protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
   //Handler
   private val handler = new Outflow[Sample] with Inflow[Sample]{
-    protected def drain(s: Sample): Unit = { pour(s.copy(value = s.value * level)) }}
+    //Variables
+    @volatile private var level = 0.0
+    @volatile private var working = false
+    //Methods
+    def enable(): Unit = { working = true }
+    def disable(): Unit = { working = false }
+    def setLevel(l: Double): Unit = { level = l }
+    protected def drain(s: Sample): Unit = if(working){ pour(s.copy(value = s.value * level)) }}
+  //On start and on stop
+  protected def onStart(): Unit = {
+    handler.enable()
+    UI.sendCommand(C.Start) }
+  protected def onStop(): Unit = {
+    handler.disable()
+    UI.sendCommand(C.Stop) }
   //UI registration and events handling
   UI(new PotUI)
-  UI.onEvent{ case E.DoubleValueChanged(newVal) ⇒ level = newVal }
+  UI.onEvent{ case E.DoubleValueChanged(newVal) ⇒ handler.setLevel(newVal)}
   //DSL
   def init: Double = _init
   def init_=(v: Double){ _init = v}

@@ -186,16 +186,18 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
   //Outflow
   private val outflow = new Handler
   //On start and on stop
-  protected def onStart(): Unit = { UI.sendCommand(C.Start) }
-  protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
+  protected def onStart(): Unit = {
+    UI.sendCommand(C.Start) }
+  protected def onStop(): Unit = {
+    currentGen.foreach(_.stop())
+    UI.sendCommand(C.Stop)}
   //UI handling
   UI.onEvent{
     case SetGen(sampleRate, period) ⇒
       currentGen.foreach(_.stop())
       currentGen = Some(new Gen(sampleRate, period, _f, outflow))
     case StopGen ⇒
-      currentGen.foreach(_.stop())
-      currentGen = None}
+      currentGen.foreach(_.stop())}
   //DSL
   def sampleRate: Int = _sampleRate
   def sampleRate_=(v: Int){ _sampleRate = v }
