@@ -51,7 +51,7 @@ import mathact.parts.ui.{Colors, DoubleValueBox}
 
 class ChartRecorder(implicit context: BlockContext)
 extends Tool(context, "CR", "mathact/tools/plots/chart_recorder.png")
-with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
+with ObjWiring with BlockUI with LinkIn[TimedValue] with Colors{
   //Parameters
   val defaultMinRange: Double = -1
   val defaultMaxRange: Double = 1
@@ -62,7 +62,7 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
   val defaultPrefH: Double = 300
   val gridColor = JColor.GRAY
   val chartBackgroundColor = JColor.WHITE
-  //Variables
+  //Properties
   @volatile private var _minRange     = defaultMinRange
   @volatile private var _maxRange     = defaultMaxRange
   @volatile private var _axisXName    = defaultAxisXName
@@ -70,12 +70,17 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
   @volatile private var _maxTraceSize = defaultMaxTraceSize
   @volatile private var _prefW        = defaultPrefW
   @volatile private var _prefH        = defaultPrefH
-  @volatile private var _startTime    = -1L
-  @volatile private var lines = List[Line]()
+  //Variables
+  private var lines = List[Line]()
   //Definitions
   private case class ChartUpdate(i: Int, value: Double, time: Long) extends UICommand
   private class Line(val i: Int, val name: String = "", val color: Color, ui: UI.type) extends Inflow[TimedValue] {
-    protected def drain(v: TimedValue): Unit = ui.sendCommand(ChartUpdate(i, v.value, v.time))}
+    //Variables
+    private var prevTime = -1L
+    //Methods
+    protected def drain(v: TimedValue): Unit = if(prevTime != v.time) {
+      prevTime =  v.time
+      ui.sendCommand(ChartUpdate(i, v.value, v.time))}}
   private class ChartUI extends SfxFrame{
     //Params
     title = "Chart recorder" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
@@ -83,7 +88,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
     //Bounds
     val minRange = _minRange
     val maxRange = if(_maxRange > minRange) _maxRange else minRange + 1
-    var startTime = _startTime
     //Components
     val (labels, traces) = lines
       .map{ line ⇒
@@ -119,11 +123,9 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
           children = labels}}}
     //Commands reactions
     def onCommand = {
-      case C.Start ⇒
-        startTime = if (startTime < 0) System.currentTimeMillis() else 0L
       case ChartUpdate(i, value, time) ⇒
         labels(i).update(value)
-        traces(i).addPoint((time - startTime) / 1000.0, value)}}
+        traces(i).addPoint(time / 1000.0, value)}}
   //UI registration and events handling
   UI(new ChartUI)
   //Functions
@@ -131,8 +133,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
     val line = new Line(lines.size, name, color, UI)
     lines +:= line
     line}
-  //On start and on stop
-  protected def onStart(): Unit = { UI.sendCommand(C.Start) }
   //DSL
   def minRange: Double = _minRange
   def minRange_=(v: Double){ _minRange = v }
@@ -148,8 +148,6 @@ with ObjWiring with ObjOnStart with BlockUI with LinkIn[TimedValue] with Colors{
   def prefW_=(v: Double){ _prefW = v }
   def prefH: Double = _prefH
   def prefH_=(v: Double){ _prefH = v }
-  def startTime: Long = _startTime
-  def startTime_=(v: Long){ _startTime = v }
   //Inlets
   def in: Socket[TimedValue] = Inlet(buildLine(name = "Line",color = nextColor))
   def line(name: String = "Line", color: Color = nextColor): Socket[TimedValue] = Inlet(buildLine(name, color))}

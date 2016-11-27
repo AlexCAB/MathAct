@@ -37,8 +37,6 @@ import org.jfree.fx.FXGraphics2D
 import javafx.scene.canvas.Canvas
 
 import mathact.core.bricks.ui.interaction.UICommand
-
-import scala.concurrent.Future
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Label, Spinner, SpinnerValueFactory}
@@ -83,35 +81,11 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
   @volatile private var _prefH      = defaultPrefH
   //Variables
   @volatile private var lines = List[Line]()
-  @volatile private var cleanWorker: Option[CleanWorker] = None
   @volatile private var currentTraceTime = defaultTraceTime
-  @volatile private var cleanTime = 0L
   //Definitions
   private case class UpdateTrace(i: Int, s: Sample) extends UICommand
   private class Line(val i: Int, val name: String = "", val color: Color, ui: UI.type) extends Inflow[Sample] {
     protected def drain(s: Sample): Unit =  ui.sendCommand(UpdateTrace(i, s))}
-  private class CleanWorker(val period: Int, ui: UI.type){
-    //Values
-    val startTime = System.currentTimeMillis()
-    //Variables
-    @volatile private var work = true
-    @volatile private var count = 0L
-    @volatile private object Mutex
-    //Methods
-    def doStop(): Unit = {
-      work = false
-      Mutex.synchronized(Mutex.notifyAll())}
-    //Worker
-    Future{ while (work) {
-      //Set prev time
-      val current = System.currentTimeMillis()
-      val error = (current - startTime) % period
-      val duration = period - error
-      count += 1
-      //Sleep
-      Mutex.synchronized(Mutex.wait(if(duration < 1) 1 else duration))
-      //Cleaning lines
-      ui.sendCommand(C.Clean)}}}
   private class ScopeUI extends SfxFrame{
     //Params
     title = "Scope" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
@@ -123,6 +97,20 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
     val traceTime =
       if(_traceTime < minTraceTime) minTraceTime else if(_traceTime > maxTraceTime) maxTraceTime else _traceTime
     //Definitions
+    class Trace(line: Line, drawPoints: Boolean){
+      //Variables
+      private var lastTime = 0L
+      //Construction
+      val series = new XYSeries(line.name match{case "" ⇒ null case n ⇒ n})
+      val renderer = new XYLineAndShapeRenderer()
+      renderer.setSeriesPaint(0, line.color.toJColor)
+      renderer.setBaseShapesVisible(drawPoints)
+      //Methods
+      def addSample(sample: Sample, traceTime: Int): Unit = {
+        val nextTime = sample.time % traceTime
+        if(nextTime < lastTime) series.clear()
+        lastTime = nextTime
+        series.add(nextTime, sample.value)}}
     class ChartCanvas(chart: JFreeChart) extends Canvas {
       //Construction
       val g2 = new FXGraphics2D(getGraphicsContext2D)
@@ -139,12 +127,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
       override def prefHeight(width: Double): Double =  getHeight}
     //Components
     val traces = lines
-      .map{ line ⇒
-        val dataSeries = new XYSeries(line.name match{case "" ⇒ null case n ⇒ n})
-        val renderer = new XYLineAndShapeRenderer()
-        renderer.setSeriesPaint(0, line.color.toJColor)
-        renderer.setBaseShapesVisible(_drawPoints)
-        (line.i, (dataSeries, renderer))}
+      .map{ line ⇒ (line.i, new Trace(line, _drawPoints)) }
       .toMap
     val chart = ChartFactory.createXYLineChart(null, uiAxisXName, uiAxisYName, null)
     val plot = chart.getPlot.asInstanceOf[XYPlot]
@@ -154,9 +137,9 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
     plot.getRangeAxis.setRange(minRange, maxRange)
     plot.getDomainAxis.setRange(0, traceTime)
     plot.getRangeAxis.setAutoRange(_autoRange)
-    traces.foreach{ case (i, (series, renderer)) ⇒
-      plot.setDataset(i, new XYSeriesCollection(series))
-      plot.setRenderer(i, renderer)}
+    traces.foreach{ case (i, trace) ⇒
+      plot.setDataset(i, new XYSeriesCollection(trace.series))
+      plot.setRenderer(i, trace.renderer)}
     val chartCanvas = new ChartCanvas(chart)
     val spinnerTraceTime = new Spinner[Int]{
       prefHeight = uiElemsHeight
@@ -198,12 +181,9 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
       case C.Stop ⇒
         chartCanvas.disable = true
         spinnerTraceTime.disable  = true
-      case UpdateTrace(i, s) ⇒ if(s.time >= cleanTime ) {
-        traces(i)._1.add(s.time - cleanTime, s.value)
-        chartCanvas.draw()}
-      case C.Clean ⇒
-        traces.foreach{ case (_, (series, _)) ⇒ series.clear() }
-        cleanTime = System.currentTimeMillis()}}
+      case UpdateTrace(i, s) ⇒
+        traces(i).addSample(s, currentTraceTime)
+        chartCanvas.draw()}}
   //UI registration and events handling
   UI(new ScopeUI)
   //Functions
@@ -212,16 +192,11 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkIn[Sample] w
     lines +:= line
     line}
   //On start and on stop
-  protected def onStart(): Unit = {
-    UI.sendCommand(C.Start) }
-  protected def onStop(): Unit = {
-    UI.sendCommand(C.Stop)
-    cleanWorker.foreach(_.doStop())}
+  protected def onStart(): Unit = { UI.sendCommand(C.Start) }
+  protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
   //UI handling
   UI.onEvent{ case E.IntValueChanged(newTraceTime) ⇒
-    currentTraceTime = newTraceTime
-    cleanWorker.foreach(_.doStop())
-    cleanWorker = Some(new CleanWorker(newTraceTime, UI))}
+    currentTraceTime = newTraceTime}
   //DSL
   def minRange: Double = _minRange
   def minRange_=(v: Double){ _minRange = v }

@@ -27,7 +27,7 @@ import mathact.tools.Sketches
   * Created by CAB on 18.06.2016.
   */
 
-object Examples extends Sketches{
+object Simple extends Sketches{
   SketchOf[ObjWiringExample](
     name = "Obj tap wiring example",
     description = "Example of tap wiring in object style.",
@@ -72,8 +72,7 @@ object Examples extends Sketches{
     logger = true)
   SketchOf[SimpleScopeExample](
     name = "Using of SimpleScope",
-    description = "Example of using simple oscilloscope tool.",
-    autorun = true)
+    description = "Example of using simple oscilloscope tool.")
 
   //TODO Add more
 

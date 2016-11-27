@@ -18,5 +18,5 @@ package mathact.data.discrete
   * Created by CAB on 13.11.2016.
   */
 
-case class TimedEvent(time: Long){ //System time
+case class TimedEvent(time: Long){ //Virtual time in milli seconds
   override def toString = s"TimedEvent(time = $time)"}

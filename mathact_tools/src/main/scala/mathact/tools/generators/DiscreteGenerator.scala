@@ -158,8 +158,8 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
   protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
   //Outflow
   private val outflow = new Outflow[TimedEvent]{
-    def riseEvent(): Unit = pour(
-      TimedEvent(System.currentTimeMillis()))}
+    def riseEvent(virtualTime: Long): Unit = pour(
+      TimedEvent(virtualTime))}
   //Processor
   private val processor = actorOf(
     Props(new Actor {
@@ -168,20 +168,22 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
       var version = 0L
       var period = 0L
       var lastTime = 0L
+      var virtualTime = 0L
       //Functions
-      def currentTime: Long = System.currentTimeMillis()
+      def sysTime: Long = System.currentTimeMillis()
       def sleep(delay: Long, version: Long): Unit =
         try{ if (delay > 0) Thread.sleep(delay) }
-        catch{ case error: InterruptedException ⇒ Thread.currentThread().interrupt() }
+        catch{ case _: InterruptedException ⇒ Thread.currentThread().interrupt() }
         finally{ self ! version }
       //Logic
       def newTick(): Unit = {
-        val delay = (lastTime + period) - currentTime //Difference between next time and current time
+        val delay = (lastTime + period) - sysTime //Difference between next time and current time
         lastTime += period  //Next last time
+        virtualTime += period
         if(delay > 10) Future{ sleep(delay, version) } else sleep(delay, version)}
       def restart(): Unit = {
         version += 1
-        lastTime = currentTime
+        lastTime = sysTime
         isStarted = true}
       def stop(): Unit = {
         isStarted = false
@@ -192,21 +194,22 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
       def receive = {
         case E.Start ⇒
           restart()
-          outflow.riseEvent()
+          outflow.riseEvent(virtualTime)
           newTick()
         case E.Stop ⇒
           stop()
         case E.Step ⇒
-          outflow.riseEvent()
+          virtualTime += period
+          outflow.riseEvent(virtualTime)
         case E.LongValueChanged(newVal) if isStarted ⇒
           update(newVal)
           restart()
-          outflow.riseEvent()
+          outflow.riseEvent(virtualTime)
           newTick()
         case E.LongValueChanged(newVal) ⇒
           update(newVal)
         case pv: Long if pv == version && isStarted ⇒
-          outflow.riseEvent()
+          outflow.riseEvent(virtualTime)
           newTick()}}),
     "DiscreteGeneratorProcessor")
   UI.onEvent{ case e ⇒ processor ! e }

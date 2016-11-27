@@ -19,7 +19,7 @@ package mathact.data.analog
   */
 
 case class Sample(
-  time: Long, //System time
+  time: Long, // Virtual time in milliseconds
   shift: Double,
   value: Double)
 {

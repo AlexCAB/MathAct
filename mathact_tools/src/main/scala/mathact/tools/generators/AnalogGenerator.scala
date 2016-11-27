@@ -71,10 +71,12 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
   private class Gen(sampleRate: Int, period: Int, function: Double⇒Double, outflow: Handler){
     //Params
     val samplePeriod = 1000 / sampleRate  //In mills
+    val sampleTimeStep = period / sampleRate
     //Variables
     @volatile private var work = true
     @volatile private var totalTime = 0L
     @volatile private var prevTime = 0L
+    @volatile private var virtualTime = 0L
     @volatile private object Mutex
     //Methods
     def stop(): Unit = {
@@ -89,7 +91,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
       while (work) {
         //Eval t and f
         val ct = System.currentTimeMillis()
-        val t = (totalTime % period).toDouble / period
+        val t = (virtualTime % period).toDouble / period
         val f = _f
         //Increase total time
         val delta = ct - prevTime
@@ -99,11 +101,13 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[Sample]{
         try{
           val v = f(t)
           outflow.riseEvent(Sample(
-            time = ct,
+            time = virtualTime,
             shift = t,
             value = v))}
         catch{ case e: Throwable ⇒
           logger.error(e, "[AnalogGenerator.Gen.Worker] Error on call of user generator function.")}
+        //Increment virtual time
+        virtualTime += sampleTimeStep
         //Sleep
         val timeout = samplePeriod + (samplePeriod - delta)
         Mutex.synchronized(Mutex.wait(if(timeout < 1) 1 else timeout))}}}
