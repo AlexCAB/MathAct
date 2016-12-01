@@ -14,6 +14,7 @@
 
 package examples
 
+import examples.common.SimplePidExample
 import examples.linking.CompactLinking
 import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
 import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
@@ -27,7 +28,7 @@ import mathact.tools.Sketches
   * Created by CAB on 18.06.2016.
   */
 
-object Simple extends Sketches{
+object Examples extends Sketches{
   SketchOf[ObjWiringExample](
     name = "Obj tap wiring example",
     description = "Example of tap wiring in object style.",
@@ -73,6 +74,12 @@ object Simple extends Sketches{
   SketchOf[SimpleScopeExample](
     name = "Using of SimpleScope",
     description = "Example of using simple oscilloscope tool.")
+  SketchOf[SimplePidExample](
+    name = "Simple PID example",
+    description = "Simple PID regulated model example.")
+
+
+
 
   //TODO Add more
 
