@@ -12,15 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package mathact.tools.math
 
-import mathact.data.{Timed, Value}
 
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+/**
+  * Created by CAB on 03.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+class Integrator {
+
+  //TODO если время тоже должен игнорироапть
+
+}

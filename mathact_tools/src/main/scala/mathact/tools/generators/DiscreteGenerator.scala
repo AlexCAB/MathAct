@@ -14,17 +14,17 @@
 
 package mathact.tools.generators
 
-import java.text.{DecimalFormatSymbols, DecimalFormat}
+import java.text.{DecimalFormat, DecimalFormatSymbols}
 import java.util.Locale
 
 import mathact.core.bricks.linking.LinkOut
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import mathact.core.bricks.blocks.BlockContext
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
 import mathact.data.discrete.TimedEvent
-import mathact.data.ui.{E, C}
-import mathact.parts.ui.IconButton
+import mathact.data.ui.{C, E}
+import mathact.parts.ui.ExecButtons
 import mathact.tools.Tool
 
 import scala.concurrent.Future
@@ -52,12 +52,13 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
   val sliderWidth: Int = 300
   val precision = 1000L
   //Resources
-  private val startEImg = new Image("mathact/tools/generators/start_e.png", btnSize, btnSize, true, true)
-  private val startDImg = new Image("mathact/tools/generators/start_d.png", btnSize, btnSize, true, true)
-  private val stopEImg = new Image("mathact/tools/generators/stop_e.png", btnSize, btnSize, true, true)
-  private val stopDImg = new Image("mathact/tools/generators/stop_d.png", btnSize, btnSize, true, true)
-  private val stepEImg = new Image("mathact/tools/generators/step_e.png", btnSize, btnSize, true, true)
-  private val stepDImg = new Image("mathact/tools/generators/step_d.png", btnSize, btnSize, true, true)
+  private val btnIcons = ExecButtons.BtnIcons(
+    startEImg = new Image("mathact/tools/generators/start_e.png", btnSize, btnSize, true, true),
+    startDImg = new Image("mathact/tools/generators/start_d.png", btnSize, btnSize, true, true),
+    stopEImg = new Image("mathact/tools/generators/stop_e.png", btnSize, btnSize, true, true),
+    stopDImg = new Image("mathact/tools/generators/stop_d.png", btnSize, btnSize, true, true),
+    stepEImg = new Image("mathact/tools/generators/step_e.png", btnSize, btnSize, true, true),
+    stepDImg = new Image("mathact/tools/generators/step_d.png", btnSize, btnSize, true, true))
   //Variables
   @volatile private var _initFreq = (defaultInitFreq * precision).toLong
   @volatile private var _minFreq = (defaultMinFreq * precision).toLong
@@ -85,15 +86,10 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
     //Variables
     private var oldSliderPos = 0L
     //Components
-    val startBtn: IconButton  = new IconButton(startEImg, startDImg)({
-      stopBtn.active()
-      sendEvent(E.Start)})
-    val stopBtn: IconButton = new IconButton(stopEImg, stopDImg)({
-      startBtn.active()
-      sendEvent(E.Stop)})
-    val stepBtn: IconButton = new IconButton(stepEImg, stepDImg)({
-      stepBtn.active()
-      sendEvent(E.Step)})
+    val startStopStepBtn = new ExecButtons(btnSize, btnIcons, {
+      case ExecButtons.Action.Start ⇒ sendEvent(E.Start)
+      case ExecButtons.Action.Stop ⇒ sendEvent(E.Stop)
+      case ExecButtons.Action.Step ⇒ sendEvent(E.Step)})
     val stateString = new Label{
       text = buildStatus(initFreq)
       style = "-fx-font-size: 11pt;"}
@@ -122,12 +118,7 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
         top =  new HBox {
           alignment = Pos.Center
           children = Seq(
-            new HBox(2) {
-              alignment = Pos.Center
-              prefHeight = btnSize
-              prefWidth = btnSize * 3
-              padding = Insets(8.0, 4.0, 4.0, 4.0)
-              children = Seq(startBtn, stopBtn, stepBtn)},
+            startStopStepBtn,
             new HBox {
               padding = Insets(8.0, 4.0, 4.0, 4.0)
               alignment = Pos.Center
@@ -142,14 +133,11 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
     def onCommand = {
       case C.Start ⇒
         sendEvent(E.LongValueChanged((1000 * precision) / initFreq)) //Sends in milli seconds
-        startBtn.active()
-        stepBtn.active()
+        startStopStepBtn.active()
         speedSlider.disable = false
       case C.Stop ⇒
         sendEvent(E.Stop)
-        startBtn.passive()
-        stopBtn.passive()
-        stepBtn.passive()
+        startStopStepBtn.passive()
         speedSlider.disable = true}}
   //UI registration
   UI(new GenUI)

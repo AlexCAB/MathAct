@@ -12,15 +12,52 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package mathact.playing.types
 
-import mathact.data.{Timed, Value}
 
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+/** Playing with types hierarchy
+  * Created by CAB on 03.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+object TypeHierarchy extends App{
+  println("==== TypeHierarchy ====")
+  //
+  trait Timed[V <: Timed[V]]{ _: V ⇒
+    val time: Long
+    def time(t: Long): V
+
+
+
+  }
+
+
+
+
+
+  case class TE(v: Double, time: Long) extends Timed[TE]{
+
+    def time(t: Long): TE = copy(time = t)
+
+
+
+  }
+
+
+
+
+  def inc[T <: Timed[T]](v: T): T  = {
+
+    val t = v.time(v.time + 1)
+
+    t
+
+  }
+
+  val t1 = TE(1, 1)
+  val t2 = inc(t1)
+
+  println(t2)
+
+
+
+}

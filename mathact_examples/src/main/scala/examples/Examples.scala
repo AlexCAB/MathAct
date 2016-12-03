@@ -19,6 +19,7 @@ import examples.linking.CompactLinking
 import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
 import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
 import examples.tools.pots.{AnalogPotExample, TimedValuesPotExample}
+import examples.tools.time.TimeLoopExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringExample, FunWiringZipExample, ObjWiringExample}
 import mathact.tools.Sketches
@@ -74,6 +75,17 @@ object Examples extends Sketches{
   SketchOf[SimpleScopeExample](
     name = "Using of SimpleScope",
     description = "Example of using simple oscilloscope tool.")
+  SketchOf[TimeLoopExample](
+    name = "Using of TimeLoop",
+    description = "Example of using TimeLoop.",
+    autorun = true)
+
+
+
+
+
+
+
   SketchOf[SimplePidExample](
     name = "Simple PID example",
     description = "Simple PID regulated model example.")

@@ -17,7 +17,7 @@ package mathact.playing.reflection
 import scala.reflect.runtime.universe._
 
 
-/**  Playing with sub types
+/** Playing with sub types
   * Created by CAB on 07.11.2016.
   */
 

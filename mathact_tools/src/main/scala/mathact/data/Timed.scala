@@ -12,15 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package mathact.data
 
-import mathact.data.{Timed, Value}
-
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+/** Base trite for the timed messages
+  * Created by CAB on 03.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+trait Timed[V <: Timed[V]]{ _: V ⇒
+  //Abstract
+  val time: Long
+  def time(t: Long): V
+  //Concrete
+  def tick: V = time(time + 1)}

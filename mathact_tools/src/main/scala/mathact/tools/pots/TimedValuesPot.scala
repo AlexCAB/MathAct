@@ -16,15 +16,14 @@ package mathact.tools.pots
 
 import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkThrough
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStop, ObjOnStart, ObjWiring}
+import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjOnStop, ObjWiring}
 import mathact.core.bricks.ui.BlockUI
-import mathact.data.discrete.{TimedValue, TimedEvent}
-import mathact.data.ui.{E, C}
+import mathact.data.discrete.{TimedEvent, TimedValue}
+import mathact.data.ui.{C, E}
+import mathact.parts.ui.SetPointDouble
 import mathact.tools.Tool
+
 import scalafx.scene.Scene
-import scalafx.scene.control.{Spinner, SpinnerValueFactory, Slider}
-import scalafx.scene.layout.HBox
-import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.paint.Color._
 
 
@@ -59,53 +58,26 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkThrough[Time
     val initVal = if(_init < minVal) minVal else if(_init > maxVal) maxVal else _init
     val valStep = (maxVal - minVal).abs / 100
     //Components
-    val spinner: Spinner[Double]  = new Spinner[Double]{
-      prefHeight = elemsHeight
-      prefWidth = spinnerWidth
-      style = "-fx-font-size: 11pt;"
-      disable = true
-      editable = true
-      value.onChange{
-        Option(slider).foreach(_.value = this.value.value)
-        sendEvent(E.DoubleValueChanged(this.value.value))}
-      valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(minVal, maxVal, initVal, valStep)
-        .asInstanceOf[SpinnerValueFactory[Double]]}
-    val slider: Slider = new Slider{
-      min = minVal
-      max = maxVal
-      value = initVal
-      showTickLabels = true
-      showTickMarks = true
-      majorTickUnit = (maxVal - minVal).abs / 10
-      minorTickCount = 4
-      blockIncrement = valStep
-      prefHeight = elemsHeight
-      prefWidth = sliderWidth
-      disable = true
-      value.onChange{ spinner.valueFactory.value.setValue(this.value.value) }}
+    val setPoint = new SetPointDouble(
+      elemsHeight,
+      spinnerWidth,
+      sliderWidth,
+      minVal,
+      maxVal,
+      initVal,
+      valStep,
+      v ⇒ sendEvent(E.DoubleValueChanged(v)))
     //Scene
     scene = new Scene{
       fill = White
-      root = new HBox {
-          alignment = Pos.Center
-          children = Seq(
-            new HBox(2) {
-              alignment = Pos.Center
-              padding = Insets(8.0, 4.0, 4.0, 4.0)
-              children = spinner},
-            new HBox {
-              padding = Insets(8.0, 4.0, 4.0, 4.0)
-              alignment = Pos.Center
-              children = slider})}}
+      root = setPoint}
     //Commands reactions
     def onCommand = {
       case C.Start ⇒
         sendEvent(E.DoubleValueChanged(initVal))
-        spinner.disable = false
-        slider.disable = false
+        setPoint.active()
       case C.Stop ⇒
-        spinner.disable = true
-        slider.disable = true}}
+        setPoint.passive()}}
   //On start and on stop
   protected def onStart(): Unit = { UI.sendCommand(C.Start) }
   protected def onStop(): Unit = { UI.sendCommand(C.Stop) }
