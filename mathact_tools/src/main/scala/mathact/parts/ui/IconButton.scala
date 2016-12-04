@@ -23,11 +23,13 @@ import scalafx.scene.image.{Image, ImageView}
   * Created by CAB on 11.11.2016.
   */
 
-class IconButton(enabledImg: Image, disabledImg: Image)(action: ⇒Unit) extends Button {
+class IconButton(btnSize: Int, enabledImg: Image, disabledImg: Image)(action: ⇒Unit) extends Button {
   //Images
   private val eView = new ImageView{ image =  enabledImg }
   private val dView = new ImageView{ image =  disabledImg }
   //Config
+  prefWidth = btnSize
+  prefHeight = btnSize
   graphic = dView
   disable = true
   onAction = handle{

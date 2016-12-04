@@ -31,6 +31,7 @@ object C {
   case object Stop extends UICommand
   case object Update extends UICommand
   case object Clean extends UICommand
+  case object Ended extends UICommand
 
   //TODO Add more
 

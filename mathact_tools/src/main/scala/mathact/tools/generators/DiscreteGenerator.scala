@@ -31,7 +31,6 @@ import scala.concurrent.Future
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Label, Slider}
-import scalafx.scene.image.Image
 import scalafx.scene.layout.{BorderPane, HBox}
 import scalafx.scene.paint.Color._
 
@@ -48,17 +47,9 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
   val defaultMinFreq: Double = 1
   val defaultMaxFreq: Double = 10
   val defaultSliderStep: Double = 0.1
-  val btnSize: Int = 25
+  val btnSize: Int = 30
   val sliderWidth: Int = 300
   val precision = 1000L
-  //Resources
-  private val btnIcons = ExecButtons.BtnIcons(
-    startEImg = new Image("mathact/tools/generators/start_e.png", btnSize, btnSize, true, true),
-    startDImg = new Image("mathact/tools/generators/start_d.png", btnSize, btnSize, true, true),
-    stopEImg = new Image("mathact/tools/generators/stop_e.png", btnSize, btnSize, true, true),
-    stopDImg = new Image("mathact/tools/generators/stop_d.png", btnSize, btnSize, true, true),
-    stepEImg = new Image("mathact/tools/generators/step_e.png", btnSize, btnSize, true, true),
-    stepDImg = new Image("mathact/tools/generators/step_d.png", btnSize, btnSize, true, true))
   //Variables
   @volatile private var _initFreq = (defaultInitFreq * precision).toLong
   @volatile private var _minFreq = (defaultMinFreq * precision).toLong
@@ -77,23 +68,21 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
     val minFreq = if(_minFreq < 1) 1 else if(_minFreq > maxVal ) maxVal else _minFreq
     val maxFreq = if(_maxFreq < minFreq) minFreq else if(_maxFreq > maxVal) maxVal else _maxFreq
     val initFreq = if(_initFreq < minFreq) minFreq else if(_initFreq > maxFreq) maxFreq else _initFreq
-    val freqStep = if (_sliderStep <= 0) 1 else if(_sliderStep > maxVal) maxVal else _sliderStep
+    val freqStep = if(_sliderStep <= 0) 1 else if(_sliderStep > maxVal) maxVal else _sliderStep
     //Functions
     def buildStatus(currentFreq: Double): String =
       s"Frequency(Hz): min = ${decimalFormat.format(minFreq / precision)}, " +
       s"max = ${decimalFormat.format(maxFreq / precision)}, " +
       s"current = ${decimalFormat.format(currentFreq / precision)}"
-    //Variables
-    private var oldSliderPos = 0L
     //Components
-    val startStopStepBtn = new ExecButtons(btnSize, btnIcons, {
-      case ExecButtons.Action.Start ⇒ sendEvent(E.Start)
-      case ExecButtons.Action.Stop ⇒ sendEvent(E.Stop)
-      case ExecButtons.Action.Step ⇒ sendEvent(E.Step)})
+    val startStopStepBtn = new ExecButtons(btnSize, sendEvent(E.Start), sendEvent(E.Stop), sendEvent(E.Step))
     val stateString = new Label{
       text = buildStatus(initFreq)
       style = "-fx-font-size: 11pt;"}
     val speedSlider = new Slider{
+      //Variables
+      private var oldPos = 0L
+      //Config
       min = minFreq / precision
       max = maxFreq / precision
       value = initFreq / precision
@@ -105,10 +94,11 @@ with ObjWiring with ObjOnStart with ObjOnStop with BlockUI with LinkOut[TimedEve
       prefHeight = btnSize
       prefWidth = sliderWidth
       disable = true
+      //On action
       value.onChange{
         val rVal = (value.value * precision / freqStep).toLong * freqStep
-        if(rVal != oldSliderPos) {
-          oldSliderPos = rVal
+        if(rVal != oldPos) {
+          oldPos = rVal
           stateString.text = buildStatus(rVal)
           sendEvent(E.LongValueChanged((1000 * precision) / rVal))}}}  //Sends in milli seconds
     //Scene

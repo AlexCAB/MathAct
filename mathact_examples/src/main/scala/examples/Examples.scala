@@ -78,6 +78,7 @@ object Examples extends Sketches{
   SketchOf[TimeLoopExample](
     name = "Using of TimeLoop",
     description = "Example of using TimeLoop.",
+    logger = true,
     autorun = true)
 
 

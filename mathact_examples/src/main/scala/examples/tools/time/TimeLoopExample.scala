@@ -30,12 +30,14 @@ class TimeLoopExample extends SimpleWorkbench {
   //Sketch parameters
   heading = "Time loop example"
   //Blocks
-  val loop = new TimeLoop[TimedValue]{ name = "Time loop" }
+  val loop = new TimeLoop[TimedValue]{
+    name = "Time loop"
+    initMessage = TimedValue(time = -1, value = 10)}
   val logger =  new EmptyBlock with FunWiring with LinkThrough[TimedValue, TimedValue]{ name = "Logger"
     val in = In[TimedValue]
     val out = Out[TimedValue]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))      //Log next received value
-    in.map(_ + 1).next(out)                                    //Increment value and send back
-    in.map(_ + 1.5).filter(_ ⇒ math.random > 0.5) .next(out)} //Simulate accidental duplication of message
+    in.foreach(v ⇒ logger.info("Logger received: " + v))     //Log next received value
+//    in.map(_ + 1.5).filter(_ ⇒ math.random > 0.5) .next(out) //Simulate accidental duplication of message
+    in.map(_ + 1).next(out)}                                  //Increment value and send back
   //Connecting
   loop ~> logger ~> loop }

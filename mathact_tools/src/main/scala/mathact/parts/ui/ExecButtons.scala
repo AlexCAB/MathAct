@@ -14,7 +14,6 @@
 
 package mathact.parts.ui
 
-import mathact.parts.ui.ExecButtons.BtnIcons
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.image.Image
 import scalafx.scene.layout.HBox
@@ -24,32 +23,25 @@ import scalafx.scene.layout.HBox
   * Created by CAB on 03.12.2016.
   */
 
-object ExecButtons{
-  //Definitions
-  case class BtnIcons(
-    startEImg: Image,
-    startDImg: Image,
-    stopEImg: Image,
-    stopDImg: Image,
-    stepEImg: Image,
-    stepDImg: Image)
-  object Action extends Enumeration {
-    val Start, Stop, Step = Value}
-  type Action = Action.Value}
-
-
-class ExecButtons(btnSize: Int, icons: BtnIcons, action: ExecButtons.Action⇒Unit)
-extends HBox(2) { import ExecButtons._
+class ExecButtons(btnSize: Int, onStart: ⇒Unit, onStop: ⇒Unit, onStep: ⇒Unit)
+extends HBox(2) {
+  //Resources
+  val startEImg = new Image("mathact/parts/ui/start_e.png", btnSize, btnSize, true, true)
+  val startDImg = new Image("mathact/parts/ui/start_d.png", btnSize, btnSize, true, true)
+  val stopEImg = new Image("mathact/parts/ui/stop_e.png", btnSize, btnSize, true, true)
+  val stopDImg = new Image("mathact/parts/ui/stop_d.png", btnSize, btnSize, true, true)
+  val stepEImg = new Image("mathact/parts/ui/step_e.png", btnSize, btnSize, true, true)
+  val stepDImg = new Image("mathact/parts/ui/step_d.png", btnSize, btnSize, true, true)
   //Components
-  val startBtn: IconButton  = new IconButton(icons.startEImg, icons.startDImg)({
+  val startBtn: IconButton  = new IconButton(btnSize, startEImg, startDImg)({
     stopBtn.active()
-    action(Action.Start)})
-  val stopBtn: IconButton = new IconButton(icons.stopEImg, icons.stopDImg)({
+    onStart})
+  val stopBtn: IconButton = new IconButton(btnSize, stopEImg, stopDImg)({
     startBtn.active()
-    action(Action.Stop)})
-  val stepBtn: IconButton = new IconButton(icons.stepEImg, icons.stepDImg)({
+    onStop})
+  val stepBtn: IconButton = new IconButton(btnSize, stepEImg, stepDImg)({
     stepBtn.active()
-    action(Action.Step)})
+    onStep})
   //Construction
   alignment = Pos.Center
   prefHeight = btnSize
@@ -59,6 +51,7 @@ extends HBox(2) { import ExecButtons._
   //Methods
   def active(): Unit = {
     startBtn.active()
+    stopBtn.passive()
     stepBtn.active()}
   def passive(): Unit = {
     startBtn.passive()
