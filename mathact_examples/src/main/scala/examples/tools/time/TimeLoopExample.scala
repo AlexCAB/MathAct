@@ -37,7 +37,7 @@ class TimeLoopExample extends SimpleWorkbench {
     val in = In[TimedValue]
     val out = Out[TimedValue]
     in.foreach(v ⇒ logger.info("Logger received: " + v))     //Log next received value
-//    in.map(_ + 1.5).filter(_ ⇒ math.random > 0.5) .next(out) //Simulate accidental duplication of message
+    in.map(_ + 1.5).filter(_ ⇒ math.random > 0.5) .next(out) //Simulate accidental duplication of message
     in.map(_ + 1).next(out)}                                  //Increment value and send back
   //Connecting
   loop ~> logger ~> loop }

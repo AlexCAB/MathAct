@@ -15,10 +15,9 @@
 package examples.common
 
 import mathact.data.discrete.{TimedEvent, TimedValue}
-import mathact.tools.flow.Border
 import mathact.tools.math._
 import mathact.tools.plots.ChartRecorder
-//import mathact.tools.pots.SettingDial
+import mathact.tools.pots.SettingDial
 import mathact.tools.time.TimeLoop
 import mathact.tools.workbenches.SimpleWorkbench
 
@@ -38,20 +37,17 @@ class SimplePidExample extends SimpleWorkbench {
 
 
 
-  val timeLoop = new TimeLoop[TimedValue]{
-//    timeout = 10.mills
-  }
+  val timeLoop = new TimeLoop[TimedValue]{ name = "Time loop" }
 
 
 
 
 
-
-//
-//  val setPoint = new SettingDial{
-//    min = 0.1
-//    max = 0.9
-//    init = 0.5}
+  val setPoint = new SettingDial{
+    name = "Set point"
+    min = 0.1
+    max = 0.9
+    init = 0.5}
 //
 //  val pPoint = new SettingDial{
 //    min = 0.1
@@ -84,7 +80,7 @@ class SimplePidExample extends SimpleWorkbench {
 //
 //  val controller = new {
 //    //Blocks
-//    private val subtractor = new Subtractor
+//    private val subtractor = new SignInverter
 //    private val integrator = new Integrator
 //    private val differentiator = new Differentiator
 //    private val pMultiplier = new Multiplier

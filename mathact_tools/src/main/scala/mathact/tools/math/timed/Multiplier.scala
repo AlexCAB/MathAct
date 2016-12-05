@@ -13,8 +13,7 @@
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-package mathact.tools.math
-
+package mathact.tools.math.timed
 
 /**
   * Created by CAB on 03.12.2016.

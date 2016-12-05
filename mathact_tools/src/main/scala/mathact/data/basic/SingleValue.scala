@@ -12,16 +12,15 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.tools.math.timed
+package mathact.data.basic
 
-import mathact.core.bricks.blocks.BlockContext
-import mathact.tools.math.TimedMath
+import mathact.data.Value
 
 
-/** Timed adder
-  * Created by CAB on 03.12.2016.
+/** Single value
+  * Created by CAB on 05.12.2016.
   */
 
-class Adder(implicit context: BlockContext) extends TimedMath(context, "+", "mathact/tools/math/timed/adder.png"){
-  protected def eval(timedInput: Vector[Double], singleInput: Vector[Double]): Double =
-    timedInput.sum + singleInput.sum}
+case class SingleValue(value: Double) extends Value[SingleValue]{
+  def value(v: Double) = copy(value = v)
+  override def toString = s"SingleValue(value = $value)"}

@@ -18,6 +18,6 @@ package mathact.tools.math.timed
   * Created by CAB on 03.12.2016.
   */
 
-class SignInvertor {
+class SignInverter {
 
 }

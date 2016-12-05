@@ -17,8 +17,9 @@ package examples
 import examples.common.SimplePidExample
 import examples.linking.CompactLinking
 import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
+import examples.tools.math.TimedMathExample
 import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
-import examples.tools.pots.{AnalogPotExample, TimedValuesPotExample}
+import examples.tools.pots.{AnalogPotExample, SettingDialExample, TimedValuesPotExample}
 import examples.tools.time.TimeLoopExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringExample, FunWiringZipExample, ObjWiringExample}
@@ -78,11 +79,16 @@ object Examples extends Sketches{
   SketchOf[TimeLoopExample](
     name = "Using of TimeLoop",
     description = "Example of using TimeLoop.",
+    logger = true)
+  SketchOf[SettingDialExample](
+    name = "Using of SettingDial",
+    description = "Example of using SettingDial tool.",
+    logger = true)
+  SketchOf[TimedMathExample](
+    name = "Using of TimedMath",
+    description = "Example timed math operators.",
     logger = true,
     autorun = true)
-
-
-
 
 
 

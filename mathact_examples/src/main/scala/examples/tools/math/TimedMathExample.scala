@@ -12,16 +12,41 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.tools.math.timed
+package examples.tools.math
 
-import mathact.core.bricks.blocks.BlockContext
-import mathact.tools.math.TimedMath
+import mathact.tools.generators.DiscreteGenerator
+import mathact.tools.math.timed.Adder
+import mathact.tools.plots.ChartRecorder
+import mathact.tools.pots.{SettingDial, TimedValuesPot}
+import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Timed adder
-  * Created by CAB on 03.12.2016.
+/** Example timed math operators
+  * Created by CAB on 05.12.2016.
   */
 
-class Adder(implicit context: BlockContext) extends TimedMath(context, "+", "mathact/tools/math/timed/adder.png"){
-  protected def eval(timedInput: Vector[Double], singleInput: Vector[Double]): Double =
-    timedInput.sum + singleInput.sum}
+class TimedMathExample extends SimpleWorkbench {
+  //Sketch parameters
+  heading = "Timed math example"
+  //Helpers
+  val generator = new DiscreteGenerator{ name = "Time generator" }
+  val potX = new TimedValuesPot{ name = "Timed pot X" }
+  val potY = new TimedValuesPot{ name = "Timed pot Y" }
+  val dialX = new SettingDial{ name = "Dial X" }
+  val dialY = new SettingDial{ name = "Dial X" }
+  val chart = new ChartRecorder{ name = "chart" }
+  //Operators
+  val adder = new Adder
+  //Connecting
+  generator ~> potX
+  generator ~> potY
+  potX  ~> adder
+  potY  ~> adder
+  dialX ~> adder
+  dialY ~> adder ~> chart.line(name = "adder")
+
+
+
+
+
+}
