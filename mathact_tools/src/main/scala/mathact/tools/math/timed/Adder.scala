@@ -22,6 +22,7 @@ import mathact.tools.math.TimedMath
   * Created by CAB on 03.12.2016.
   */
 
-class Adder(implicit context: BlockContext) extends TimedMath(context, "+", "mathact/tools/math/timed/adder.png"){
+class Adder(implicit context: BlockContext)
+extends TimedMath(context, "+", "mathact/tools/math/timed/adder.png"){
   protected def eval(timedInput: Vector[Double], singleInput: Vector[Double]): Double =
     timedInput.sum + singleInput.sum}

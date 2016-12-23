@@ -14,8 +14,6 @@
 
 package mathact.tools.plots
 
-import java.text.{DecimalFormat, DecimalFormatSymbols}
-import java.util.Locale
 import javax.swing.SwingUtilities
 
 import info.monitorenter.gui.chart.Chart2D
@@ -25,18 +23,16 @@ import info.monitorenter.gui.chart.traces.Trace2DLtd
 import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.fitting.Socket
-import mathact.core.bricks.plumbing.wiring.obj.{ObjOnStart, ObjWiring}
+import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
 import mathact.core.bricks.ui.BlockUI
 import mathact.core.bricks.ui.interaction.UICommand
 import mathact.data.discrete.TimedValue
-import mathact.data.ui.C
 import mathact.tools.Tool
 
 import scalafx.embed.swing.SwingNode
-import scalafx.geometry.{Insets, Pos}
+import scalafx.geometry.Insets
 import scalafx.scene.Scene
-import scalafx.scene.control.Label
-import scalafx.scene.layout.{BorderPane, FlowPane, HBox}
+import scalafx.scene.layout.{BorderPane, FlowPane}
 import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
 import java.awt.{Color => JColor}
@@ -58,7 +54,7 @@ with ObjWiring with BlockUI with LinkIn[TimedValue] with Colors{
   val defaultAxisXName: String = "time in seconds"
   val defaultAxisYName: String = "value"
   val defaultMaxTraceSize: Int = 100
-  val defaultPrefW: Double = 600
+  val defaultPrefW: Double = 800
   val defaultPrefH: Double = 300
   val gridColor = JColor.GRAY
   val chartBackgroundColor = JColor.WHITE
@@ -78,9 +74,10 @@ with ObjWiring with BlockUI with LinkIn[TimedValue] with Colors{
     //Variables
     private var prevTime = -1L
     //Methods
-    protected def drain(v: TimedValue): Unit = if(prevTime != v.time) {
+    protected def drain(v: TimedValue): Unit = {
+      if(prevTime != v.time) {
       prevTime =  v.time
-      ui.sendCommand(ChartUpdate(i, v.value, v.time))}}
+      ui.sendCommand(ChartUpdate(i, v.value, v.time))}}}
   private class ChartUI extends SfxFrame{
     //Params
     title = "Chart recorder" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
@@ -131,7 +128,7 @@ with ObjWiring with BlockUI with LinkIn[TimedValue] with Colors{
   //Functions
   private def buildLine(name: String, color: Color): Line = {
     val line = new Line(lines.size, name, color, UI)
-    lines +:= line
+    lines :+= line
     line}
   //DSL
   def minRange: Double = _minRange

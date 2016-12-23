@@ -28,44 +28,36 @@ import mathact.tools.workbenches.SimpleWorkbench
 
 class SimplePidExample extends SimpleWorkbench {
   //Blocks
-
-
-
-
-
-
-
-
-
+  val settingDials = new {
+    val setPoint = new SettingDial{
+      name = "Set point"
+      min = 0.1
+      max = 0.9
+      init = 0.5}
+    val drainSpeed = new SettingDial{
+      name = "Drain speed"
+      min = -1.0
+      max = 0.0
+      init = -0.2}
+    val pPoint = new SettingDial{
+      min = 0.0
+      max = 1000
+      init = 1}
+    val iPoint = new SettingDial{
+      min = 0.0
+      max = 1000
+      init = 1}
+    val dPoint = new SettingDial{
+      min = 0.0
+      max = 1000
+      init = 1}}
   val timeLoop = new TimeLoop[TimedValue]{ name = "Time loop" }
 
 
 
 
+//
 
-  val setPoint = new SettingDial{
-    name = "Set point"
-    min = 0.1
-    max = 0.9
-    init = 0.5}
-//
-//  val pPoint = new SettingDial{
-//    min = 0.1
-//    max = 0.9
-//    init = 0.5}
-//  val iPoint = new SettingDial{
-//    min = 0.1
-//    max = 0.9
-//    init = 0.5}
-//  val dPoint = new SettingDial{
-//    min = 0.1
-//    max = 0.9
-//    init = 0.5}
-//
-//  val tap = new SettingDial{
-//    min = -1.0
-//    max = 0.0
-//    init = -0.5}
 //
 //  val tank = new {
 //    //Blocks
