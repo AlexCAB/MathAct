@@ -14,8 +14,8 @@
 
 package examples.common
 
-import mathact.data.discrete.{TimedEvent, TimedValue}
-import mathact.tools.math._
+import mathact.data.discrete.TimedValue
+import mathact.tools.math.timed._
 import mathact.tools.plots.ChartRecorder
 import mathact.tools.pots.SettingDial
 import mathact.tools.time.TimeLoop
@@ -28,88 +28,79 @@ import mathact.tools.workbenches.SimpleWorkbench
 
 class SimplePidExample extends SimpleWorkbench {
   //Blocks
-  val settingDials = new {
+  val timeLoop = new TimeLoop[TimedValue]{ initTimeout = 100; initMessage = TimedValue(0,0) }
+  val chart = new ChartRecorder{ minRange = 0 }
+  //Units
+  val dials = new {
     val setPoint = new SettingDial{
       name = "Set point"
-      min = 0.1
-      max = 0.9
-      init = 0.5}
+      min = .1
+      max = .9
+      init = .5}
     val drainSpeed = new SettingDial{
       name = "Drain speed"
-      min = -1.0
-      max = 0.0
-      init = -0.2}
+      min = -1
+      max = 0
+      init = -.2}
     val pPoint = new SettingDial{
-      min = 0.0
-      max = 1000
+      name = "P"
+      min = 0
+      max = 2
       init = 1}
     val iPoint = new SettingDial{
-      min = 0.0
-      max = 1000
-      init = 1}
+      name = "I"
+      min = 0
+      max = 2
+      init = .01}
     val dPoint = new SettingDial{
-      min = 0.0
-      max = 1000
-      init = 1}}
-  val timeLoop = new TimeLoop[TimedValue]{ name = "Time loop" }
-
-
-
-
-//
-
-//
-//  val tank = new {
-//    //Blocks
-//    private val summer = new Adder
-//    private val integrator = new Integrator
-//    //Connecting
-//    summer.out ~> integrator.in
-//    //Pins
-//    val tap = summer.in
-//    val effect = summer.in
-//    val level = integrator.out}
-//
-//  val controller = new {
-//    //Blocks
-//    private val subtractor = new SignInverter
-//    private val integrator = new Integrator
-//    private val differentiator = new Differentiator
-//    private val pMultiplier = new Multiplier
-//    private val iMultiplier = new Multiplier
-//    private val dMultiplier = new Multiplier
-//    private val border = new Border
-//    private val summer = new Adder
-//    //Connecting
-//    subtractor                   ~> pMultiplier ~> border
-//    subtractor ~> integrator     ~> iMultiplier ~> border ~> summer
-//    subtractor ~> differentiator ~> dMultiplier ~> border
-//    //Pins
-//    val r = subtractor.plaus
-//    val y = subtractor.minus
-//    val u = summer.out
-//    val p = pMultiplier.in
-//    val i = iMultiplier.in
-//    val d = dMultiplier.in}
-//
-//  val chart = new ChartRecorder{
-//
-//
-//  }
-//
-//
-//  //Connecting
-//  tap ~> tank.tap
-//  setPoint ~> controller.r
-//  pPoint ~> controller.p
-//  iPoint ~> controller.i
-//  dPoint ~> controller.d
-//  tank.level ~> timedLoop ~> controller.y
-//  controller.u ~> tank.effect
-//  tank.tap ~> chart.line("tap")
-//  tank.effect ~> chart.line("effect")
-//  tank.level ~> chart.line("level")
-
-
-
-}
+      name = "D"
+      min = 0
+      max = 2
+      init = .01}}
+  val tank = new {
+    //Blocks
+    val adder = new Adder
+    val integrator = new Integrator
+    val multiplier = new Multiplier
+    //Connecting
+    multiplier ~> adder
+    adder ~> integrator
+    //Pins
+    val effect = adder.inF
+    val feedback = multiplier.inF
+    val drain = multiplier.inS
+    val level = integrator.out}
+  val controller = new {
+    //Blocks
+    val signInverter = new SignInverter
+    val inAdder = new Adder
+    val integrator = new Integrator
+    val differentiator = new Differentiator
+    val pMultiplier = new Multiplier
+    val iMultiplier = new Multiplier
+    val dMultiplier = new Multiplier
+    val outAdder = new Adder
+    //Connecting
+    signInverter ~> inAdder
+    inAdder ~>                pMultiplier    ~> outAdder
+    inAdder ~> iMultiplier ~> integrator     ~> outAdder
+    inAdder ~> dMultiplier ~> differentiator ~> outAdder
+    //Pins
+    val r = inAdder.inS
+    val y = signInverter.inF
+    val u = outAdder.out
+    val p = pMultiplier.inS
+    val i = iMultiplier.inS
+    val d = dMultiplier.inS}
+  //Connecting
+  dials.setPoint ~> controller.r
+  dials.drainSpeed ~> tank.drain
+  dials.pPoint ~> controller.p
+  dials.iPoint ~> controller.i
+  dials.dPoint ~> controller.d
+  tank.level ~> timeLoop.in
+  timeLoop.out ~> controller.y
+  timeLoop.out ~> tank.feedback
+  controller.u ~> tank.effect
+  controller.u ~> chart.line("effect")
+  tank.level ~> chart.line("level")}

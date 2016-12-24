@@ -17,7 +17,6 @@ package mathact.core.plumbing.infrastructure.drive
 import mathact.core.model.enums._
 import mathact.core.model.holders.DriveRef
 import mathact.core.model.messages.M
-import mathact.core.plumbing.infrastructure.drive.Drive.State
 
 import scala.collection.mutable.{ListBuffer => MutList}
 import scala.concurrent.duration.Duration
@@ -167,24 +166,26 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     * @param outletId - Int, source ID
     * @param inletId - Int, drain ID
     * @param value - Any, user message */
-  def userMessage(outletId: Int, inletId: Int, value: Any, state: State): Unit = state match{
-    case State.Connected | State.TurnedOn | State.Starting | State.Working | State.Stopping | State.Stopped ⇒
-      //Process message
-      runForInlet(inletId){ inlet ⇒
-        log.debug(s"[DriveMessaging.userMessage] inletId: $outletId, inlet: $inlet, value: $value")
-        enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))}
-    case _ ⇒
-      //Incorrect state
-      log.error(
-        s"[DriveMessaging.userMessage] Incorrect state $state, inletId: $outletId, inlet: $inletId, value: $value.")
-      val outletName =  s"№$outletId"
-      val inletName = inlets
-        .get(inletId).flatMap(_.name).getOrElse(s"№$inletId")
-      userLogging ! M.LogError(
-        Some(blockId),
-        blockName.getOrElse(blockClassName),
-        Seq(),
-        s"Message $value from $outletName to $inletName not processed in state $state")}
+  def userMessage(outletId: Int, inletId: Int, value: Any, state: State): Unit = {
+    import State._
+    state match{
+      case Connected | TurnedOn | CreatingUI | Starting | Working | Stopping | ClosingUI | Stopped ⇒
+        //Process message
+        runForInlet(inletId){ inlet ⇒
+          log.debug(s"[DriveMessaging.userMessage] inletId: $outletId, inlet: $inlet, value: $value")
+          enqueueOrRunMessageTask(inlet, value).foreach(inlet ⇒ sendLoadMessage(inlet))}
+      case _ ⇒
+        //Incorrect state
+        log.error(
+          s"[DriveMessaging.userMessage] Incorrect state $state, inletId: $outletId, inlet: $inletId, value: $value.")
+        val outletName =  s"№$outletId"
+        val inletName = inlets
+          .get(inletId).flatMap(_.name).getOrElse(s"№$inletId")
+        userLogging ! M.LogError(
+          Some(blockId),
+          blockName.getOrElse(blockClassName),
+          Seq(),
+          s"Message $value from $outletName to $inletName not processed in state $state")}}
   /** Starting of user messages processing */
   def startUserMessageProcessing(): Unit = {
     //Run for firs message

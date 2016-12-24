@@ -12,17 +12,25 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package mathact.tools.pots
 
-import mathact.data.basic.SingleValue
-import mathact.data.{Timed, Value}
+import mathact.core.bricks.blocks.BlockContext
+import mathact.core.bricks.linking.{LinkIn, LinkOut}
+import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
+import mathact.core.bricks.ui.BlockUI
+import mathact.data.discrete.TimedValue
+import mathact.tools.Tool
 
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+
+/** Boolean switch
+  * Created by CAB on 24.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  def toSingleValue = SingleValue(value)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+class BoolSwitch(implicit context: BlockContext)
+extends Tool(context, "BS", "mathact/tools/pots/bool_switch.png")
+with ObjWiring with BlockUI with LinkOut[Boolean] {
+
+
+ val out = Outlet[Boolean](???)
+
+}

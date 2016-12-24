@@ -12,17 +12,28 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package examples.tools.pots
 
-import mathact.data.basic.SingleValue
-import mathact.data.{Timed, Value}
+import mathact.core.bricks.linking.LinkIn
+import mathact.core.bricks.plumbing.wiring.fun.FunWiring
+import mathact.tools.EmptyBlock
+import mathact.tools.pots.BoolSwitch
+import mathact.tools.workbenches.SimpleWorkbench
 
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+
+/** Example of using boolean switch
+  * Created by CAB on 24.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  def toSingleValue = SingleValue(value)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+class BoolSwitchExample extends SimpleWorkbench {
+  //Sketch parameters
+  heading = "Boolean switch example"
+  //Blocks
+  val switch = new BoolSwitch{
+    name = "Boolean switch"}
+  val logger =  new EmptyBlock with FunWiring with LinkIn[Boolean]{
+    name = "Logger"
+    val in = In[Boolean]
+    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  //Connecting
+  switch ~> logger }

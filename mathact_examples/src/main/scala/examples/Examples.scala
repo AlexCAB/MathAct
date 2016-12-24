@@ -87,15 +87,12 @@ object Examples extends Sketches{
   SketchOf[TimedMathExample](
     name = "Using of TimedMath",
     description = "Example timed math operators.",
-    logger = true,
-    autorun = true)
-
-
-
-
+    logger = true)
   SketchOf[SimplePidExample](
     name = "Simple PID example",
-    description = "Simple PID regulated model example.")
+    description = "Simple PID regulated model example.",
+    autorun = true)
+
 
 
 

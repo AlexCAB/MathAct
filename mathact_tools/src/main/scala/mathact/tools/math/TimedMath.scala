@@ -32,7 +32,7 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
   //Abstract evaluation function
   protected def eval(timedInput: Vector[Double], singleInput: Vector[Double]): Double
   //Definitions
-  private class TimedInflow(default: Option[TimedValue], outflow: MainOutflow) extends Inflow[TimedValue]{
+  private class TimedInflow(default: Option[TimedValue], processor: Processor) extends Inflow[TimedValue]{
     //Variables
     private var lastReceived: Option[TimedValue] = default
     //Methods
@@ -45,14 +45,14 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
     def clean(): Unit = {lastReceived = None}
     protected def drain(v: TimedValue): Unit = {
       lastReceived = Some(v)
-      outflow.tryToEval()}}
+      processor.tryToEval()}}
   private class SingleInflow(default: Option[SingleValue]) extends Inflow[SingleValue]{
     //Variables
     private var lastReceived: Option[SingleValue] = default
     //Methods
     def getLast: Option[SingleValue] = lastReceived
     protected def drain(v: SingleValue): Unit = { lastReceived = Some(v) }}
-  private class MainOutflow(timeds: ⇒Vector[TimedInflow], singles: ⇒Vector[SingleInflow]) extends Outflow[TimedValue]{
+  private class Processor(timeds: ⇒ Vector[TimedInflow], singles: ⇒ Vector[SingleInflow]) extends Outflow[TimedValue]{
     //Methods
     def tryToEval(): Unit = {
       //Check time of timed
@@ -64,12 +64,14 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
           //Get and check last single
           singles.map(_.getLast) match{
             case lastSingles if lastSingles.forall(_.nonEmpty) ⇒
-              //Eval and sent next
-              pour(TimedValue(
+              //Eval and
+              val nextVal = TimedValue(
                 firstNonEmpty.get.time,
                 eval(
                   lastTimed.map(_.get.value),
-                  lastSingles.map(_.get.value))))
+                  lastSingles.map(_.get.value)))
+              //Send next
+              pour(nextVal)
               //Clean
               timeds.foreach(_.clean())
             case lastSingles ⇒
@@ -80,11 +82,11 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
   //Variables
   private var timedInflows = Vector[TimedInflow]()
   private var singleInflows = Vector[SingleInflow]()
-  //Outflow
-  private val outflow = new MainOutflow(timedInflows, singleInflows)
+  //Processor
+  private val processor = new Processor(timedInflows, singleInflows)
   //Functions
   private def buildTimedInflow(default: Option[TimedValue]): TimedInflow = {
-    val inflow = new TimedInflow(default, outflow)
+    val inflow = new TimedInflow(default, processor)
     timedInflows +:= inflow
     inflow}
   private def buildSingleInflow(default: Option[SingleValue]): SingleInflow = {
@@ -96,4 +98,4 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
   def timed(default: Option[TimedValue]) = Inlet(buildTimedInflow(default))
   def inS = Inlet(buildSingleInflow(None))
   def single(default: Option[SingleValue]) = Inlet(buildSingleInflow(default))
-  val out = Outlet(outflow)}
+  val out = Outlet(processor)}

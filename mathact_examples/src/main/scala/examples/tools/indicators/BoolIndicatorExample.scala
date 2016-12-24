@@ -12,17 +12,32 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.data.discrete
+package examples.tools.indicators
 
+import mathact.core.bricks.linking.LinkIn
+import mathact.core.bricks.plumbing.wiring.fun.FunWiring
 import mathact.data.basic.SingleValue
-import mathact.data.{Timed, Value}
+import mathact.tools.EmptyBlock
+import mathact.tools.indicators.BoolIndicator
+import mathact.tools.workbenches.SimpleWorkbench
 
-/** Represent of one double value with time-stamp
-  * Created by CAB on 13.11.2016.
+
+/** Example of using boolean indicator tool.
+  * Created by CAB on 24.12.2016.
   */
 
-case class TimedValue(time: Long, value: Double) extends Timed[TimedValue] with Value[TimedValue]{
-  def time(t: Long) = copy(time = t)
-  def value(v: Double) = copy(value = v)
-  def toSingleValue = SingleValue(value)
-  override def toString = s"TimedEvent(time = $time, value = $value)"}
+class BoolIndicatorExample extends SimpleWorkbench {
+  //Sketch parameters
+  heading = "Boolean indicator example"
+  //Blocks
+  BoolSwitch
+
+
+  val indicator = new BoolIndicator{
+    name = "Boolean indicator"}
+  val logger =  new EmptyBlock with FunWiring with LinkIn[SingleValue]{
+    name = "Logger"
+    val in = In[Boolean]
+    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  //Connecting
+  indicator ~> logger }
