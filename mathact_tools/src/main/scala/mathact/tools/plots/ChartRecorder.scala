@@ -123,7 +123,7 @@ with ObjWiring with BlockUI with LinkIn[TimedValue] with Colors{
       case ChartUpdate(i, value, time) ⇒
         labels(i).update(value)
         traces(i).addPoint(time / 1000.0, value)}}
-  //UI registration and events handling
+  //UI registration
   UI(new ChartUI)
   //Functions
   private def buildLine(name: String, color: Color): Line = {

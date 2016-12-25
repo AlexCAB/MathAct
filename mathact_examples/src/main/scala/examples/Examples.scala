@@ -17,9 +17,10 @@ package examples
 import examples.common.SimplePidExample
 import examples.linking.CompactLinking
 import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
+import examples.tools.indicators.BoolIndicatorExample
 import examples.tools.math.TimedMathExample
 import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
-import examples.tools.pots.{AnalogPotExample, SettingDialExample, TimedValuesPotExample}
+import examples.tools.pots.{AnalogPotExample, BoolSwitchExample, SettingDialExample, TimedValuesPotExample}
 import examples.tools.time.TimeLoopExample
 import examples.ui.BlocksWithUiExample
 import examples.wiring.{FunWiringExample, FunWiringZipExample, ObjWiringExample}
@@ -90,12 +91,15 @@ object Examples extends Sketches{
     logger = true)
   SketchOf[SimplePidExample](
     name = "Simple PID example",
-    description = "Simple PID regulated model example.",
+    description = "Simple PID regulated model example.")
+  SketchOf[BoolSwitchExample](
+    name = "Boolean switch example",
+    description = "Example of using boolean switch tool.",
+    logger = true)
+  SketchOf[BoolIndicatorExample](
+    name = "Boolean indicator example",
+    description = "Example of using boolean indicator tool.",
     autorun = true)
-
-
-
-
 
   //TODO Add more
 

@@ -14,11 +14,8 @@
 
 package examples.tools.indicators
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.data.basic.SingleValue
-import mathact.tools.EmptyBlock
 import mathact.tools.indicators.BoolIndicator
+import mathact.tools.pots.BoolSwitch
 import mathact.tools.workbenches.SimpleWorkbench
 
 
@@ -30,14 +27,9 @@ class BoolIndicatorExample extends SimpleWorkbench {
   //Sketch parameters
   heading = "Boolean indicator example"
   //Blocks
-  BoolSwitch
-
-
-  val indicator = new BoolIndicator{
-    name = "Boolean indicator"}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[SingleValue]{
-    name = "Logger"
-    val in = In[Boolean]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  val switch1 = new BoolSwitch{ name = "switch1" }
+  val switch2 = new BoolSwitch{ name = "switch2" }
+  val indicator = new BoolIndicator{ name = "Boolean indicator" }
   //Connecting
-  indicator ~> logger }
+  switch1 ~> indicator
+  switch2 ~> indicator.in("switch2")}
