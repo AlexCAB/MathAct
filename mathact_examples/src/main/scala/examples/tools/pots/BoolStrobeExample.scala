@@ -17,20 +17,20 @@ package examples.tools.pots
 import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.wiring.fun.FunWiring
 import mathact.tools.EmptyBlock
-import mathact.tools.pots.BoolSwitch
+import mathact.tools.pots.BoolStrobe
 import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Example of using boolean switch
-  * Created by CAB on 24.12.2016.
+/** Bool strobe example
+  * Created by CAB on 26.12.2016.
   */
 
-class BoolSwitchExample extends SimpleWorkbench {
+class BoolStrobeExample extends SimpleWorkbench {
   //Sketch parameters
-  heading = "Boolean switch example"
+  heading = "Boolean strobe example"
   //Blocks
-  val switch = new BoolSwitch{
-    name = "Boolean switch"
+  val switch = new BoolStrobe{
+    name = "Boolean strobe"
     default = false}
   val logger =  new EmptyBlock with FunWiring with LinkIn[Boolean]{
     name = "Logger"

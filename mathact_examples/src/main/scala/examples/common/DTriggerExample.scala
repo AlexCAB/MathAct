@@ -12,29 +12,33 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.pots
+package examples.common
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.tools.EmptyBlock
-import mathact.tools.pots.BoolSwitch
+import mathact.tools.indicators.BoolIndicator
+import mathact.tools.math.logic.bool.{And, FlipFlop, Nor, Not}
+import mathact.tools.pots.{BoolStrobe, BoolSwitch}
 import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Example of using boolean switch
-  * Created by CAB on 24.12.2016.
+/** D-rigger example
+  * Created by CAB on 26.12.2016.
   */
 
-class BoolSwitchExample extends SimpleWorkbench {
+class DTriggerExample extends SimpleWorkbench {
   //Sketch parameters
-  heading = "Boolean switch example"
-  //Blocks
-  val switch = new BoolSwitch{
-    name = "Boolean switch"
-    default = false}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Boolean]{
-    name = "Logger"
-    val in = In[Boolean]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  heading = "D-trigger example"
+  //Helpers
+  val dIn = new BoolSwitch{ name = "D in" }
+  val eIn = new BoolStrobe{ name = "E in" }
+  val indicator = new BoolIndicator{ name = "Out" }
+  //Operators
+  val fAnd = new And
+  val iAnd = new And
+  val flipFlop = new FlipFlop
   //Connecting
-  switch ~> logger }
+  dIn ~> new Not ~> fAnd ~> flipFlop.s
+             eIn ~> fAnd
+             eIn ~> iAnd
+  dIn            ~> iAnd ~> flipFlop.r
+  flipFlop.out ~> indicator.in("Q")
+  flipFlop.inv ~> indicator.in("!Q")}

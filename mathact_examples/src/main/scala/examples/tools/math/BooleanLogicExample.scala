@@ -12,29 +12,35 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.pots
+package examples.tools.math
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.tools.EmptyBlock
+import mathact.tools.indicators.BoolIndicator
+import mathact.tools.math.logic.bool._
 import mathact.tools.pots.BoolSwitch
 import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Example of using boolean switch
-  * Created by CAB on 24.12.2016.
+/** Example of using boolean logic operators
+  * Created by CAB on 26.12.2016.
   */
 
-class BoolSwitchExample extends SimpleWorkbench {
+class BooleanLogicExample extends SimpleWorkbench {
   //Sketch parameters
-  heading = "Boolean switch example"
-  //Blocks
-  val switch = new BoolSwitch{
-    name = "Boolean switch"
-    default = false}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Boolean]{
-    name = "Logger"
-    val in = In[Boolean]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
+  heading = "Boolean logic example"
+  //Helpers
+  val potX = new BoolSwitch{ name = "In X" }
+  val potY = new BoolSwitch{ name = "In Y" }
+  val indicator = new BoolIndicator{ name = "Out" }
+  //Operators
+  val not = new Not
+  val nor = new Nor
+  val and = new And
+  val or = new Or
   //Connecting
-  switch ~> logger }
+  potX ~> not ~> indicator.in("NOT")
+  potX ~> nor
+  potX ~> nor ~> indicator.in("NOR")
+  potX ~> and
+  potY ~> and ~> indicator.in("AND")
+  potX ~> or
+  potY ~> or ~> indicator.in("OR")}

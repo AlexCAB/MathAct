@@ -14,16 +14,16 @@
 
 package examples
 
-import examples.common.SimplePidExample
+import examples.common.{DTriggerExample, SimplePidExample}
 import examples.linking.CompactLinking
-import examples.tools.generators.{AnalogGeneratorExample, DiscreteGeneratorExample}
-import examples.tools.indicators.BoolIndicatorExample
-import examples.tools.math.TimedMathExample
-import examples.tools.plots.{ChartRecorderExample, SimpleScopeExample}
-import examples.tools.pots.{AnalogPotExample, BoolSwitchExample, SettingDialExample, TimedValuesPotExample}
-import examples.tools.time.TimeLoopExample
+import examples.tools.generators._
+import examples.tools.indicators._
+import examples.tools.math._
+import examples.tools.plots._
+import examples.tools.pots._
+import examples.tools.time._
 import examples.ui.BlocksWithUiExample
-import examples.wiring.{FunWiringExample, FunWiringZipExample, ObjWiringExample}
+import examples.wiring._
 import mathact.tools.Sketches
 
 
@@ -96,10 +96,21 @@ object Examples extends Sketches{
     name = "Boolean switch example",
     description = "Example of using boolean switch tool.",
     logger = true)
+  SketchOf[BoolStrobeExample](
+    name = "Boolean strobe example",
+    description = "Example of using boolean strobe tool.",
+    logger = true)
   SketchOf[BoolIndicatorExample](
     name = "Boolean indicator example",
-    description = "Example of using boolean indicator tool.",
+    description = "Example of using boolean indicator tool.")
+  SketchOf[BooleanLogicExample](
+    name = "Boolean logic example",
+    description = "Using of boolean operators.")
+  SketchOf[DTriggerExample](
+    name = "D-trigger example",
+    description = "Using of boolean operators to build D-trigger.",
     autorun = true)
+
 
   //TODO Add more
 

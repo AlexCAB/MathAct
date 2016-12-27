@@ -46,7 +46,7 @@ with ObjWiring with BlockUI with LinkIn[Boolean]{
     title = "Bool indicator" + (name match{case Some(n) ⇒ " - " + n case _ ⇒ ""})
     showOnStart = true
     //Components
-    val lines = indicators.map(indicator ⇒ (
+    val lines = indicators.map( indicator ⇒ (
       indicator.i,
       indicator.name,
       new Label{

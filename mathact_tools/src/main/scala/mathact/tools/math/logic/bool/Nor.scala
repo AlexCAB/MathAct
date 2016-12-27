@@ -12,29 +12,16 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package examples.tools.pots
+package mathact.tools.math.logic.bool
 
-import mathact.core.bricks.linking.LinkIn
-import mathact.core.bricks.plumbing.wiring.fun.FunWiring
-import mathact.tools.EmptyBlock
-import mathact.tools.pots.BoolSwitch
-import mathact.tools.workbenches.SimpleWorkbench
+import mathact.core.bricks.blocks.BlockContext
+import mathact.tools.math.BooleanLogic
 
 
-/** Example of using boolean switch
-  * Created by CAB on 24.12.2016.
+/** NOR operator
+  * Created by CAB on 26.12.2016.
   */
 
-class BoolSwitchExample extends SimpleWorkbench {
-  //Sketch parameters
-  heading = "Boolean switch example"
-  //Blocks
-  val switch = new BoolSwitch{
-    name = "Boolean switch"
-    default = false}
-  val logger =  new EmptyBlock with FunWiring with LinkIn[Boolean]{
-    name = "Logger"
-    val in = In[Boolean]
-    in.foreach(v ⇒ logger.info("Logger received: " + v))}
-  //Connecting
-  switch ~> logger }
+class Nor(implicit context: BlockContext)
+extends BooleanLogic(context, "NOR", "mathact/tools/math/logic/bool/nor.png"){
+  protected def eval(input: Seq[Boolean]): Boolean = ! input.exists(v ⇒ v)}

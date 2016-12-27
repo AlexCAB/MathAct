@@ -44,7 +44,7 @@ extends PumpLike{
   val blockClassName =  block.getClass.getTypeName
   //Logging
   private val akkaLog = Logging.getLogger(context.system, this)
-  akkaLog.info(s"[Pump.<init>] DriveCreating of block: $blockClassName")
+  akkaLog.debug(s"[Pump.<init>] DriveCreating of block: $blockClassName")
   private[core] object log {
     def debug(msg: String): Unit = akkaLog.debug(s"[$blockClassName] $msg")
     def info(msg: String): Unit = akkaLog.info(s"[$blockClassName] $msg")
