@@ -15,7 +15,8 @@
 package mathact.core.bricks.plumbing.wiring.obj
 
 import mathact.core.bricks.plumbing.fitting.{Plug, Socket}
-import mathact.core.plumbing.fitting.flows.{OutflowLike, InflowLike}
+import mathact.core.model.enums.DequeueAlgo
+import mathact.core.plumbing.fitting.flows.{InflowLike, OutflowLike}
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
 
@@ -61,8 +62,9 @@ trait ObjWiring { _: BlockLike ⇒
   private def registerOutlet[H](out: Outflow[H], name: Option[String]): Plug[H] with ObjPlug[H] = Option(pump) match{
     case Some(p) ⇒ new OutPipe[H](out, name, p) with ObjPlug[H]
     case None ⇒ throw new IllegalStateException("[ObjWiring.registerOutlet] Pump not set.")}
-  private def registerInlet[H](in: Inflow[H], name: Option[String]): Socket[H] with ObjSocket[H] = Option(pump) match{
-    case Some(p) ⇒ new InPipe[H](in, name , p) with ObjSocket[H]
+  private def registerInlet[H](in: Inflow[H], name: Option[String], dequeue: DequeueAlgo)
+  :Socket[H] with ObjSocket[H] = Option(pump) match{
+    case Some(p) ⇒ new InPipe[H](in, name, p, dequeue) with ObjSocket[H]
     case None ⇒ throw new IllegalStateException("[ObjWiring.registerInlet] Pump not set.")}
   /** Registration if Outlet */
   protected object Outlet{
@@ -70,5 +72,11 @@ trait ObjWiring { _: BlockLike ⇒
     def apply[H](out: Outflow[H], name: String ): Plug[H] with ObjPlug[H] = registerOutlet(out, Some(name))}
   /** Registration if Inlet */
   protected object Inlet{
-    def apply[H](in: Inflow[H]): Socket[H] with ObjSocket[H] = registerInlet(in, None)
-    def apply[H](in: Inflow[H], name: String): Socket[H] with ObjSocket[H] = registerInlet(in, Some(name))}}
+    def apply[H](in: Inflow[H]): Socket[H] with ObjSocket[H] =
+      registerInlet(in, None, DequeueAlgo.Queue)
+    def apply[H](in: Inflow[H], name: String): Socket[H] with ObjSocket[H] =
+      registerInlet(in, Some(name), DequeueAlgo.Queue)
+    def apply[H](in: Inflow[H], dequeue: DequeueAlgo): Socket[H] with ObjSocket[H] =
+      registerInlet(in, None, dequeue)
+    def apply[H](in: Inflow[H], name: String, dequeue: DequeueAlgo): Socket[H] with ObjSocket[H] =
+      registerInlet(in, Some(name), dequeue)}}

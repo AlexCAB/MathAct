@@ -14,8 +14,9 @@
 
 package mathact.core.bricks.plumbing.wiring.fun
 
-import mathact.core.bricks.plumbing.fitting.{Socket, Plug}
-import mathact.core.plumbing.fitting.flows.{OutflowLike, InflowLike}
+import mathact.core.bricks.plumbing.fitting.{Plug, Socket}
+import mathact.core.model.enums.DequeueAlgo
+import mathact.core.plumbing.fitting.flows.{InflowLike, OutflowLike}
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
 
@@ -179,17 +180,19 @@ trait FunWiring { _: BlockLike ⇒
   /** Registration of Inlet */
   protected object In{
     //Functions
-    private def newInlet[H](name: Option[String]): Socket[H] with FunSocket[H] = Option(pump) match{
+    private def newInlet[H](name: Option[String], dequeue: DequeueAlgo): Socket[H] with FunSocket[H] = Option(pump) match{
       case Some(p) ⇒
         val inflow = new Inflow[H]
-        val inPipe = new InPipe[H](inflow, name , p) with FunSocket[H]
+        val inPipe = new InPipe[H](inflow, name , p, dequeue) with FunSocket[H]
         inflowsMap += (inPipe.inletId → inflow)
         inPipe
       case None ⇒
         throw new IllegalStateException("[FunWiring.newInlet] Pump not created.")}
     //Methods
-    def apply[H]: Socket[H] with FunSocket[H] = newInlet(None)
-    def apply[H](name: String): Socket[H] with FunSocket[H] = newInlet(Some(name))}
+    def apply[H]: Socket[H] with FunSocket[H] = newInlet(None, DequeueAlgo.Queue)
+    def apply[H](dequeue: DequeueAlgo): Socket[H] with FunSocket[H] = newInlet(None, dequeue)
+    def apply[H](name: String): Socket[H] with FunSocket[H] = newInlet(Some(name), DequeueAlgo.Queue)
+    def apply[H](name: String, dequeue: DequeueAlgo): Socket[H] with FunSocket[H] = newInlet(Some(name), dequeue)}
   /** Registration of Outlet */
   protected object Out{
     //Functions

@@ -14,15 +14,15 @@
 
 package examples
 
-import examples.common.{DTriggerExample, SimplePidExample}
-import examples.linking.CompactLinking
+import examples.common._
+import examples.linking._
 import examples.tools.generators._
 import examples.tools.indicators._
 import examples.tools.math._
 import examples.tools.plots._
 import examples.tools.pots._
 import examples.tools.time._
-import examples.ui.BlocksWithUiExample
+import examples.ui._
 import examples.wiring._
 import mathact.tools.Sketches
 
@@ -108,8 +108,18 @@ object Examples extends Sketches{
     description = "Using of boolean operators.")
   SketchOf[DTriggerExample](
     name = "D-trigger example",
-    description = "Using of boolean operators to build D-trigger.",
+    description = "Using of boolean operators to build D-trigger.")
+  SketchOf[ValueIndicatorExample](
+    name = "Value indicator example",
+    description = "Example of using value indicator tool.")
+  SketchOf[ContinuousMathExample](
+    name = "Continuous math example",
+    description = "Example of continuous math operators.")
+  SketchOf[FeedbackExample](
+    name = "Feedback example",
+    description = "Example of feedback loop.",
     autorun = true)
+
 
 
   //TODO Add more

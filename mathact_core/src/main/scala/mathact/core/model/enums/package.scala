@@ -69,6 +69,11 @@ package object enums {
     val FillScreen = Value
     val WindowsStairs = Value}
   type WindowsLayoutKind = WindowsLayoutKind.Value
+  //DequeueAlgo
+  object DequeueAlgo extends Enumeration {
+    val Queue = Value
+    val Last = Value}
+  type DequeueAlgo = DequeueAlgo.Value
 
 //TODO Add more
 

@@ -33,7 +33,7 @@ class TimedMathExample extends SimpleWorkbench {
   val potX = new TimedValuesPot{ name = "Timed pot X" }
   val potY = new TimedValuesPot{ name = "Timed pot Y" }
   val dialX = new SettingDial{ name = "Dial X" }
-  val dialY = new SettingDial{ name = "Dial X" }
+  val dialY = new SettingDial{ name = "Dial Y" }
   val chart = new ChartRecorder{ name = "chart" }
   //Operators
   val adder = new Adder

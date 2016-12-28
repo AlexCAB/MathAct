@@ -14,12 +14,16 @@
 
 package mathact.tools.indicators
 
+import java.text.{DecimalFormat, DecimalFormatSymbols}
+import java.util.Locale
+
 import mathact.core.bricks.blocks.BlockContext
 import mathact.core.bricks.linking.LinkIn
 import mathact.core.bricks.plumbing.fitting.Socket
 import mathact.core.bricks.plumbing.wiring.obj.ObjWiring
 import mathact.core.bricks.ui.BlockUI
 import mathact.core.bricks.ui.interaction.UICommand
+import mathact.data.basic.SingleValue
 import mathact.tools.Tool
 
 import scalafx.geometry.{Insets, Pos}
@@ -29,17 +33,19 @@ import scalafx.scene.layout.{BorderPane, VBox}
 import scalafx.scene.paint.Color.White
 
 
-/** Boolean indicator
-  * Created by CAB on 24.12.2016.
+/** Value indicator
+  * Created by CAB on 28.12.2016.
   */
 
-class BoolIndicator(implicit context: BlockContext)
-extends Tool(context, "BI", "mathact/tools/indicators/boolean_indicator.png")
-with ObjWiring with BlockUI with LinkIn[Boolean]{
+class ValueIndicator(implicit context: BlockContext)
+extends Tool(context, "VI", "mathact/tools/indicators/value_indicator.png")
+with ObjWiring with BlockUI with LinkIn[SingleValue]{
+  //Helpers
+  val decimalFormat = new DecimalFormat("0.0#######",  new DecimalFormatSymbols(Locale.US))
   //Definitions
-  private case class Update(i: Int, value: Boolean) extends UICommand
-  private class Indicator(val i: Int, val name: String = "", ui: UI.type) extends Inflow[Boolean] {
-    protected def drain(v: Boolean): Unit = ui.sendCommand(Update(i, v))}
+  private case class Update(i: Int, value: String) extends UICommand
+  private class Indicator(val i: Int, val name: String = "", ui: UI.type) extends Inflow[SingleValue] {
+    protected def drain(v: SingleValue): Unit = ui.sendCommand(Update(i, decimalFormat.format(v.value)))}
   //UI
   private class MainUI(indicators: Seq[Indicator]) extends SfxFrame{
     //Params
@@ -50,7 +56,7 @@ with ObjWiring with BlockUI with LinkIn[Boolean]{
       indicator.i,
       indicator.name,
       new Label{
-        prefWidth = 60
+        prefWidth = 100
         prefHeight = 20
         alignment = Pos.CenterLeft
         text = "---"
@@ -60,7 +66,7 @@ with ObjWiring with BlockUI with LinkIn[Boolean]{
     scene = new Scene{
       fill = White
       root = new BorderPane{
-        prefWidth = 200
+        prefWidth = 300
         center = new VBox(2){
           padding = Insets(1.0)
           alignment = Pos.CenterRight
@@ -74,7 +80,7 @@ with ObjWiring with BlockUI with LinkIn[Boolean]{
           padding = Insets(1.0)
           children = lines.map{ case (_, _, label) ⇒ label }}}}
     //Commands reactions
-    def onCommand = { case Update(i, value) ⇒ labels(i).text = if(value) "true" else "false" }}
+    def onCommand = { case Update(i, value) ⇒ labels(i).text = value }}
   //Variables
   private var indicators = List[Indicator]()
   //UI registration
@@ -85,5 +91,5 @@ with ObjWiring with BlockUI with LinkIn[Boolean]{
     indicators :+= line
     line}
   //Inlets
-  def in: Socket[Boolean] = Inlet(buildIndicator(name = ""))
-  def in(name: String = ""): Socket[Boolean] = Inlet(buildIndicator(name))}
+  def in: Socket[SingleValue] = Inlet(buildIndicator(name = ""))
+  def in(name: String = ""): Socket[SingleValue] = Inlet(buildIndicator(name))}

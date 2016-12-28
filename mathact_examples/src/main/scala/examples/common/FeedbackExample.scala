@@ -12,27 +12,32 @@
  * @                                                                             @ *
 \* *  http://github.com/alexcab  * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package mathact.core.plumbing.fitting.pipes
+package examples.common
 
-import mathact.core.bricks.plumbing.fitting.Socket
-import mathact.core.model.enums.DequeueAlgo
-import mathact.core.plumbing.Pump
-import mathact.core.plumbing.fitting.Pipe
-import mathact.core.plumbing.fitting.flows.InflowLike
+import mathact.tools.indicators.ValueIndicator
+import mathact.tools.math.continuous.{Adder, Multiplier}
+import mathact.tools.pots.SettingDial
+import mathact.tools.workbenches.SimpleWorkbench
 
 
-/** Wrapper fot Inlet
-  * Created by CAB on 24.08.2016.
+/** Example of feedback loop.
+  * Created by CAB on 28.12.2016.
   */
 
-private[core] class InPipe[H] (
-  private[core] val in: InflowLike[H],
-  private[core] val inletName: Option[String],
-  private[core] val pump: Pump,
-  private[core] val dequeue: DequeueAlgo)
-extends Pipe[H] with Socket[H]{
-  //Construction
-  private[core] val (blockId, inletId) = pump.addInlet(this, inletName)
-  //Methods
-  override def toString: String = s"InPipe(in: $in, outletName: $inletName, pump: $pump)"
-  def processValue(value: Any): Unit = in.processValue(value)}
+class FeedbackExample extends SimpleWorkbench {
+  //Sketch parameters
+  heading = "Continuous math example"
+  //Helpers
+  val input = new SettingDial{ name = "input"; min = -2; max = 2; init = 1}
+  val amplifyingRate = new SettingDial{ name = "amplifying"; min = 0; max = 10; init = 2}
+  val feedbackRate = new SettingDial{ name = "feedback"; min = -2; max = 2; init = 0}
+  val output = new ValueIndicator{ name = "output" }
+  //Operators
+  val amplifier = new Multiplier
+  val feedback = new Multiplier
+  val adder = new Adder
+  //Connecting
+  amplifyingRate ~> amplifier
+  feedbackRate ~> feedback
+  input ~> adder ~> amplifier ~> output
+  adder <~ feedback <~ amplifier}

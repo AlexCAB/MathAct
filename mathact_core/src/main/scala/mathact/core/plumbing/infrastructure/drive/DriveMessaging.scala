@@ -65,7 +65,7 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     log.debug(s"[DriveMessaging.runMsgTask] Task runs: $task, from inlet: $inlet")}
   private def runNextMsgTask(): Option[InletState] = { //Return: inlet for which tusk runs (to call sendLoadMessage)
     //Search for inlet with max queue size
-    val maxQueueInlet = inlets.values match{
+    val maxQueueInlet = inlets.values.filter(_.taskQueue.nonEmpty) match{
       case ins if ins.isEmpty ⇒ None
       case ins ⇒ ins.maxBy(_.taskQueue.size) match{
         case msi if msi.taskQueue.isEmpty ⇒ None
@@ -73,7 +73,14 @@ private[core] trait DriveMessaging { _: DriveActor ⇒ import Drive._
     //Run task
     maxQueueInlet match{
       case Some(inlet) ⇒
-        runMsgTask(inlet, inlet.taskQueue.dequeue())
+        val next = inlet.pipe.dequeue match{
+          case DequeueAlgo.Queue ⇒
+            inlet.taskQueue.dequeue()
+          case DequeueAlgo.Last ⇒
+            val next = inlet.taskQueue.last
+            inlet.taskQueue.clear()
+            next}
+        runMsgTask(inlet, next)
         Some(inlet)
       case None ⇒
        log.debug(s"[DriveMessaging.runNextMsgTask] No more tasks to run.")

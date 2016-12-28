@@ -16,7 +16,7 @@ package mathact.core.plumbing.infrastructure.drive
 
 import java.util.concurrent.ExecutionException
 
-import akka.actor.{PoisonPill, Terminated, Actor, Props}
+import akka.actor.{Actor, PoisonPill, Props, Terminated}
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -27,13 +27,13 @@ import mathact.core.dummies.TestActor
 import mathact.core.gui.ui.BlockUILike
 import mathact.core.model.config.{DriveConfigLike, PumpConfigLike}
 import mathact.core.model.data.layout.{WindowPreference, WindowState}
-import mathact.core.model.data.pipes.{OutletData, InletData}
-import mathact.core.model.enums.{BlockType, VisualisationLaval}
+import mathact.core.model.data.pipes.{InletData, OutletData}
+import mathact.core.model.enums.{BlockType, DequeueAlgo, VisualisationLaval}
 import mathact.core.model.holders._
 import mathact.core.model.messages.M
 import mathact.core.plumbing.Pump
 import mathact.core.plumbing.fitting.flows.{InflowLike, OutflowLike}
-import mathact.core.plumbing.fitting.life.{OnStopLike, OnStartLike}
+import mathact.core.plumbing.fitting.life.{OnStartLike, OnStopLike}
 import mathact.core.plumbing.fitting.pipes.{InPipe, OutPipe}
 import mathact.core.sketch.blocks.BlockLike
 import org.scalatest.Suite
@@ -99,7 +99,7 @@ class PumpAndDriveTest extends ActorTestSpec{
       //Pipes
       val testHandler = new TestHandler
       lazy val outlet = new OutPipe(testHandler, Some("testOutlet"), pump)
-      lazy val inlet = new InPipe(testHandler, Some("testInlet"), pump)
+      lazy val inlet = new InPipe(testHandler, Some("testInlet"), pump, DequeueAlgo.Queue)
       //On start and stop
       private[core]  def doStart(): Unit = {
         println("[PumpAndDriveTest.testBlock] onStart called.")
@@ -249,7 +249,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Pipes
         val otherHandler = new TestHandler
         lazy val outlet = new OutPipe(otherHandler, Some("otherOutlet"), pump)
-        lazy val inlet = new InPipe(otherHandler, Some("otherInlet"), pump)}
+        lazy val inlet = new InPipe(otherHandler, Some("otherInlet"), pump, DequeueAlgo.Queue)}
       lazy val builtBlock = {
         testBlock
         testPlumbing.send(testDrive, M.ConstructDrive)
@@ -324,7 +324,7 @@ class PumpAndDriveTest extends ActorTestSpec{
         //Pipes
         val otherHandler = new TestHandler
         lazy val outlet = new OutPipe(otherHandler, Some("otherOutlet"), pump)
-        lazy val inlet = new InPipe(otherHandler, Some("otherInlet"), pump)}
+        lazy val inlet = new InPipe(otherHandler, Some("otherInlet"), pump, DequeueAlgo.Queue)}
       lazy val builtBlockWithUi = {
         testBlockWithUi
         testPlumbing.send(testDrive, M.ConstructDrive)

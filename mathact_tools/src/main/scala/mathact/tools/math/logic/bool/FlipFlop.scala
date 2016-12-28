@@ -31,8 +31,6 @@ with ObjWiring with ObjOnStart{
   //Outflow
   private val outflow = new Outflow[Boolean] { def send(v: Boolean): Unit = pour(v) }
   private val invflow = new Outflow[Boolean] { def send(v: Boolean): Unit = pour(v) }
-  //Connection points
-
   //DSL
   def default: Boolean = state
   def default_=(v: Boolean){ state = v }

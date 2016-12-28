@@ -52,7 +52,7 @@ with LinkThrough2[TimedValue, SingleValue, TimedValue]{
     //Methods
     def getLast: Option[SingleValue] = lastReceived
     protected def drain(v: SingleValue): Unit = { lastReceived = Some(v) }}
-  private class Processor(timeds: ⇒ Vector[TimedInflow], singles: ⇒ Vector[SingleInflow]) extends Outflow[TimedValue]{
+  private class Processor(timeds: ⇒Vector[TimedInflow], singles: ⇒Vector[SingleInflow]) extends Outflow[TimedValue]{
     //Methods
     def tryToEval(): Unit = {
       //Check time of timed

@@ -15,7 +15,7 @@
 package examples.common
 
 import mathact.tools.indicators.BoolIndicator
-import mathact.tools.math.logic.bool.{And, FlipFlop, Nor, Not}
+import mathact.tools.math.logic.bool.{And, FlipFlop, Not}
 import mathact.tools.pots.{BoolStrobe, BoolSwitch}
 import mathact.tools.workbenches.SimpleWorkbench
 
