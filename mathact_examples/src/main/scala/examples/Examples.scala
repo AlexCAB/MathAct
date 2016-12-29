@@ -117,8 +117,7 @@ object Examples extends Sketches{
     description = "Example of continuous math operators.")
   SketchOf[FeedbackExample](
     name = "Feedback example",
-    description = "Example of feedback loop.",
-    autorun = true)
+    description = "Example of feedback loop.")
 
 
 

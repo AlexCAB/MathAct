@@ -32,13 +32,13 @@ class DTriggerExample extends SimpleWorkbench {
   val eIn = new BoolStrobe{ name = "E in" }
   val indicator = new BoolIndicator{ name = "Out" }
   //Operators
-  val fAnd = new And
-  val iAnd = new And
+  val fAnd = new And{ name = "fAnd" }
+  val iAnd = new And{ name = "iAnd" }
   val flipFlop = new FlipFlop
   //Connecting
-  dIn ~> new Not ~> fAnd ~> flipFlop.s
+  dIn ~> new Not ~> fAnd ~> flipFlop.r
              eIn ~> fAnd
              eIn ~> iAnd
-  dIn            ~> iAnd ~> flipFlop.r
+  dIn            ~> iAnd ~> flipFlop.s
   flipFlop.out ~> indicator.in("Q")
   flipFlop.inv ~> indicator.in("!Q")}
