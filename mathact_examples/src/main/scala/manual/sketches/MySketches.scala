@@ -24,12 +24,16 @@ import mathact.tools.Sketches
 object MySketches extends Sketches{
   SketchOf[MyFirstSketch](
     name = "My first sketch",
-    description = "The first sketch that I wrote.",
+    description = "The first sketch that I define but not implemented.",
     logger = true,
     visualisation = true)
   SketchOf[MySecondSketch](
     name = "My second sketch",
-    description = "The second sketch that I define but not implemented.")
+    description = "The second sketch that I wrote.")
+  SketchOf[MyThirdSketch](
+    name = "My third sketch",
+    description = "The third complex sketch.",
+    logger = true)
 
   //TODO Add more
 
