@@ -15,7 +15,7 @@
 package examples.common
 
 import mathact.tools.indicators.ValueIndicator
-import mathact.tools.math.continuous.{Adder, Multiplier}
+import mathact.tools.math.continuous._
 import mathact.tools.pots.SettingDial
 import mathact.tools.workbenches.SimpleWorkbench
 

@@ -15,8 +15,8 @@
 package examples.common
 
 import mathact.tools.indicators.BoolIndicator
-import mathact.tools.math.logic.bool.{And, FlipFlop, Not}
-import mathact.tools.pots.{BoolStrobe, BoolSwitch}
+import mathact.tools.math.logic.bool._
+import mathact.tools.pots._
 import mathact.tools.workbenches.SimpleWorkbench
 
 
@@ -32,8 +32,8 @@ class DTriggerExample extends SimpleWorkbench {
   val eIn = new BoolStrobe{ name = "E in" }
   val indicator = new BoolIndicator{ name = "Out" }
   //Operators
-  val fAnd = new And{ name = "fAnd" }
-  val iAnd = new And{ name = "iAnd" }
+  val fAnd = new And
+  val iAnd = new And
   val flipFlop = new FlipFlop
   //Connecting
   dIn ~> new Not ~> fAnd ~> flipFlop.r
