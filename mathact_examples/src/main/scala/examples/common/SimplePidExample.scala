@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
  * @                                                                             @ *
- *           #          # #                                 #    (c) 2016 CAB      *
+ *           #          # #                                 #    (c) 2017 CAB      *
  *          # #      # #                                  #  #                     *
  *         #  #    #  #           # #     # #           #     #              # #   *
  *        #   #  #   #             #       #          #        #              #    *
@@ -36,7 +36,7 @@ class SimplePidExample extends SimpleWorkbench {
       name = "Set point"
       min = .1
       max = .9
-      init = .5}
+      init = .75}
     val drainSpeed = new SettingDial{
       name = "Drain speed"
       min = -1

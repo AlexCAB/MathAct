@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
  * @                                                                             @ *
- *           #          # #                                 #    (c) 2016 CAB      *
+ *           #          # #                                 #    (c) 2017 CAB      *
  *          # #      # #                                  #  #                     *
  *         #  #    #  #           # #     # #           #     #              # #   *
  *        #   #  #   #             #       #          #        #              #    *
@@ -75,7 +75,7 @@ object Examples extends Sketches{
     description = "Example of using simple analog potentiometer.",
     logger = true)
   SketchOf[SimpleScopeExample](
-    name = "Using of SimpleScope",
+    name = "Simple scope example",
     description = "Example of using simple oscilloscope tool.")
   SketchOf[TimeLoopExample](
     name = "Using of TimeLoop",

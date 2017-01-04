@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
  * @                                                                             @ *
- *           #          # #                                 #    (c) 2016 CAB      *
+ *           #          # #                                 #    (c) 2017 CAB      *
  *          # #      # #                                  #  #                     *
  *         #  #    #  #           # #     # #           #     #              # #   *
  *        #   #  #   #             #       #          #        #              #    *
@@ -41,8 +41,7 @@ object MySketches extends Sketches{
   SketchOf[MyFifthSketch](
     name = "My fifth sketch",
     description = "Using of block UI.",
-    logger = true,
-    autorun = true)
+    logger = true)
 
 
   //TODO Add more
